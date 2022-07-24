@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:runify/model/command.dart';
+import 'package:runify/model/cmd.dart';
 import 'package:runify/view/run/style.dart';
 
 class CommandRow extends StatelessWidget {

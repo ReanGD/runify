@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:runify/view/run/select_index.dart';
 import 'package:runify/view/run/style.dart';
+import 'package:runify/view/run/select_index.dart';
 
 class IndexedRow extends StatelessWidget {
   final int index;

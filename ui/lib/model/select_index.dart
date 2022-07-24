@@ -6,7 +6,9 @@ class SelectIndex with ChangeNotifier {
   int get index => _index;
 
   void update(int index) {
-    _index = index;
-    notifyListeners();
+    if (_index != index) {
+      _index = index;
+      notifyListeners();
+    }
   }
 }
