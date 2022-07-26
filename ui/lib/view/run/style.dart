@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-const cmdRowNameStyle = TextStyle(
-  fontWeight: FontWeight.normal,
-  fontSize: 20.0,
-  color: Colors.black,
+const styleNormalText = TextStyle(
+  fontSize: 18.0,
+  fontWeight: FontWeight.w500,
+  fontStyle: FontStyle.normal,
 );
 
 const cmdRowCategoryStyle = TextStyle(
@@ -12,6 +12,6 @@ const cmdRowCategoryStyle = TextStyle(
   color: Colors.black,
 );
 
-const cmdRowPadding = EdgeInsets.symmetric(vertical: 15, horizontal: 15);
+const cmdRowPadding = EdgeInsets.symmetric(vertical: 12, horizontal: 15);
 
 const cmdRowSelectedColor = Colors.grey;

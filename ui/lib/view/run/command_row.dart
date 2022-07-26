@@ -16,7 +16,7 @@ class CommandRow extends StatelessWidget {
         children: <Widget>[
           Text(
             data.name(),
-            style: cmdRowNameStyle,
+            style: styleNormalText,
           ),
           Text(
             data.category(),
