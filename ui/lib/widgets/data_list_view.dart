@@ -1,44 +1,44 @@
 import 'package:flutter/material.dart';
 
 class DataListViewController {
-  int _selectPosition = -1;
+  int _selectedIndex = -1;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
-  bool select(int position) {
-    if (_selectPosition == position) {
+  bool select(int index) {
+    if (_selectedIndex == index) {
       return false;
     }
 
-    final prevTile = _items[_selectPosition];
-    if (prevTile != null) {
-      prevTile.select(false);
+    final prevItem = _items[_selectedIndex];
+    if (prevItem != null) {
+      prevItem.select(false);
     }
 
-    final nextTile = _items[position];
-    if (nextTile != null) {
-      _selectPosition = position;
-      nextTile.select(true);
+    final nextItem = _items[index];
+    if (nextItem != null) {
+      _selectedIndex = index;
+      nextItem.select(true);
       return true;
     } else {
-      _selectPosition = -1;
+      _selectedIndex = -1;
     }
 
     return false;
   }
 
-  bool isTilesExists() {
+  bool isItemsExists() {
     return _items.isNotEmpty;
   }
 
-  MapEntry<int, BuildContext>? getNearestTileContext(int position) {
+  MapEntry<int, BuildContext>? getNearestItem(int index) {
     if (_items.isNotEmpty) {
-      BuildContext? ctx = _items[position]?.context;
+      BuildContext? ctx = _items[index]?.context;
       if (ctx != null) {
-        return MapEntry(position, ctx);
+        return MapEntry(index, ctx);
       }
 
       final nearestKey = _items.keys.reduce((curr, next) =>
-          (curr - position).abs() < (next - position).abs() ? curr : next);
+          (curr - index).abs() < (next - index).abs() ? curr : next);
       ctx = _items[nearestKey]?.context;
       if (ctx != null) {
         return MapEntry(nearestKey, ctx);
@@ -48,25 +48,25 @@ class DataListViewController {
     return null;
   }
 
-  void _register(int position, _DataListItemState tile) {
-    _items[position] = tile;
+  void _register(int index, _DataListItemState item) {
+    _items[index] = item;
   }
 
-  void _unregister(int position, _DataListItemState tile) {
-    if (_items[position] == tile) {
-      _items.remove(position);
+  void _unregister(int index, _DataListItemState item) {
+    if (_items[index] == item) {
+      _items.remove(index);
     }
   }
 }
 
 class DataListItem extends StatefulWidget {
-  final int position;
+  final int index;
   final Widget child;
   final DataListViewController controller;
 
   const DataListItem(
       {required Key key,
-      required this.position,
+      required this.index,
       required this.controller,
       required this.child})
       : super(key: key);
@@ -92,21 +92,21 @@ class _DataListItemState extends State<DataListItem> {
   @override
   void initState() {
     super.initState();
-    widget.controller._register(widget.position, this);
+    widget.controller._register(widget.index, this);
   }
 
   @override
   void dispose() {
-    widget.controller._unregister(widget.position, this);
+    widget.controller._unregister(widget.index, this);
     super.dispose();
   }
 
   @override
   void didUpdateWidget(DataListItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.position != widget.position || oldWidget.key != widget.key) {
-      widget.controller._unregister(oldWidget.position, this);
-      widget.controller._register(widget.position, this);
+    if (oldWidget.index != widget.index || oldWidget.key != widget.key) {
+      widget.controller._unregister(oldWidget.index, this);
+      widget.controller._register(widget.index, this);
     }
   }
 
