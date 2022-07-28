@@ -26,28 +26,26 @@ class IndexedListViewController {
     return false;
   }
 
-  BuildContext? getTileContext(int position) {
-    return _tiles[position]?.context;
-  }
-
   bool isTilesExists() {
     return _tiles.isNotEmpty;
   }
 
-  int? getNearestPosition(int position) {
-    if (_tiles.isEmpty) {
-      return null;
+  MapEntry<int, BuildContext>? getNearestTileContext(int position) {
+    if (_tiles.isNotEmpty) {
+      BuildContext? ctx = _tiles[position]?.context;
+      if (ctx != null) {
+        return MapEntry(position, ctx);
+      }
+
+      final nearestKey = _tiles.keys.reduce((curr, next) =>
+          (curr - position).abs() < (next - position).abs() ? curr : next);
+      ctx = _tiles[nearestKey]?.context;
+      if (ctx != null) {
+        return MapEntry(nearestKey, ctx);
+      }
     }
 
-    final sorted = _tiles.keys.toList()
-      ..sort((int first, int second) => first.compareTo(second));
-
-    final minPosition = sorted.first;
-    final maxPosition = sorted.last;
-
-    return (position - minPosition).abs() < (position - maxPosition).abs()
-        ? minPosition
-        : maxPosition;
+    return null;
   }
 
   void _register(int position, _IndexedListTileState tile) {
