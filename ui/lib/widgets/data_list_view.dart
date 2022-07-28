@@ -232,6 +232,27 @@ class _DataListItemState extends State<DataListItem> {
   }
 }
 
+Widget dataListView(
+    {required DataListViewController controller,
+    required DataListScroll scroll,
+    required int itemCount,
+    required IndexedWidgetBuilder itemBuilder}) {
+  return ListView.builder(
+    scrollDirection: Axis.vertical,
+    reverse: false,
+    controller: scroll,
+    itemCount: itemCount,
+    itemBuilder: (context, index) {
+      return DataListItem(
+        key: ValueKey(index),
+        controller: controller,
+        index: index,
+        child: itemBuilder(context, index),
+      );
+    },
+  );
+}
+
 /// used to invoke async functions in order
 Future<T> addToOrder<T>(key, FutureOr<T> Function() action) async {
   for (;;) {
