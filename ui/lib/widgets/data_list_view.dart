@@ -6,36 +6,40 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 
 class DataListViewController {
+  _DataListScroll? _dataScroll;
+
+  void _attach(_DataListScroll dataScroll) {
+    _dataScroll = dataScroll;
+  }
+
+  Future scrollTo(int index) async {
+    return _dataScroll?.scrollTo(index);
+  }
+}
+
+class _DataListScroll extends ScrollController {
   int _selectedIndex = -1;
+  final double? suggestedRowHeight;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
-  bool select(int index) {
-    if (_selectedIndex == index) {
-      return false;
-    }
+  _DataListScroll({double initialScrollOffset = 0.0, this.suggestedRowHeight})
+      : super(initialScrollOffset: initialScrollOffset, keepScrollOffset: true);
 
-    final prevItem = _items[_selectedIndex];
-    if (prevItem != null) {
-      prevItem.select(false);
-    }
-
-    final nextItem = _items[index];
-    if (nextItem != null) {
-      _selectedIndex = index;
-      nextItem.select(true);
-      return true;
-    } else {
-      _selectedIndex = -1;
-    }
-
-    return false;
+  Future scrollTo(int index) async {
+    return addToOrder(this, () => _scrollTo(index));
   }
 
-  bool isItemsExists() {
-    return _items.isNotEmpty;
+  void register(int index, _DataListItemState item) {
+    _items[index] = item;
   }
 
-  MapEntry<int, BuildContext>? getNearestItem(int index) {
+  void unregister(int index, _DataListItemState item) {
+    if (_items[index] == item) {
+      _items.remove(index);
+    }
+  }
+
+  MapEntry<int, BuildContext>? _getNearestItem(int index) {
     if (_items.isNotEmpty) {
       BuildContext? ctx = _items[index]?.context;
       if (ctx != null) {
@@ -53,29 +57,6 @@ class DataListViewController {
     return null;
   }
 
-  void _register(int index, _DataListItemState item) {
-    _items[index] = item;
-  }
-
-  void _unregister(int index, _DataListItemState item) {
-    if (_items[index] == item) {
-      _items.remove(index);
-    }
-  }
-}
-
-class DataListScroll extends ScrollController {
-  final double? suggestedRowHeight;
-  final DataListViewController controller;
-
-  DataListScroll(this.controller,
-      {double initialScrollOffset = 0.0, this.suggestedRowHeight})
-      : super(initialScrollOffset: initialScrollOffset, keepScrollOffset: true);
-
-  Future scrollTo(int postition) async {
-    return addToOrder(this, () => _scrollTo(postition));
-  }
-
   /// return offset, which is a absolute offset to bring the target object into the viewport with "alignment".
   double _offsetToRevealInViewport(BuildContext object, double alignment) {
     final renderBox = object.findRenderObject()!;
@@ -88,23 +69,23 @@ class DataListScroll extends ScrollController {
     return absoluteOffset;
   }
 
-  Future<bool> _jumpToNearest(int pos, bool useSuggested) async {
-    bool stop = false;
-    final nearestItem = controller.getNearestItem(pos);
+  Future<bool> _jumpToNearest(int index, bool useSuggested) async {
+    bool foundTarget = false;
+    final nearestItem = _getNearestItem(index);
     if (nearestItem != null) {
       int attempts = 1;
-      double alignment = pos > nearestItem.key ? 1.0 : 0.0;
-      if (pos == nearestItem.key) {
+      double alignment = index > nearestItem.key ? 1.0 : 0.0;
+      if (index == nearestItem.key) {
         // not sure why it doesn't scroll to the given offset, try more within 5 times
         attempts = 5;
         alignment = 0.5;
-        stop = true;
+        foundTarget = true;
       }
       double targetOffset =
           _offsetToRevealInViewport(nearestItem.value, alignment);
 
-      if (useSuggested && suggestedRowHeight != null && !stop) {
-        targetOffset += ((pos - nearestItem.key) * suggestedRowHeight!);
+      if (useSuggested && suggestedRowHeight != null && !foundTarget) {
+        targetOffset += ((index - nearestItem.key) * suggestedRowHeight!);
       }
 
       // The content preferred position might be impossible to reach
@@ -124,15 +105,20 @@ class DataListScroll extends ScrollController {
       }
     }
 
-    return stop;
+    return foundTarget;
   }
 
-  Future _scrollTo(int position) async {
+  Future _scrollTo(int index) async {
+    if (_selectedIndex != index) {
+      _items[_selectedIndex]?.select(false);
+      _selectedIndex = -1;
+    }
+
     // In listView init or reload case, widget state of list item may not be ready for query.
     // this prevent from over scrolling becoming empty screen or unnecessary scroll bounce.
     const maxBound = 30; // 0.5 second if 60fps
     for (var count = 0; count != maxBound; count++) {
-      if (!controller.isItemsExists()) {
+      if (_items.isEmpty) {
         await _waitForWidgetStateBuild();
       } else {
         break;
@@ -142,9 +128,14 @@ class DataListScroll extends ScrollController {
     bool usedSuggestedRowHeight = true;
     while (hasClients) {
       final oldOffset = offset;
-      final stop = await _jumpToNearest(position, usedSuggestedRowHeight);
+      final foundTarget = await _jumpToNearest(index, usedSuggestedRowHeight);
+      if (foundTarget && _selectedIndex != index) {
+        _selectedIndex = index;
+        _items[index]?.select(true);
+      }
+
       usedSuggestedRowHeight = false; // just use once
-      if (stop || offset == oldOffset) {
+      if (foundTarget || offset == oldOffset) {
         break;
       }
     }
@@ -162,23 +153,23 @@ class DataListScroll extends ScrollController {
   Future _waitForWidgetStateBuild() => SchedulerBinding.instance.endOfFrame;
 }
 
-class DataListItem extends StatefulWidget {
+class _DataListItem extends StatefulWidget {
   final int index;
   final Widget child;
-  final DataListViewController controller;
+  final _DataListScroll dataScroll;
 
-  const DataListItem(
+  const _DataListItem(
       {required Key key,
       required this.index,
-      required this.controller,
+      required this.dataScroll,
       required this.child})
       : super(key: key);
 
   @override
-  State<DataListItem> createState() => _DataListItemState();
+  State<_DataListItem> createState() => _DataListItemState();
 }
 
-class _DataListItemState extends State<DataListItem> {
+class _DataListItemState extends State<_DataListItem> {
   bool _selected = false;
 
   void select(bool isSelected) {
@@ -195,21 +186,21 @@ class _DataListItemState extends State<DataListItem> {
   @override
   void initState() {
     super.initState();
-    widget.controller._register(widget.index, this);
+    widget.dataScroll.register(widget.index, this);
   }
 
   @override
   void dispose() {
-    widget.controller._unregister(widget.index, this);
+    widget.dataScroll.unregister(widget.index, this);
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(DataListItem oldWidget) {
+  void didUpdateWidget(_DataListItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.index != widget.index || oldWidget.key != widget.key) {
-      widget.controller._unregister(oldWidget.index, this);
-      widget.controller._register(widget.index, this);
+      widget.dataScroll.unregister(oldWidget.index, this);
+      widget.dataScroll.register(widget.index, this);
     }
   }
 
@@ -234,18 +225,19 @@ class _DataListItemState extends State<DataListItem> {
 
 Widget dataListView(
     {required DataListViewController controller,
-    required DataListScroll scroll,
     required int itemCount,
     required IndexedWidgetBuilder itemBuilder}) {
+  final dataScroll = _DataListScroll();
+  controller._attach(dataScroll);
   return ListView.builder(
     scrollDirection: Axis.vertical,
     reverse: false,
-    controller: scroll,
+    controller: dataScroll,
     itemCount: itemCount,
     itemBuilder: (context, index) {
-      return DataListItem(
+      return _DataListItem(
         key: ValueKey(index),
-        controller: controller,
+        dataScroll: dataScroll,
         index: index,
         child: itemBuilder(context, index),
       );
