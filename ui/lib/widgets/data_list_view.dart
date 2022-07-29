@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 
-class DataListViewController {
+class DataListController {
   _DataListScroll? _dataScroll;
 
   void _attach(_DataListScroll dataScroll) {
@@ -18,7 +18,7 @@ class DataListViewController {
 }
 
 class _DataListScroll extends ScrollController {
-  int _selectedIndex = -1;
+  int _selectedIndex = 0;
   final double? suggestedRowHeight;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
@@ -37,6 +37,10 @@ class _DataListScroll extends ScrollController {
     if (_items[index] == item) {
       _items.remove(index);
     }
+  }
+
+  bool isSelected(int index) {
+    return index == _selectedIndex;
   }
 
   MapEntry<int, BuildContext>? _getNearestItem(int index) {
@@ -109,11 +113,6 @@ class _DataListScroll extends ScrollController {
   }
 
   Future _scrollTo(int index) async {
-    if (_selectedIndex != index) {
-      _items[_selectedIndex]?.select(false);
-      _selectedIndex = -1;
-    }
-
     // In listView init or reload case, widget state of list item may not be ready for query.
     // this prevent from over scrolling becoming empty screen or unnecessary scroll bounce.
     const maxBound = 30; // 0.5 second if 60fps
@@ -129,15 +128,18 @@ class _DataListScroll extends ScrollController {
     while (hasClients) {
       final oldOffset = offset;
       final foundTarget = await _jumpToNearest(index, usedSuggestedRowHeight);
-      if (foundTarget && _selectedIndex != index) {
-        _selectedIndex = index;
-        _items[index]?.select(true);
-      }
-
       usedSuggestedRowHeight = false; // just use once
       if (foundTarget || offset == oldOffset) {
         break;
       }
+    }
+
+    if (_selectedIndex != index) {
+      final prevIndex = _selectedIndex;
+      final nextIndex = index;
+      _selectedIndex = index;
+      _items[prevIndex]?.update();
+      _items[nextIndex]?.update();
     }
 
     //after auto scrolling, we should sync final scroll position without flag on
@@ -170,14 +172,7 @@ class _DataListItem extends StatefulWidget {
 }
 
 class _DataListItemState extends State<_DataListItem> {
-  bool _selected = false;
-
-  void select(bool isSelected) {
-    if (isSelected == _selected) {
-      return;
-    }
-    _selected = isSelected;
-
+  void update() {
     if (mounted) {
       setState(() {});
     }
@@ -206,7 +201,7 @@ class _DataListItemState extends State<_DataListItem> {
 
   @override
   Widget build(BuildContext context) {
-    if (_selected) {
+    if (widget.dataScroll.isSelected(widget.index)) {
       final ThemeData theme = Theme.of(context);
       final ListTileThemeData tileTheme = ListTileTheme.of(context);
       final selectedColor = tileTheme.selectedColor ??
@@ -224,7 +219,7 @@ class _DataListItemState extends State<_DataListItem> {
 }
 
 Widget dataListView(
-    {required DataListViewController controller,
+    {required DataListController controller,
     required int itemCount,
     required IndexedWidgetBuilder itemBuilder}) {
   final dataScroll = _DataListScroll();
