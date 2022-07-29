@@ -19,10 +19,9 @@ class DataListController {
 
 class _DataListScroll extends ScrollController {
   int _selectedIndex = 0;
-  final double? suggestedRowHeight;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
-  _DataListScroll({double initialScrollOffset = 0.0, this.suggestedRowHeight})
+  _DataListScroll({double initialScrollOffset = 0.0})
       : super(initialScrollOffset: initialScrollOffset, keepScrollOffset: true);
 
   Future scrollTo(int index) async {
@@ -62,15 +61,13 @@ class _DataListScroll extends ScrollController {
   }
 
   /// return offset, which is a absolute offset to bring the target object into the viewport with "alignment".
-  double _offsetToRevealInViewport(BuildContext object, double alignment) {
+  RevealedOffset _offsetToRevealInViewport(
+      BuildContext object, double alignment) {
     final renderBox = object.findRenderObject()!;
     assert(Scrollable.of(object) != null);
     final RenderAbstractViewport viewport =
         RenderAbstractViewport.of(renderBox)!;
-    final revealedOffset = viewport.getOffsetToReveal(renderBox, alignment);
-    final absoluteOffset = revealedOffset.offset;
-
-    return absoluteOffset;
+    return viewport.getOffsetToReveal(renderBox, alignment);
   }
 
   Future<bool> _jumpToNearest(int index, bool useSuggested) async {
@@ -85,11 +82,13 @@ class _DataListScroll extends ScrollController {
         alignment = 0.5;
         foundTarget = true;
       }
-      double targetOffset =
+      RevealedOffset revealedOffset =
           _offsetToRevealInViewport(nearestItem.value, alignment);
 
-      if (useSuggested && suggestedRowHeight != null && !foundTarget) {
-        targetOffset += ((index - nearestItem.key) * suggestedRowHeight!);
+      double scrollOffset = revealedOffset.offset;
+      if (useSuggested && !foundTarget) {
+        scrollOffset +=
+            ((index - nearestItem.key) * revealedOffset.rect.height);
       }
 
       // The content preferred position might be impossible to reach
@@ -99,11 +98,19 @@ class _DataListScroll extends ScrollController {
       // to a bounce at either the top or bottom, unless the scroll
       // physics are set to clamp. To prevent this, we limit the
       // offset to not overshoot the extent in either direction.
-      targetOffset = targetOffset.clamp(
+      scrollOffset = scrollOffset.clamp(
           position.minScrollExtent, position.maxScrollExtent);
 
-      while (attempts != 0 && hasClients && offset != targetOffset) {
-        jumpTo(targetOffset);
+      if (foundTarget && _selectedIndex != index) {
+        final prevIndex = _selectedIndex;
+        final nextIndex = index;
+        _selectedIndex = index;
+        _items[prevIndex]?.update();
+        _items[nextIndex]?.update();
+      }
+
+      while (attempts != 0 && hasClients && offset != scrollOffset) {
+        jumpTo(scrollOffset);
         await _waitForWidgetStateBuild();
         attempts--;
       }
@@ -132,14 +139,6 @@ class _DataListScroll extends ScrollController {
       if (foundTarget || offset == oldOffset) {
         break;
       }
-    }
-
-    if (_selectedIndex != index) {
-      final prevIndex = _selectedIndex;
-      final nextIndex = index;
-      _selectedIndex = index;
-      _items[prevIndex]?.update();
-      _items[nextIndex]?.update();
     }
 
     //after auto scrolling, we should sync final scroll position without flag on
