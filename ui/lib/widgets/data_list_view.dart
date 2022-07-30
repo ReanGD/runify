@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:async';
 import 'dart:collection';
 
@@ -12,20 +13,62 @@ class DataListController {
     _dataScroll = dataScroll;
   }
 
-  Future scrollTo(int index) async {
-    return _dataScroll?.scrollTo(index);
+  Future selectByOffset(int offset) async {
+    return _dataScroll?.selectByOffset(offset);
   }
 }
 
+class UpIntent extends Intent {
+  const UpIntent();
+}
+
+class DownIntent extends Intent {
+  const DownIntent();
+}
+
+class PageUpIntent extends Intent {
+  const PageUpIntent();
+}
+
+class PageDownIntent extends Intent {
+  const PageDownIntent();
+}
+
+class MoveAction<T extends Intent> extends Action<T> {
+  final int offset;
+  final DataListController controller;
+
+  MoveAction(this.controller, this.offset);
+
+  @override
+  Object? invoke(covariant T intent) {
+    controller.selectByOffset(offset);
+    return null;
+  }
+}
+
+Action<UpIntent> upAction(DataListController controller) =>
+    MoveAction<UpIntent>(controller, -1);
+
+Action<DownIntent> downAction(DataListController controller) =>
+    MoveAction<DownIntent>(controller, 1);
+
+Action<PageUpIntent> pageUpAction(DataListController controller) =>
+    MoveAction<PageUpIntent>(controller, -10);
+
+Action<PageDownIntent> pageDownAction(DataListController controller) =>
+    MoveAction<PageDownIntent>(controller, 10);
+
 class _DataListScroll extends ScrollController {
+  final int itemCount;
   int _selectedIndex = 0;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
-  _DataListScroll({double initialScrollOffset = 0.0})
+  _DataListScroll(this.itemCount, {double initialScrollOffset = 0.0})
       : super(initialScrollOffset: initialScrollOffset, keepScrollOffset: true);
 
-  Future scrollTo(int index) async {
-    return addToOrder(this, () => _scrollTo(index));
+  Future selectByOffset(int offset) async {
+    return runByOrder(this, () => _selectByOffset(offset));
   }
 
   void register(int index, _DataListItemState item) {
@@ -119,7 +162,8 @@ class _DataListScroll extends ScrollController {
     return foundTarget;
   }
 
-  Future _scrollTo(int index) async {
+  Future _selectByOffset(int offset) async {
+    int index = max(min(_selectedIndex + offset, itemCount - 1), 0);
     // In listView init or reload case, widget state of list item may not be ready for query.
     // this prevent from over scrolling becoming empty screen or unnecessary scroll bounce.
     const maxBound = 30; // 0.5 second if 60fps
@@ -221,7 +265,7 @@ Widget dataListView(
     {required DataListController controller,
     required int itemCount,
     required IndexedWidgetBuilder itemBuilder}) {
-  final dataScroll = _DataListScroll();
+  final dataScroll = _DataListScroll(itemCount);
   controller._attach(dataScroll);
   return ListView.builder(
     scrollDirection: Axis.vertical,
@@ -240,7 +284,7 @@ Widget dataListView(
 }
 
 /// used to invoke async functions in order
-Future<T> addToOrder<T>(key, FutureOr<T> Function() action) async {
+Future<T> runByOrder<T>(key, FutureOr<T> Function() action) async {
   for (;;) {
     final c = _locks[key];
     if (c == null) break;
