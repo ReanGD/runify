@@ -3,14 +3,33 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 
 class DataListController {
   _DataListScroll? _dataScroll;
+  static const int _pageOffset = 10;
 
   void _attach(_DataListScroll dataScroll) {
     _dataScroll = dataScroll;
+  }
+
+  Map<Type, Action<Intent>> getActions() {
+    return <Type, Action<Intent>>{
+      MoveSelectionIntent: MoveSelectionAction(this),
+    };
+  }
+
+  Map<LogicalKeySet, Intent> getShortcuts() {
+    return <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionIntent(-1),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionIntent(1),
+      LogicalKeySet(LogicalKeyboardKey.pageUp):
+          const MoveSelectionIntent(-_pageOffset),
+      LogicalKeySet(LogicalKeyboardKey.pageDown):
+          const MoveSelectionIntent(_pageOffset),
+    };
   }
 
   Future selectByOffset(int offset) async {
@@ -18,46 +37,23 @@ class DataListController {
   }
 }
 
-class UpIntent extends Intent {
-  const UpIntent();
-}
-
-class DownIntent extends Intent {
-  const DownIntent();
-}
-
-class PageUpIntent extends Intent {
-  const PageUpIntent();
-}
-
-class PageDownIntent extends Intent {
-  const PageDownIntent();
-}
-
-class MoveAction<T extends Intent> extends Action<T> {
+class MoveSelectionIntent extends Intent {
   final int offset;
+
+  const MoveSelectionIntent(this.offset);
+}
+
+class MoveSelectionAction extends Action<MoveSelectionIntent> {
   final DataListController controller;
 
-  MoveAction(this.controller, this.offset);
+  MoveSelectionAction(this.controller);
 
   @override
-  Object? invoke(covariant T intent) {
-    controller.selectByOffset(offset);
+  Object? invoke(covariant MoveSelectionIntent intent) {
+    controller.selectByOffset(intent.offset);
     return null;
   }
 }
-
-Action<UpIntent> upAction(DataListController controller) =>
-    MoveAction<UpIntent>(controller, -1);
-
-Action<DownIntent> downAction(DataListController controller) =>
-    MoveAction<DownIntent>(controller, 1);
-
-Action<PageUpIntent> pageUpAction(DataListController controller) =>
-    MoveAction<PageUpIntent>(controller, -10);
-
-Action<PageDownIntent> pageDownAction(DataListController controller) =>
-    MoveAction<PageDownIntent>(controller, 10);
 
 class _DataListScroll extends ScrollController {
   final int itemCount;
@@ -328,26 +324,41 @@ class _DataListItemState extends State<_DataListItem>
   }
 }
 
-Widget dataListView(
-    {required DataListController controller,
-    required int itemCount,
-    required IndexedWidgetBuilder itemBuilder}) {
-  final dataScroll = _DataListScroll(itemCount);
-  controller._attach(dataScroll);
-  return ListView.builder(
-    scrollDirection: Axis.vertical,
-    reverse: false,
-    controller: dataScroll,
-    itemCount: itemCount,
-    itemBuilder: (context, index) {
-      return _DataListItem(
-        key: ValueKey(index),
-        dataScroll: dataScroll,
-        index: index,
-        child: itemBuilder(context, index),
-      );
-    },
-  );
+class DataListView extends StatelessWidget {
+  final DataListController controller;
+  final bool shrinkWrap;
+  final int itemCount;
+  final IndexedWidgetBuilder itemBuilder;
+
+  const DataListView(
+      {super.key,
+      this.shrinkWrap = false,
+      required this.controller,
+      required this.itemCount,
+      required this.itemBuilder});
+
+  @override
+  Widget build(BuildContext context) {
+    final dataScroll = _DataListScroll(itemCount);
+    controller._attach(dataScroll);
+
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      reverse: false,
+      controller: dataScroll,
+      shrinkWrap: shrinkWrap,
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        return _DataListItem(
+          key: ValueKey(index),
+          dataScroll: dataScroll,
+          index: index,
+          child: itemBuilder(context, index),
+        );
+      },
+      // ),
+    );
+  }
 }
 
 /// used to invoke async functions in order
