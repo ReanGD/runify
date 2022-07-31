@@ -7,13 +7,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 
-class DataListController {
+abstract class DataListController {
   _DataListScroll? _dataScroll;
   static const int _pageOffset = 10;
 
   void _attach(_DataListScroll dataScroll) {
     _dataScroll = dataScroll;
   }
+
+  List<int> getVisibleItems(BuildContext context);
 
   Map<Type, Action<Intent>> getActions() {
     return <Type, Action<Intent>>{
@@ -56,15 +58,19 @@ class MoveSelectionAction extends Action<MoveSelectionIntent> {
 }
 
 class _DataListScroll extends ScrollController {
-  final int itemCount;
+  int _indexCount = 0;
   int _selectedIndex = 0;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
-  _DataListScroll(this.itemCount, {double initialScrollOffset = 0.0})
+  _DataListScroll({double initialScrollOffset = 0.0})
       : super(initialScrollOffset: initialScrollOffset, keepScrollOffset: true);
 
   Future selectByOffset(int offset) async {
     return runByOrder(this, () => _selectByOffset(offset));
+  }
+
+  void update(int indexCount) {
+    _indexCount = indexCount;
   }
 
   void register(int index, _DataListItemState item) {
@@ -160,7 +166,7 @@ class _DataListScroll extends ScrollController {
   }
 
   Future _selectByOffset(int offset) async {
-    int index = max(min(_selectedIndex + offset, itemCount - 1), 0);
+    int index = max(min(_selectedIndex + offset, _indexCount - 1), 0);
     // In listView init or reload case, widget state of list item may not be ready for query.
     // this prevent from over scrolling becoming empty screen or unnecessary scroll bounce.
     const maxBound = 30; // 0.5 second if 60fps
@@ -196,12 +202,14 @@ class _DataListScroll extends ScrollController {
 }
 
 class _DataListItem extends StatefulWidget {
+  final int id;
   final int index;
   final Widget child;
   final _DataListScroll dataScroll;
 
   const _DataListItem(
-      {required Key key,
+      {Key? key,
+      required this.id,
       required this.index,
       required this.dataScroll,
       required this.child})
@@ -243,7 +251,7 @@ class _DataListItemState extends State<_DataListItem>
   @override
   void didUpdateWidget(_DataListItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.index != widget.index || oldWidget.key != widget.key) {
+    if (oldWidget.id != widget.id || oldWidget.index != widget.index) {
       widget.dataScroll.unregister(oldWidget.index, this);
       widget.dataScroll.register(widget.index, this);
     }
@@ -325,38 +333,41 @@ class _DataListItemState extends State<_DataListItem>
 }
 
 class DataListView extends StatelessWidget {
-  final DataListController controller;
   final bool shrinkWrap;
-  final int itemCount;
+  final List<int> _visibleItems = [];
+  final _DataListScroll _dataScroll = _DataListScroll();
+  final DataListController controller;
   final IndexedWidgetBuilder itemBuilder;
 
-  const DataListView(
+  DataListView(
       {super.key,
       this.shrinkWrap = false,
       required this.controller,
-      required this.itemCount,
       required this.itemBuilder});
 
   @override
   Widget build(BuildContext context) {
-    final dataScroll = _DataListScroll(itemCount);
-    controller._attach(dataScroll);
+    final visibleItems = controller.getVisibleItems(context);
+    _dataScroll.update(visibleItems.length);
+    controller._attach(_dataScroll);
+    _visibleItems.clear();
+    _visibleItems.addAll(visibleItems);
 
     return ListView.builder(
       scrollDirection: Axis.vertical,
       reverse: false,
-      controller: dataScroll,
+      controller: _dataScroll,
       shrinkWrap: shrinkWrap,
-      itemCount: itemCount,
+      itemCount: visibleItems.length,
       itemBuilder: (context, index) {
+        final id = _visibleItems[index];
         return _DataListItem(
-          key: ValueKey(index),
-          dataScroll: dataScroll,
+          id: id,
           index: index,
-          child: itemBuilder(context, index),
+          dataScroll: _dataScroll,
+          child: itemBuilder(context, id),
         );
       },
-      // ),
     );
   }
 }
