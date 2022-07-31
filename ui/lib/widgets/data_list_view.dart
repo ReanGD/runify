@@ -148,6 +148,7 @@ class _DataListScroll extends ScrollController {
         final prevIndex = _selectedIndex;
         final nextIndex = index;
         _selectedIndex = index;
+        // print("real select $_selectedIndex");
         _items[prevIndex]?.update();
         _items[nextIndex]?.update();
       }
@@ -214,10 +215,20 @@ class _DataListItem extends StatefulWidget {
   State<_DataListItem> createState() => _DataListItemState();
 }
 
-class _DataListItemState extends State<_DataListItem> {
+class _DataListItemState extends State<_DataListItem>
+    with AutomaticKeepAliveClientMixin<_DataListItem> {
+  bool _hovering = false;
+  InkHighlight? _highlight;
+
   void update() {
     if (mounted) {
-      setState(() {});
+      setState(() {
+        if (_hovering) {
+          _hovering = false;
+          _highlight?.dispose();
+          _highlight = null;
+        }
+      });
     }
   }
 
@@ -243,21 +254,77 @@ class _DataListItemState extends State<_DataListItem> {
   }
 
   @override
+  void deactivate() {
+    _highlight?.dispose();
+    _highlight = null;
+    super.deactivate();
+  }
+
+  @override
+  bool get wantKeepAlive => _highlight != null;
+
+  void _handleMouseEnter() {
+    _hovering = true;
+    void handleInkRemoval() {
+      if (_highlight != null) {
+        _highlight = null;
+        updateKeepAlive();
+      }
+    }
+
+    if (_highlight != null && _highlight!.active) {
+      return;
+    }
+
+    if (_highlight == null) {
+      final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
+      final ThemeData theme = Theme.of(context);
+      _highlight = InkHighlight(
+        controller: Material.of(context)!,
+        referenceBox: referenceBox,
+        color: theme.hoverColor,
+        // shape: widget.highlightShape,
+        onRemoved: handleInkRemoval,
+        textDirection: Directionality.of(context),
+        fadeDuration: const Duration(milliseconds: 50),
+      );
+      updateKeepAlive();
+    } else {
+      _highlight?.activate();
+    }
+
+    assert(_highlight != null && _highlight!.active);
+  }
+
+  void _handleMouseExit() {
+    _hovering = false;
+    _highlight?.deactivate();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+
+    final child = MouseRegion(
+      onEnter: (event) => _handleMouseEnter(),
+      onExit: (event) => _handleMouseExit(),
+      child: widget.child,
+    );
+
     if (widget.dataScroll.isSelected(widget.index)) {
       final ThemeData theme = Theme.of(context);
       final ListTileThemeData tileTheme = ListTileTheme.of(context);
-      final selectedColor = tileTheme.selectedColor ??
+      final selectColor = tileTheme.selectedColor ??
           theme.listTileTheme.selectedColor ??
           theme.colorScheme.primary;
 
       return ColoredBox(
-        color: selectedColor,
-        child: widget.child,
+        color: selectColor,
+        child: child,
       );
     }
 
-    return widget.child;
+    return child;
   }
 }
 
