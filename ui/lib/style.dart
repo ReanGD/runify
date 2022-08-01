@@ -56,3 +56,25 @@ ThemeData getDarkTheme() {
     // fontFamily: GoogleFonts.notoSans().fontFamily,
   );
 }
+
+extension RunifyTextTheme on TextTheme {
+  TextStyle? get majorText => bodyMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        fontSize: 18,
+        letterSpacing: -0.2,
+        wordSpacing: 0,
+      );
+
+  TextStyle? get minorText => bodyMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        fontSize: 18,
+        letterSpacing: -0.2,
+        wordSpacing: 0,
+        color: bodyMedium?.color?.withAlpha(130),
+      );
+}
+
+extension RunifyCardTheme on CardTheme {
+  EdgeInsetsGeometry get commandPadding =>
+      const EdgeInsets.symmetric(vertical: 10, horizontal: 10);
+}
