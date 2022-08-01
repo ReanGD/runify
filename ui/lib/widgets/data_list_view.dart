@@ -7,35 +7,30 @@ import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 
-abstract class DataListController {
-  _DataListScroll? _dataScroll;
-  static const int _pageOffset = 10;
+enum DataItemEvent {
+  onTap,
+  onMenu,
+  onChoice,
+}
 
-  void _attach(_DataListScroll dataScroll) {
-    _dataScroll = dataScroll;
-  }
+typedef OnDataItemEvent = void Function(DataItemEvent event, int id);
+typedef _OnDataItemIndexEvent = void Function(DataItemEvent event, int index);
 
-  List<int> getVisibleItems(BuildContext context);
+class OnEventIntent extends Intent {
+  final DataItemEvent event;
 
-  Map<Type, Action<Intent>> getActions() {
-    return <Type, Action<Intent>>{
-      MoveSelectionIntent: MoveSelectionAction(this),
-    };
-  }
+  const OnEventIntent(this.event);
+}
 
-  Map<LogicalKeySet, Intent> getShortcuts() {
-    return <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionIntent(-1),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionIntent(1),
-      LogicalKeySet(LogicalKeyboardKey.pageUp):
-          const MoveSelectionIntent(-_pageOffset),
-      LogicalKeySet(LogicalKeyboardKey.pageDown):
-          const MoveSelectionIntent(_pageOffset),
-    };
-  }
+class OnEventAction extends Action<OnEventIntent> {
+  final DataListController controller;
 
-  Future selectByOffset(int offset) async {
-    return _dataScroll?.selectByOffset(offset);
+  OnEventAction(this.controller);
+
+  @override
+  Object? invoke(covariant OnEventIntent intent) {
+    controller.onItemEvent(intent.event);
+    return null;
   }
 }
 
@@ -57,20 +52,67 @@ class MoveSelectionAction extends Action<MoveSelectionIntent> {
   }
 }
 
+abstract class DataListController {
+  _DataListScroll? _dataScroll;
+  static const int _pageOffset = 10;
+
+  void _attach(_DataListScroll dataScroll) {
+    _dataScroll = dataScroll;
+  }
+
+  List<int> getVisibleItems(BuildContext context);
+
+  Map<Type, Action<Intent>> getActions() {
+    return <Type, Action<Intent>>{
+      OnEventIntent: OnEventAction(this),
+      MoveSelectionIntent: MoveSelectionAction(this),
+    };
+  }
+
+  Map<LogicalKeySet, Intent> getShortcuts() {
+    return <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.enter):
+          const OnEventIntent(DataItemEvent.onChoice),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyX):
+          const OnEventIntent(DataItemEvent.onMenu),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionIntent(-1),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionIntent(1),
+      LogicalKeySet(LogicalKeyboardKey.pageUp):
+          const MoveSelectionIntent(-_pageOffset),
+      LogicalKeySet(LogicalKeyboardKey.pageDown):
+          const MoveSelectionIntent(_pageOffset),
+    };
+  }
+
+  void onItemEvent(DataItemEvent event) {
+    return _dataScroll?.onItemIndexEvent(event);
+  }
+
+  Future selectByOffset(int offset) async {
+    return _dataScroll?.selectByOffset(offset);
+  }
+}
+
 class _DataListScroll extends ScrollController {
   int _indexCount = 0;
   int _selectedIndex = 0;
+  _OnDataItemIndexEvent? _onItemIndexEvent;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
   _DataListScroll({double initialScrollOffset = 0.0})
       : super(initialScrollOffset: initialScrollOffset, keepScrollOffset: true);
 
+  void onItemIndexEvent(DataItemEvent event, {int? index}) {
+    _onItemIndexEvent?.call(event, index ?? _selectedIndex);
+  }
+
   Future selectByOffset(int offset) async {
     return runByOrder(this, () => _selectByOffset(offset));
   }
 
-  void update(int indexCount) {
+  void update(int indexCount, _OnDataItemIndexEvent onItemIndexEvent) {
     _indexCount = indexCount;
+    _onItemIndexEvent = onItemIndexEvent;
   }
 
   void register(int index, _DataListItemState item) {
@@ -312,7 +354,15 @@ class _DataListItemState extends State<_DataListItem>
     final child = MouseRegion(
       onEnter: (event) => _handleMouseEnter(),
       onExit: (event) => _handleMouseExit(),
-      child: widget.child,
+      child: GestureDetector(
+        onTap: () {
+          widget.dataScroll
+              .onItemIndexEvent(DataItemEvent.onTap, index: widget.index);
+        },
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: true,
+        child: widget.child,
+      ),
     );
 
     if (widget.dataScroll.isSelected(widget.index)) {
@@ -337,18 +387,26 @@ class DataListView extends StatelessWidget {
   final List<int> _visibleItems = [];
   final _DataListScroll _dataScroll = _DataListScroll();
   final DataListController controller;
+  final OnDataItemEvent? onDataItemEvent;
   final IndexedWidgetBuilder itemBuilder;
 
   DataListView(
       {super.key,
       this.shrinkWrap = false,
       required this.controller,
+      this.onDataItemEvent,
       required this.itemBuilder});
+
+  void _onItemIndexEvent(DataItemEvent event, int index) {
+    if (index >= 0 && index < _visibleItems.length) {
+      onDataItemEvent?.call(event, _visibleItems[index]);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final visibleItems = controller.getVisibleItems(context);
-    _dataScroll.update(visibleItems.length);
+    _dataScroll.update(visibleItems.length, _onItemIndexEvent);
     controller._attach(_dataScroll);
     _visibleItems.clear();
     _visibleItems.addAll(visibleItems);
