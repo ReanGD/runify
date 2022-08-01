@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
@@ -329,7 +330,6 @@ class _DataListItemState extends State<_DataListItem>
         controller: Material.of(context)!,
         referenceBox: referenceBox,
         color: theme.hoverColor,
-        // shape: widget.highlightShape,
         onRemoved: handleInkRemoval,
         textDirection: Directionality.of(context),
         fadeDuration: const Duration(milliseconds: 50),
@@ -350,8 +350,9 @@ class _DataListItemState extends State<_DataListItem>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final ThemeData theme = Theme.of(context);
 
-    final child = MouseRegion(
+    return MouseRegion(
       onEnter: (event) => _handleMouseEnter(),
       onExit: (event) => _handleMouseExit(),
       child: GestureDetector(
@@ -361,29 +362,24 @@ class _DataListItemState extends State<_DataListItem>
         },
         behavior: HitTestBehavior.opaque,
         excludeFromSemantics: true,
-        child: widget.child,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius:
+                const BorderRadius.all(Radius.circular(defaultRadius)),
+            color: widget.dataScroll.isSelected(widget.index)
+                ? theme.focusColor
+                : null,
+          ),
+          child: widget.child,
+        ),
       ),
     );
-
-    if (widget.dataScroll.isSelected(widget.index)) {
-      final ThemeData theme = Theme.of(context);
-      final ListTileThemeData tileTheme = ListTileTheme.of(context);
-      final selectColor = tileTheme.selectedColor ??
-          theme.listTileTheme.selectedColor ??
-          theme.colorScheme.primary;
-
-      return ColoredBox(
-        color: selectColor,
-        child: child,
-      );
-    }
-
-    return child;
   }
 }
 
 class DataListView extends StatelessWidget {
   final bool shrinkWrap;
+  final EdgeInsetsGeometry? padding;
   final List<int> _visibleItems = [];
   final _DataListScroll _dataScroll = _DataListScroll();
   final DataListController controller;
@@ -393,6 +389,7 @@ class DataListView extends StatelessWidget {
   DataListView(
       {super.key,
       this.shrinkWrap = false,
+      this.padding,
       required this.controller,
       this.onDataItemEvent,
       required this.itemBuilder});
@@ -416,6 +413,7 @@ class DataListView extends StatelessWidget {
       reverse: false,
       controller: _dataScroll,
       shrinkWrap: shrinkWrap,
+      padding: padding,
       itemCount: visibleItems.length,
       itemBuilder: (context, index) {
         final id = _visibleItems[index];
