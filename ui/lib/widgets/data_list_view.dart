@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:async';
 import 'dart:collection';
 
@@ -12,6 +11,7 @@ enum DataItemEvent {
   onTap,
   onMenu,
   onChoice,
+  onFocus,
 }
 
 typedef OnDataItemEvent = void Function(DataItemEvent event, int id);
@@ -35,20 +35,20 @@ class OnEventAction extends Action<OnEventIntent> {
   }
 }
 
-class MoveSelectionIntent extends Intent {
+class MoveFocusIntent extends Intent {
   final int offset;
 
-  const MoveSelectionIntent(this.offset);
+  const MoveFocusIntent(this.offset);
 }
 
-class MoveSelectionAction extends Action<MoveSelectionIntent> {
+class MoveFocusAction extends Action<MoveFocusIntent> {
   final DataListController controller;
 
-  MoveSelectionAction(this.controller);
+  MoveFocusAction(this.controller);
 
   @override
-  Object? invoke(covariant MoveSelectionIntent intent) {
-    controller.selectByOffset(intent.offset);
+  Object? invoke(covariant MoveFocusIntent intent) {
+    controller.moveFocus(intent.offset);
     return null;
   }
 }
@@ -66,7 +66,7 @@ abstract class DataListController {
   Map<Type, Action<Intent>> getActions() {
     return <Type, Action<Intent>>{
       OnEventIntent: OnEventAction(this),
-      MoveSelectionIntent: MoveSelectionAction(this),
+      MoveFocusIntent: MoveFocusAction(this),
     };
   }
 
@@ -76,12 +76,12 @@ abstract class DataListController {
           const OnEventIntent(DataItemEvent.onChoice),
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyX):
           const OnEventIntent(DataItemEvent.onMenu),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveSelectionIntent(-1),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveSelectionIntent(1),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveFocusIntent(-1),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveFocusIntent(1),
       LogicalKeySet(LogicalKeyboardKey.pageUp):
-          const MoveSelectionIntent(-_pageOffset),
+          const MoveFocusIntent(-_pageOffset),
       LogicalKeySet(LogicalKeyboardKey.pageDown):
-          const MoveSelectionIntent(_pageOffset),
+          const MoveFocusIntent(_pageOffset),
     };
   }
 
@@ -89,14 +89,14 @@ abstract class DataListController {
     return _dataScroll?.onItemIndexEvent(event);
   }
 
-  Future selectByOffset(int offset) async {
-    return _dataScroll?.selectByOffset(offset);
+  Future moveFocus(int moveOffset) async {
+    return _dataScroll?.moveFocus(moveOffset);
   }
 }
 
 class _DataListScroll extends ScrollController {
   int _indexCount = 0;
-  int _selectedIndex = 0;
+  int _focusedIndex = 0;
   _OnDataItemIndexEvent? _onItemIndexEvent;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
@@ -104,11 +104,11 @@ class _DataListScroll extends ScrollController {
       : super(initialScrollOffset: initialScrollOffset, keepScrollOffset: true);
 
   void onItemIndexEvent(DataItemEvent event, {int? index}) {
-    _onItemIndexEvent?.call(event, index ?? _selectedIndex);
+    _onItemIndexEvent?.call(event, index ?? _focusedIndex);
   }
 
-  Future selectByOffset(int offset) async {
-    return runByOrder(this, () => _selectByOffset(offset));
+  Future moveFocus(int moveOffset) async {
+    return runByOrder(this, () => _moveFocus(moveOffset));
   }
 
   void update(int indexCount, _OnDataItemIndexEvent onItemIndexEvent) {
@@ -126,8 +126,8 @@ class _DataListScroll extends ScrollController {
     }
   }
 
-  bool isSelected(int index) {
-    return index == _selectedIndex;
+  bool isFocused(int index) {
+    return index == _focusedIndex;
   }
 
   MapEntry<int, BuildContext>? _getNearestItem(int index) {
@@ -189,13 +189,13 @@ class _DataListScroll extends ScrollController {
       scrollOffset = scrollOffset.clamp(
           position.minScrollExtent, position.maxScrollExtent);
 
-      if (foundTarget && _selectedIndex != index) {
-        final prevIndex = _selectedIndex;
+      if (foundTarget && _focusedIndex != index) {
+        final prevIndex = _focusedIndex;
         final nextIndex = index;
-        _selectedIndex = index;
-        // print("real select $_selectedIndex");
+        _focusedIndex = index;
         _items[prevIndex]?.update();
         _items[nextIndex]?.update();
+        onItemIndexEvent(DataItemEvent.onFocus);
       }
 
       while (attempts != 0 && hasClients && offset != scrollOffset) {
@@ -208,8 +208,8 @@ class _DataListScroll extends ScrollController {
     return foundTarget;
   }
 
-  Future _selectByOffset(int offset) async {
-    int index = max(min(_selectedIndex + offset, _indexCount - 1), 0);
+  Future _moveFocus(int moveOffset) async {
+    int index = (_focusedIndex + moveOffset).clamp(0, _indexCount - 1);
     // In listView init or reload case, widget state of list item may not be ready for query.
     // this prevent from over scrolling becoming empty screen or unnecessary scroll bounce.
     const maxBound = 30; // 0.5 second if 60fps
@@ -366,7 +366,7 @@ class _DataListItemState extends State<_DataListItem>
           decoration: BoxDecoration(
             borderRadius:
                 const BorderRadius.all(Radius.circular(defaultRadius)),
-            color: widget.dataScroll.isSelected(widget.index)
+            color: widget.dataScroll.isFocused(widget.index)
                 ? theme.focusColor
                 : null,
           ),
