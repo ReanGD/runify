@@ -14,7 +14,7 @@ enum DataItemEvent {
   onFocus,
 }
 
-typedef OnDataItemEvent = void Function(DataItemEvent event, int id);
+typedef OnDataItemEvent = void Function(DataItemEvent event, int? id);
 typedef _OnDataItemIndexEvent = void Function(DataItemEvent event, int index);
 
 class OnEventIntent extends Intent {
@@ -111,9 +111,12 @@ class _DataListScroll extends ScrollController {
     return runByOrder(this, () => _moveFocus(moveOffset));
   }
 
-  void update(int indexCount, _OnDataItemIndexEvent onItemIndexEvent) {
+  void update(int indexCount, _OnDataItemIndexEvent callbackOnItemIndexEvent) {
     _indexCount = indexCount;
-    _onItemIndexEvent = onItemIndexEvent;
+    _onItemIndexEvent = callbackOnItemIndexEvent;
+    _focusedIndex =
+        indexCount > 0 ? _focusedIndex.clamp(0, _indexCount - 1) : -1;
+    onItemIndexEvent(DataItemEvent.onFocus, index: _focusedIndex);
   }
 
   void register(int index, _DataListItemState item) {
@@ -395,18 +398,20 @@ class DataListView extends StatelessWidget {
       required this.itemBuilder});
 
   void _onItemIndexEvent(DataItemEvent event, int index) {
+    int? id;
     if (index >= 0 && index < _visibleItems.length) {
-      onDataItemEvent?.call(event, _visibleItems[index]);
+      id = _visibleItems[index];
     }
+    onDataItemEvent?.call(event, id);
   }
 
   @override
   Widget build(BuildContext context) {
     final visibleItems = controller.getVisibleItems(context);
-    _dataScroll.update(visibleItems.length, _onItemIndexEvent);
-    controller._attach(_dataScroll);
     _visibleItems.clear();
     _visibleItems.addAll(visibleItems);
+    controller._attach(_dataScroll);
+    _dataScroll.update(visibleItems.length, _onItemIndexEvent);
 
     return ListView.builder(
       scrollDirection: Axis.vertical,
