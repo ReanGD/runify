@@ -28,3 +28,6 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+# Tmp data
+cache.json

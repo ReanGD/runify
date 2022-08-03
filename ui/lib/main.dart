@@ -22,7 +22,7 @@ void main() {
         themeMode: ThemeMode.system,
         initialRoute: "/commands",
         routes: <String, WidgetBuilder>{
-          "/commands": (BuildContext context) => const CommandScreen(),
+          "/commands": (BuildContext context) => CommandScreen(),
           "/settings": (BuildContext context) => const SettingsScreen(),
         },
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:runify/model/cmd_storage.dart';
+import 'package:runify/model/cmd_filter.dart';
+import 'package:runify/model/cmd_loader.dart';
 import 'package:runify/widgets/data_list_view.dart';
 import 'package:runify/view/commands/command_list.dart';
 import 'package:runify/widgets/disable_focus_trap_behavior.dart';
@@ -8,7 +9,7 @@ import 'package:runify/widgets/disable_focus_trap_behavior.dart';
 class CommandListController extends DataListController {
   @override
   List<int> getVisibleItems(BuildContext context) {
-    return context.watch<CommandStorage>().getVisibleItems();
+    return context.watch<CommandFilter>().visibleItems;
   }
 }
 
@@ -22,8 +23,8 @@ class CommandScreen extends StatelessWidget {
     return Scaffold(
       body: MultiProvider(
         providers: [
-          ChangeNotifierProvider<CommandStorage>(
-              create: (_) => CommandStorage()),
+          ChangeNotifierProvider<CommandFilter>(
+              create: (_) => CommandFilter(CommandLoader.instance.commands)),
         ],
         child: DisableFocusTrapBehavior(
           child: Shortcuts(

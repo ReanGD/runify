@@ -3,7 +3,7 @@ import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/widgets/hdivider.dart';
-import 'package:runify/model/cmd_storage.dart';
+import 'package:runify/model/cmd_filter.dart';
 import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
@@ -15,7 +15,7 @@ class CommandList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final storage = context.read<CommandStorage>();
+    final storage = context.read<CommandFilter>();
 
     final theme = Theme.of(context);
     final cardTheme = theme.cardTheme;
