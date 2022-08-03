@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ui",
+            "cwd": "ui",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "ui (profile mode)",
+            "cwd": "ui",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "ui (release mode)",
+            "cwd": "ui",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
