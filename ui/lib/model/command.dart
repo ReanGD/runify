@@ -1,49 +1,18 @@
-import 'dart:io';
-
 import 'package:runify/model/data_filter.dart';
 
-abstract class Command implements Matcher {
-  String name();
-  String category();
-  String? iconPath();
-
+abstract class CommandAction implements Matcher {
+  String get name;
   void execute();
 }
 
-typedef CommandFilter = DataFilter<Command>;
+typedef CommandActions = List<CommandAction>;
+typedef CommandActionFilter = DataFilter<CommandAction>;
 
-class ApplicationCommand extends Command {
-  final String _name;
-  final String _applicationPath;
-  final String? _iconPath;
-
-  ApplicationCommand.fromJson(Map<String, dynamic> json)
-      : _name = json["name"] as String,
-        _applicationPath = json["app"] as String,
-        _iconPath = json["icon"] == null ? null : json["icon"] as String;
-
-  @override
-  String name() {
-    return _name;
-  }
-
-  @override
-  String category() {
-    return "Application";
-  }
-
-  @override
-  String? iconPath() {
-    return _iconPath;
-  }
-
-  @override
-  bool match(String filter) {
-    return _name.toLowerCase().contains(filter);
-  }
-
-  @override
-  void execute() {
-    Process.run("dex", [_applicationPath]);
-  }
+abstract class Command implements Matcher {
+  String get name;
+  String get category;
+  String? get iconPath;
+  CommandActions get actions;
 }
+
+typedef CommandFilter = DataFilter<Command>;
