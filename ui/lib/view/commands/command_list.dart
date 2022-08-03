@@ -8,17 +8,10 @@ import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
 
-class CommandListController extends DataListController {
-  @override
-  List<int> getVisibleItems(BuildContext context) {
-    return context.watch<CommandStorage>().getVisibleItems();
-  }
-}
-
 class CommandList extends StatelessWidget {
-  final DataListController controller = CommandListController();
+  final DataListController controller;
 
-  CommandList({Key? key}) : super(key: key);
+  const CommandList({Key? key, required this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,44 +32,38 @@ class CommandList extends StatelessWidget {
       right: cardTheme.commandPadding.right,
     );
 
-    return Shortcuts(
-      shortcuts: controller.getShortcuts(),
-      child: Actions(
-        actions: controller.getActions(),
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: windowPadding,
-              child: SearchField(
-                padding: searchFieldPadding,
-                hintText: UIText.searchFieldHint,
-                onChanged: (String query) => storage.applyFilter(query),
-              ),
-            ),
-            HDivider(padding: dividerPadding),
-            Expanded(
-              child: Focus(
-                canRequestFocus: true,
-                child: DataListView(
-                  controller: controller,
-                  padding: windowPadding,
-                  onDataItemEvent: (DataItemEvent event, int? id) {
-                    // print("event: $event, id: $id");
-                  },
-                  itemBuilder: (context, int id) {
-                    final item = storage[id];
-                    return CommandCard(
-                      name: item.name(),
-                      category: item.category(),
-                      iconPath: item.iconPath(),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: windowPadding,
+          child: SearchField(
+            padding: searchFieldPadding,
+            hintText: UIText.searchFieldHint,
+            onChanged: (String query) => storage.applyFilter(query),
+          ),
         ),
-      ),
+        HDivider(padding: dividerPadding),
+        Expanded(
+          child: Focus(
+            canRequestFocus: true,
+            child: DataListView(
+              controller: controller,
+              padding: windowPadding,
+              onDataItemEvent: (DataItemEvent event, int? id) {
+                // print("event: $event, id: $id");
+              },
+              itemBuilder: (context, int id) {
+                final item = storage[id];
+                return CommandCard(
+                  name: item.name(),
+                  category: item.category(),
+                  iconPath: item.iconPath(),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
