@@ -1,12 +1,16 @@
 import 'dart:io';
 
-abstract class Command {
+import 'package:runify/model/data_filter.dart';
+
+abstract class Command implements Matcher {
   String name();
   String category();
   String? iconPath();
 
   void execute();
 }
+
+typedef CommandFilter = DataFilter<Command>;
 
 class ApplicationCommand extends Command {
   final String _name;
@@ -31,6 +35,11 @@ class ApplicationCommand extends Command {
   @override
   String? iconPath() {
     return _iconPath;
+  }
+
+  @override
+  bool match(String filter) {
+    return _name.toLowerCase().contains(filter);
   }
 
   @override

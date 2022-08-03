@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:runify/model/cmd.dart';
 
-class CommandFilter with ChangeNotifier {
+abstract class Matcher {
+  bool match(String filter);
+}
+
+class DataFilter<T extends Matcher> with ChangeNotifier {
   String _filter = "";
-  final List<Command> _items = [];
+  final List<T> _items = [];
   final List<int> _visibleItems = [];
 
-  CommandFilter(Future<List<Command>> items) {
-    items.then((data) {
+  DataFilter(Future<Iterable<T>> items) {
+    items.then((Iterable<T> data) {
       _items.addAll(data);
       _update();
     });
   }
 
-  Command operator [](int id) {
+  T operator [](int id) {
     return _items[id];
   }
 
@@ -22,7 +25,7 @@ class CommandFilter with ChangeNotifier {
   void _update() {
     _visibleItems.clear();
     for (var i = 0; i != _items.length; i++) {
-      if (_items[i].name().toLowerCase().contains(_filter)) {
+      if (_items[i].match(_filter)) {
         _visibleItems.add(i);
       }
     }

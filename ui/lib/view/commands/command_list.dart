@@ -2,8 +2,8 @@ import 'package:runify/text.dart';
 import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:runify/model/command.dart';
 import 'package:runify/widgets/hdivider.dart';
-import 'package:runify/model/cmd_filter.dart';
 import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
@@ -11,7 +11,7 @@ import 'package:runify/widgets/data_list_view.dart';
 class CommandList extends StatelessWidget {
   final DataListController controller;
 
-  const CommandList({Key? key, required this.controller}) : super(key: key);
+  const CommandList({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
