@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:runify/model/command.dart';
+import 'package:runify/model/app_command.dart';
 
 class CommandLoader {
   late Future<List<Command>> _applications;
