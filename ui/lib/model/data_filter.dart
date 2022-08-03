@@ -9,11 +9,21 @@ class DataFilter<T extends Matcher> with ChangeNotifier {
   final List<T> _items = [];
   final List<int> _visibleItems = [];
 
-  DataFilter(Future<Iterable<T>> items) {
+  DataFilter() {
+    _items.clear();
+    _update();
+  }
+
+  DataFilter.future(Future<Iterable<T>> items) {
     items.then((Iterable<T> data) {
       _items.addAll(data);
       _update();
     });
+  }
+
+  DataFilter.value(Iterable<T> items) {
+    _items.addAll(items);
+    _update();
   }
 
   T operator [](int id) {
