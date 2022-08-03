@@ -2,6 +2,7 @@ import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:runify/actions/actions.dart';
 import 'package:runify/view/run/run_screen.dart';
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:runify/view/settings/setting_screen.dart';
 
 void main() {
@@ -27,4 +28,11 @@ void main() {
       ),
     ),
   );
+
+  doWhenWindowReady(() {
+    appWindow.minSize = const Size(1280, 720);
+    appWindow.size = const Size(1280, 720);
+    appWindow.alignment = Alignment.center;
+    appWindow.show();
+  });
 }
