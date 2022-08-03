@@ -1,8 +1,40 @@
 import os
 import json
+import tempfile
+from pathlib import Path
+from cairosvg import svg2png
+from xdg.IconTheme import getIconPath
 from xdg.DesktopEntry import DesktopEntry
 from xdg.BaseDirectory import xdg_data_dirs
 
+
+cache_file = "cache.json"
+
+if os.path.exists(cache_file):
+    with open(cache_file) as f:
+        print(f.read())
+    exit(0)
+
+tmpdir = os.path.join(tempfile.gettempdir(), "icons")
+if not os.path.exists(tmpdir):
+    os.mkdir(tmpdir)
+
+
+def get_icon_path(iconName):
+    origin = getIconPath(iconName, 64)
+    if origin is None:
+        return origin
+
+    origin = Path(origin)
+    if origin.suffix != ".svg":
+        return origin.as_posix()
+
+    png_path = Path(tmpdir, origin.name)
+    png_path = png_path.with_suffix(".png")
+    if not png_path.exists():
+        svg2png(url=origin.as_posix(), write_to=png_path.as_posix())
+
+    return png_path.as_posix()
 
 apps = {}
 for root_dir in xdg_data_dirs[::-1]:
@@ -19,7 +51,16 @@ for root_dir in xdg_data_dirs[::-1]:
             obj = DesktopEntry(full_path)
             if obj.getNoDisplay() or obj.getHidden():
                 continue
+            icon_path = get_icon_path(obj.getIcon())
+            apps[obj.getName()] = {"name": obj.getName(), "app": full_path, "icon": icon_path}
 
-            apps[obj.getName()] = {"name": obj.getName(), "app": full_path}
+# for i in range(1000):
+#     name = f"application {i} name"
+#     apps[name] = {"name": name, "app": name}
 
-print(json.dumps([it for it in apps.values()], ensure_ascii=False))
+text = json.dumps([it for it in apps.values()], ensure_ascii=False)
+
+with open(cache_file, "w") as f:
+    f.write(text)
+
+print(text)
