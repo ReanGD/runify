@@ -28,6 +28,7 @@ class SearchField extends StatelessWidget {
         hintText: hintText,
         hintStyle: theme.textTheme.minorText,
         filled: false,
+        isDense: true,
         errorBorder: border,
         focusedBorder: border,
         focusedErrorBorder: border,

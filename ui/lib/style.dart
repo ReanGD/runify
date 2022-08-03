@@ -57,6 +57,11 @@ ThemeData getDarkTheme() {
   );
 }
 
+extension RunifyDialogTheme on DialogTheme {
+  double get verticalOffset => 10.0;
+  double get horizontalOffset => 10.0;
+}
+
 extension RunifyTextTheme on TextTheme {
   TextStyle? get majorText => bodyMedium?.copyWith(
         fontWeight: FontWeight.w600,
@@ -75,6 +80,6 @@ extension RunifyTextTheme on TextTheme {
 }
 
 extension RunifyCardTheme on CardTheme {
-  EdgeInsetsGeometry get commandPadding =>
+  EdgeInsets get commandPadding =>
       const EdgeInsets.symmetric(vertical: 10, horizontal: 10);
 }
