@@ -1,3 +1,4 @@
 class UIText {
-  static const searchFieldHint = "Search for commands or applications...";
+  static const searchActionHint = "Search for actions...";
+  static const searchCommandHint = "Search for commands or applications...";
 }

@@ -22,8 +22,7 @@ class CommandList extends StatelessWidget {
     final dialogTheme = theme.dialogTheme;
 
     final dividerPadding = EdgeInsets.only(
-        top: dialogTheme.horizontalOffset,
-        bottom: dialogTheme.horizontalOffset);
+        top: dialogTheme.verticalOffset, bottom: dialogTheme.verticalOffset);
     final windowPadding =
         EdgeInsets.symmetric(horizontal: dialogTheme.horizontalOffset);
     final searchFieldPadding = EdgeInsets.only(
@@ -38,29 +37,26 @@ class CommandList extends StatelessWidget {
           padding: windowPadding,
           child: SearchField(
             padding: searchFieldPadding,
-            hintText: UIText.searchFieldHint,
+            hintText: UIText.searchCommandHint,
             onChanged: (String query) => storage.applyFilter(query),
           ),
         ),
         HDivider(padding: dividerPadding),
         Expanded(
-          child: Focus(
-            canRequestFocus: true,
-            child: DataListView(
-              controller: controller,
-              padding: windowPadding,
-              onDataItemEvent: (DataItemEvent event, int? id) {
-                // print("event: $event, id: $id");
-              },
-              itemBuilder: (context, int id) {
-                final item = storage[id];
-                return CommandCard(
-                  name: item.name(),
-                  category: item.category(),
-                  iconPath: item.iconPath(),
-                );
-              },
-            ),
+          child: DataListView(
+            controller: controller,
+            padding: windowPadding,
+            onDataItemEvent: (DataItemEvent event, int? id) {
+              // print("event: $event, id: $id");
+            },
+            itemBuilder: (context, int id) {
+              final item = storage[id];
+              return CommandCard(
+                name: item.name(),
+                category: item.category(),
+                iconPath: item.iconPath(),
+              );
+            },
           ),
         ),
       ],
