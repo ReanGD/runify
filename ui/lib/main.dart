@@ -1,8 +1,8 @@
 import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:runify/actions/actions.dart';
-import 'package:runify/view/run/run_screen.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:runify/view/commands/command_screen.dart';
 import 'package:runify/view/settings/setting_screen.dart';
 
 void main() {
@@ -20,9 +20,9 @@ void main() {
         theme: getLightTheme(),
         darkTheme: getDarkTheme(),
         themeMode: ThemeMode.system,
-        initialRoute: "/run",
+        initialRoute: "/commands",
         routes: <String, WidgetBuilder>{
-          "/run": (BuildContext context) => const RunScreen(),
+          "/commands": (BuildContext context) => const CommandScreen(),
           "/settings": (BuildContext context) => const SettingsScreen(),
         },
       ),
