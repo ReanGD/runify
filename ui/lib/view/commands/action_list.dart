@@ -1,11 +1,19 @@
 import 'package:runify/text.dart';
 import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:runify/model/command.dart';
 import 'package:runify/widgets/hdivider.dart';
 import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
-import 'package:runify/view/commands/command_screen.dart';
+
+class ActionListController extends DataListController {
+  @override
+  List<int> getVisibleItems(BuildContext context) {
+    return context.watch<CommandActionFilter>().visibleItems;
+  }
+}
 
 class ActionList extends StatelessWidget {
   final ActionListController controller;
@@ -14,6 +22,8 @@ class ActionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final storage = context.read<CommandActionFilter>();
+
     final theme = Theme.of(context);
     final cardTheme = theme.cardTheme;
     final dialogTheme = theme.dialogTheme;
@@ -27,45 +37,35 @@ class ActionList extends StatelessWidget {
         vertical: dialogTheme.verticalOffset,
         horizontal: dialogTheme.horizontalOffset);
 
-    return SizedBox(
-      width: 350,
-      height: 300,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
-          border: Border.all(),
-          borderRadius: const BorderRadius.all(Radius.circular(defaultRadius)),
-        ),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Padding(
-                padding: windowPadding,
-                child: DataListView(
-                  controller: controller,
-                  onDataItemEvent: (DataItemEvent event, int? id) {
-                    // print("event: $event, id: $id");
-                  },
-                  itemBuilder: (context, int id) {
-                    return CommandCard(
-                      name: "Action $id",
-                    );
-                  },
-                ),
-              ),
+    return Column(
+      children: <Widget>[
+        Expanded(
+          child: Padding(
+            padding: windowPadding,
+            child: DataListView(
+              controller: controller,
+              onDataItemEvent: (DataItemEvent event, int? id) {
+                // print("event: $event, id: $id");
+              },
+              itemBuilder: (context, int id) {
+                final item = storage[id];
+                return CommandCard(
+                  name: item.name,
+                );
+              },
             ),
-            const HDivider(),
-            Padding(
-              padding: windowPadding,
-              child: SearchField(
-                padding: searchFieldPadding,
-                hintText: UIText.searchActionHint,
-                onChanged: (String query) {},
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        const HDivider(),
+        Padding(
+          padding: windowPadding,
+          child: SearchField(
+            padding: searchFieldPadding,
+            hintText: UIText.searchActionHint,
+            onChanged: (String query) => storage.applyFilter(query),
+          ),
+        ),
+      ],
     );
   }
 }

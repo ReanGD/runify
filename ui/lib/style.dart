@@ -58,6 +58,8 @@ ThemeData getDarkTheme() {
 }
 
 extension RunifyDialogTheme on DialogTheme {
+  double get actionsWidth => 350;
+  double get actionsHeight => 300;
   double get verticalOffset => 10.0;
   double get horizontalOffset => 10.0;
 }
