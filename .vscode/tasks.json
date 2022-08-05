@@ -1,0 +1,79 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Build Server",
+			"command": "make build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": {
+				"base": "$go",
+				"fileLocation": [
+					"relative",
+					"${workspaceRoot}/server"
+				]
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/server"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "Build UI debug",
+			"command": "make build_debug",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/ui"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "Build UI profile",
+			"command": "make build_profile",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/ui"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "Build UI release",
+			"command": "make build_release",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/ui"
+			}
+		}
+	]
+}
