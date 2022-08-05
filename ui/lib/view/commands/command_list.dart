@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/model/command.dart';
 import 'package:runify/widgets/hdivider.dart';
-import 'package:runify/model/command_menu.dart';
 import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
+import 'package:runify/view/commands/command_menu_dialog.dart';
 
 class CommandListController extends DataListController {
   @override
@@ -23,10 +23,10 @@ class CommandList extends StatelessWidget {
 
   void _onDataItemEvent(
       BuildContext context, DataItemEvent event, Command? command) {
-    if (event == DataItemEvent.onMenu) {
-      context.read<CommandMenu>().show(command);
+    if (event == DataItemEvent.onMenu && command != null) {
+      CommandMenuDialog.show(context, command);
+      return;
     }
-    // print("event: $event, id: $id");
   }
 
   @override

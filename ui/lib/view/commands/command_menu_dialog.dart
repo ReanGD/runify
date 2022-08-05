@@ -2,42 +2,60 @@ import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/model/command.dart';
-import 'package:runify/model/command_menu.dart';
 import 'package:runify/view/commands/action_list.dart';
+import 'package:runify/widgets/disable_focus_trap_behavior.dart';
 
 class CommandMenuDialog extends StatelessWidget {
-  final ActionListController controller;
+  final Command command;
+  final controller = ActionListController();
 
-  const CommandMenuDialog({super.key, required this.controller});
+  CommandMenuDialog({super.key, required this.command});
+
+  static Future show(BuildContext context, Command command) {
+    return showDialog(
+      context: context,
+      barrierColor: null,
+      builder: (BuildContext context) {
+        return CommandMenuDialog(command: command);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final commandMenu = context.watch<CommandMenu>();
-    final visible = commandMenu.visible;
-    if (!visible) {
-      return const SizedBox.shrink();
-    }
-
     final theme = Theme.of(context);
     final dialogTheme = theme.dialogTheme;
+    final dividerTheme = theme.dividerTheme;
 
     return ChangeNotifierProvider<CommandActionFilter>(
-      create: (_) => commandMenu.filter,
-      child: Positioned(
-        right: dialogTheme.horizontalOffset,
-        bottom: dialogTheme.verticalOffset,
-        child: SizedBox(
-          width: dialogTheme.actionsWidth,
-          height: dialogTheme.actionsHeight,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor,
-              border: Border.all(),
-              borderRadius:
-                  const BorderRadius.all(Radius.circular(defaultRadius)),
+      create: (_) => CommandActionFilter.value(command.actions),
+      child: Padding(
+        padding: EdgeInsets.only(
+          right: dialogTheme.horizontalOffset,
+          bottom: dialogTheme.verticalOffset,
+        ),
+        child: Align(
+          alignment: AlignmentDirectional.bottomEnd,
+          child: Material(
+            color: theme.scaffoldBackgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(defaultRadius),
+              side: BorderSide(color: dividerTheme.color ?? theme.dividerColor),
             ),
-            child: ActionList(
-              controller: controller,
+            child: DisableFocusTrapBehavior(
+              child: Shortcuts(
+                shortcuts: controller.getShortcuts(),
+                child: Actions(
+                  actions: controller.getActions(),
+                  child: SizedBox(
+                    width: dialogTheme.actionsWidth,
+                    height: dialogTheme.actionsHeight,
+                    child: ActionList(
+                      controller: controller,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),

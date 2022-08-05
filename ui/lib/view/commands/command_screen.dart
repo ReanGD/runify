@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/model/command.dart';
-import 'package:runify/model/command_menu.dart';
 import 'package:runify/model/command_loader.dart';
-import 'package:runify/view/commands/action_list.dart';
 import 'package:runify/view/commands/command_list.dart';
-import 'package:runify/view/commands/command_menu_dialog.dart';
 import 'package:runify/widgets/disable_focus_trap_behavior.dart';
 
 class CommandScreen extends StatelessWidget {
-  final actionsController = ActionListController();
-  final commandsController = CommandListController();
+  final controller = CommandListController();
 
   CommandScreen({super.key});
 
@@ -23,25 +19,15 @@ class CommandScreen extends StatelessWidget {
             create: (_) =>
                 CommandFilter.future(CommandLoader.instance.applications),
           ),
-          ChangeNotifierProvider<CommandMenu>(
-            create: (_) => CommandMenu(),
-          ),
         ],
         child: DisableFocusTrapBehavior(
           child: Shortcuts(
-              shortcuts: commandsController.getShortcuts(),
-              child: Stack(
-                children: <Widget>[
-                  Actions(
-                    actions: commandsController.getActions(),
-                    child: CommandList(controller: commandsController),
-                  ),
-                  Actions(
-                    actions: actionsController.getActions(),
-                    child: CommandMenuDialog(controller: actionsController),
-                  ),
-                ],
-              )),
+            shortcuts: controller.getShortcuts(),
+            child: Actions(
+              actions: controller.getActions(),
+              child: CommandList(controller: controller),
+            ),
+          ),
         ),
       ),
     );
