@@ -1,4 +1,7 @@
-.PHONY: build
+.PHONY: dep build help
+
+dep: ## Get the dependencies
+	@../ci/make_scripts/install_go_deps.sh
 
 build: ## Build the binary file
 	@../ci/make_scripts/build_server.sh

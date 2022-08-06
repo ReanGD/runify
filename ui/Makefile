@@ -1,4 +1,4 @@
-.PHONY: build_debug build_profile build_release
+.PHONY: build_debug build_profile build_release help
 
 build_debug: ## Build debug version
 	@../ci/make_scripts/build_ui.sh "debug"
