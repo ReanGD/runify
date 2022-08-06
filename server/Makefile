@@ -1,7 +1,9 @@
+export GOLANGCILINT_VERSION := "v1.48.0"
+
 .PHONY: dep build help
 
 dep: ## Get the dependencies
-	@../ci/make_scripts/install_go_deps.sh
+	@../ci/make_scripts/install_server_deps.sh ${GOLANGCILINT_VERSION}
 
 build: ## Build the binary file
 	@../ci/make_scripts/build_server.sh
