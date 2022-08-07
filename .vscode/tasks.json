@@ -26,6 +26,29 @@
 		},
 		{
 			"type": "shell",
+			"label": "Build and Run Server",
+			"command": "make run",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": {
+				"base": "$go",
+				"fileLocation": [
+					"relative",
+					"${workspaceRoot}/server"
+				]
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/server"
+			}
+		},
+		{
+			"type": "shell",
 			"label": "Build UI debug",
 			"command": "make build_debug",
 			"group": {
