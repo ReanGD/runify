@@ -45,7 +45,7 @@ func getXDGAppDirs() []string {
 	return xdgAppDirs
 }
 
-func walkXDGDesktopEntries(iconTheme *IconTheme, fn func(fullpath string, entry *desktop.Entry)) {
+func walkXDGDesktopEntries(iconResolver *files.IconResolver, fn func(fullpath string, entry *desktop.Entry)) {
 	exists := make(map[string]struct{})
 	for _, dirname := range getXDGAppDirs() {
 		files.Walk(dirname, func(fullpath string) {
@@ -75,27 +75,20 @@ func walkXDGDesktopEntries(iconTheme *IconTheme, fn func(fullpath string, entry 
 			if entry.NoDisplay || entry.Hidden {
 				return
 			}
-
-			if len(entry.Icon) != 0 {
-				if _, err = os.Stat(entry.Icon); err != nil {
-					entry.Icon = iconTheme.LookupIcon(entry.Icon, 48, 0)
-				}
-			}
+			entry.Icon = iconResolver.Resolve(entry.Icon, 48)
 
 			fn(fullpath, entry)
 		})
 	}
 }
 
-func Get() {
-	Init()
-	iconTheme, err := IconThemeGetDefault()
-	if err != nil {
-		logger.Write("Error get default icon theme: %s", err)
-		return
-	}
-
-	walkXDGDesktopEntries(iconTheme, func(fullpath string, entry *desktop.Entry) {
-		fmt.Println(fullpath)
+func Get(iconResolver *files.IconResolver) {
+	cnt := 0
+	walkXDGDesktopEntries(iconResolver, func(fullpath string, entry *desktop.Entry) {
+		if filepath.Ext(entry.Icon) == ".svg" {
+			cnt++
+		}
+		fmt.Println(fullpath, entry.Icon)
 	})
+	fmt.Println(cnt)
 }
