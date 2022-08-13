@@ -19,11 +19,9 @@ type WalkSuite struct {
 }
 
 func (s *WalkSuite) SetupSuite() {
-	t := s.T()
-
 	s.rootDir = filepath.Join(os.TempDir(), "walk_suite")
 	s.removeAll()
-	s.rootItem = fsh.CreateRoot(t, s.rootDir,
+	s.rootItem = fsh.CreateRoot(s.T(), s.rootDir,
 		fsh.CreateFile("file_01"),
 		fsh.CreateFile("file_02"),
 		fsh.CreateDir("dir_1",

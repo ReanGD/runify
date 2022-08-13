@@ -15,7 +15,7 @@ const (
 	FSItemFile
 	FSItemLink
 
-	FileDataPrefix = "123ABCabcАБВабв"
+	fileDataPrefix = "123ABCabcАБВабв"
 )
 
 type FSItem struct {
@@ -63,6 +63,14 @@ func CreateLink(name string, link string) *FSItem {
 	}
 }
 
+func (ci *FSItem) Join(name string) string {
+	return filepath.Join(ci.FullPath, name)
+}
+
+func (ci *FSItem) Data() []byte {
+	return []byte(fileDataPrefix + ci.FullPath)
+}
+
 func (ci *FSItem) Get(name string) *FSItem {
 	if item, ok := ci.children[name]; ok {
 		return item
@@ -85,7 +93,7 @@ func (ci *FSItem) addChildren(items []*FSItem) {
 func (ci *FSItem) create(t *testing.T, rootPath string, parentPath string) {
 	if ci.ItemType == FSItemFile {
 		ci.FullPath = filepath.Join(parentPath, ci.ItemName)
-		require.NoError(t, os.WriteFile(ci.FullPath, []byte(FileDataPrefix+ci.FullPath), 0777))
+		require.NoError(t, os.WriteFile(ci.FullPath, []byte(fileDataPrefix+ci.FullPath), 0777))
 		return
 	}
 

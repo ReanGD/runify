@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ReanGD/runify/server/test/utils/fsh"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -12,68 +13,28 @@ import (
 type ExistsSuite struct {
 	suite.Suite
 
-	data                         string
-	rootDir                      string
-	existsDir                    string
-	noExistsDir                  string
-	existsSymlinkDir             string
-	noExistsSymlinkDir           string
-	existsSymlinkToSymlinkDir    string
-	noExistsSymlinkToSymlinkDir  string
-	withSymlinksDir              string
-	existsFile                   string
-	noExistsFile                 string
-	existsSymlinkFile            string
-	noExistsSymlinkFile          string
-	existsSymlinkToSymlinkFile   string
-	noExistsSymlinkToSymlinkFile string
+	rootDir  string
+	rootItem *fsh.FSItem
 }
 
 func (s *ExistsSuite) SetupSuite() {
-	t := s.T()
-
-	s.data = "123ABCabcАБВабв"
-
 	s.rootDir = filepath.Join(os.TempDir(), "exists_suite")
 	s.removeAll()
-	require.NoError(t, os.Mkdir(s.rootDir, 0777))
-
-	s.existsDir = filepath.Join(s.rootDir, "exists_dir")
-	require.NoError(t, os.Mkdir(s.existsDir, 0777))
-
-	s.noExistsDir = filepath.Join(s.rootDir, "no_exists_dir")
-
-	s.existsSymlinkDir = filepath.Join(s.rootDir, "exists_symlink_dir")
-	require.NoError(t, os.Symlink(s.existsDir, s.existsSymlinkDir))
-
-	s.noExistsSymlinkDir = filepath.Join(s.rootDir, "no_exists_symlink_dir")
-	require.NoError(t, os.Symlink(s.noExistsDir, s.noExistsSymlinkDir))
-
-	s.existsSymlinkToSymlinkDir = filepath.Join(s.rootDir, "exists_symlink_to_symlink_dir")
-	require.NoError(t, os.Symlink(s.existsSymlinkDir, s.existsSymlinkToSymlinkDir))
-
-	s.noExistsSymlinkToSymlinkDir = filepath.Join(s.rootDir, "no_exists_symlink_to_symlink_dir")
-	require.NoError(t, os.Symlink(s.noExistsSymlinkDir, s.noExistsSymlinkToSymlinkDir))
-
-	s.withSymlinksDir = filepath.Join(s.rootDir, "with_symlinks_dir")
-	require.NoError(t, os.Mkdir(s.withSymlinksDir, 0777))
-
-	s.existsFile = filepath.Join(s.existsDir, "exists.file")
-	require.NoError(t, os.WriteFile(s.existsFile, []byte(s.data+s.existsFile), 0777))
-
-	s.noExistsFile = filepath.Join(s.rootDir, "no_exists.file")
-
-	s.existsSymlinkFile = filepath.Join(s.withSymlinksDir, "exists_symlink.file")
-	require.NoError(t, os.Symlink(s.existsFile, s.existsSymlinkFile))
-
-	s.noExistsSymlinkFile = filepath.Join(s.withSymlinksDir, "no_exists_symlink.file")
-	require.NoError(t, os.Symlink(s.noExistsFile, s.noExistsSymlinkFile))
-
-	s.existsSymlinkToSymlinkFile = filepath.Join(s.withSymlinksDir, "exists_symlink_to_symlink.file")
-	require.NoError(t, os.Symlink(s.existsSymlinkFile, s.existsSymlinkToSymlinkFile))
-
-	s.noExistsSymlinkToSymlinkFile = filepath.Join(s.withSymlinksDir, "no_exists_symlink_to_symlink.file")
-	require.NoError(t, os.Symlink(s.noExistsSymlinkFile, s.noExistsSymlinkToSymlinkFile))
+	s.rootItem = fsh.CreateRoot(s.T(), s.rootDir,
+		fsh.CreateDir("exists_dir",
+			fsh.CreateFile("exists.file"),
+		),
+		fsh.CreateLink("exists_symlink_dir", "exists_dir"),
+		fsh.CreateLink("no_exists_symlink_dir", "no_exists_dir"),
+		fsh.CreateLink("exists_symlink_to_symlink_dir", "exists_symlink_dir"),
+		fsh.CreateLink("no_exists_symlink_to_symlink_dir", "no_exists_symlink_dir"),
+		fsh.CreateDir("with_symlinks_dir",
+			fsh.CreateLink("exists_symlink.file", "exists_dir/exists.file"),
+			fsh.CreateLink("no_exists_symlink.file", "exists_dir/no_exists.file"),
+			fsh.CreateLink("exists_symlink_to_symlink.file", "with_symlinks_dir/exists_symlink.file"),
+			fsh.CreateLink("no_exists_symlink_to_symlink.file", "with_symlinks_dir/no_exists_symlink.file"),
+		),
+	)
 }
 
 func (s *ExistsSuite) TearDownSuite() {
@@ -107,20 +68,20 @@ func (s *ExistsSuite) checkExists(name string, expectedIsDir bool, expectedIsFil
 	require.Equal(t, expectedIsAny, actual)
 }
 
-func (s *ExistsSuite) checkRead(name string, expectedData string) {
+func (s *ExistsSuite) checkRead(name string, expectedData []byte) {
 	t := s.T()
 
 	actualData, err := os.ReadFile(name)
 	if len(expectedData) != 0 {
 		require.NoError(t, err)
-		require.Equal(t, []byte(expectedData), actualData)
+		require.Equal(t, expectedData, actualData)
 	} else {
 		require.Error(t, err)
 	}
 }
 
 func (s *ExistsSuite) TestExistsDir() {
-	name := s.existsDir
+	name := s.rootItem.Get("exists_dir").FullPath
 	expectedIsDir := true
 	expectedIsFile := false
 	expectedIsSymlink := false
@@ -130,7 +91,7 @@ func (s *ExistsSuite) TestExistsDir() {
 }
 
 func (s *ExistsSuite) TestNoExistsDir() {
-	name := s.noExistsDir
+	name := s.rootItem.Join("no_exists_dir")
 	expectedIsDir := false
 	expectedIsFile := false
 	expectedIsSymlink := false
@@ -140,7 +101,7 @@ func (s *ExistsSuite) TestNoExistsDir() {
 }
 
 func (s *ExistsSuite) TestExistsSymlinkDir() {
-	name := s.existsSymlinkDir
+	name := s.rootItem.Get("exists_symlink_dir").FullPath
 	expectedIsDir := true
 	expectedIsFile := false
 	expectedIsSymlink := true
@@ -150,7 +111,7 @@ func (s *ExistsSuite) TestExistsSymlinkDir() {
 }
 
 func (s *ExistsSuite) TestNoExistsSymlinkDir() {
-	name := s.noExistsSymlinkDir
+	name := s.rootItem.Get("no_exists_symlink_dir").FullPath
 	expectedIsDir := false
 	expectedIsFile := false
 	expectedIsSymlink := true
@@ -160,7 +121,7 @@ func (s *ExistsSuite) TestNoExistsSymlinkDir() {
 }
 
 func (s *ExistsSuite) TestExistsSymlinkToSymlinkDir() {
-	name := s.existsSymlinkToSymlinkDir
+	name := s.rootItem.Get("exists_symlink_to_symlink_dir").FullPath
 	expectedIsDir := true
 	expectedIsFile := false
 	expectedIsSymlink := true
@@ -170,7 +131,7 @@ func (s *ExistsSuite) TestExistsSymlinkToSymlinkDir() {
 }
 
 func (s *ExistsSuite) TestNoExistsSymlinkToSymlinkDir() {
-	name := s.noExistsSymlinkToSymlinkDir
+	name := s.rootItem.Get("no_exists_symlink_to_symlink_dir").FullPath
 	expectedIsDir := false
 	expectedIsFile := false
 	expectedIsSymlink := true
@@ -180,69 +141,70 @@ func (s *ExistsSuite) TestNoExistsSymlinkToSymlinkDir() {
 }
 
 func (s *ExistsSuite) TestExistsFile() {
-	name := s.existsFile
+	item := s.rootItem.Get("exists_dir").Get("exists.file")
+	name := item.FullPath
 	expectedIsDir := false
 	expectedIsFile := true
 	expectedIsSymlink := false
 	expectedIsAny := true
 
 	s.checkExists(name, expectedIsDir, expectedIsFile, expectedIsSymlink, expectedIsAny)
-	s.checkRead(name, s.data+s.existsFile)
+	s.checkRead(name, item.Data())
 }
 
 func (s *ExistsSuite) TestNoExistsFile() {
-	name := s.noExistsFile
+	name := s.rootItem.Get("exists_dir").Join("no_exists.file")
 	expectedIsDir := false
 	expectedIsFile := false
 	expectedIsSymlink := false
 	expectedIsAny := false
 
 	s.checkExists(name, expectedIsDir, expectedIsFile, expectedIsSymlink, expectedIsAny)
-	s.checkRead(name, "")
+	s.checkRead(name, []byte{})
 }
 
 func (s *ExistsSuite) TestExistsSymlinkFile() {
-	name := s.existsSymlinkFile
+	name := s.rootItem.Get("with_symlinks_dir").Get("exists_symlink.file").FullPath
 	expectedIsDir := false
 	expectedIsFile := true
 	expectedIsSymlink := true
 	expectedIsAny := true
 
 	s.checkExists(name, expectedIsDir, expectedIsFile, expectedIsSymlink, expectedIsAny)
-	s.checkRead(name, s.data+s.existsFile) // link to s.existsFile
+	s.checkRead(name, s.rootItem.Get("exists_dir").Get("exists.file").Data()) // link to s.existsFile
 }
 
 func (s *ExistsSuite) TestNoExistsSymlinkFile() {
-	name := s.noExistsSymlinkFile
+	name := s.rootItem.Get("with_symlinks_dir").Get("no_exists_symlink.file").FullPath
 	expectedIsDir := false
 	expectedIsFile := false
 	expectedIsSymlink := true
 	expectedIsAny := false
 
 	s.checkExists(name, expectedIsDir, expectedIsFile, expectedIsSymlink, expectedIsAny)
-	s.checkRead(name, "")
+	s.checkRead(name, []byte{})
 }
 
 func (s *ExistsSuite) TestExistsSymlinkToSymlinkFile() {
-	name := s.existsSymlinkToSymlinkFile
+	name := s.rootItem.Get("with_symlinks_dir").Get("exists_symlink_to_symlink.file").FullPath
 	expectedIsDir := false
 	expectedIsFile := true
 	expectedIsSymlink := true
 	expectedIsAny := true
 
 	s.checkExists(name, expectedIsDir, expectedIsFile, expectedIsSymlink, expectedIsAny)
-	s.checkRead(name, s.data+s.existsFile) // link to s.existsFile
+	s.checkRead(name, s.rootItem.Get("exists_dir").Get("exists.file").Data()) // link to s.existsFile
 }
 
 func (s *ExistsSuite) TestNoExistsSymlinkToSymlinkFile() {
-	name := s.noExistsSymlinkToSymlinkFile
+	name := s.rootItem.Get("with_symlinks_dir").Get("no_exists_symlink_to_symlink.file").FullPath
 	expectedIsDir := false
 	expectedIsFile := false
 	expectedIsSymlink := true
 	expectedIsAny := false
 
 	s.checkExists(name, expectedIsDir, expectedIsFile, expectedIsSymlink, expectedIsAny)
-	s.checkRead(name, "")
+	s.checkRead(name, []byte{})
 }
 
 func TestExistsSuite(t *testing.T) {
