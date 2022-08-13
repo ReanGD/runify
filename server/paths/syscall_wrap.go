@@ -6,11 +6,11 @@ func getenv(key string) (string, bool) {
 	return syscall.Getenv(key)
 }
 
-func lStatMode(name string) (uint32, error) {
+func lStatMode(path string) (uint32, error) {
 	var err error
 	var stat syscall.Stat_t
 	for {
-		err = syscall.Lstat(name, &stat)
+		err = syscall.Lstat(path, &stat)
 		if err != syscall.EINTR {
 			break
 		}

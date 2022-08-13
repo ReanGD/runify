@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
-func readDir(dirname string) ([]fs.DirEntry, error) {
-	f, err := os.Open(dirname)
+func readDir(dirPath string) ([]fs.DirEntry, error) {
+	f, err := os.Open(dirPath)
 	if err != nil {
 		return nil, err
 	}
