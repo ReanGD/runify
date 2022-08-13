@@ -6,105 +6,16 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ReanGD/runify/server/test/utils/fsh"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
-
-type itemType uint
-
-const (
-	itemDir itemType = iota
-	itemFile
-	itemLink
-
-	fileDataPrefix = "123ABCabcАБВабв"
-)
-
-type createItem struct {
-	fullPath string
-	itemName string
-	link     string
-	itemType itemType
-	children map[string]*createItem
-}
-
-func createRoot(t *testing.T, rootpath string, children ...*createItem) *createItem {
-	res := &createItem{
-		fullPath: rootpath,
-		itemType: itemDir,
-	}
-
-	res.addChildren(children)
-	res.create(t, rootpath, rootpath)
-
-	return res
-}
-
-func createDir(name string, children ...*createItem) *createItem {
-	res := &createItem{
-		itemName: name,
-		itemType: itemDir,
-	}
-	res.addChildren(children)
-
-	return res
-}
-
-func createFile(name string) *createItem {
-	return &createItem{
-		itemName: name,
-		itemType: itemFile,
-	}
-}
-
-func createLink(name string, link string) *createItem {
-	return &createItem{
-		itemName: name,
-		link:     link,
-		itemType: itemLink,
-	}
-}
-
-func (ci *createItem) get(name string) *createItem {
-	return ci.children[name]
-}
-
-func (ci *createItem) addChildren(items []*createItem) {
-	ci.children = make(map[string]*createItem)
-	for _, it := range items {
-		ci.children[it.itemName] = it
-	}
-}
-
-func (ci *createItem) create(t *testing.T, rootPath string, parentPath string) {
-	if ci.itemType == itemFile {
-		ci.fullPath = filepath.Join(parentPath, ci.itemName)
-		require.NoError(t, os.WriteFile(ci.fullPath, []byte(fileDataPrefix+ci.fullPath), 0777))
-		return
-	}
-
-	if ci.itemType == itemDir {
-		ci.fullPath = filepath.Join(parentPath, ci.itemName)
-		require.NoError(t, os.Mkdir(ci.fullPath, 0777))
-		for _, child := range ci.children {
-			child.create(t, rootPath, ci.fullPath)
-		}
-		return
-	}
-
-	if ci.itemType == itemLink {
-		ci.fullPath = filepath.Join(parentPath, ci.itemName)
-		srcPath := filepath.Join(rootPath, ci.link)
-		require.NoError(t, os.Symlink(srcPath, ci.fullPath))
-		return
-	}
-}
 
 type WalkSuite struct {
 	suite.Suite
 
 	rootDir  string
-	rootItem *createItem
+	rootItem *fsh.FSItem
 }
 
 func (s *WalkSuite) SetupSuite() {
@@ -112,20 +23,26 @@ func (s *WalkSuite) SetupSuite() {
 
 	s.rootDir = filepath.Join(os.TempDir(), "walk_suite")
 	s.removeAll()
-	s.rootItem = createRoot(t, s.rootDir,
-		createFile("file_1"),
-		createFile("file_2"),
-		createDir("dir_1",
-			createFile("file_11"),
-			createLink("file_link_2", "file_2"),
-			createLink("file_link_link_2", "file_link_2"),
-			createLink("file_link_no_exists", "file_no_exists"),
-			createLink("file_link_link_no_exists", "file_link_no_exists"),
+	s.rootItem = fsh.CreateRoot(t, s.rootDir,
+		fsh.CreateFile("file_01"),
+		fsh.CreateFile("file_02"),
+		fsh.CreateDir("dir_1",
+			fsh.CreateFile("file_11"),
+			fsh.CreateLink("file_link_01", "file_01"),
+			fsh.CreateLink("file_link_02", "file_02"),
+			fsh.CreateLink("file_link_link_01", "file_link_01"),
+			fsh.CreateLink("file_link_link_02", "file_link_02"),
+			fsh.CreateLink("file_link_no_exists", "file_no_exists"),
+			fsh.CreateLink("file_link_link_no_exists", "file_link_no_exists"),
+			fsh.CreateDir("dir_2",
+				fsh.CreateFile("file_21"),
+				fsh.CreateFile("file_22"),
+			),
 		),
-		createLink("link_dir_1", "dir_1"),
-		createLink("link_link_dir_1", "link_dir_1"),
-		createLink("link_dir_no_exists", "dir_no_exists"),
-		createLink("file_link_link_no_exists", "link_dir_no_exists"),
+		fsh.CreateLink("link_dir_1", "dir_1"),
+		fsh.CreateLink("link_link_dir_1", "link_dir_1"),
+		fsh.CreateLink("link_dir_no_exists", "dir_no_exists"),
+		fsh.CreateLink("file_link_link_no_exists", "link_dir_no_exists"),
 	)
 }
 
@@ -137,37 +54,40 @@ func (s *WalkSuite) removeAll() {
 	require.NoError(s.T(), os.RemoveAll(s.rootDir))
 }
 
-func (s *WalkSuite) checkReadLinkDir(path string, item *createItem) {
+func (s *WalkSuite) checkReadLinkDir(path string, item *fsh.FSItem) {
 	entries, err := readDir(path)
 	s.Require().NoError(err)
 	for _, entry := range entries {
-		child, ok := item.children[entry.Name()]
-		s.Require().True(ok)
-		switch child.itemType {
-		case itemFile:
+		child := item.Get(entry.Name())
+		s.Require().NotNil(child)
+		switch child.ItemType {
+		case fsh.FSItemFile:
 			s.Require().Equal(fs.FileMode(0x0), entry.Type())
-		case itemDir:
+		case fsh.FSItemDir:
 			s.Require().Equal(os.ModeDir, entry.Type())
-		case itemLink:
+		case fsh.FSItemLink:
 			s.Require().Equal(os.ModeSymlink, entry.Type())
 		}
 	}
+
+	s.Require().Equal(item.CountChildren(), len(entries))
 }
 
-func (s *WalkSuite) checkReadDir(item *createItem) {
-	s.checkReadLinkDir(item.fullPath, item)
+func (s *WalkSuite) checkReadDir(item *fsh.FSItem) {
+	s.checkReadLinkDir(item.FullPath, item)
 }
 
 func (s *WalkSuite) TestReadDir() {
 	s.checkReadDir(s.rootItem)
-	s.checkReadDir(s.rootItem.get("dir_1"))
-	s.checkReadLinkDir(s.rootItem.get("link_dir_1").fullPath, s.rootItem.get("dir_1"))
-	s.checkReadLinkDir(s.rootItem.get("link_link_dir_1").fullPath, s.rootItem.get("dir_1"))
+	s.checkReadDir(s.rootItem.Get("dir_1"))
+	s.checkReadDir(s.rootItem.Get("dir_1").Get("dir_2"))
+	s.checkReadLinkDir(s.rootItem.Get("link_dir_1").FullPath, s.rootItem.Get("dir_1"))
+	s.checkReadLinkDir(s.rootItem.Get("link_link_dir_1").FullPath, s.rootItem.Get("dir_1"))
 
-	_, err := readDir(s.rootItem.get("link_dir_no_exists").fullPath)
+	_, err := readDir(s.rootItem.Get("link_dir_no_exists").FullPath)
 	s.Require().Error(err)
 
-	_, err = readDir(s.rootItem.get("file_link_link_no_exists").fullPath)
+	_, err = readDir(s.rootItem.Get("file_link_link_no_exists").FullPath)
 	s.Require().Error(err)
 
 	_, err = readDir("~")
