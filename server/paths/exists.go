@@ -7,7 +7,7 @@ import (
 )
 
 func existsType(path string, targetModeType uint32) (bool, error) {
-	modeType, err := lStatMode(path)
+	modeType, err := lStatMode(ExpandUser(path))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false, nil

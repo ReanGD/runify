@@ -18,6 +18,7 @@ type ExistsSuite struct {
 }
 
 func (s *ExistsSuite) SetupSuite() {
+	Init()
 	s.rootDir = filepath.Join(os.TempDir(), "exists_suite")
 	s.removeAll()
 	s.rootItem = fsh.CreateRoot(s.T(), s.rootDir,
@@ -53,19 +54,19 @@ func (s *ExistsSuite) checkExists(path string, expectedIsDir bool, expectedIsFil
 
 	actual, err = ExistsDir(path)
 	require.NoError(t, err)
-	require.Equal(t, expectedIsDir, actual)
+	require.Equal(t, expectedIsDir, actual, "ExistsDir return wrong value")
 
 	actual, err = ExistsFile(path)
 	require.NoError(t, err)
-	require.Equal(t, expectedIsFile, actual)
+	require.Equal(t, expectedIsFile, actual, "ExistsFile return wrong value")
 
 	actual, err = ExistsSymlink(path)
 	require.NoError(t, err)
-	require.Equal(t, expectedIsSymlink, actual)
+	require.Equal(t, expectedIsSymlink, actual, "ExistsSymlink return wrong value")
 
 	actual, err = Exists(path)
 	require.NoError(t, err)
-	require.Equal(t, expectedIsAny, actual)
+	require.Equal(t, expectedIsAny, actual, "Exists return wrong value")
 }
 
 func (s *ExistsSuite) checkRead(path string, expectedData []byte) {
@@ -205,6 +206,16 @@ func (s *ExistsSuite) TestNoExistsSymlinkToSymlinkFile() {
 
 	s.checkExists(path, expectedIsDir, expectedIsFile, expectedIsSymlink, expectedIsAny)
 	s.checkRead(path, []byte{})
+}
+
+func (s *ExistsSuite) TestHomeDir() {
+	path := "~"
+	expectedIsDir := true
+	expectedIsFile := false
+	expectedIsSymlink := false
+	expectedIsAny := true
+
+	s.checkExists(path, expectedIsDir, expectedIsFile, expectedIsSymlink, expectedIsAny)
 }
 
 func TestExistsSuite(t *testing.T) {

@@ -19,6 +19,7 @@ type WalkSuite struct {
 }
 
 func (s *WalkSuite) SetupSuite() {
+	Init()
 	s.rootDir = filepath.Join(os.TempDir(), "walk_suite")
 	s.removeAll()
 	s.rootItem = fsh.CreateRoot(s.T(), s.rootDir,
@@ -53,43 +54,53 @@ func (s *WalkSuite) removeAll() {
 }
 
 func (s *WalkSuite) checkReadLinkDir(path string, item *fsh.FSItem) {
+	t := s.T()
+
 	entries, err := readDir(path)
-	s.Require().NoError(err)
+	require.NoError(t, err)
 	for _, entry := range entries {
 		child := item.Get(entry.Name())
-		s.Require().NotNil(child)
+		require.NotNil(t, child)
 		switch child.ItemType {
 		case fsh.FSItemFile:
-			s.Require().Equal(fs.FileMode(0x0), entry.Type())
+			require.Equal(t, fs.FileMode(0x0), entry.Type())
 		case fsh.FSItemDir:
-			s.Require().Equal(os.ModeDir, entry.Type())
+			require.Equal(t, os.ModeDir, entry.Type())
 		case fsh.FSItemLink:
-			s.Require().Equal(os.ModeSymlink, entry.Type())
+			require.Equal(t, os.ModeSymlink, entry.Type())
 		}
 	}
 
-	s.Require().Equal(item.CountChildren(), len(entries))
+	require.Equal(t, item.CountChildren(), len(entries))
 }
 
 func (s *WalkSuite) checkReadDir(item *fsh.FSItem) {
 	s.checkReadLinkDir(item.FullPath, item)
 }
 
-func (s *WalkSuite) TestReadDir() {
+func (s *WalkSuite) TestReadExistDirs() {
 	s.checkReadDir(s.rootItem)
 	s.checkReadDir(s.rootItem.Get("dir_1"))
 	s.checkReadDir(s.rootItem.Get("dir_1").Get("dir_2"))
 	s.checkReadLinkDir(s.rootItem.Get("link_dir_1").FullPath, s.rootItem.Get("dir_1"))
 	s.checkReadLinkDir(s.rootItem.Get("link_link_dir_1").FullPath, s.rootItem.Get("dir_1"))
+}
+
+func (s *WalkSuite) TestReadNoExistDirs() {
+	t := s.T()
 
 	_, err := readDir(s.rootItem.Get("link_dir_no_exists").FullPath)
-	s.Require().Error(err)
+	require.Error(t, err)
 
 	_, err = readDir(s.rootItem.Get("file_link_link_no_exists").FullPath)
-	s.Require().Error(err)
+	require.Error(t, err)
+}
 
-	_, err = readDir("~")
-	s.Require().Error(err)
+func (s *WalkSuite) TestReadHomeDirs() {
+	t := s.T()
+
+	_, err := readDir("~")
+	require.Error(t, err)
 }
 
 func TestWalkSuite(t *testing.T) {
