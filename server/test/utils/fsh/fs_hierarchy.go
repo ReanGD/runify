@@ -3,6 +3,7 @@ package fsh
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,8 +22,8 @@ const (
 type FSItem struct {
 	FullPath string
 	ItemName string
-	LinkPath string
 	ItemType FSItemType
+	linkPath string
 	children map[string]*FSItem
 }
 
@@ -58,7 +59,7 @@ func CreateFile(name string) *FSItem {
 func CreateLink(name string, link string) *FSItem {
 	return &FSItem{
 		ItemName: name,
-		LinkPath: link,
+		linkPath: link,
 		ItemType: FSItemLink,
 	}
 }
@@ -77,6 +78,34 @@ func (ci *FSItem) Get(name string) *FSItem {
 	}
 
 	return nil
+}
+
+func (ci *FSItem) getChildrenRecursive(root *FSItem, fullpath string, items map[string]FSItemType) {
+	if ci.ItemType != FSItemLink {
+		items[fullpath] = ci.ItemType
+		for _, item := range ci.children {
+			item.getChildrenRecursive(root, filepath.Join(fullpath, item.ItemName), items)
+		}
+		return
+	}
+
+	it := root
+	for _, name := range strings.Split(ci.linkPath, "/") {
+		it = it.Get(name)
+		if it == nil {
+			items[fullpath] = FSItemFile
+			return
+		}
+	}
+
+	it.getChildrenRecursive(root, fullpath, items)
+}
+
+func (ci *FSItem) GetExistChildrenRecursive(root *FSItem) map[string]FSItemType {
+	items := make(map[string]FSItemType)
+	ci.getChildrenRecursive(root, ci.FullPath, items)
+
+	return items
 }
 
 func (ci *FSItem) CountChildren() int {
@@ -108,7 +137,7 @@ func (ci *FSItem) create(t *testing.T, rootPath string, parentPath string) {
 
 	if ci.ItemType == FSItemLink {
 		ci.FullPath = filepath.Join(parentPath, ci.ItemName)
-		srcPath := filepath.Join(rootPath, ci.LinkPath)
+		srcPath := filepath.Join(rootPath, ci.linkPath)
 		require.NoError(t, os.Symlink(srcPath, ci.FullPath))
 		return
 	}

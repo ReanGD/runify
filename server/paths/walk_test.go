@@ -1,6 +1,7 @@
 package paths
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -39,6 +40,7 @@ func (s *WalkSuite) SetupSuite() {
 			),
 		),
 		fsh.CreateLink("link_dir_1", "dir_1"),
+		fsh.CreateLink("link_dir_2", "dir_2"),
 		fsh.CreateLink("link_link_dir_1", "link_dir_1"),
 		fsh.CreateLink("link_dir_no_exists", "dir_no_exists"),
 		fsh.CreateLink("file_link_link_no_exists", "link_dir_no_exists"),
@@ -78,6 +80,26 @@ func (s *WalkSuite) checkReadDir(item *fsh.FSItem) {
 	s.checkReadLinkDir(item.FullPath, item)
 }
 
+func (s *WalkSuite) checkWalkFiles(startItem *fsh.FSItem) {
+	t := s.T()
+
+	expected := make(map[string]struct{})
+	for fullpath, itemType := range startItem.GetExistChildrenRecursive(s.rootItem) {
+		if itemType == fsh.FSItemFile {
+			expected[fullpath] = struct{}{}
+		}
+	}
+
+	actualCnt := 0
+	WalkFiles(startItem.FullPath, func(path string) {
+		_, ok := expected[path]
+		require.True(t, ok, fmt.Sprintf("not found actual path %s", path))
+		actualCnt++
+	})
+
+	require.Equal(t, len(expected), actualCnt)
+}
+
 func (s *WalkSuite) TestReadExistDirs() {
 	s.checkReadDir(s.rootItem)
 	s.checkReadDir(s.rootItem.Get("dir_1"))
@@ -96,11 +118,17 @@ func (s *WalkSuite) TestReadNoExistDirs() {
 	require.Error(t, err)
 }
 
-func (s *WalkSuite) TestReadHomeDirs() {
+func (s *WalkSuite) TestReadHomeDir() {
 	t := s.T()
 
 	_, err := readDir("~")
 	require.Error(t, err)
+}
+
+func (s *WalkSuite) TestWalkFiles() {
+	s.checkWalkFiles(s.rootItem)
+	s.checkWalkFiles(s.rootItem.Get("dir_1"))
+	s.checkWalkFiles(s.rootItem.Get("dir_1").Get("dir_2"))
 }
 
 func TestWalkSuite(t *testing.T) {
