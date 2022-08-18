@@ -2,7 +2,6 @@ package paths
 
 import (
 	"path/filepath"
-	"strings"
 )
 
 func GetSysTmp() string {
@@ -13,8 +12,17 @@ func GetUserHome() string {
 	return cache.userHome
 }
 
+func GetXDGDataDirs() []string {
+	return cache.xdgDataDirs
+}
+
+func GetXDGAppDirs() []string {
+	return cache.xdgAppDirs
+}
+
 func ExpandUser(path string) string {
-	if strings.HasPrefix(path, "~") {
+	if len(path) >= 1 && path[0] == '~' {
+		// TODO: need perf fix
 		return filepath.Join(cache.userHome, path[1:])
 	}
 
