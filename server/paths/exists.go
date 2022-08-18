@@ -2,11 +2,36 @@ package paths
 
 import (
 	"os"
-	"path/filepath"
 	"syscall"
 )
 
-func existsType(path string, targetModeType uint32) (bool, error) {
+func ExistsDir(path string) (bool, error) {
+	modeType, err := statMode(ExpandUser(path))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return modeType == syscall.S_IFDIR, nil
+}
+
+func ExistsFile(path string) (bool, error) {
+	modeType, err := statMode(ExpandUser(path))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return modeType == syscall.S_IFREG, nil
+}
+
+func ExistsSymlink(path string) (bool, error) {
 	modeType, err := lStatMode(ExpandUser(path))
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -16,46 +41,18 @@ func existsType(path string, targetModeType uint32) (bool, error) {
 		return false, err
 	}
 
-	// is symlink and found not symlink
-	if modeType == syscall.S_IFLNK && modeType != targetModeType {
-		// resolve symlink
-		path, err = filepath.EvalSymlinks(path)
-		if err != nil {
-			if os.IsNotExist(err) {
-				return false, nil
-			}
-
-			return false, err
-		}
-
-		if len(path) == 0 {
-			return false, nil
-		}
-
-		if modeType, err = lStatMode(path); err != nil {
-			if os.IsNotExist(err) {
-				return false, nil
-			}
-
-			return false, err
-		}
-	}
-
-	return modeType == targetModeType || targetModeType == syscall.S_IFMT, nil
-}
-
-func ExistsDir(path string) (bool, error) {
-	return existsType(path, syscall.S_IFDIR)
-}
-
-func ExistsFile(path string) (bool, error) {
-	return existsType(path, syscall.S_IFREG)
-}
-
-func ExistsSymlink(path string) (bool, error) {
-	return existsType(path, syscall.S_IFLNK)
+	return modeType == syscall.S_IFLNK, nil
 }
 
 func Exists(path string) (bool, error) {
-	return existsType(path, syscall.S_IFMT)
+	_, err := statMode(ExpandUser(path))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
 }

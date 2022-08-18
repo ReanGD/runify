@@ -93,7 +93,7 @@ func (ci *FSItem) getChildrenRecursive(root *FSItem, fullpath string, items map[
 	for _, name := range strings.Split(ci.linkPath, "/") {
 		it = it.Get(name)
 		if it == nil {
-			items[fullpath] = FSItemFile
+			// link no exists
 			return
 		}
 	}
