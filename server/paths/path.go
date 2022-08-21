@@ -14,6 +14,18 @@ func GetUserHome() string {
 	return cache.userHome
 }
 
+func GetUserCache() string {
+	return cache.userCache
+}
+
+func GetAppCache() string {
+	return cache.appCache
+}
+
+func GetAppIconCache() string {
+	return cache.appIconCache
+}
+
 func GetXDGDataDirs() []string {
 	return cache.xdgDataDirs
 }
