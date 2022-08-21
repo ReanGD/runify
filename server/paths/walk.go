@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
+	"unsafe"
 
 	"github.com/ReanGD/runify/server/logger"
 )
@@ -16,6 +17,25 @@ const (
 )
 
 type WalkFunc func(path string, mode PathMode)
+
+// func openDir(name string) (*os.File, error) {
+// 	var fd int
+// 	var err error
+// 	for {
+// 		fd, err = syscall.Open(name, syscall.O_CLOEXEC, 0)
+// 		if err != syscall.EINTR {
+// 			break
+// 		}
+// 	}
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	f := os.newFile(uintptr(fd), name, os.kindOpenFile)
+// 	f.appendMode = false
+// 	return f, nil
+// }
 
 func readDir(dirPath string) ([]fs.DirEntry, error) {
 	f, err := os.Open(dirPath)
@@ -31,7 +51,7 @@ func readDir(dirPath string) ([]fs.DirEntry, error) {
 }
 
 // see /usr/lib/go/src/path/filepath/symlink.go
-func resolve(path string, linksWalked int, startPos int) (string, int, bool) {
+func resolve(path string, linksWalked int, startPos int) (string, int, uint32, bool) {
 	volLen := 0
 	if len(path) > 0 && path[0] == runePathSeparator {
 		volLen++
@@ -45,6 +65,8 @@ func resolve(path string, linksWalked int, startPos int) (string, int, bool) {
 		allowDots = false
 	}
 	dest := path[:ind]
+	var err error
+	var modeType uint32
 
 	for start, end := ind, ind; start < len(path); start = end {
 		for start < len(path) && path[start] == runePathSeparator {
@@ -59,7 +81,10 @@ func resolve(path string, linksWalked int, startPos int) (string, int, bool) {
 		if end == start {
 			// No more path components.
 			break
-		} else if path[start:end] == "." {
+		}
+
+		modeType = 0
+		if path[start:end] == "." {
 			// Ignore path component ".".
 			continue
 		} else if path[start:end] == ".." {
@@ -97,32 +122,32 @@ func resolve(path string, linksWalked int, startPos int) (string, int, bool) {
 		dest += path[start:end]
 
 		// Check is symlink
-		modeType, err := lStatMode(dest)
-		if err != nil {
+		if modeType, err = lStatMode(dest); err != nil {
 			if os.IsNotExist(err) {
 				// Path {dest} is not exists, it is not error
 			} else {
 				logger.Write("Failed read file stat for path %s, error: %s", dest, err)
 			}
 
-			return "", linksWalked, false
+			return "", linksWalked, modeType, false
 		}
 
 		if modeType != syscall.S_IFLNK {
 			if modeType != syscall.S_IFDIR && end < len(path) {
 				// found not dir inside path
 				logger.Write("Failed resolve path %s, error: %s", path, syscall.ENOTDIR)
-				return "", linksWalked, false
+				return "", linksWalked, modeType, false
 			}
 
 			continue
 		}
 
 		// Resolve symlink.
+		modeType = 0
 		linksWalked++
 		if linksWalked > linksWalkedMax {
 			logger.Write("Failed resolve path %s, error: too many links", path, syscall.ENOTDIR)
-			return "", linksWalked, false
+			return "", linksWalked, modeType, false
 
 		}
 
@@ -134,16 +159,16 @@ func resolve(path string, linksWalked int, startPos int) (string, int, bool) {
 				logger.Write("Failed read file stat for path %s, error: %s", dest, err)
 			}
 
-			return "", linksWalked, false
+			return "", linksWalked, modeType, false
 		}
 		if len(resolvedPath) == 0 {
 			// Path {resolvedPath} is not exists, it is not error
-			return "", linksWalked, false
+			return "", linksWalked, modeType, false
 		}
 
 		if !allowDots && (resolvedPath == "." || resolvedPath == "..") {
 			logger.Write("Path %s is circle links", dest)
-			return "", linksWalked, false
+			return "", linksWalked, modeType, false
 		}
 		allowDots = true
 
@@ -172,7 +197,30 @@ func resolve(path string, linksWalked int, startPos int) (string, int, bool) {
 		}
 	}
 
-	return filepath.Clean(dest), linksWalked, true
+	if modeType == 0 {
+		if modeType, err = lStatMode(dest); err != nil {
+			logger.Write("Unexpected error for get stat for path %s, error: %s", dest, err)
+			return "", linksWalked, modeType, false
+		}
+	}
+	return filepath.Clean(dest), linksWalked, modeType, true
+}
+
+func join(first string, last string) string {
+	e1Len := len(first)
+	fullLen := e1Len + len(last)
+	if first[e1Len-1] != runePathSeparator && last[0] != runePathSeparator {
+		fullLen++
+	}
+	buf := make([]byte, fullLen)
+	index := copy(buf, first[:])
+	if first[e1Len-1] != runePathSeparator && last[0] != runePathSeparator {
+		buf[index] = byte(runePathSeparator)
+		index++
+	}
+	copy(buf[index:], last[:])
+
+	return *(*string)(unsafe.Pointer(&buf))
 }
 
 func walkDir(linkPath string, realPath string, linksWalked int, fn WalkFunc) {
@@ -183,17 +231,11 @@ func walkDir(linkPath string, realPath string, linksWalked int, fn WalkFunc) {
 	}
 
 	for _, child := range children {
-		childRealPath := filepath.Join(realPath, child.Name())
-		childLinkPath := filepath.Join(linkPath, child.Name())
+		childRealPath := join(realPath, child.Name())
+		childLinkPath := join(linkPath, child.Name())
 		if (child.Type() & os.ModeSymlink) != 0 {
-			resolvedPath, linksWalkedChild, ok := resolve(childRealPath, linksWalked, len(realPath))
+			resolvedPath, linksWalkedChild, modeType, ok := resolve(childRealPath, linksWalked, len(realPath))
 			if !ok {
-				continue
-			}
-
-			modeType, err := lStatMode(resolvedPath)
-			if err != nil {
-				logger.Write("Unexpected error for get stat for path %s, error: %s", resolvedPath, err)
 				continue
 			}
 
@@ -220,7 +262,7 @@ func Walk(dirPath string, fn WalkFunc) {
 	modeType, err := lStatMode(fullDirPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			// // Path {fullDirPath} is not exists, it is not error
+			// Path {fullDirPath} is not exists, it is not error
 		} else {
 			logger.Write("Failed read file stat for path %s, error: %s", fullDirPath, err)
 		}
@@ -229,14 +271,8 @@ func Walk(dirPath string, fn WalkFunc) {
 	}
 
 	if modeType == syscall.S_IFLNK {
-		resolvedPath, linksWalked, ok := resolve(fullDirPath, 0, 0)
+		resolvedPath, linksWalked, modeType, ok := resolve(fullDirPath, 0, 0)
 		if !ok {
-			return
-		}
-
-		modeType, err := lStatMode(resolvedPath)
-		if err != nil {
-			logger.Write("Unexpected error for get stat for path %s, error: %s", resolvedPath, err)
 			return
 		}
 
