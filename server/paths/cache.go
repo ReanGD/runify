@@ -2,15 +2,19 @@ package paths
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 	"strings"
+
+	"github.com/ReanGD/runify/server/gtk"
 )
 
 type cachePaths struct {
-	sysTmp      string
-	userHome    string
-	xdgDataDirs []string
-	xdgAppDirs  []string
+	defaultIconTheme *gtk.IconTheme
+	sysTmp           string
+	userHome         string
+	xdgDataDirs      []string
+	xdgAppDirs       []string
 }
 
 var (
@@ -57,6 +61,13 @@ func getXDGAppDirs(xdgDataDirs []string) []string {
 
 func Init() error {
 	var ok bool
+	var err error
+
+	gtk.Init()
+	cache.defaultIconTheme, err = gtk.IconThemeGetDefault()
+	if err != nil {
+		return fmt.Errorf("Getting default theme for icons ended with error: %s", err)
+	}
 
 	if cache.sysTmp, ok = getenv("TMPDIR"); !ok {
 		cache.sysTmp = "/tmp"

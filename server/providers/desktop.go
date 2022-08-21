@@ -3,53 +3,18 @@ package providers
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
 
-	"github.com/ReanGD/runify/server/files"
 	"github.com/ReanGD/runify/server/logger"
+	"github.com/ReanGD/runify/server/paths"
 	"github.com/rkoesters/xdg/desktop"
 )
 
-func getXDGDataDirs() []string {
-	var xdgDataDirs []string
-
-	if xdgDataHome, ok := os.LookupEnv("XDG_DATA_HOME"); ok {
-		xdgDataDirs = append(xdgDataDirs, xdgDataHome)
-	} else {
-		xdgDataDirs = append(xdgDataDirs, path.Join("~", ".local", "share"))
-	}
-
-	if str, ok := os.LookupEnv("XDG_DATA_DIRS"); ok {
-		xdgDataDirs = append(xdgDataDirs, strings.Split(str, ":")...)
-	} else {
-		xdgDataDirs = append(xdgDataDirs, "/usr/local/share", "/usr/share")
-	}
-
-	return xdgDataDirs
-}
-
-func getXDGAppDirs() []string {
-	xdgDataDirs := getXDGDataDirs()
-	xdgAppDirs := []string{}
-	for _, dirname := range xdgDataDirs {
-		fullpath := path.Join(dirname, "applications")
-		if _, err := os.Lstat(fullpath); os.IsNotExist(err) {
-			continue
-		}
-
-		xdgAppDirs = append(xdgAppDirs, fullpath)
-	}
-
-	return xdgAppDirs
-}
-
-func walkXDGDesktopEntries(iconResolver *files.IconResolver, fn func(fullpath string, entry *desktop.Entry)) {
+func walkXDGDesktopEntries(fn func(fullpath string, entry *desktop.Entry)) {
 	exists := make(map[string]struct{})
-	for _, dirname := range getXDGAppDirs() {
-		files.Walk(dirname, func(fullpath string) {
-			if filepath.Ext(fullpath) != ".desktop" {
+	for _, dirname := range paths.GetXDGAppDirs() {
+		paths.Walk(dirname, func(fullpath string, mode paths.PathMode) {
+			if mode != paths.ModeRegFile || filepath.Ext(fullpath) != ".desktop" {
 				return
 			}
 
@@ -75,16 +40,16 @@ func walkXDGDesktopEntries(iconResolver *files.IconResolver, fn func(fullpath st
 			if entry.NoDisplay || entry.Hidden {
 				return
 			}
-			entry.Icon = iconResolver.Resolve(entry.Icon, 48)
+			entry.Icon = paths.GetIconPath(entry.Icon, 48)
 
 			fn(fullpath, entry)
 		})
 	}
 }
 
-func Get(iconResolver *files.IconResolver) {
+func Get() {
 	cnt := 0
-	walkXDGDesktopEntries(iconResolver, func(fullpath string, entry *desktop.Entry) {
+	walkXDGDesktopEntries(func(fullpath string, entry *desktop.Entry) {
 		if filepath.Ext(entry.Icon) == ".svg" {
 			cnt++
 		}
