@@ -8,14 +8,14 @@ import (
 type PathMode uint8
 
 const (
-	ModeNamedPipe   PathMode = 1
-	ModeCharDevice  PathMode = 2 // character-oriented device file
-	ModeBlockDevice PathMode = 3 // block-oriented device file
-	ModeDir         PathMode = 4
-	ModeRegFile     PathMode = 5
-	ModeSymlink     PathMode = 6
-	ModeSocket      PathMode = 7
-	ModeUnknown     PathMode = 8
+	ModeUnknown     PathMode = 0
+	ModeNamedPipe   PathMode = 1 << 0
+	ModeCharDevice  PathMode = 1 << 1 // character-oriented device file
+	ModeBlockDevice PathMode = 1 << 2 // block-oriented device file
+	ModeDir         PathMode = 1 << 3
+	ModeRegFile     PathMode = 1 << 4
+	ModeSymlink     PathMode = 1 << 5
+	ModeSocket      PathMode = 1 << 6
 )
 
 func dirEntryModeToPathMode(mode fs.FileMode) PathMode {

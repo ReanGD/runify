@@ -30,17 +30,19 @@ func (s *WalkSuite) SetupSuite() {
 			fsh.CreateFile("file_11"),
 			fsh.CreateLink("file_link_01", "file_01"),
 			fsh.CreateLink("file_link_02", "file_02"),
-			fsh.CreateLink("file_link_link_01", "file_link_01"),
-			fsh.CreateLink("file_link_link_02", "file_link_02"),
+			fsh.CreateLink("file_link_11", "./file_11"),
+			fsh.CreateLink("file_link_link_01", "dir_1/file_link_01"),
+			fsh.CreateLink("file_link_link_02", "dir_1/file_link_02"),
 			fsh.CreateLink("file_link_no_exists", "file_no_exists"),
-			fsh.CreateLink("file_link_link_no_exists", "file_link_no_exists"),
+			fsh.CreateLink("file_link_no_exists_relative", "./file_no_exists"),
+			fsh.CreateLink("file_link_link_no_exists", "dir_1/file_link_no_exists"),
 			fsh.CreateDir("dir_2",
 				fsh.CreateFile("file_21"),
 				fsh.CreateFile("file_22"),
 			),
 		),
 		fsh.CreateLink("link_dir_1", "dir_1"),
-		fsh.CreateLink("link_dir_2", "dir_2"),
+		fsh.CreateLink("link_dir_2", "dir_1/dir_2"),
 		fsh.CreateLink("link_link_dir_1", "link_dir_1"),
 		fsh.CreateLink("link_dir_no_exists", "dir_no_exists"),
 		fsh.CreateLink("file_link_link_no_exists", "link_dir_no_exists"),
@@ -83,17 +85,11 @@ func (s *WalkSuite) checkReadDir(item *fsh.FSItem) {
 func (s *WalkSuite) checkWalkFiles(startItem *fsh.FSItem) {
 	t := s.T()
 
-	expected := make(map[string]struct{})
-	for fullpath, itemType := range startItem.GetExistChildrenRecursive(s.rootItem) {
-		if itemType == fsh.FSItemFile {
-			expected[fullpath] = struct{}{}
-		}
-	}
-
 	actualCnt := 0
-	WalkFiles(startItem.FullPath, func(path string) {
+	expected := startItem.GetExistChildrenRecursive(s.rootItem)
+	Walk(startItem.FullPath, func(path string, mode PathMode) {
 		_, ok := expected[path]
-		require.True(t, ok, fmt.Sprintf("not found actual path %s", path))
+		require.True(t, ok, fmt.Sprintf("not found actual path %s inside expected", path))
 		actualCnt++
 	})
 

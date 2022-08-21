@@ -80,17 +80,23 @@ func (ci *FSItem) Get(name string) *FSItem {
 	return nil
 }
 
-func (ci *FSItem) getChildrenRecursive(root *FSItem, fullpath string, items map[string]FSItemType) {
+func (ci *FSItem) getChildrenRecursive(root *FSItem, parent *FSItem, fullpath string, items map[string]FSItemType) {
 	if ci.ItemType != FSItemLink {
 		items[fullpath] = ci.ItemType
 		for _, item := range ci.children {
-			item.getChildrenRecursive(root, filepath.Join(fullpath, item.ItemName), items)
+			item.getChildrenRecursive(root, ci, filepath.Join(fullpath, item.ItemName), items)
 		}
 		return
 	}
 
 	it := root
-	for _, name := range strings.Split(ci.linkPath, "/") {
+	linkPath := ci.linkPath
+	if strings.HasPrefix(ci.linkPath, "./") {
+		it = parent
+		linkPath = ci.linkPath[2:]
+	}
+
+	for _, name := range strings.Split(linkPath, "/") {
 		it = it.Get(name)
 		if it == nil {
 			// link no exists
@@ -98,12 +104,12 @@ func (ci *FSItem) getChildrenRecursive(root *FSItem, fullpath string, items map[
 		}
 	}
 
-	it.getChildrenRecursive(root, fullpath, items)
+	it.getChildrenRecursive(root, parent, fullpath, items)
 }
 
 func (ci *FSItem) GetExistChildrenRecursive(root *FSItem) map[string]FSItemType {
 	items := make(map[string]FSItemType)
-	ci.getChildrenRecursive(root, ci.FullPath, items)
+	ci.getChildrenRecursive(root, ci, ci.FullPath, items)
 
 	return items
 }
@@ -137,7 +143,11 @@ func (ci *FSItem) create(t *testing.T, rootPath string, parentPath string) {
 
 	if ci.ItemType == FSItemLink {
 		ci.FullPath = filepath.Join(parentPath, ci.ItemName)
-		srcPath := filepath.Join(rootPath, ci.linkPath)
+
+		srcPath := ci.linkPath
+		if !strings.HasPrefix(ci.linkPath, "./") {
+			srcPath = filepath.Join(rootPath, ci.linkPath)
+		}
 		require.NoError(t, os.Symlink(srcPath, ci.FullPath))
 		return
 	}
