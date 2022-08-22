@@ -40,7 +40,7 @@ func walkXDGDesktopEntries(fn func(fullpath string, entry *desktop.Entry)) {
 			if entry.NoDisplay || entry.Hidden {
 				return
 			}
-			entry.Icon = paths.GetIconPath(entry.Icon, 48)
+			entry.Icon = paths.GetNonSvgIconPath(entry.Icon, 48)
 
 			fn(fullpath, entry)
 		})
