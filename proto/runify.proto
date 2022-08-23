@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package runify;
+
+option go_package = "./pb";
+
+message Empty {
+
+}
+
+message ActionID {
+	uint32 actionID = 1;
+	uint64 commandID = 2;
+}
+
+message Action {
+	uint32 id = 1;
+	string name = 2;
+}
+
+message Actions {
+	repeated Action data = 1;
+}
+
+message CommandID {
+	uint64 id = 1;
+}
+
+message Command {
+	uint64 id = 1;
+	string name = 2;
+	string icon = 3;
+}
+
+message Commands {
+	repeated Command data = 1;
+}
+
+message Form {
+}
+
+message Message {
+	string text = 1;
+}
+
+enum WindowState {
+	SHOW = 0;
+	HIDE = 1;
+}
+
+message Result {
+	oneof payload {
+		Commands commands = 1;
+		Form form = 2;
+		Message message = 3;
+		WindowState winState = 4;
+	}
+}
+
+service Runify {
+	rpc GetRoot(Empty) returns (Commands) {}
+	rpc GetActions(CommandID) returns (Actions) {}
+	rpc Execute(ActionID) returns (Result) {}
+}
