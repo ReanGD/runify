@@ -14,57 +14,53 @@ import (
 	"go.uber.org/zap"
 )
 
-type dataProviderHandler interface {
-	getName() string
-	onInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error
-	onStart()
-	getRoot() []*pb.Command
-}
+const moduleName = "provider"
 
-type dataProvider struct {
-	providerID uint64
-	handler    dataProviderHandler
+type Provider struct {
+	handler *providerHandler
 
 	module.Module
 }
 
-func newDataProvider(providerID uint64, handler dataProviderHandler) *dataProvider {
-	return &dataProvider{
-		providerID: providerID,
-		handler:    handler,
+func New() *Provider {
+	return &Provider{
+		handler: newProviderHandler(),
 	}
 }
 
-func (p *dataProvider) onInit(cfg *config.Config, rootProviderLogger *zap.Logger) <-chan error {
+func (p *Provider) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
-	go func() {
-		channelLen := cfg.GetConfiguration().Provider.SubModuleChannelLen
-		p.InitSubmodule(rootProviderLogger, p.handler.getName(), channelLen)
 
-		ch <- p.handler.onInit(cfg, p.ModuleLogger, p.providerID)
+	go func() {
+		channelLen := cfg.GetConfiguration().Provider.ChannelLen
+		p.Init(rootLogger, moduleName, channelLen)
+
+		ch <- p.handler.onInit(cfg, p.ModuleLogger)
 	}()
 
 	return ch
 }
 
-func (p *dataProvider) onStart(ctx context.Context, wg *sync.WaitGroup, errCh chan<- error) {
+func (p *Provider) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 	wg.Add(1)
+	ch := make(chan error, 1)
 	go func() {
-		p.handler.onStart()
+		p.ModuleLogger.Info("Start")
+		errCh := p.handler.onStart(ctx, wg)
 
 		for {
-			if isFinish, err := p.safeRequestLoop(ctx); isFinish {
-				if err != nil {
-					errCh <- err
-				}
+			if isFinish, err := p.safeRequestLoop(ctx, errCh); isFinish {
+				ch <- err
 				wg.Done()
 				return
 			}
 		}
 	}()
+
+	return ch
 }
 
-func (p *dataProvider) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultErr error) {
+func (p *Provider) safeRequestLoop(ctx context.Context, errCh <-chan error) (resultIsFinish bool, resultErr error) {
 	var request interface{}
 	defer func() {
 		if recoverResult := recover(); recoverResult != nil {
@@ -79,12 +75,16 @@ func (p *dataProvider) safeRequestLoop(ctx context.Context) (resultIsFinish bool
 
 	messageCh := p.GetReadChannel()
 	done := ctx.Done()
+
 	for {
 		request = nil
 		select {
 		case <-done:
 			resultIsFinish = true
 			resultErr = nil
+			return
+		case resultErr = <-errCh:
+			resultIsFinish = true
 			return
 		case request = <-messageCh:
 			p.MessageWasRead()
@@ -95,7 +95,7 @@ func (p *dataProvider) safeRequestLoop(ctx context.Context) (resultIsFinish bool
 	}
 }
 
-func (p *dataProvider) onRequest(request interface{}) (bool, error) {
+func (p *Provider) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *getRootCmd:
 		r.result <- p.handler.getRoot()
@@ -111,7 +111,7 @@ func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (p *dataProvider) onRequestDefault(request interface{}, reason string) (bool, error) {
+func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *getRootCmd:
 		r.result <- []*pb.Command{}
@@ -132,8 +132,11 @@ func (p *dataProvider) onRequestDefault(request interface{}, reason string) (boo
 	return false, nil
 }
 
-func (p *dataProvider) getRoot(result chan<- []*pb.Command) {
+func (p *Provider) GetRoot() <-chan []*pb.Command {
+	ch := make(chan []*pb.Command, 1)
 	p.AddToChannel(&getRootCmd{
-		result: result,
+		result: ch,
 	})
+
+	return ch
 }

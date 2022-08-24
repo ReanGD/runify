@@ -23,8 +23,8 @@ type desktopEntry struct {
 	moduleLogger *zap.Logger
 }
 
-func newDesktopEntry() desktopEntry {
-	return desktopEntry{
+func newDesktopEntry() *desktopEntry {
+	return &desktopEntry{
 		providerID:   0,
 		entries:      []*entry{},
 		commands:     []*pb.Command{},
