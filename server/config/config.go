@@ -11,7 +11,9 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var logModule = zap.String("module", "config")
+const ModuleName = "config"
+
+var logModule = zap.String("module", ModuleName)
 
 type logItem struct {
 	lvl zapcore.Level

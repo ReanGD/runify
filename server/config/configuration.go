@@ -11,13 +11,15 @@ type BuildCfg struct {
 	BuildDateTime string
 }
 
-type ServerCfg struct {
-	GrpcUnixAddr string
+type RpcCfg struct {
+	ChannelLen uint32
+	Address    string
 }
 
-func (c ServerCfg) setDefault(vp *viper.Viper) {
-	vp.SetDefault("Server", map[string]interface{}{
-		"GrpcUnixAddr": "/tmp/runify.socket",
+func (c RpcCfg) setDefault(vp *viper.Viper) {
+	vp.SetDefault("Rpc", map[string]interface{}{
+		"ChannelLen": 100,
+		"Address":    "/tmp/runify.socket",
 	})
 }
 
@@ -82,7 +84,7 @@ func (c LoggerCfg) setDefault(vp *viper.Viper) {
 		"LevelStacktrace":           "error",
 		"AddCallerInfo":             false,
 		"Format":                    "plain",
-		"Output":                    "server.log",
+		"Output":                    "runify.log",
 		"MaxSizeMb":                 100,
 		"MaxAgeDays":                3,
 		"MaxBackups":                0,
@@ -93,7 +95,7 @@ func (c LoggerCfg) setDefault(vp *viper.Viper) {
 }
 
 type ConfigurationSaved struct {
-	Server   ServerCfg
+	Rpc      RpcCfg
 	Provider ProviderCfg
 	Logger   LoggerCfg
 }
@@ -111,7 +113,7 @@ func newConfiguration(buildCfg *BuildCfg) *Configuration {
 }
 
 func (c *Configuration) setDefault(vp *viper.Viper) {
-	c.Server.setDefault(vp)
+	c.Rpc.setDefault(vp)
 	c.Provider.setDefault(vp)
 	c.Logger.setDefault(vp)
 }
