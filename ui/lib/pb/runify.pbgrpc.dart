@@ -18,13 +18,14 @@ class RunifyClient extends $grpc.Client {
       '/runify.Runify/GetRoot',
       ($0.Empty value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $0.Commands.fromBuffer(value));
-  static final _$getActions = $grpc.ClientMethod<$0.CommandID, $0.Actions>(
-      '/runify.Runify/GetActions',
-      ($0.CommandID value) => value.writeToBuffer(),
-      ($core.List<$core.int> value) => $0.Actions.fromBuffer(value));
-  static final _$execute = $grpc.ClientMethod<$0.ActionID, $0.Result>(
+  static final _$getActions =
+      $grpc.ClientMethod<$0.SelectedCommand, $0.Actions>(
+          '/runify.Runify/GetActions',
+          ($0.SelectedCommand value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $0.Actions.fromBuffer(value));
+  static final _$execute = $grpc.ClientMethod<$0.SelectedAction, $0.Result>(
       '/runify.Runify/Execute',
-      ($0.ActionID value) => value.writeToBuffer(),
+      ($0.SelectedAction value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $0.Result.fromBuffer(value));
 
   RunifyClient($grpc.ClientChannel channel,
@@ -37,12 +38,12 @@ class RunifyClient extends $grpc.Client {
     return $createUnaryCall(_$getRoot, request, options: options);
   }
 
-  $grpc.ResponseFuture<$0.Actions> getActions($0.CommandID request,
+  $grpc.ResponseFuture<$0.Actions> getActions($0.SelectedCommand request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getActions, request, options: options);
   }
 
-  $grpc.ResponseFuture<$0.Result> execute($0.ActionID request,
+  $grpc.ResponseFuture<$0.Result> execute($0.SelectedAction request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$execute, request, options: options);
   }
@@ -59,19 +60,19 @@ abstract class RunifyServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($0.Commands value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.CommandID, $0.Actions>(
+    $addMethod($grpc.ServiceMethod<$0.SelectedCommand, $0.Actions>(
         'GetActions',
         getActions_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.CommandID.fromBuffer(value),
+        ($core.List<$core.int> value) => $0.SelectedCommand.fromBuffer(value),
         ($0.Actions value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.ActionID, $0.Result>(
+    $addMethod($grpc.ServiceMethod<$0.SelectedAction, $0.Result>(
         'Execute',
         execute_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.ActionID.fromBuffer(value),
+        ($core.List<$core.int> value) => $0.SelectedAction.fromBuffer(value),
         ($0.Result value) => value.writeToBuffer()));
   }
 
@@ -81,17 +82,18 @@ abstract class RunifyServiceBase extends $grpc.Service {
   }
 
   $async.Future<$0.Actions> getActions_Pre(
-      $grpc.ServiceCall call, $async.Future<$0.CommandID> request) async {
+      $grpc.ServiceCall call, $async.Future<$0.SelectedCommand> request) async {
     return getActions(call, await request);
   }
 
   $async.Future<$0.Result> execute_Pre(
-      $grpc.ServiceCall call, $async.Future<$0.ActionID> request) async {
+      $grpc.ServiceCall call, $async.Future<$0.SelectedAction> request) async {
     return execute(call, await request);
   }
 
   $async.Future<$0.Commands> getRoot($grpc.ServiceCall call, $0.Empty request);
   $async.Future<$0.Actions> getActions(
-      $grpc.ServiceCall call, $0.CommandID request);
-  $async.Future<$0.Result> execute($grpc.ServiceCall call, $0.ActionID request);
+      $grpc.ServiceCall call, $0.SelectedCommand request);
+  $async.Future<$0.Result> execute(
+      $grpc.ServiceCall call, $0.SelectedAction request);
 }

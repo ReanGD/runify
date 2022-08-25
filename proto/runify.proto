@@ -8,9 +8,13 @@ message Empty {
 
 }
 
-message ActionID {
+message SelectedAction {
 	uint32 actionID = 1;
 	uint64 commandID = 2;
+}
+
+message SelectedCommand {
+	uint64 commandID = 1;
 }
 
 message Action {
@@ -20,10 +24,6 @@ message Action {
 
 message Actions {
 	repeated Action data = 1;
-}
-
-message CommandID {
-	uint64 id = 1;
 }
 
 message Command {
@@ -59,6 +59,6 @@ message Result {
 
 service Runify {
 	rpc GetRoot(Empty) returns (Commands) {}
-	rpc GetActions(CommandID) returns (Actions) {}
-	rpc Execute(ActionID) returns (Result) {}
+	rpc GetActions(SelectedCommand) returns (Actions) {}
+	rpc Execute(SelectedAction) returns (Result) {}
 }

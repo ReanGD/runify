@@ -23,8 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RunifyClient interface {
 	GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Commands, error)
-	GetActions(ctx context.Context, in *CommandID, opts ...grpc.CallOption) (*Actions, error)
-	Execute(ctx context.Context, in *ActionID, opts ...grpc.CallOption) (*Result, error)
+	GetActions(ctx context.Context, in *SelectedCommand, opts ...grpc.CallOption) (*Actions, error)
+	Execute(ctx context.Context, in *SelectedAction, opts ...grpc.CallOption) (*Result, error)
 }
 
 type runifyClient struct {
@@ -44,7 +44,7 @@ func (c *runifyClient) GetRoot(ctx context.Context, in *Empty, opts ...grpc.Call
 	return out, nil
 }
 
-func (c *runifyClient) GetActions(ctx context.Context, in *CommandID, opts ...grpc.CallOption) (*Actions, error) {
+func (c *runifyClient) GetActions(ctx context.Context, in *SelectedCommand, opts ...grpc.CallOption) (*Actions, error) {
 	out := new(Actions)
 	err := c.cc.Invoke(ctx, "/runify.Runify/GetActions", in, out, opts...)
 	if err != nil {
@@ -53,7 +53,7 @@ func (c *runifyClient) GetActions(ctx context.Context, in *CommandID, opts ...gr
 	return out, nil
 }
 
-func (c *runifyClient) Execute(ctx context.Context, in *ActionID, opts ...grpc.CallOption) (*Result, error) {
+func (c *runifyClient) Execute(ctx context.Context, in *SelectedAction, opts ...grpc.CallOption) (*Result, error) {
 	out := new(Result)
 	err := c.cc.Invoke(ctx, "/runify.Runify/Execute", in, out, opts...)
 	if err != nil {
@@ -67,8 +67,8 @@ func (c *runifyClient) Execute(ctx context.Context, in *ActionID, opts ...grpc.C
 // for forward compatibility
 type RunifyServer interface {
 	GetRoot(context.Context, *Empty) (*Commands, error)
-	GetActions(context.Context, *CommandID) (*Actions, error)
-	Execute(context.Context, *ActionID) (*Result, error)
+	GetActions(context.Context, *SelectedCommand) (*Actions, error)
+	Execute(context.Context, *SelectedAction) (*Result, error)
 	mustEmbedUnimplementedRunifyServer()
 }
 
@@ -79,10 +79,10 @@ type UnimplementedRunifyServer struct {
 func (UnimplementedRunifyServer) GetRoot(context.Context, *Empty) (*Commands, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoot not implemented")
 }
-func (UnimplementedRunifyServer) GetActions(context.Context, *CommandID) (*Actions, error) {
+func (UnimplementedRunifyServer) GetActions(context.Context, *SelectedCommand) (*Actions, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetActions not implemented")
 }
-func (UnimplementedRunifyServer) Execute(context.Context, *ActionID) (*Result, error) {
+func (UnimplementedRunifyServer) Execute(context.Context, *SelectedAction) (*Result, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
 }
 func (UnimplementedRunifyServer) mustEmbedUnimplementedRunifyServer() {}
@@ -117,7 +117,7 @@ func _Runify_GetRoot_Handler(srv interface{}, ctx context.Context, dec func(inte
 }
 
 func _Runify_GetActions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CommandID)
+	in := new(SelectedCommand)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -129,13 +129,13 @@ func _Runify_GetActions_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/runify.Runify/GetActions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunifyServer).GetActions(ctx, req.(*CommandID))
+		return srv.(RunifyServer).GetActions(ctx, req.(*SelectedCommand))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Runify_Execute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ActionID)
+	in := new(SelectedAction)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func _Runify_Execute_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: "/runify.Runify/Execute",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunifyServer).Execute(ctx, req.(*ActionID))
+		return srv.(RunifyServer).Execute(ctx, req.(*SelectedAction))
 	}
 	return interceptor(ctx, in, info, handler)
 }

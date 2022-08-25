@@ -43,15 +43,15 @@ class Empty extends $pb.GeneratedMessage {
   static Empty? _defaultInstance;
 }
 
-class ActionID extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ActionID', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+class SelectedAction extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SelectedAction', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'actionID', $pb.PbFieldType.OU3, protoName: 'actionID')
     ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'commandID', $pb.PbFieldType.OU6, protoName: 'commandID', defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
-  ActionID._() : super();
-  factory ActionID({
+  SelectedAction._() : super();
+  factory SelectedAction({
     $core.int? actionID,
     $fixnum.Int64? commandID,
   }) {
@@ -64,26 +64,26 @@ class ActionID extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory ActionID.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ActionID.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory SelectedAction.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SelectedAction.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  ActionID clone() => ActionID()..mergeFromMessage(this);
+  SelectedAction clone() => SelectedAction()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ActionID copyWith(void Function(ActionID) updates) => super.copyWith((message) => updates(message as ActionID)) as ActionID; // ignore: deprecated_member_use
+  SelectedAction copyWith(void Function(SelectedAction) updates) => super.copyWith((message) => updates(message as SelectedAction)) as SelectedAction; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static ActionID create() => ActionID._();
-  ActionID createEmptyInstance() => create();
-  static $pb.PbList<ActionID> createRepeated() => $pb.PbList<ActionID>();
+  static SelectedAction create() => SelectedAction._();
+  SelectedAction createEmptyInstance() => create();
+  static $pb.PbList<SelectedAction> createRepeated() => $pb.PbList<SelectedAction>();
   @$core.pragma('dart2js:noInline')
-  static ActionID getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ActionID>(create);
-  static ActionID? _defaultInstance;
+  static SelectedAction getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SelectedAction>(create);
+  static SelectedAction? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.int get actionID => $_getIZ(0);
@@ -102,6 +102,53 @@ class ActionID extends $pb.GeneratedMessage {
   $core.bool hasCommandID() => $_has(1);
   @$pb.TagNumber(2)
   void clearCommandID() => clearField(2);
+}
+
+class SelectedCommand extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SelectedCommand', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'commandID', $pb.PbFieldType.OU6, protoName: 'commandID', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false
+  ;
+
+  SelectedCommand._() : super();
+  factory SelectedCommand({
+    $fixnum.Int64? commandID,
+  }) {
+    final _result = create();
+    if (commandID != null) {
+      _result.commandID = commandID;
+    }
+    return _result;
+  }
+  factory SelectedCommand.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SelectedCommand.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SelectedCommand clone() => SelectedCommand()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SelectedCommand copyWith(void Function(SelectedCommand) updates) => super.copyWith((message) => updates(message as SelectedCommand)) as SelectedCommand; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SelectedCommand create() => SelectedCommand._();
+  SelectedCommand createEmptyInstance() => create();
+  static $pb.PbList<SelectedCommand> createRepeated() => $pb.PbList<SelectedCommand>();
+  @$core.pragma('dart2js:noInline')
+  static SelectedCommand getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SelectedCommand>(create);
+  static SelectedCommand? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get commandID => $_getI64(0);
+  @$pb.TagNumber(1)
+  set commandID($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCommandID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCommandID() => clearField(1);
 }
 
 class Action extends $pb.GeneratedMessage {
@@ -204,53 +251,6 @@ class Actions extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $core.List<Action> get data => $_getList(0);
-}
-
-class CommandID extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CommandID', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..hasRequiredFields = false
-  ;
-
-  CommandID._() : super();
-  factory CommandID({
-    $fixnum.Int64? id,
-  }) {
-    final _result = create();
-    if (id != null) {
-      _result.id = id;
-    }
-    return _result;
-  }
-  factory CommandID.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CommandID.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  CommandID clone() => CommandID()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CommandID copyWith(void Function(CommandID) updates) => super.copyWith((message) => updates(message as CommandID)) as CommandID; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static CommandID create() => CommandID._();
-  CommandID createEmptyInstance() => create();
-  static $pb.PbList<CommandID> createRepeated() => $pb.PbList<CommandID>();
-  @$core.pragma('dart2js:noInline')
-  static CommandID getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CommandID>(create);
-  static CommandID? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $fixnum.Int64 get id => $_getI64(0);
-  @$pb.TagNumber(1)
-  set id($fixnum.Int64 v) { $_setInt64(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearId() => clearField(1);
 }
 
 class Command extends $pb.GeneratedMessage {

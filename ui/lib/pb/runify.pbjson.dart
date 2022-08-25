@@ -26,17 +26,27 @@ const Empty$json = const {
 
 /// Descriptor for `Empty`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List emptyDescriptor = $convert.base64Decode('CgVFbXB0eQ==');
-@$core.Deprecated('Use actionIDDescriptor instead')
-const ActionID$json = const {
-  '1': 'ActionID',
+@$core.Deprecated('Use selectedActionDescriptor instead')
+const SelectedAction$json = const {
+  '1': 'SelectedAction',
   '2': const [
     const {'1': 'actionID', '3': 1, '4': 1, '5': 13, '10': 'actionID'},
     const {'1': 'commandID', '3': 2, '4': 1, '5': 4, '10': 'commandID'},
   ],
 };
 
-/// Descriptor for `ActionID`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List actionIDDescriptor = $convert.base64Decode('CghBY3Rpb25JRBIaCghhY3Rpb25JRBgBIAEoDVIIYWN0aW9uSUQSHAoJY29tbWFuZElEGAIgASgEUgljb21tYW5kSUQ=');
+/// Descriptor for `SelectedAction`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List selectedActionDescriptor = $convert.base64Decode('Cg5TZWxlY3RlZEFjdGlvbhIaCghhY3Rpb25JRBgBIAEoDVIIYWN0aW9uSUQSHAoJY29tbWFuZElEGAIgASgEUgljb21tYW5kSUQ=');
+@$core.Deprecated('Use selectedCommandDescriptor instead')
+const SelectedCommand$json = const {
+  '1': 'SelectedCommand',
+  '2': const [
+    const {'1': 'commandID', '3': 1, '4': 1, '5': 4, '10': 'commandID'},
+  ],
+};
+
+/// Descriptor for `SelectedCommand`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List selectedCommandDescriptor = $convert.base64Decode('Cg9TZWxlY3RlZENvbW1hbmQSHAoJY29tbWFuZElEGAEgASgEUgljb21tYW5kSUQ=');
 @$core.Deprecated('Use actionDescriptor instead')
 const Action$json = const {
   '1': 'Action',
@@ -58,16 +68,6 @@ const Actions$json = const {
 
 /// Descriptor for `Actions`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List actionsDescriptor = $convert.base64Decode('CgdBY3Rpb25zEiIKBGRhdGEYASADKAsyDi5ydW5pZnkuQWN0aW9uUgRkYXRh');
-@$core.Deprecated('Use commandIDDescriptor instead')
-const CommandID$json = const {
-  '1': 'CommandID',
-  '2': const [
-    const {'1': 'id', '3': 1, '4': 1, '5': 4, '10': 'id'},
-  ],
-};
-
-/// Descriptor for `CommandID`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List commandIDDescriptor = $convert.base64Decode('CglDb21tYW5kSUQSDgoCaWQYASABKARSAmlk');
 @$core.Deprecated('Use commandDescriptor instead')
 const Command$json = const {
   '1': 'Command',
