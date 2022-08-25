@@ -36,6 +36,15 @@ func lStatMode(path string) (uint32, error) {
 	return stat.Mode & syscall.S_IFMT, err
 }
 
+func LStatMode(path string) (PathMode, error) {
+	modeType, err := lStatMode(ExpandUser(path))
+	if err == nil {
+		return statModeToPathMode(modeType), nil
+	}
+
+	return ModeUnknown, err
+}
+
 func statMode(path string) (uint32, error) {
 	var err error
 	var stat syscall.Stat_t

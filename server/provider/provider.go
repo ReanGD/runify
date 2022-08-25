@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const moduleName = "provider"
+const ModuleName = "provider"
 
 type Provider struct {
 	handler *providerHandler
@@ -33,7 +33,7 @@ func (p *Provider) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan err
 
 	go func() {
 		channelLen := cfg.Get().Provider.ChannelLen
-		p.Init(rootLogger, moduleName, channelLen)
+		p.Init(rootLogger, ModuleName, channelLen)
 
 		ch <- p.handler.onInit(cfg, p.ModuleLogger)
 	}()
@@ -45,8 +45,8 @@ func (p *Provider) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error
 	wg.Add(1)
 	ch := make(chan error, 1)
 	go func() {
-		p.ModuleLogger.Info("Start")
 		errCh := p.handler.onStart(ctx, wg)
+		p.ModuleLogger.Info("Start")
 
 		for {
 			if isFinish, err := p.safeRequestLoop(ctx, errCh); isFinish {
@@ -116,7 +116,7 @@ func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, e
 	case *getRootCmd:
 		r.result <- []*pb.Command{}
 		p.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "getRoot"),
+			zap.String("RequestType", "GetRoot"),
 			zap.String("Reason", reason),
 			zap.String("Action", "skip request"))
 
