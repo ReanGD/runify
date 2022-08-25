@@ -38,7 +38,7 @@ func newDataProvider(providerID uint64, handler dataProviderHandler) *dataProvid
 func (p *dataProvider) onInit(cfg *config.Config, rootProviderLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 	go func() {
-		channelLen := cfg.GetConfiguration().Provider.SubModuleChannelLen
+		channelLen := cfg.Get().Provider.SubModuleChannelLen
 		p.InitSubmodule(rootProviderLogger, p.handler.getName(), channelLen)
 
 		ch <- p.handler.onInit(cfg, p.ModuleLogger, p.providerID)

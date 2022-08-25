@@ -32,7 +32,7 @@ func (p *Provider) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan err
 	ch := make(chan error)
 
 	go func() {
-		channelLen := cfg.GetConfiguration().Provider.ChannelLen
+		channelLen := cfg.Get().Provider.ChannelLen
 		p.Init(rootLogger, moduleName, channelLen)
 
 		ch <- p.handler.onInit(cfg, p.ModuleLogger)

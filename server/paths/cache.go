@@ -58,12 +58,14 @@ func (k iconKey) toFullPath() string {
 
 type cachePaths struct {
 	defaultIconTheme *gtk.IconTheme
+	iconPathCache    map[iconKey]string
 	sysTmp           string
 	userHome         string
+	userConfig       string
 	userCache        string
+	appConfig        string
 	appCache         string
 	appIconCache     string
-	iconPathCache    map[iconKey]string
 	xdgDataDirs      []string
 	xdgAppDirs       []string
 }
@@ -122,7 +124,21 @@ func scanIcons(dirPath string) {
 	})
 }
 
-func Init() error {
+func createDir(dirPath string) (existed bool, err error) {
+	if existed, err = ExistsDir(dirPath); err != nil {
+		return existed, fmt.Errorf("Getting info about dir (%s) ended with error: %s", dirPath, err)
+	}
+
+	if !existed {
+		if err = os.MkdirAll(dirPath, 0700); err != nil {
+			return existed, fmt.Errorf("Creating dir (%s) ended with error: %s", dirPath, err)
+		}
+	}
+
+	return existed, err
+}
+
+func New() error {
 	var ok bool
 	var err error
 
@@ -135,6 +151,7 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("Getting default theme for icons ended with error: %s", err)
 	}
+	cache.iconPathCache = make(map[iconKey]string)
 
 	if cache.sysTmp, ok = getenv("TMPDIR"); !ok {
 		cache.sysTmp = "/tmp"
@@ -144,26 +161,22 @@ func Init() error {
 		return errors.New("Env $HOME is not defined")
 	}
 
+	cache.userConfig = ExpandUser(getenvDef("XDG_CONFIG_HOM", filepath.Join(cache.userHome, ".config")))
 	cache.userCache = ExpandUser(getenvDef("XDG_CACHE_HOME", filepath.Join(cache.userHome, ".cache")))
 
+	cache.appConfig = filepath.Join(cache.userConfig, appName)
+	if _, err := createDir(cache.appConfig); err != nil {
+		return err
+	}
 	cache.appCache = filepath.Join(cache.userCache, appName)
-	if ok, err = ExistsDir(cache.appCache); err != nil {
-		return fmt.Errorf("Getting info about appCache dir (%s) ended with error: %s", cache.appCache, err)
-	} else if !ok {
-		if err = os.MkdirAll(cache.appCache, 0700); err != nil {
-			return fmt.Errorf("Creating appCache dir (%s) ended with error: %s", cache.appCache, err)
-		}
+	if _, err := createDir(cache.appCache); err != nil {
+		return err
 	}
 
 	cache.appIconCache = filepath.Join(cache.appCache, "icon")
-	cache.iconPathCache = make(map[iconKey]string)
-	if ok, err = ExistsDir(cache.appIconCache); err != nil {
-		return fmt.Errorf("Getting info about appIconCache dir (%s) ended with error: %s", cache.appIconCache, err)
-	} else if !ok {
-		if err = os.MkdirAll(cache.appIconCache, 0700); err != nil {
-			return fmt.Errorf("Creating appIconCache dir (%s) ended with error: %s", cache.appIconCache, err)
-		}
-	} else {
+	if existed, err := createDir(cache.appIconCache); err != nil {
+		return err
+	} else if existed {
 		defer scanIcons(cache.appIconCache)
 	}
 

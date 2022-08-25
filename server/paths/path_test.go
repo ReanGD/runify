@@ -13,7 +13,7 @@ type PathSuite struct {
 }
 
 func (s *PathSuite) SetupSuite() {
-	Init()
+	New()
 }
 
 func (s *PathSuite) TestGetSysTmp() {

@@ -70,19 +70,20 @@ func newOptions(cfg *config.LoggerCfg) ([]zap.Option, error) {
 	return opts, nil
 }
 
-func New(cfg *config.LoggerCfg, appID string) (*Logger, error) {
-	level := zap.NewAtomicLevelAt(cfg.Level)
+func New(cfg *config.Config, appID string) (*Logger, error) {
+	logCfg := &cfg.Get().Logger
+	level := zap.NewAtomicLevelAt(logCfg.Level)
 	obj := &Logger{
 		level: &level,
 		root:  nil,
 	}
 
-	core, err := newCore(cfg, obj.level, zap.String("AppID", appID))
+	core, err := newCore(logCfg, obj.level, zap.String("AppID", appID))
 	if err != nil {
 		return nil, err
 	}
 
-	opts, err := newOptions(cfg)
+	opts, err := newOptions(logCfg)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package paths
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/ReanGD/runify/server/gtk"
 	"github.com/ReanGD/runify/server/logger"
@@ -15,8 +16,16 @@ func GetUserHome() string {
 	return cache.userHome
 }
 
+func GetUserConfig() string {
+	return cache.userConfig
+}
+
 func GetUserCache() string {
 	return cache.userCache
+}
+
+func GetAppConfig() string {
+	return cache.appConfig
 }
 
 func GetAppCache() string {
@@ -66,7 +75,7 @@ func GetNonSvgIconPath(name string, size int) string {
 		return ""
 	}
 
-	if filepath.Ext(path) != ".svg" {
+	if filepath.Ext(path) != ".svg" && !strings.HasPrefix(path, "/org") {
 		// TODO: resize icon
 		cache.iconPathCache[key] = path
 		return path
