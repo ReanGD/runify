@@ -18,7 +18,7 @@ type ExistsSuite struct {
 }
 
 func (s *ExistsSuite) SetupSuite() {
-	Init()
+	New()
 	s.rootDir = filepath.Join(os.TempDir(), "exists_suite")
 	s.removeAll()
 	s.rootItem = fsh.CreateRoot(s.T(), s.rootDir,
