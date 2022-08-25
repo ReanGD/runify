@@ -36,13 +36,13 @@ func (p *desktopEntry) getName() string {
 	return "desktopEntry"
 }
 
-func (p *desktopEntry) init(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error {
+func (p *desktopEntry) onInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error {
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
 	return nil
 }
 
-func (p *desktopEntry) start() {
+func (p *desktopEntry) onStart() {
 	id := p.providerID
 	entries := p.entries
 	commands := p.commands
