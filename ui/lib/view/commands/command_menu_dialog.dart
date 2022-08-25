@@ -2,6 +2,7 @@ import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/model/command.dart';
+import 'package:runify/model/data_provider.dart';
 import 'package:runify/view/commands/action_list.dart';
 import 'package:runify/widgets/disable_focus_trap_behavior.dart';
 
@@ -28,7 +29,8 @@ class CommandMenuDialog extends StatelessWidget {
     final dividerTheme = theme.dividerTheme;
 
     return ChangeNotifierProvider<CommandActionFilter>(
-      create: (_) => CommandActionFilter.value(command.actions),
+      create: (_) => CommandActionFilter.future(
+          DataProvider.instance.getActions(command.id)),
       child: Padding(
         padding: EdgeInsets.only(
           right: dialogTheme.horizontalOffset,

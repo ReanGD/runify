@@ -71,7 +71,7 @@ class CommandList extends StatelessWidget {
               return CommandCard(
                 name: item.name,
                 category: item.category,
-                iconPath: item.iconPath,
+                icon: item.icon,
               );
             },
           ),

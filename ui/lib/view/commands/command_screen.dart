@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/model/command.dart';
-import 'package:runify/model/command_loader.dart';
+import 'package:runify/model/data_provider.dart';
 import 'package:runify/view/commands/command_list.dart';
 import 'package:runify/widgets/disable_focus_trap_behavior.dart';
 
@@ -17,7 +17,7 @@ class CommandScreen extends StatelessWidget {
         providers: [
           ChangeNotifierProvider<CommandFilter>(
             create: (_) =>
-                CommandFilter.future(CommandLoader.instance.applications),
+                CommandFilter.future(DataProvider.instance.getRoot()),
           ),
         ],
         child: DisableFocusTrapBehavior(

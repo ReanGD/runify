@@ -5,13 +5,12 @@ import 'package:runify/widgets/text_size.dart';
 class CommandCard extends StatelessWidget {
   final String name;
   final String? category;
-  final String? iconPath;
+  final String? icon;
 
-  const CommandCard(
-      {super.key, required this.name, this.category, this.iconPath});
+  const CommandCard({super.key, required this.name, this.category, this.icon});
 
   Widget _getIcon(String? path, double size) {
-    if (path == null) {
+    if (path == null || path.isEmpty) {
       return Icon(Icons.settings, size: size);
     }
 
@@ -37,7 +36,7 @@ class CommandCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          _getIcon(iconPath, iconSize),
+          _getIcon(icon, iconSize),
           Text(
             "  $name",
             style: nameStyle,
