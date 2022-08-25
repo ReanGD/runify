@@ -103,3 +103,24 @@ func (p *desktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *des
 func (p *desktopEntry) getRoot() []*pb.Command {
 	return p.commands
 }
+
+func (p *desktopEntry) getActions(commandID uint64) []*pb.Action {
+	itemID := int(commandID & commandIDMask)
+	if itemID >= len(p.entries) {
+		p.moduleLogger.Warn("Not found item by commandID",
+			zap.String("Command", "GetActions"), zap.Uint64("CommandID", commandID), zap.Int("itemID", itemID))
+
+		return []*pb.Action{}
+	}
+
+	return []*pb.Action{{
+		Id:   0,
+		Name: "Open",
+	}, {
+		Id:   1,
+		Name: "Copy name",
+	}, {
+		Id:   2,
+		Name: "Copy path",
+	}}
+}

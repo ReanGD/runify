@@ -99,6 +99,8 @@ func (p *Provider) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *getRootCmd:
 		r.result <- p.handler.getRoot()
+	case *getActionsCmd:
+		r.result <- p.handler.getActions(r.commandID)
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -119,6 +121,13 @@ func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, e
 			zap.String("RequestType", "GetRoot"),
 			zap.String("Reason", reason),
 			zap.String("Action", "skip request"))
+	case *getActionsCmd:
+		r.result <- []*pb.Action{}
+		p.ModuleLogger.Debug("Message is wrong",
+			zap.String("RequestType", "GetActions"),
+			zap.Uint64("CommandID", r.commandID),
+			zap.String("Reason", reason),
+			zap.String("Action", "skip request"))
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -136,6 +145,16 @@ func (p *Provider) GetRoot() <-chan []*pb.Command {
 	ch := make(chan []*pb.Command, 1)
 	p.AddToChannel(&getRootCmd{
 		result: ch,
+	})
+
+	return ch
+}
+
+func (p *Provider) GetActions(commandID uint64) <-chan []*pb.Action {
+	ch := make(chan []*pb.Action, 1)
+	p.AddToChannel(&getActionsCmd{
+		commandID: commandID,
+		result:    ch,
 	})
 
 	return ch

@@ -19,6 +19,7 @@ type dataProviderHandler interface {
 	onInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error
 	onStart()
 	getRoot() []*pb.Command
+	getActions(commandID uint64) []*pb.Action
 }
 
 type dataProvider struct {
@@ -99,6 +100,8 @@ func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *getRootCmd:
 		r.result <- p.handler.getRoot()
+	case *getActionsCmd:
+		r.result <- p.handler.getActions(r.commandID)
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -119,6 +122,13 @@ func (p *dataProvider) onRequestDefault(request interface{}, reason string) (boo
 			zap.String("RequestType", "getRoot"),
 			zap.String("Reason", reason),
 			zap.String("Action", "skip request"))
+	case *getActionsCmd:
+		r.result <- []*pb.Action{}
+		p.ModuleLogger.Debug("Message is wrong",
+			zap.String("RequestType", "getActions"),
+			zap.Uint64("CommandID", r.commandID),
+			zap.String("Reason", reason),
+			zap.String("Action", "skip request"))
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -135,5 +145,12 @@ func (p *dataProvider) onRequestDefault(request interface{}, reason string) (boo
 func (p *dataProvider) getRoot(result chan<- []*pb.Command) {
 	p.AddToChannel(&getRootCmd{
 		result: result,
+	})
+}
+
+func (p *dataProvider) getActions(commandID uint64, result chan<- []*pb.Action) {
+	p.AddToChannel(&getActionsCmd{
+		commandID: commandID,
+		result:    result,
 	})
 }

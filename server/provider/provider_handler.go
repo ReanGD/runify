@@ -10,20 +10,20 @@ import (
 )
 
 type providerHandler struct {
-	dataProviders []*dataProvider
+	dataProviders map[uint64]*dataProvider
 	moduleLogger  *zap.Logger
 }
 
 func newProviderHandler() *providerHandler {
 	return &providerHandler{
-		dataProviders: []*dataProvider{},
+		dataProviders: make(map[uint64]*dataProvider),
 		moduleLogger:  nil,
 	}
 }
 
 func (h *providerHandler) onInit(cfg *config.Config, moduleLogger *zap.Logger) error {
 	h.moduleLogger = moduleLogger
-	h.dataProviders = append(h.dataProviders, newDataProvider(desktopEntryID, newDesktopEntry()))
+	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, newDesktopEntry())
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
 	for _, dp := range h.dataProviders {
@@ -60,4 +60,19 @@ func (h *providerHandler) getRoot() []*pb.Command {
 	}
 
 	return result
+}
+
+func (h *providerHandler) getActions(commandID uint64) []*pb.Action {
+	providerID := commandID & providerIDMask
+	provider, ok := h.dataProviders[providerID]
+	if !ok {
+		h.moduleLogger.Warn("Not found provider",
+			zap.String("Command", "GetActions"), zap.Uint64("CommandID", commandID), zap.Uint64("ProviderID", providerID))
+		return []*pb.Action{}
+	}
+
+	resultCh := make(chan []*pb.Action, 1)
+	provider.getActions(commandID, resultCh)
+
+	return <-resultCh
 }

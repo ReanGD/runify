@@ -20,16 +20,19 @@ func newRunifyServer(provider *provider.Provider) *runifyServer {
 }
 
 func (s *runifyServer) GetRoot(context.Context, *pb.Empty) (*pb.Commands, error) {
-	cmds := <-s.provider.GetRoot()
+	data := <-s.provider.GetRoot()
 	return &pb.Commands{
-		Data: cmds,
+		Data: data,
 	}, nil
 }
 
-func (s *runifyServer) GetActions(ctx context.Context, commandID *pb.CommandID) (*pb.Actions, error) {
-	return nil, nil
+func (s *runifyServer) GetActions(ctx context.Context, selectedCommand *pb.SelectedCommand) (*pb.Actions, error) {
+	data := <-s.provider.GetActions(selectedCommand.CommandID)
+	return &pb.Actions{
+		Data: data,
+	}, nil
 }
 
-func (s *runifyServer) Execute(ctx context.Context, actionID *pb.ActionID) (*pb.Result, error) {
+func (s *runifyServer) Execute(ctx context.Context, selectedAction *pb.SelectedAction) (*pb.Result, error) {
 	return nil, nil
 }
