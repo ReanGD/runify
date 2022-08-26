@@ -54,6 +54,7 @@ class CommandMenuDialog extends StatelessWidget {
                     height: dialogTheme.actionsHeight,
                     child: ActionList(
                       controller: controller,
+                      command: command,
                     ),
                   ),
                 ),

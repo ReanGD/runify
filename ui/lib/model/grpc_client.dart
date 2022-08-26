@@ -36,4 +36,14 @@ class GrpcClient {
 
     return result.data;
   }
+
+  Future<void> execute(Int64 commandID, int actionID) async {
+    final timer = Stopwatch()..start();
+    await _client
+        .execute(SelectedAction(commandID: commandID, actionID: actionID));
+    final dt = timer.elapsedMicroseconds;
+    print("execute = $dt mcs");
+
+    return;
+  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/model/command.dart';
 import 'package:runify/widgets/hdivider.dart';
+import 'package:runify/model/data_provider.dart';
 import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
@@ -25,6 +26,10 @@ class CommandList extends StatelessWidget {
       BuildContext context, DataItemEvent event, Command? command) {
     if (event == DataItemEvent.onMenu && command != null) {
       CommandMenuDialog.show(context, command);
+      return;
+    }
+    if (event == DataItemEvent.onChoice && command != null) {
+      DataProvider.instance.execute(command.id, 0);
       return;
     }
   }

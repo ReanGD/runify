@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/model/command.dart';
 import 'package:runify/widgets/hdivider.dart';
+import 'package:runify/model/data_provider.dart';
 import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
@@ -17,8 +18,18 @@ class ActionListController extends DataListController {
 
 class ActionList extends StatelessWidget {
   final ActionListController controller;
+  final Command command;
 
-  const ActionList({super.key, required this.controller});
+  const ActionList(
+      {super.key, required this.controller, required this.command});
+
+  void _onDataItemEvent(
+      BuildContext context, DataItemEvent event, CommandAction? action) {
+    if (event == DataItemEvent.onChoice && action != null) {
+      DataProvider.instance.execute(command.id, action.id);
+      return;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +56,8 @@ class ActionList extends StatelessWidget {
             child: DataListView(
               controller: controller,
               onDataItemEvent: (DataItemEvent event, int? id) {
-                // print("event: $event, id: $id");
+                _onDataItemEvent(
+                    context, event, (id != null) ? storage[id] : null);
               },
               itemBuilder: (context, int id) {
                 final item = storage[id];

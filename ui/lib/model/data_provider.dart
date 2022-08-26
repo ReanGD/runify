@@ -26,4 +26,10 @@ class DataProvider {
 
     return res;
   }
+
+  Future<void> execute(Int64 commandID, int actionID) async {
+    await _client.execute(commandID, actionID);
+
+    return;
+  }
 }
