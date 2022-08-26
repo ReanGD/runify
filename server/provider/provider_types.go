@@ -16,3 +16,9 @@ type getActionsCmd struct {
 	commandID uint64
 	result    chan<- []*pb.Action
 }
+
+type executeCmd struct {
+	commandID uint64
+	actionID  uint32
+	result    chan<- *pb.Result
+}

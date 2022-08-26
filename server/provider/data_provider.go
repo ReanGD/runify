@@ -20,6 +20,7 @@ type dataProviderHandler interface {
 	onStart()
 	getRoot() []*pb.Command
 	getActions(commandID uint64) []*pb.Action
+	execute(commandID uint64, actionID uint32) *pb.Result
 }
 
 type dataProvider struct {
@@ -102,6 +103,8 @@ func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 		r.result <- p.handler.getRoot()
 	case *getActionsCmd:
 		r.result <- p.handler.getActions(r.commandID)
+	case *executeCmd:
+		r.result <- p.handler.execute(r.commandID, r.actionID)
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -119,14 +122,24 @@ func (p *dataProvider) onRequestDefault(request interface{}, reason string) (boo
 	case *getRootCmd:
 		r.result <- []*pb.Command{}
 		p.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "getRoot"),
+			zap.String("RequestType", "GetRoot"),
 			zap.String("Reason", reason),
 			zap.String("Action", "skip request"))
 	case *getActionsCmd:
 		r.result <- []*pb.Action{}
 		p.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "getActions"),
+			zap.String("RequestType", "GetActions"),
 			zap.Uint64("CommandID", r.commandID),
+			zap.String("Reason", reason),
+			zap.String("Action", "skip request"))
+	case *executeCmd:
+		r.result <- &pb.Result{
+			Payload: &pb.Result_Empty{},
+		}
+		p.ModuleLogger.Debug("Message is wrong",
+			zap.String("RequestType", "Execute"),
+			zap.Uint64("CommandID", r.commandID),
+			zap.Uint32("ActionID", r.actionID),
 			zap.String("Reason", reason),
 			zap.String("Action", "skip request"))
 
@@ -151,6 +164,14 @@ func (p *dataProvider) getRoot(result chan<- []*pb.Command) {
 func (p *dataProvider) getActions(commandID uint64, result chan<- []*pb.Action) {
 	p.AddToChannel(&getActionsCmd{
 		commandID: commandID,
+		result:    result,
+	})
+}
+
+func (p *dataProvider) execute(commandID uint64, actionID uint32, result chan<- *pb.Result) {
+	p.AddToChannel(&executeCmd{
+		commandID: commandID,
+		actionID:  actionID,
 		result:    result,
 	})
 }

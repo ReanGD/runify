@@ -76,3 +76,23 @@ func (h *providerHandler) getActions(commandID uint64) []*pb.Action {
 
 	return <-resultCh
 }
+
+func (h *providerHandler) execute(commandID uint64, actionID uint32) *pb.Result {
+	providerID := commandID & providerIDMask
+	provider, ok := h.dataProviders[providerID]
+	if !ok {
+		h.moduleLogger.Warn("Not found provider",
+			zap.String("Command", "Execute"),
+			zap.Uint64("CommandID", commandID),
+			zap.Uint32("ActionID", actionID),
+			zap.Uint64("ProviderID", providerID))
+		return &pb.Result{
+			Payload: &pb.Result_Empty{},
+		}
+	}
+
+	resultCh := make(chan *pb.Result, 1)
+	provider.execute(commandID, actionID, resultCh)
+
+	return <-resultCh
+}

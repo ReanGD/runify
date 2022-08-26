@@ -34,5 +34,6 @@ func (s *runifyServer) GetActions(ctx context.Context, selectedCommand *pb.Selec
 }
 
 func (s *runifyServer) Execute(ctx context.Context, selectedAction *pb.SelectedAction) (*pb.Result, error) {
-	return nil, nil
+	data := <-s.provider.Execute(selectedAction.CommandID, selectedAction.ActionID)
+	return data, nil
 }

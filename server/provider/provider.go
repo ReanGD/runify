@@ -101,6 +101,8 @@ func (p *Provider) onRequest(request interface{}) (bool, error) {
 		r.result <- p.handler.getRoot()
 	case *getActionsCmd:
 		r.result <- p.handler.getActions(r.commandID)
+	case *executeCmd:
+		r.result <- p.handler.execute(r.commandID, r.actionID)
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -126,6 +128,16 @@ func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, e
 		p.ModuleLogger.Debug("Message is wrong",
 			zap.String("RequestType", "GetActions"),
 			zap.Uint64("CommandID", r.commandID),
+			zap.String("Reason", reason),
+			zap.String("Action", "skip request"))
+	case *executeCmd:
+		r.result <- &pb.Result{
+			Payload: &pb.Result_Empty{},
+		}
+		p.ModuleLogger.Debug("Message is wrong",
+			zap.String("RequestType", "Execute"),
+			zap.Uint64("CommandID", r.commandID),
+			zap.Uint32("ActionID", r.actionID),
 			zap.String("Reason", reason),
 			zap.String("Action", "skip request"))
 
@@ -154,6 +166,17 @@ func (p *Provider) GetActions(commandID uint64) <-chan []*pb.Action {
 	ch := make(chan []*pb.Action, 1)
 	p.AddToChannel(&getActionsCmd{
 		commandID: commandID,
+		result:    ch,
+	})
+
+	return ch
+}
+
+func (p *Provider) Execute(commandID uint64, actionID uint32) <-chan *pb.Result {
+	ch := make(chan *pb.Result, 1)
+	p.AddToChannel(&executeCmd{
+		commandID: commandID,
+		actionID:  actionID,
 		result:    ch,
 	})
 

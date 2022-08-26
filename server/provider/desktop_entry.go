@@ -2,6 +2,7 @@ package provider
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/ReanGD/runify/server/config"
@@ -123,4 +124,37 @@ func (p *desktopEntry) getActions(commandID uint64) []*pb.Action {
 		Id:   2,
 		Name: "Copy path",
 	}}
+}
+
+func (p *desktopEntry) execute(commandID uint64, actionID uint32) *pb.Result {
+	itemID := int(commandID & commandIDMask)
+	if itemID >= len(p.entries) {
+		p.moduleLogger.Warn("Not found item by commandID",
+			zap.String("Command", "Execute"),
+			zap.Uint64("CommandID", commandID),
+			zap.Uint32("ActionID", actionID),
+			zap.Int("itemID", itemID))
+
+		return &pb.Result{
+			Payload: &pb.Result_Empty{},
+		}
+	}
+
+	// TODO: copy run from dex
+	entry := p.entries[itemID]
+	c := exec.Command("dex", entry.path)
+	err := c.Run()
+	if err != nil {
+		p.moduleLogger.Warn("Failed execute desktop entry",
+			zap.String("Command", "Execute"),
+			zap.String("Path", entry.path),
+			zap.Uint64("CommandID", commandID),
+			zap.Uint32("ActionID", actionID),
+			zap.Int("itemID", itemID),
+			zap.Error(err))
+	}
+
+	return &pb.Result{
+		Payload: &pb.Result_Empty{},
+	}
 }
