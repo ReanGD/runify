@@ -12,24 +12,26 @@ class DataProvider {
   Future<List<Command>> getRoot() async {
     final List<Command> res = [];
     for (final it in await _client.getRoot()) {
-      res.add(Command(it.id, it.name, "Application", it.icon));
+      res.add(Command(it.cardID, it.name, "Application", it.icon));
     }
 
     return res;
   }
 
-  Future<List<CommandAction>> getActions(Int64 commandID) async {
+  Future<List<CommandAction>> getActions(Int64 cardID) async {
     final List<CommandAction> res = [];
-    for (final it in await _client.getActions(commandID)) {
-      res.add(CommandAction(it.id, it.name));
+    for (final it in await _client.getActions(cardID)) {
+      res.add(CommandAction(it.actionID, it.name));
     }
 
     return res;
   }
 
-  Future<void> execute(Int64 commandID, int actionID) async {
-    await _client.execute(commandID, actionID);
+  Future<void> executeDefault(Int64 cardID) async {
+    await _client.executeDefault(cardID);
+  }
 
-    return;
+  Future<void> execute(Int64 cardID, int actionID) async {
+    await _client.execute(cardID, actionID);
   }
 }

@@ -29,7 +29,7 @@ class CommandList extends StatelessWidget {
       return;
     }
     if (event == DataItemEvent.onChoice && command != null) {
-      DataProvider.instance.execute(command.id, 0);
+      DataProvider.instance.executeDefault(command.id);
       return;
     }
   }
