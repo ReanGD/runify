@@ -20,52 +20,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type WindowState int32
-
-const (
-	WindowState_SHOW WindowState = 0
-	WindowState_HIDE WindowState = 1
-)
-
-// Enum value maps for WindowState.
-var (
-	WindowState_name = map[int32]string{
-		0: "SHOW",
-		1: "HIDE",
-	}
-	WindowState_value = map[string]int32{
-		"SHOW": 0,
-		"HIDE": 1,
-	}
-)
-
-func (x WindowState) Enum() *WindowState {
-	p := new(WindowState)
-	*p = x
-	return p
-}
-
-func (x WindowState) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (WindowState) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_runify_proto_enumTypes[0].Descriptor()
-}
-
-func (WindowState) Type() protoreflect.EnumType {
-	return &file_proto_runify_proto_enumTypes[0]
-}
-
-func (x WindowState) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use WindowState.Descriptor instead.
-func (WindowState) EnumDescriptor() ([]byte, []int) {
-	return file_proto_runify_proto_rawDescGZIP(), []int{0}
-}
-
 type Empty struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -104,17 +58,18 @@ func (*Empty) Descriptor() ([]byte, []int) {
 	return file_proto_runify_proto_rawDescGZIP(), []int{0}
 }
 
-type SelectedAction struct {
+type CardItem struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ActionID  uint32 `protobuf:"varint,1,opt,name=actionID,proto3" json:"actionID,omitempty"`
-	CommandID uint64 `protobuf:"varint,2,opt,name=commandID,proto3" json:"commandID,omitempty"`
+	CardID uint64 `protobuf:"varint,1,opt,name=cardID,proto3" json:"cardID,omitempty"`
+	Name   string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Icon   string `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon,omitempty"`
 }
 
-func (x *SelectedAction) Reset() {
-	*x = SelectedAction{}
+func (x *CardItem) Reset() {
+	*x = CardItem{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_runify_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -122,13 +77,13 @@ func (x *SelectedAction) Reset() {
 	}
 }
 
-func (x *SelectedAction) String() string {
+func (x *CardItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SelectedAction) ProtoMessage() {}
+func (*CardItem) ProtoMessage() {}
 
-func (x *SelectedAction) ProtoReflect() protoreflect.Message {
+func (x *CardItem) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_runify_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -140,35 +95,42 @@ func (x *SelectedAction) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SelectedAction.ProtoReflect.Descriptor instead.
-func (*SelectedAction) Descriptor() ([]byte, []int) {
+// Deprecated: Use CardItem.ProtoReflect.Descriptor instead.
+func (*CardItem) Descriptor() ([]byte, []int) {
 	return file_proto_runify_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SelectedAction) GetActionID() uint32 {
+func (x *CardItem) GetCardID() uint64 {
 	if x != nil {
-		return x.ActionID
+		return x.CardID
 	}
 	return 0
 }
 
-func (x *SelectedAction) GetCommandID() uint64 {
+func (x *CardItem) GetName() string {
 	if x != nil {
-		return x.CommandID
+		return x.Name
 	}
-	return 0
+	return ""
 }
 
-type SelectedCommand struct {
+func (x *CardItem) GetIcon() string {
+	if x != nil {
+		return x.Icon
+	}
+	return ""
+}
+
+type SelectedCard struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommandID uint64 `protobuf:"varint,1,opt,name=commandID,proto3" json:"commandID,omitempty"`
+	CardID uint64 `protobuf:"varint,1,opt,name=cardID,proto3" json:"cardID,omitempty"`
 }
 
-func (x *SelectedCommand) Reset() {
-	*x = SelectedCommand{}
+func (x *SelectedCard) Reset() {
+	*x = SelectedCard{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_runify_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -176,13 +138,13 @@ func (x *SelectedCommand) Reset() {
 	}
 }
 
-func (x *SelectedCommand) String() string {
+func (x *SelectedCard) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SelectedCommand) ProtoMessage() {}
+func (*SelectedCard) ProtoMessage() {}
 
-func (x *SelectedCommand) ProtoReflect() protoreflect.Message {
+func (x *SelectedCard) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_runify_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -194,29 +156,29 @@ func (x *SelectedCommand) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SelectedCommand.ProtoReflect.Descriptor instead.
-func (*SelectedCommand) Descriptor() ([]byte, []int) {
+// Deprecated: Use SelectedCard.ProtoReflect.Descriptor instead.
+func (*SelectedCard) Descriptor() ([]byte, []int) {
 	return file_proto_runify_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SelectedCommand) GetCommandID() uint64 {
+func (x *SelectedCard) GetCardID() uint64 {
 	if x != nil {
-		return x.CommandID
+		return x.CardID
 	}
 	return 0
 }
 
-type Action struct {
+type ActionItem struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id   uint32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	ActionID uint32 `protobuf:"varint,1,opt,name=actionID,proto3" json:"actionID,omitempty"`
+	Name     string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 }
 
-func (x *Action) Reset() {
-	*x = Action{}
+func (x *ActionItem) Reset() {
+	*x = ActionItem{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_runify_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -224,13 +186,13 @@ func (x *Action) Reset() {
 	}
 }
 
-func (x *Action) String() string {
+func (x *ActionItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Action) ProtoMessage() {}
+func (*ActionItem) ProtoMessage() {}
 
-func (x *Action) ProtoReflect() protoreflect.Message {
+func (x *ActionItem) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_runify_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -242,19 +204,19 @@ func (x *Action) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Action.ProtoReflect.Descriptor instead.
-func (*Action) Descriptor() ([]byte, []int) {
+// Deprecated: Use ActionItem.ProtoReflect.Descriptor instead.
+func (*ActionItem) Descriptor() ([]byte, []int) {
 	return file_proto_runify_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Action) GetId() uint32 {
+func (x *ActionItem) GetActionID() uint32 {
 	if x != nil {
-		return x.Id
+		return x.ActionID
 	}
 	return 0
 }
 
-func (x *Action) GetName() string {
+func (x *ActionItem) GetName() string {
 	if x != nil {
 		return x.Name
 	}
@@ -266,7 +228,7 @@ type Actions struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data []*Action `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
+	Items []*ActionItem `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 }
 
 func (x *Actions) Reset() {
@@ -301,25 +263,24 @@ func (*Actions) Descriptor() ([]byte, []int) {
 	return file_proto_runify_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *Actions) GetData() []*Action {
+func (x *Actions) GetItems() []*ActionItem {
 	if x != nil {
-		return x.Data
+		return x.Items
 	}
 	return nil
 }
 
-type Command struct {
+type SelectedAction struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id   uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Icon string `protobuf:"bytes,3,opt,name=icon,proto3" json:"icon,omitempty"`
+	ActionID uint32 `protobuf:"varint,1,opt,name=actionID,proto3" json:"actionID,omitempty"`
+	CardID   uint64 `protobuf:"varint,2,opt,name=cardID,proto3" json:"cardID,omitempty"`
 }
 
-func (x *Command) Reset() {
-	*x = Command{}
+func (x *SelectedAction) Reset() {
+	*x = SelectedAction{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_runify_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -327,13 +288,13 @@ func (x *Command) Reset() {
 	}
 }
 
-func (x *Command) String() string {
+func (x *SelectedAction) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Command) ProtoMessage() {}
+func (*SelectedAction) ProtoMessage() {}
 
-func (x *Command) ProtoReflect() protoreflect.Message {
+func (x *SelectedAction) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_runify_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -345,89 +306,38 @@ func (x *Command) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Command.ProtoReflect.Descriptor instead.
-func (*Command) Descriptor() ([]byte, []int) {
+// Deprecated: Use SelectedAction.ProtoReflect.Descriptor instead.
+func (*SelectedAction) Descriptor() ([]byte, []int) {
 	return file_proto_runify_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *Command) GetId() uint64 {
+func (x *SelectedAction) GetActionID() uint32 {
 	if x != nil {
-		return x.Id
+		return x.ActionID
 	}
 	return 0
 }
 
-func (x *Command) GetName() string {
+func (x *SelectedAction) GetCardID() uint64 {
 	if x != nil {
-		return x.Name
+		return x.CardID
 	}
-	return ""
-}
-
-func (x *Command) GetIcon() string {
-	if x != nil {
-		return x.Icon
-	}
-	return ""
-}
-
-type Commands struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Data []*Command `protobuf:"bytes,1,rep,name=data,proto3" json:"data,omitempty"`
-}
-
-func (x *Commands) Reset() {
-	*x = Commands{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_runify_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *Commands) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Commands) ProtoMessage() {}
-
-func (x *Commands) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_runify_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Commands.ProtoReflect.Descriptor instead.
-func (*Commands) Descriptor() ([]byte, []int) {
-	return file_proto_runify_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *Commands) GetData() []*Command {
-	if x != nil {
-		return x.Data
-	}
-	return nil
+	return 0
 }
 
 type Form struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Layout string      `protobuf:"bytes,1,opt,name=layout,proto3" json:"layout,omitempty"`
+	Cards  []*CardItem `protobuf:"bytes,2,rep,name=cards,proto3" json:"cards,omitempty"`
 }
 
 func (x *Form) Reset() {
 	*x = Form{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_runify_proto_msgTypes[7]
+		mi := &file_proto_runify_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -440,7 +350,7 @@ func (x *Form) String() string {
 func (*Form) ProtoMessage() {}
 
 func (x *Form) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_runify_proto_msgTypes[7]
+	mi := &file_proto_runify_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -453,34 +363,48 @@ func (x *Form) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Form.ProtoReflect.Descriptor instead.
 func (*Form) Descriptor() ([]byte, []int) {
-	return file_proto_runify_proto_rawDescGZIP(), []int{7}
+	return file_proto_runify_proto_rawDescGZIP(), []int{6}
 }
 
-type Message struct {
+func (x *Form) GetLayout() string {
+	if x != nil {
+		return x.Layout
+	}
+	return ""
+}
+
+func (x *Form) GetCards() []*CardItem {
+	if x != nil {
+		return x.Cards
+	}
+	return nil
+}
+
+type HideWindow struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Text string `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	Error string `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
 }
 
-func (x *Message) Reset() {
-	*x = Message{}
+func (x *HideWindow) Reset() {
+	*x = HideWindow{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_runify_proto_msgTypes[8]
+		mi := &file_proto_runify_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
 }
 
-func (x *Message) String() string {
+func (x *HideWindow) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Message) ProtoMessage() {}
+func (*HideWindow) ProtoMessage() {}
 
-func (x *Message) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_runify_proto_msgTypes[8]
+func (x *HideWindow) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_runify_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -491,14 +415,14 @@ func (x *Message) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Message.ProtoReflect.Descriptor instead.
-func (*Message) Descriptor() ([]byte, []int) {
-	return file_proto_runify_proto_rawDescGZIP(), []int{8}
+// Deprecated: Use HideWindow.ProtoReflect.Descriptor instead.
+func (*HideWindow) Descriptor() ([]byte, []int) {
+	return file_proto_runify_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *Message) GetText() string {
+func (x *HideWindow) GetError() string {
 	if x != nil {
-		return x.Text
+		return x.Error
 	}
 	return ""
 }
@@ -510,17 +434,16 @@ type Result struct {
 
 	// Types that are assignable to Payload:
 	//
-	//	*Result_Commands
 	//	*Result_Form
-	//	*Result_Message
-	//	*Result_WinState
+	//	*Result_Empty
+	//	*Result_Hide
 	Payload isResult_Payload `protobuf_oneof:"payload"`
 }
 
 func (x *Result) Reset() {
 	*x = Result{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_proto_runify_proto_msgTypes[9]
+		mi := &file_proto_runify_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -533,7 +456,7 @@ func (x *Result) String() string {
 func (*Result) ProtoMessage() {}
 
 func (x *Result) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_runify_proto_msgTypes[9]
+	mi := &file_proto_runify_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -546,19 +469,12 @@ func (x *Result) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Result.ProtoReflect.Descriptor instead.
 func (*Result) Descriptor() ([]byte, []int) {
-	return file_proto_runify_proto_rawDescGZIP(), []int{9}
+	return file_proto_runify_proto_rawDescGZIP(), []int{8}
 }
 
 func (m *Result) GetPayload() isResult_Payload {
 	if m != nil {
 		return m.Payload
-	}
-	return nil
-}
-
-func (x *Result) GetCommands() *Commands {
-	if x, ok := x.GetPayload().(*Result_Commands); ok {
-		return x.Commands
 	}
 	return nil
 }
@@ -570,103 +486,97 @@ func (x *Result) GetForm() *Form {
 	return nil
 }
 
-func (x *Result) GetMessage() *Message {
-	if x, ok := x.GetPayload().(*Result_Message); ok {
-		return x.Message
+func (x *Result) GetEmpty() *Empty {
+	if x, ok := x.GetPayload().(*Result_Empty); ok {
+		return x.Empty
 	}
 	return nil
 }
 
-func (x *Result) GetWinState() WindowState {
-	if x, ok := x.GetPayload().(*Result_WinState); ok {
-		return x.WinState
+func (x *Result) GetHide() *HideWindow {
+	if x, ok := x.GetPayload().(*Result_Hide); ok {
+		return x.Hide
 	}
-	return WindowState_SHOW
+	return nil
 }
 
 type isResult_Payload interface {
 	isResult_Payload()
 }
 
-type Result_Commands struct {
-	Commands *Commands `protobuf:"bytes,1,opt,name=commands,proto3,oneof"`
-}
-
 type Result_Form struct {
-	Form *Form `protobuf:"bytes,2,opt,name=form,proto3,oneof"`
+	Form *Form `protobuf:"bytes,1,opt,name=form,proto3,oneof"`
 }
 
-type Result_Message struct {
-	Message *Message `protobuf:"bytes,3,opt,name=message,proto3,oneof"`
+type Result_Empty struct {
+	Empty *Empty `protobuf:"bytes,2,opt,name=empty,proto3,oneof"`
 }
 
-type Result_WinState struct {
-	WinState WindowState `protobuf:"varint,4,opt,name=winState,proto3,enum=runify.WindowState,oneof"`
+type Result_Hide struct {
+	Hide *HideWindow `protobuf:"bytes,3,opt,name=hide,proto3,oneof"`
 }
-
-func (*Result_Commands) isResult_Payload() {}
 
 func (*Result_Form) isResult_Payload() {}
 
-func (*Result_Message) isResult_Payload() {}
+func (*Result_Empty) isResult_Payload() {}
 
-func (*Result_WinState) isResult_Payload() {}
+func (*Result_Hide) isResult_Payload() {}
 
 var File_proto_runify_proto protoreflect.FileDescriptor
 
 var file_proto_runify_proto_rawDesc = []byte{
 	0x0a, 0x12, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x70,
 	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x06, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x22, 0x07, 0x0a, 0x05,
-	0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x4a, 0x0a, 0x0e, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65,
-	0x64, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1a, 0x0a, 0x08, 0x61, 0x63, 0x74, 0x69, 0x6f,
+	0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x4a, 0x0a, 0x08, 0x43, 0x61, 0x72, 0x64, 0x49, 0x74, 0x65,
+	0x6d, 0x12, 0x16, 0x0a, 0x06, 0x63, 0x61, 0x72, 0x64, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x06, 0x63, 0x61, 0x72, 0x64, 0x49, 0x44, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a,
+	0x04, 0x69, 0x63, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x69, 0x63, 0x6f,
+	0x6e, 0x22, 0x26, 0x0a, 0x0c, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x43, 0x61, 0x72,
+	0x64, 0x12, 0x16, 0x0a, 0x06, 0x63, 0x61, 0x72, 0x64, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x04, 0x52, 0x06, 0x63, 0x61, 0x72, 0x64, 0x49, 0x44, 0x22, 0x3c, 0x0a, 0x0a, 0x41, 0x63, 0x74,
+	0x69, 0x6f, 0x6e, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x1a, 0x0a, 0x08, 0x61, 0x63, 0x74, 0x69, 0x6f,
 	0x6e, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x61, 0x63, 0x74, 0x69, 0x6f,
-	0x6e, 0x49, 0x44, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x49, 0x44,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x09, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x49,
-	0x44, 0x22, 0x2f, 0x0a, 0x0f, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x43, 0x6f, 0x6d,
-	0x6d, 0x61, 0x6e, 0x64, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x49,
-	0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x09, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
-	0x49, 0x44, 0x22, 0x2c, 0x0a, 0x06, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02,
-	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04,
-	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65,
-	0x22, 0x2d, 0x0a, 0x07, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x22, 0x0a, 0x04, 0x64,
-	0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x72, 0x75, 0x6e, 0x69,
-	0x66, 0x79, 0x2e, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22,
-	0x41, 0x0a, 0x07, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61,
-	0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x12,
-	0x0a, 0x04, 0x69, 0x63, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x69, 0x63,
-	0x6f, 0x6e, 0x22, 0x2f, 0x0a, 0x08, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x73, 0x12, 0x23,
-	0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x72,
-	0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x04, 0x64,
-	0x61, 0x74, 0x61, 0x22, 0x06, 0x0a, 0x04, 0x46, 0x6f, 0x72, 0x6d, 0x22, 0x1d, 0x0a, 0x07, 0x4d,
-	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x65, 0x78, 0x74, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x65, 0x78, 0x74, 0x22, 0xc7, 0x01, 0x0a, 0x06, 0x52,
-	0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x2e, 0x0a, 0x08, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
-	0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79,
-	0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x73, 0x48, 0x00, 0x52, 0x08, 0x63, 0x6f, 0x6d,
-	0x6d, 0x61, 0x6e, 0x64, 0x73, 0x12, 0x22, 0x0a, 0x04, 0x66, 0x6f, 0x72, 0x6d, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x46, 0x6f, 0x72,
-	0x6d, 0x48, 0x00, 0x52, 0x04, 0x66, 0x6f, 0x72, 0x6d, 0x12, 0x2b, 0x0a, 0x07, 0x6d, 0x65, 0x73,
-	0x73, 0x61, 0x67, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x72, 0x75, 0x6e,
-	0x69, 0x66, 0x79, 0x2e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x48, 0x00, 0x52, 0x07, 0x6d,
-	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x31, 0x0a, 0x08, 0x77, 0x69, 0x6e, 0x53, 0x74, 0x61,
-	0x74, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x13, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66,
-	0x79, 0x2e, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x74, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52,
-	0x08, 0x77, 0x69, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x65, 0x42, 0x09, 0x0a, 0x07, 0x70, 0x61, 0x79,
-	0x6c, 0x6f, 0x61, 0x64, 0x2a, 0x21, 0x0a, 0x0b, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x74,
-	0x61, 0x74, 0x65, 0x12, 0x08, 0x0a, 0x04, 0x53, 0x48, 0x4f, 0x57, 0x10, 0x00, 0x12, 0x08, 0x0a,
-	0x04, 0x48, 0x49, 0x44, 0x45, 0x10, 0x01, 0x32, 0xa5, 0x01, 0x0a, 0x06, 0x52, 0x75, 0x6e, 0x69,
-	0x66, 0x79, 0x12, 0x2c, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6f, 0x74, 0x12, 0x0d, 0x2e,
-	0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x10, 0x2e, 0x72,
-	0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x73, 0x22, 0x00,
-	0x12, 0x38, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x17,
-	0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64,
-	0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x1a, 0x0f, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79,
-	0x2e, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0x00, 0x12, 0x33, 0x0a, 0x07, 0x45, 0x78,
-	0x65, 0x63, 0x75, 0x74, 0x65, 0x12, 0x16, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53,
-	0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x1a, 0x0e, 0x2e,
-	0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x42,
-	0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6e, 0x49, 0x44, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x33, 0x0a, 0x07, 0x41, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x73, 0x12, 0x28, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x12, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x41, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x44, 0x0a, 0x0e,
+	0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1a,
+	0x0a, 0x08, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d,
+	0x52, 0x08, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x44, 0x12, 0x16, 0x0a, 0x06, 0x63, 0x61,
+	0x72, 0x64, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x63, 0x61, 0x72, 0x64,
+	0x49, 0x44, 0x22, 0x46, 0x0a, 0x04, 0x46, 0x6f, 0x72, 0x6d, 0x12, 0x16, 0x0a, 0x06, 0x6c, 0x61,
+	0x79, 0x6f, 0x75, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6c, 0x61, 0x79, 0x6f,
+	0x75, 0x74, 0x12, 0x26, 0x0a, 0x05, 0x63, 0x61, 0x72, 0x64, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x10, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x43, 0x61, 0x72, 0x64, 0x49,
+	0x74, 0x65, 0x6d, 0x52, 0x05, 0x63, 0x61, 0x72, 0x64, 0x73, 0x22, 0x22, 0x0a, 0x0a, 0x48, 0x69,
+	0x64, 0x65, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f,
+	0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x88,
+	0x01, 0x0a, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x22, 0x0a, 0x04, 0x66, 0x6f, 0x72,
+	0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79,
+	0x2e, 0x46, 0x6f, 0x72, 0x6d, 0x48, 0x00, 0x52, 0x04, 0x66, 0x6f, 0x72, 0x6d, 0x12, 0x25, 0x0a,
+	0x05, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x72,
+	0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x48, 0x00, 0x52, 0x05, 0x65,
+	0x6d, 0x70, 0x74, 0x79, 0x12, 0x28, 0x0a, 0x04, 0x68, 0x69, 0x64, 0x65, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x12, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x48, 0x69, 0x64, 0x65,
+	0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x48, 0x00, 0x52, 0x04, 0x68, 0x69, 0x64, 0x65, 0x42, 0x09,
+	0x0a, 0x07, 0x70, 0x61, 0x79, 0x6c, 0x6f, 0x61, 0x64, 0x32, 0xd8, 0x01, 0x0a, 0x06, 0x52, 0x75,
+	0x6e, 0x69, 0x66, 0x79, 0x12, 0x28, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6f, 0x74, 0x12,
+	0x0d, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0c,
+	0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x46, 0x6f, 0x72, 0x6d, 0x22, 0x00, 0x12, 0x35,
+	0x0a, 0x0a, 0x47, 0x65, 0x74, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x14, 0x2e, 0x72,
+	0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x43, 0x61,
+	0x72, 0x64, 0x1a, 0x0f, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x41, 0x63, 0x74, 0x69,
+	0x6f, 0x6e, 0x73, 0x22, 0x00, 0x12, 0x38, 0x0a, 0x0e, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65,
+	0x44, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x12, 0x14, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79,
+	0x2e, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x43, 0x61, 0x72, 0x64, 0x1a, 0x0e, 0x2e,
+	0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12,
+	0x33, 0x0a, 0x07, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x12, 0x16, 0x2e, 0x72, 0x75, 0x6e,
+	0x69, 0x66, 0x79, 0x2e, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x41, 0x63, 0x74, 0x69,
+	0x6f, 0x6e, 0x1a, 0x0e, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x52, 0x65, 0x73, 0x75,
+	0x6c, 0x74, 0x22, 0x00, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -681,39 +591,37 @@ func file_proto_runify_proto_rawDescGZIP() []byte {
 	return file_proto_runify_proto_rawDescData
 }
 
-var file_proto_runify_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_runify_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_proto_runify_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_proto_runify_proto_goTypes = []interface{}{
-	(WindowState)(0),        // 0: runify.WindowState
-	(*Empty)(nil),           // 1: runify.Empty
-	(*SelectedAction)(nil),  // 2: runify.SelectedAction
-	(*SelectedCommand)(nil), // 3: runify.SelectedCommand
-	(*Action)(nil),          // 4: runify.Action
-	(*Actions)(nil),         // 5: runify.Actions
-	(*Command)(nil),         // 6: runify.Command
-	(*Commands)(nil),        // 7: runify.Commands
-	(*Form)(nil),            // 8: runify.Form
-	(*Message)(nil),         // 9: runify.Message
-	(*Result)(nil),          // 10: runify.Result
+	(*Empty)(nil),          // 0: runify.Empty
+	(*CardItem)(nil),       // 1: runify.CardItem
+	(*SelectedCard)(nil),   // 2: runify.SelectedCard
+	(*ActionItem)(nil),     // 3: runify.ActionItem
+	(*Actions)(nil),        // 4: runify.Actions
+	(*SelectedAction)(nil), // 5: runify.SelectedAction
+	(*Form)(nil),           // 6: runify.Form
+	(*HideWindow)(nil),     // 7: runify.HideWindow
+	(*Result)(nil),         // 8: runify.Result
 }
 var file_proto_runify_proto_depIdxs = []int32{
-	4,  // 0: runify.Actions.data:type_name -> runify.Action
-	6,  // 1: runify.Commands.data:type_name -> runify.Command
-	7,  // 2: runify.Result.commands:type_name -> runify.Commands
-	8,  // 3: runify.Result.form:type_name -> runify.Form
-	9,  // 4: runify.Result.message:type_name -> runify.Message
-	0,  // 5: runify.Result.winState:type_name -> runify.WindowState
-	1,  // 6: runify.Runify.GetRoot:input_type -> runify.Empty
-	3,  // 7: runify.Runify.GetActions:input_type -> runify.SelectedCommand
-	2,  // 8: runify.Runify.Execute:input_type -> runify.SelectedAction
-	7,  // 9: runify.Runify.GetRoot:output_type -> runify.Commands
-	5,  // 10: runify.Runify.GetActions:output_type -> runify.Actions
-	10, // 11: runify.Runify.Execute:output_type -> runify.Result
-	9,  // [9:12] is the sub-list for method output_type
-	6,  // [6:9] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	3, // 0: runify.Actions.items:type_name -> runify.ActionItem
+	1, // 1: runify.Form.cards:type_name -> runify.CardItem
+	6, // 2: runify.Result.form:type_name -> runify.Form
+	0, // 3: runify.Result.empty:type_name -> runify.Empty
+	7, // 4: runify.Result.hide:type_name -> runify.HideWindow
+	0, // 5: runify.Runify.GetRoot:input_type -> runify.Empty
+	2, // 6: runify.Runify.GetActions:input_type -> runify.SelectedCard
+	2, // 7: runify.Runify.ExecuteDefault:input_type -> runify.SelectedCard
+	5, // 8: runify.Runify.Execute:input_type -> runify.SelectedAction
+	6, // 9: runify.Runify.GetRoot:output_type -> runify.Form
+	4, // 10: runify.Runify.GetActions:output_type -> runify.Actions
+	8, // 11: runify.Runify.ExecuteDefault:output_type -> runify.Result
+	8, // 12: runify.Runify.Execute:output_type -> runify.Result
+	9, // [9:13] is the sub-list for method output_type
+	5, // [5:9] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_proto_runify_proto_init() }
@@ -735,7 +643,7 @@ func file_proto_runify_proto_init() {
 			}
 		}
 		file_proto_runify_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SelectedAction); i {
+			switch v := v.(*CardItem); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -747,7 +655,7 @@ func file_proto_runify_proto_init() {
 			}
 		}
 		file_proto_runify_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SelectedCommand); i {
+			switch v := v.(*SelectedCard); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -759,7 +667,7 @@ func file_proto_runify_proto_init() {
 			}
 		}
 		file_proto_runify_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Action); i {
+			switch v := v.(*ActionItem); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -783,7 +691,7 @@ func file_proto_runify_proto_init() {
 			}
 		}
 		file_proto_runify_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Command); i {
+			switch v := v.(*SelectedAction); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -795,18 +703,6 @@ func file_proto_runify_proto_init() {
 			}
 		}
 		file_proto_runify_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Commands); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_proto_runify_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Form); i {
 			case 0:
 				return &v.state
@@ -818,8 +714,8 @@ func file_proto_runify_proto_init() {
 				return nil
 			}
 		}
-		file_proto_runify_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Message); i {
+		file_proto_runify_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*HideWindow); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -830,7 +726,7 @@ func file_proto_runify_proto_init() {
 				return nil
 			}
 		}
-		file_proto_runify_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_proto_runify_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Result); i {
 			case 0:
 				return &v.state
@@ -843,25 +739,23 @@ func file_proto_runify_proto_init() {
 			}
 		}
 	}
-	file_proto_runify_proto_msgTypes[9].OneofWrappers = []interface{}{
-		(*Result_Commands)(nil),
+	file_proto_runify_proto_msgTypes[8].OneofWrappers = []interface{}{
 		(*Result_Form)(nil),
-		(*Result_Message)(nil),
-		(*Result_WinState)(nil),
+		(*Result_Empty)(nil),
+		(*Result_Hide)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_proto_runify_proto_rawDesc,
-			NumEnums:      1,
-			NumMessages:   10,
+			NumEnums:      0,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_proto_runify_proto_goTypes,
 		DependencyIndexes: file_proto_runify_proto_depIdxs,
-		EnumInfos:         file_proto_runify_proto_enumTypes,
 		MessageInfos:      file_proto_runify_proto_msgTypes,
 	}.Build()
 	File_proto_runify_proto = out.File

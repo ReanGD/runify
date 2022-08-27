@@ -22,8 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RunifyClient interface {
-	GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Commands, error)
-	GetActions(ctx context.Context, in *SelectedCommand, opts ...grpc.CallOption) (*Actions, error)
+	GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Form, error)
+	GetActions(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Actions, error)
+	ExecuteDefault(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Result, error)
 	Execute(ctx context.Context, in *SelectedAction, opts ...grpc.CallOption) (*Result, error)
 }
 
@@ -35,8 +36,8 @@ func NewRunifyClient(cc grpc.ClientConnInterface) RunifyClient {
 	return &runifyClient{cc}
 }
 
-func (c *runifyClient) GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Commands, error) {
-	out := new(Commands)
+func (c *runifyClient) GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Form, error) {
+	out := new(Form)
 	err := c.cc.Invoke(ctx, "/runify.Runify/GetRoot", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -44,9 +45,18 @@ func (c *runifyClient) GetRoot(ctx context.Context, in *Empty, opts ...grpc.Call
 	return out, nil
 }
 
-func (c *runifyClient) GetActions(ctx context.Context, in *SelectedCommand, opts ...grpc.CallOption) (*Actions, error) {
+func (c *runifyClient) GetActions(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Actions, error) {
 	out := new(Actions)
 	err := c.cc.Invoke(ctx, "/runify.Runify/GetActions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *runifyClient) ExecuteDefault(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Result, error) {
+	out := new(Result)
+	err := c.cc.Invoke(ctx, "/runify.Runify/ExecuteDefault", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +76,9 @@ func (c *runifyClient) Execute(ctx context.Context, in *SelectedAction, opts ...
 // All implementations must embed UnimplementedRunifyServer
 // for forward compatibility
 type RunifyServer interface {
-	GetRoot(context.Context, *Empty) (*Commands, error)
-	GetActions(context.Context, *SelectedCommand) (*Actions, error)
+	GetRoot(context.Context, *Empty) (*Form, error)
+	GetActions(context.Context, *SelectedCard) (*Actions, error)
+	ExecuteDefault(context.Context, *SelectedCard) (*Result, error)
 	Execute(context.Context, *SelectedAction) (*Result, error)
 	mustEmbedUnimplementedRunifyServer()
 }
@@ -76,11 +87,14 @@ type RunifyServer interface {
 type UnimplementedRunifyServer struct {
 }
 
-func (UnimplementedRunifyServer) GetRoot(context.Context, *Empty) (*Commands, error) {
+func (UnimplementedRunifyServer) GetRoot(context.Context, *Empty) (*Form, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoot not implemented")
 }
-func (UnimplementedRunifyServer) GetActions(context.Context, *SelectedCommand) (*Actions, error) {
+func (UnimplementedRunifyServer) GetActions(context.Context, *SelectedCard) (*Actions, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetActions not implemented")
+}
+func (UnimplementedRunifyServer) ExecuteDefault(context.Context, *SelectedCard) (*Result, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExecuteDefault not implemented")
 }
 func (UnimplementedRunifyServer) Execute(context.Context, *SelectedAction) (*Result, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
@@ -117,7 +131,7 @@ func _Runify_GetRoot_Handler(srv interface{}, ctx context.Context, dec func(inte
 }
 
 func _Runify_GetActions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SelectedCommand)
+	in := new(SelectedCard)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -129,7 +143,25 @@ func _Runify_GetActions_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/runify.Runify/GetActions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunifyServer).GetActions(ctx, req.(*SelectedCommand))
+		return srv.(RunifyServer).GetActions(ctx, req.(*SelectedCard))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Runify_ExecuteDefault_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SelectedCard)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RunifyServer).ExecuteDefault(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/runify.Runify/ExecuteDefault",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RunifyServer).ExecuteDefault(ctx, req.(*SelectedCard))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -166,6 +198,10 @@ var Runify_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetActions",
 			Handler:    _Runify_GetActions_Handler,
+		},
+		{
+			MethodName: "ExecuteDefault",
+			Handler:    _Runify_ExecuteDefault_Handler,
 		},
 		{
 			MethodName: "Execute",

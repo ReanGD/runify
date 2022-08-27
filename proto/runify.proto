@@ -8,57 +8,50 @@ message Empty {
 
 }
 
-message SelectedAction {
-	uint32 actionID = 1;
-	uint64 commandID = 2;
-}
-
-message SelectedCommand {
-	uint64 commandID = 1;
-}
-
-message Action {
-	uint32 id = 1;
-	string name = 2;
-}
-
-message Actions {
-	repeated Action data = 1;
-}
-
-message Command {
-	uint64 id = 1;
+message CardItem {
+	uint64 cardID = 1;
 	string name = 2;
 	string icon = 3;
 }
 
-message Commands {
-	repeated Command data = 1;
+message SelectedCard {
+	uint64 cardID = 1;
+}
+
+message ActionItem {
+	uint32 actionID = 1;
+	string name = 2;
+}
+
+message Actions {
+	repeated ActionItem items = 1;
+}
+
+message SelectedAction {
+	uint32 actionID = 1;
+	uint64 cardID = 2;
 }
 
 message Form {
+	string layout = 1;
+	repeated CardItem cards = 2;
 }
 
-message Message {
-	string text = 1;
-}
-
-enum WindowState {
-	SHOW = 0;
-	HIDE = 1;
+message HideWindow {
+	string error = 1;
 }
 
 message Result {
 	oneof payload {
-		Commands commands = 1;
-		Form form = 2;
-		Message message = 3;
-		WindowState winState = 4;
+		Form form = 1;
+		Empty empty = 2;
+		HideWindow hide = 3;
 	}
 }
 
 service Runify {
-	rpc GetRoot(Empty) returns (Commands) {}
-	rpc GetActions(SelectedCommand) returns (Actions) {}
+	rpc GetRoot(Empty) returns (Form) {}
+	rpc GetActions(SelectedCard) returns (Actions) {}
+	rpc ExecuteDefault(SelectedCard) returns (Result) {}
 	rpc Execute(SelectedAction) returns (Result) {}
 }
