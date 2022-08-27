@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,7 +21,7 @@ type entry struct {
 type desktopEntry struct {
 	providerID   uint64
 	entries      []*entry
-	commands     []*pb.Command
+	cache        []*pb.CardItem
 	moduleLogger *zap.Logger
 }
 
@@ -28,7 +29,7 @@ func newDesktopEntry() *desktopEntry {
 	return &desktopEntry{
 		providerID:   0,
 		entries:      []*entry{},
-		commands:     []*pb.Command{},
+		cache:        []*pb.CardItem{},
 		moduleLogger: nil,
 	}
 }
@@ -46,22 +47,22 @@ func (p *desktopEntry) onInit(cfg *config.Config, moduleLogger *zap.Logger, prov
 func (p *desktopEntry) onStart() {
 	id := p.providerID
 	entries := p.entries
-	commands := p.commands
+	cache := p.cache
 	p.walkXDGDesktopEntries(func(path string, props *desktop.Entry) {
 		entries = append(entries, &entry{
 			path:  path,
 			props: props,
 		})
-		commands = append(commands, &pb.Command{
-			Id:   id,
-			Name: props.Name,
-			Icon: props.Icon,
+		cache = append(cache, &pb.CardItem{
+			CardID: id,
+			Name:   props.Name,
+			Icon:   props.Icon,
 		})
 		id++
 	})
 
 	p.entries = entries
-	p.commands = commands
+	p.cache = cache
 }
 
 func (p *desktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *desktop.Entry)) {
@@ -101,43 +102,32 @@ func (p *desktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *des
 	}
 }
 
-func (p *desktopEntry) getRoot() []*pb.Command {
-	return p.commands
+func (p *desktopEntry) getRoot() ([]*pb.CardItem, error) {
+	return p.cache, nil
 }
 
-func (p *desktopEntry) getActions(commandID uint64) []*pb.Action {
-	itemID := int(commandID & commandIDMask)
+func (p *desktopEntry) getActions(cardID uint64) ([]*pb.ActionItem, error) {
+	itemID := int(cardID & cardIDMask)
 	if itemID >= len(p.entries) {
-		p.moduleLogger.Warn("Not found item by commandID",
-			zap.String("Command", "GetActions"), zap.Uint64("CommandID", commandID), zap.Int("itemID", itemID))
-
-		return []*pb.Action{}
+		return nil, errors.New("not found item by cardID")
 	}
 
-	return []*pb.Action{{
-		Id:   0,
-		Name: "Open",
+	return []*pb.ActionItem{{
+		ActionID: 0,
+		Name:     "Open",
 	}, {
-		Id:   1,
-		Name: "Copy name",
+		ActionID: 1,
+		Name:     "Copy name",
 	}, {
-		Id:   2,
-		Name: "Copy path",
-	}}
+		ActionID: 2,
+		Name:     "Copy path",
+	}}, nil
 }
 
-func (p *desktopEntry) execute(commandID uint64, actionID uint32) *pb.Result {
-	itemID := int(commandID & commandIDMask)
+func (p *desktopEntry) execute(cardID uint64, actionID uint32) (*pb.Result, error) {
+	itemID := int(cardID & cardIDMask)
 	if itemID >= len(p.entries) {
-		p.moduleLogger.Warn("Not found item by commandID",
-			zap.String("Command", "Execute"),
-			zap.Uint64("CommandID", commandID),
-			zap.Uint32("ActionID", actionID),
-			zap.Int("itemID", itemID))
-
-		return &pb.Result{
-			Payload: &pb.Result_Empty{},
-		}
+		return nil, errors.New("not found item by cardID")
 	}
 
 	// TODO: copy run from dex
@@ -146,15 +136,23 @@ func (p *desktopEntry) execute(commandID uint64, actionID uint32) *pb.Result {
 	err := c.Run()
 	if err != nil {
 		p.moduleLogger.Warn("Failed execute desktop entry",
-			zap.String("Command", "Execute"),
-			zap.String("Path", entry.path),
-			zap.Uint64("CommandID", commandID),
+			zap.String("Request", "Execute"),
+			zap.Uint64("CardID", cardID),
 			zap.Uint32("ActionID", actionID),
-			zap.Int("itemID", itemID),
 			zap.Error(err))
+
+		return &pb.Result{
+			Payload: &pb.Result_Hide{
+				Hide: &pb.HideWindow{
+					Error: "Failed execute desktop entry",
+				},
+			},
+		}, nil
 	}
 
 	return &pb.Result{
-		Payload: &pb.Result_Empty{},
-	}
+		Payload: &pb.Result_Hide{
+			Hide: &pb.HideWindow{},
+		},
+	}, nil
 }

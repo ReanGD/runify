@@ -48,51 +48,38 @@ func (h *providerHandler) onStart(ctx context.Context, wg *sync.WaitGroup) <-cha
 	return errCh
 }
 
-func (h *providerHandler) getRoot() []*pb.Command {
-	resultCh := make(chan []*pb.Command, len(h.dataProviders))
+func (h *providerHandler) getRoot(cmd *getRootCmd) {
+	chans := make([]<-chan []*pb.CardItem, 0, len(h.dataProviders))
 	for _, dp := range h.dataProviders {
-		dp.getRoot(resultCh)
+		chans = append(chans, dp.getRoot())
 	}
 
-	result := []*pb.Command{}
-	for i := 0; i != len(h.dataProviders); i++ {
-		result = append(result, <-resultCh...)
+	result := []*pb.CardItem{}
+	for _, ch := range chans {
+		result = append(result, <-ch...)
 	}
 
-	return result
+	cmd.result <- result
 }
 
-func (h *providerHandler) getActions(commandID uint64) []*pb.Action {
-	providerID := commandID & providerIDMask
+func (h *providerHandler) getActions(cmd *getActionsCmd) {
+	providerID := cmd.cardID & providerIDMask
 	provider, ok := h.dataProviders[providerID]
 	if !ok {
-		h.moduleLogger.Warn("Not found provider",
-			zap.String("Command", "GetActions"), zap.Uint64("CommandID", commandID), zap.Uint64("ProviderID", providerID))
-		return []*pb.Action{}
+		cmd.onRequestDefault(h.moduleLogger, "Not found provider")
+	} else {
+		data := <-provider.getActions(cmd.cardID)
+		cmd.result <- data
 	}
-
-	resultCh := make(chan []*pb.Action, 1)
-	provider.getActions(commandID, resultCh)
-
-	return <-resultCh
 }
 
-func (h *providerHandler) execute(commandID uint64, actionID uint32) *pb.Result {
-	providerID := commandID & providerIDMask
+func (h *providerHandler) execute(cmd *executeCmd) {
+	providerID := cmd.cardID & providerIDMask
 	provider, ok := h.dataProviders[providerID]
 	if !ok {
-		h.moduleLogger.Warn("Not found provider",
-			zap.String("Command", "Execute"),
-			zap.Uint64("CommandID", commandID),
-			zap.Uint32("ActionID", actionID),
-			zap.Uint64("ProviderID", providerID))
-		return &pb.Result{
-			Payload: &pb.Result_Empty{},
-		}
+		cmd.onRequestDefault(h.moduleLogger, "Not found provider")
+	} else {
+		data := <-provider.execute(cmd.cardID, cmd.actionID)
+		cmd.result <- data
 	}
-
-	resultCh := make(chan *pb.Result, 1)
-	provider.execute(commandID, actionID, resultCh)
-
-	return <-resultCh
 }

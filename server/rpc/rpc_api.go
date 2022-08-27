@@ -19,21 +19,24 @@ func newRunifyServer(provider *provider.Provider) *runifyServer {
 	}
 }
 
-func (s *runifyServer) GetRoot(context.Context, *pb.Empty) (*pb.Commands, error) {
+func (s *runifyServer) GetRoot(context.Context, *pb.Empty) (*pb.Form, error) {
 	data := <-s.provider.GetRoot()
-	return &pb.Commands{
-		Data: data,
+	return &pb.Form{
+		Cards: data,
 	}, nil
 }
 
-func (s *runifyServer) GetActions(ctx context.Context, selectedCommand *pb.SelectedCommand) (*pb.Actions, error) {
-	data := <-s.provider.GetActions(selectedCommand.CommandID)
-	return &pb.Actions{
-		Data: data,
-	}, nil
+func (s *runifyServer) GetActions(ctx context.Context, selectedCard *pb.SelectedCard) (*pb.Actions, error) {
+	data := <-s.provider.GetActions(selectedCard.CardID)
+	return data, nil
+}
+
+func (s *runifyServer) ExecuteDefault(ctx context.Context, selectedCard *pb.SelectedCard) (*pb.Result, error) {
+	data := <-s.provider.Execute(selectedCard.CardID, 1)
+	return data, nil
 }
 
 func (s *runifyServer) Execute(ctx context.Context, selectedAction *pb.SelectedAction) (*pb.Result, error) {
-	data := <-s.provider.Execute(selectedAction.CommandID, selectedAction.ActionID)
+	data := <-s.provider.Execute(selectedAction.CardID, selectedAction.ActionID)
 	return data, nil
 }

@@ -14,15 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type dataProviderHandler interface {
-	getName() string
-	onInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error
-	onStart()
-	getRoot() []*pb.Command
-	getActions(commandID uint64) []*pb.Action
-	execute(commandID uint64, actionID uint32) *pb.Result
-}
-
 type dataProvider struct {
 	providerID uint64
 	handler    dataProviderHandler
@@ -100,11 +91,25 @@ func (p *dataProvider) safeRequestLoop(ctx context.Context) (resultIsFinish bool
 func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *getRootCmd:
-		r.result <- p.handler.getRoot()
+		if data, err := p.handler.getRoot(); err != nil {
+			r.onRequestDefault(p.ModuleLogger, err.Error())
+		} else {
+			r.result <- data
+		}
 	case *getActionsCmd:
-		r.result <- p.handler.getActions(r.commandID)
+		if data, err := p.handler.getActions(r.cardID); err != nil {
+			r.onRequestDefault(p.ModuleLogger, err.Error())
+		} else {
+			r.result <- &pb.Actions{
+				Items: data,
+			}
+		}
 	case *executeCmd:
-		r.result <- p.handler.execute(r.commandID, r.actionID)
+		if data, err := p.handler.execute(r.cardID, r.actionID); err != nil {
+			r.onRequestDefault(p.ModuleLogger, err.Error())
+		} else {
+			r.result <- data
+		}
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -120,28 +125,11 @@ func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 func (p *dataProvider) onRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *getRootCmd:
-		r.result <- []*pb.Command{}
-		p.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "GetRoot"),
-			zap.String("Reason", reason),
-			zap.String("Action", "skip request"))
+		r.onRequestDefault(p.ModuleLogger, reason)
 	case *getActionsCmd:
-		r.result <- []*pb.Action{}
-		p.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "GetActions"),
-			zap.Uint64("CommandID", r.commandID),
-			zap.String("Reason", reason),
-			zap.String("Action", "skip request"))
+		r.onRequestDefault(p.ModuleLogger, reason)
 	case *executeCmd:
-		r.result <- &pb.Result{
-			Payload: &pb.Result_Empty{},
-		}
-		p.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "Execute"),
-			zap.Uint64("CommandID", r.commandID),
-			zap.Uint32("ActionID", r.actionID),
-			zap.String("Reason", reason),
-			zap.String("Action", "skip request"))
+		r.onRequestDefault(p.ModuleLogger, reason)
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -155,23 +143,32 @@ func (p *dataProvider) onRequestDefault(request interface{}, reason string) (boo
 	return false, nil
 }
 
-func (p *dataProvider) getRoot(result chan<- []*pb.Command) {
+func (p *dataProvider) getRoot() <-chan []*pb.CardItem {
+	ch := make(chan []*pb.CardItem, 1)
 	p.AddToChannel(&getRootCmd{
-		result: result,
+		result: ch,
 	})
+
+	return ch
 }
 
-func (p *dataProvider) getActions(commandID uint64, result chan<- []*pb.Action) {
+func (p *dataProvider) getActions(cardID uint64) <-chan *pb.Actions {
+	ch := make(chan *pb.Actions, 1)
 	p.AddToChannel(&getActionsCmd{
-		commandID: commandID,
-		result:    result,
+		cardID: cardID,
+		result: ch,
 	})
+
+	return ch
 }
 
-func (p *dataProvider) execute(commandID uint64, actionID uint32, result chan<- *pb.Result) {
+func (p *dataProvider) execute(cardID uint64, actionID uint32) <-chan *pb.Result {
+	ch := make(chan *pb.Result, 1)
 	p.AddToChannel(&executeCmd{
-		commandID: commandID,
-		actionID:  actionID,
-		result:    result,
+		cardID:   cardID,
+		actionID: actionID,
+		result:   ch,
 	})
+
+	return ch
 }

@@ -98,11 +98,11 @@ func (p *Provider) safeRequestLoop(ctx context.Context, errCh <-chan error) (res
 func (p *Provider) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *getRootCmd:
-		r.result <- p.handler.getRoot()
+		p.handler.getRoot(r)
 	case *getActionsCmd:
-		r.result <- p.handler.getActions(r.commandID)
+		p.handler.getActions(r)
 	case *executeCmd:
-		r.result <- p.handler.execute(r.commandID, r.actionID)
+		p.handler.execute(r)
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -118,28 +118,11 @@ func (p *Provider) onRequest(request interface{}) (bool, error) {
 func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *getRootCmd:
-		r.result <- []*pb.Command{}
-		p.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "GetRoot"),
-			zap.String("Reason", reason),
-			zap.String("Action", "skip request"))
+		r.onRequestDefault(p.ModuleLogger, reason)
 	case *getActionsCmd:
-		r.result <- []*pb.Action{}
-		p.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "GetActions"),
-			zap.Uint64("CommandID", r.commandID),
-			zap.String("Reason", reason),
-			zap.String("Action", "skip request"))
+		r.onRequestDefault(p.ModuleLogger, reason)
 	case *executeCmd:
-		r.result <- &pb.Result{
-			Payload: &pb.Result_Empty{},
-		}
-		p.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "Execute"),
-			zap.Uint64("CommandID", r.commandID),
-			zap.Uint32("ActionID", r.actionID),
-			zap.String("Reason", reason),
-			zap.String("Action", "skip request"))
+		r.onRequestDefault(p.ModuleLogger, reason)
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -153,8 +136,8 @@ func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, e
 	return false, nil
 }
 
-func (p *Provider) GetRoot() <-chan []*pb.Command {
-	ch := make(chan []*pb.Command, 1)
+func (p *Provider) GetRoot() <-chan []*pb.CardItem {
+	ch := make(chan []*pb.CardItem, 1)
 	p.AddToChannel(&getRootCmd{
 		result: ch,
 	})
@@ -162,22 +145,22 @@ func (p *Provider) GetRoot() <-chan []*pb.Command {
 	return ch
 }
 
-func (p *Provider) GetActions(commandID uint64) <-chan []*pb.Action {
-	ch := make(chan []*pb.Action, 1)
+func (p *Provider) GetActions(cardID uint64) <-chan *pb.Actions {
+	ch := make(chan *pb.Actions, 1)
 	p.AddToChannel(&getActionsCmd{
-		commandID: commandID,
-		result:    ch,
+		cardID: cardID,
+		result: ch,
 	})
 
 	return ch
 }
 
-func (p *Provider) Execute(commandID uint64, actionID uint32) <-chan *pb.Result {
+func (p *Provider) Execute(cardID uint64, actionID uint32) <-chan *pb.Result {
 	ch := make(chan *pb.Result, 1)
 	p.AddToChannel(&executeCmd{
-		commandID: commandID,
-		actionID:  actionID,
-		result:    ch,
+		cardID:   cardID,
+		actionID: actionID,
+		result:   ch,
 	})
 
 	return ch
