@@ -12,6 +12,7 @@ import (
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/provider"
 	"github.com/ReanGD/runify/server/rpc"
+	"github.com/ReanGD/runify/server/x11"
 	"github.com/gofrs/uuid"
 	"go.uber.org/zap"
 )
@@ -22,8 +23,9 @@ type Runify struct {
 	appID    uuid.UUID
 	cfg      *config.Config
 	logger   *logger.Logger
-	provider *provider.Provider
 	rpc      *rpc.Rpc
+	x11      *x11.X11
+	provider *provider.Provider
 
 	runifyLogger *zap.Logger
 }
@@ -45,8 +47,9 @@ func (r *Runify) create(buildCfg *config.BuildCfg) error {
 
 	r.cfg = config.New(buildCfg)
 	r.logger = nil
-	r.provider = provider.New()
 	r.rpc = rpc.New()
+	r.x11 = x11.New()
+	r.provider = provider.New()
 	r.runifyLogger = nil
 
 	return nil
@@ -79,14 +82,19 @@ func (r *Runify) init(cfgFile string) bool {
 	r.runifyLogger = rootLogger.With(logModule)
 	r.cfg.AddVersionToLog(rootLogger)
 
-	providerCh := r.provider.OnInit(r.cfg, rootLogger)
 	rpcCh := r.rpc.OnInit(r.cfg, rootLogger, r.provider)
+	x11Ch := r.x11.OnInit(r.cfg, rootLogger)
+	providerCh := r.provider.OnInit(r.cfg, rootLogger)
 
 	if err = r.checkOnInit(provider.ModuleName, providerCh); err != nil {
 		return false
 	}
 
 	if err = r.checkOnInit(rpc.ModuleName, rpcCh); err != nil {
+		return false
+	}
+
+	if err = r.checkOnInit(x11.ModuleName, x11Ch); err != nil {
 		return false
 	}
 
@@ -99,8 +107,9 @@ func (r *Runify) start() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	cfgCh := r.cfg.OnStart(ctx, wg, r.logger.GetRoot())
-	providerCh := r.provider.OnStart(ctx, wg)
 	rpcCh := r.rpc.OnStart(ctx, wg)
+	x11Ch := r.x11.OnStart(ctx, wg)
+	providerCh := r.provider.OnStart(ctx, wg)
 
 	r.runifyLogger.Info("Start")
 
@@ -109,10 +118,12 @@ func (r *Runify) start() {
 	select {
 	case err = <-cfgCh:
 		name = config.ModuleName
-	case err = <-providerCh:
-		name = provider.ModuleName
 	case err = <-rpcCh:
 		name = rpc.ModuleName
+	case err = <-x11Ch:
+		name = x11.ModuleName
+	case err = <-providerCh:
+		name = provider.ModuleName
 	}
 
 	r.runifyLogger.Error("Module finished with error. Start to cancel the work of the other modules",

@@ -23,6 +23,18 @@ func (c RpcCfg) setDefault(vp *viper.Viper) {
 	})
 }
 
+type X11Cfg struct {
+	ChannelLen        uint32
+	HotkeysChannelLen uint32
+}
+
+func (c X11Cfg) setDefault(vp *viper.Viper) {
+	vp.SetDefault("X11", map[string]interface{}{
+		"ChannelLen":        100,
+		"HotkeysChannelLen": 100,
+	})
+}
+
 type ProviderCfg struct {
 	ChannelLen          uint32
 	SubModuleChannelLen uint32
@@ -96,6 +108,7 @@ func (c LoggerCfg) setDefault(vp *viper.Viper) {
 
 type ConfigurationSaved struct {
 	Rpc      RpcCfg
+	X11      X11Cfg
 	Provider ProviderCfg
 	Logger   LoggerCfg
 }
@@ -114,6 +127,7 @@ func newConfiguration(buildCfg *BuildCfg) *Configuration {
 
 func (c *Configuration) setDefault(vp *viper.Viper) {
 	c.Rpc.setDefault(vp)
+	c.X11.setDefault(vp)
 	c.Provider.setDefault(vp)
 	c.Logger.setDefault(vp)
 }
