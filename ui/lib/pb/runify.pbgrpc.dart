@@ -14,6 +14,10 @@ import 'runify.pb.dart' as $0;
 export 'runify.pb.dart';
 
 class RunifyClient extends $grpc.Client {
+  static final _$waitShowWindow = $grpc.ClientMethod<$0.Empty, $0.ShowWindow>(
+      '/runify.Runify/WaitShowWindow',
+      ($0.Empty value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $0.ShowWindow.fromBuffer(value));
   static final _$getRoot = $grpc.ClientMethod<$0.Empty, $0.Form>(
       '/runify.Runify/GetRoot',
       ($0.Empty value) => value.writeToBuffer(),
@@ -36,6 +40,13 @@ class RunifyClient extends $grpc.Client {
       {$grpc.CallOptions? options,
       $core.Iterable<$grpc.ClientInterceptor>? interceptors})
       : super(channel, options: options, interceptors: interceptors);
+
+  $grpc.ResponseStream<$0.ShowWindow> waitShowWindow($0.Empty request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(
+        _$waitShowWindow, $async.Stream.fromIterable([request]),
+        options: options);
+  }
 
   $grpc.ResponseFuture<$0.Form> getRoot($0.Empty request,
       {$grpc.CallOptions? options}) {
@@ -62,6 +73,13 @@ abstract class RunifyServiceBase extends $grpc.Service {
   $core.String get $name => 'runify.Runify';
 
   RunifyServiceBase() {
+    $addMethod($grpc.ServiceMethod<$0.Empty, $0.ShowWindow>(
+        'WaitShowWindow',
+        waitShowWindow_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($0.ShowWindow value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.Empty, $0.Form>(
         'GetRoot',
         getRoot_Pre,
@@ -92,6 +110,11 @@ abstract class RunifyServiceBase extends $grpc.Service {
         ($0.Result value) => value.writeToBuffer()));
   }
 
+  $async.Stream<$0.ShowWindow> waitShowWindow_Pre(
+      $grpc.ServiceCall call, $async.Future<$0.Empty> request) async* {
+    yield* waitShowWindow(call, await request);
+  }
+
   $async.Future<$0.Form> getRoot_Pre(
       $grpc.ServiceCall call, $async.Future<$0.Empty> request) async {
     return getRoot(call, await request);
@@ -112,6 +135,8 @@ abstract class RunifyServiceBase extends $grpc.Service {
     return execute(call, await request);
   }
 
+  $async.Stream<$0.ShowWindow> waitShowWindow(
+      $grpc.ServiceCall call, $0.Empty request);
   $async.Future<$0.Form> getRoot($grpc.ServiceCall call, $0.Empty request);
   $async.Future<$0.Actions> getActions(
       $grpc.ServiceCall call, $0.SelectedCard request);

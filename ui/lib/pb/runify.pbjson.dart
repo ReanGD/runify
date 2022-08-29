@@ -80,6 +80,13 @@ const Form$json = const {
 
 /// Descriptor for `Form`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List formDescriptor = $convert.base64Decode('CgRGb3JtEhYKBmxheW91dBgBIAEoCVIGbGF5b3V0EiYKBWNhcmRzGAIgAygLMhAucnVuaWZ5LkNhcmRJdGVtUgVjYXJkcw==');
+@$core.Deprecated('Use showWindowDescriptor instead')
+const ShowWindow$json = const {
+  '1': 'ShowWindow',
+};
+
+/// Descriptor for `ShowWindow`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List showWindowDescriptor = $convert.base64Decode('CgpTaG93V2luZG93');
 @$core.Deprecated('Use hideWindowDescriptor instead')
 const HideWindow$json = const {
   '1': 'HideWindow',

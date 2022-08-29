@@ -379,6 +379,35 @@ class Form extends $pb.GeneratedMessage {
   $core.List<CardItem> get cards => $_getList(1);
 }
 
+class ShowWindow extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ShowWindow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  ShowWindow._() : super();
+  factory ShowWindow() => create();
+  factory ShowWindow.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ShowWindow.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ShowWindow clone() => ShowWindow()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ShowWindow copyWith(void Function(ShowWindow) updates) => super.copyWith((message) => updates(message as ShowWindow)) as ShowWindow; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ShowWindow create() => ShowWindow._();
+  ShowWindow createEmptyInstance() => create();
+  static $pb.PbList<ShowWindow> createRepeated() => $pb.PbList<ShowWindow>();
+  @$core.pragma('dart2js:noInline')
+  static ShowWindow getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ShowWindow>(create);
+  static ShowWindow? _defaultInstance;
+}
+
 class HideWindow extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HideWindow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error')

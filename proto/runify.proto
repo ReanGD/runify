@@ -37,6 +37,9 @@ message Form {
 	repeated CardItem cards = 2;
 }
 
+message ShowWindow {
+}
+
 message HideWindow {
 	string error = 1;
 }
@@ -50,6 +53,7 @@ message Result {
 }
 
 service Runify {
+	rpc WaitShowWindow(Empty) returns (stream ShowWindow) {}
 	rpc GetRoot(Empty) returns (Form) {}
 	rpc GetActions(SelectedCard) returns (Actions) {}
 	rpc ExecuteDefault(SelectedCard) returns (Result) {}

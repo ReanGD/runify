@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RunifyClient interface {
+	WaitShowWindow(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Runify_WaitShowWindowClient, error)
 	GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Form, error)
 	GetActions(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Actions, error)
 	ExecuteDefault(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Result, error)
@@ -34,6 +35,38 @@ type runifyClient struct {
 
 func NewRunifyClient(cc grpc.ClientConnInterface) RunifyClient {
 	return &runifyClient{cc}
+}
+
+func (c *runifyClient) WaitShowWindow(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Runify_WaitShowWindowClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Runify_ServiceDesc.Streams[0], "/runify.Runify/WaitShowWindow", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &runifyWaitShowWindowClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Runify_WaitShowWindowClient interface {
+	Recv() (*ShowWindow, error)
+	grpc.ClientStream
+}
+
+type runifyWaitShowWindowClient struct {
+	grpc.ClientStream
+}
+
+func (x *runifyWaitShowWindowClient) Recv() (*ShowWindow, error) {
+	m := new(ShowWindow)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *runifyClient) GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Form, error) {
@@ -76,6 +109,7 @@ func (c *runifyClient) Execute(ctx context.Context, in *SelectedAction, opts ...
 // All implementations must embed UnimplementedRunifyServer
 // for forward compatibility
 type RunifyServer interface {
+	WaitShowWindow(*Empty, Runify_WaitShowWindowServer) error
 	GetRoot(context.Context, *Empty) (*Form, error)
 	GetActions(context.Context, *SelectedCard) (*Actions, error)
 	ExecuteDefault(context.Context, *SelectedCard) (*Result, error)
@@ -87,6 +121,9 @@ type RunifyServer interface {
 type UnimplementedRunifyServer struct {
 }
 
+func (UnimplementedRunifyServer) WaitShowWindow(*Empty, Runify_WaitShowWindowServer) error {
+	return status.Errorf(codes.Unimplemented, "method WaitShowWindow not implemented")
+}
 func (UnimplementedRunifyServer) GetRoot(context.Context, *Empty) (*Form, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoot not implemented")
 }
@@ -110,6 +147,27 @@ type UnsafeRunifyServer interface {
 
 func RegisterRunifyServer(s grpc.ServiceRegistrar, srv RunifyServer) {
 	s.RegisterService(&Runify_ServiceDesc, srv)
+}
+
+func _Runify_WaitShowWindow_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(RunifyServer).WaitShowWindow(m, &runifyWaitShowWindowServer{stream})
+}
+
+type Runify_WaitShowWindowServer interface {
+	Send(*ShowWindow) error
+	grpc.ServerStream
+}
+
+type runifyWaitShowWindowServer struct {
+	grpc.ServerStream
+}
+
+func (x *runifyWaitShowWindowServer) Send(m *ShowWindow) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _Runify_GetRoot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -208,6 +266,12 @@ var Runify_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runify_Execute_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "WaitShowWindow",
+			Handler:       _Runify_WaitShowWindow_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "proto/runify.proto",
 }
