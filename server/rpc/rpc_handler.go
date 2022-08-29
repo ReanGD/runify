@@ -17,17 +17,23 @@ import (
 )
 
 type rpcHandler struct {
-	unixAddr     string
-	netUnixAddr  *net.UnixAddr
-	grpcServer   *grpc.Server
-	runifyServer *runifyServer
+	unixAddr         string
+	netUnixAddr      *net.UnixAddr
+	showUIMultiplier *showUIMultiplier
+	grpcServer       *grpc.Server
+	runifyServer     *runifyServer
 
 	moduleLogger *zap.Logger
 }
 
 func newRpcHandler() *rpcHandler {
 	return &rpcHandler{
-		moduleLogger: nil,
+		unixAddr:         "",
+		netUnixAddr:      nil,
+		showUIMultiplier: newShowUIMultiplier(),
+		grpcServer:       nil,
+		runifyServer:     nil,
+		moduleLogger:     nil,
 	}
 }
 
@@ -42,7 +48,7 @@ func (h *rpcHandler) onInit(cfg *config.RpcCfg, moduleLogger *zap.Logger, provid
 		return errors.New("failed resolve unit address")
 	}
 	h.grpcServer = grpc.NewServer()
-	h.runifyServer = newRunifyServer(provider)
+	h.runifyServer = newRunifyServer(provider, h.showUIMultiplier, h.moduleLogger)
 
 	return nil
 }
@@ -110,5 +116,5 @@ func (h *rpcHandler) onStop() {
 }
 
 func (h *rpcHandler) onShowUI() {
-
+	h.showUIMultiplier.sendToAll()
 }

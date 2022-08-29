@@ -2,9 +2,9 @@ package x11
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/rpc"
 	"github.com/jezek/xgbutil"
 	"github.com/jezek/xgbutil/keybind"
 	"github.com/jezek/xgbutil/xevent"
@@ -20,6 +20,7 @@ func (h hotkeyID) ZapField() zap.Field {
 type x11Keybind struct {
 	hotkeysCh   chan hotkeyID
 	xConnection *xgbutil.XUtil
+	rpc         *rpc.Rpc
 
 	moduleLogger *zap.Logger
 }
@@ -28,14 +29,16 @@ func newX11Keybind() *x11Keybind {
 	return &x11Keybind{
 		hotkeysCh:    nil,
 		xConnection:  nil,
+		rpc:          nil,
 		moduleLogger: nil,
 	}
 }
 
-func (h *x11Keybind) onInit(cfg *config.Config, xConnection *xgbutil.XUtil, moduleLogger *zap.Logger) error {
+func (h *x11Keybind) onInit(cfg *config.Config, xConnection *xgbutil.XUtil, rpc *rpc.Rpc, moduleLogger *zap.Logger) error {
 	channelLen := cfg.Get().X11.HotkeysChannelLen
 	h.hotkeysCh = make(chan hotkeyID, channelLen)
 	h.xConnection = xConnection
+	h.rpc = rpc
 	h.moduleLogger = moduleLogger
 	keybind.Initialize(h.xConnection)
 	h.register(hotkeyID(0), "Mod4-r")
@@ -47,7 +50,7 @@ func (h *x11Keybind) onStart() {
 }
 
 func (h *x11Keybind) onHotkey(id hotkeyID) {
-	fmt.Println("press key", uint32(id))
+	h.rpc.ShowUI()
 }
 
 func (h *x11Keybind) onStop() {

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/rpc"
 	"github.com/jezek/xgbutil"
 	"github.com/jezek/xgbutil/xevent"
 	"go.uber.org/zap"
@@ -29,7 +30,7 @@ func (h *x11Handler) getHotkeysCh() <-chan hotkeyID {
 	return h.keybind.hotkeysCh
 }
 
-func (h *x11Handler) onInit(cfg *config.Config, moduleLogger *zap.Logger) error {
+func (h *x11Handler) onInit(cfg *config.Config, rpc *rpc.Rpc, moduleLogger *zap.Logger) error {
 	h.moduleLogger = moduleLogger
 
 	var err error
@@ -39,7 +40,7 @@ func (h *x11Handler) onInit(cfg *config.Config, moduleLogger *zap.Logger) error 
 		return errors.New("Failed connect to x server")
 	}
 
-	return h.keybind.onInit(cfg, h.xConnection, moduleLogger)
+	return h.keybind.onInit(cfg, h.xConnection, rpc, moduleLogger)
 }
 
 func (h *x11Handler) onStart(wg *sync.WaitGroup) {

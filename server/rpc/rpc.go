@@ -28,7 +28,7 @@ func New() *Rpc {
 	}
 }
 
-func (m *Rpc) OnInit(cfg *config.Config, rootLogger *zap.Logger, provider *provider.Provider) <-chan error {
+func (m *Rpc) OnInit(cfg *config.Config, provider *provider.Provider, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {

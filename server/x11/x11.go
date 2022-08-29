@@ -9,6 +9,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/logger"
+	"github.com/ReanGD/runify/server/rpc"
 	"github.com/ReanGD/runify/server/system/module"
 	"go.uber.org/zap"
 )
@@ -27,14 +28,14 @@ func New() *X11 {
 	}
 }
 
-func (m *X11) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
+func (m *X11) OnInit(cfg *config.Config, rpc *rpc.Rpc, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {
 		channelLen := cfg.Get().X11.ChannelLen
 		m.Init(rootLogger, ModuleName, channelLen)
 
-		ch <- m.handler.onInit(cfg, m.ModuleLogger)
+		ch <- m.handler.onInit(cfg, rpc, m.ModuleLogger)
 	}()
 
 	return ch

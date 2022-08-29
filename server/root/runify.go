@@ -82,8 +82,8 @@ func (r *Runify) init(cfgFile string) bool {
 	r.runifyLogger = rootLogger.With(logModule)
 	r.cfg.AddVersionToLog(rootLogger)
 
-	rpcCh := r.rpc.OnInit(r.cfg, rootLogger, r.provider)
-	x11Ch := r.x11.OnInit(r.cfg, rootLogger)
+	rpcCh := r.rpc.OnInit(r.cfg, r.provider, rootLogger)
+	x11Ch := r.x11.OnInit(r.cfg, r.rpc, rootLogger)
 	providerCh := r.provider.OnInit(r.cfg, rootLogger)
 
 	if err = r.checkOnInit(provider.ModuleName, providerCh); err != nil {

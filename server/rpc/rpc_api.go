@@ -5,18 +5,43 @@ import (
 
 	"github.com/ReanGD/runify/server/pb"
 	"github.com/ReanGD/runify/server/provider"
+	"go.uber.org/zap"
 )
 
 type runifyServer struct {
-	provider *provider.Provider
+	provider         *provider.Provider
+	showUIMultiplier *showUIMultiplier
+	moduleLogger     *zap.Logger
 
 	pb.UnimplementedRunifyServer
 }
 
-func newRunifyServer(provider *provider.Provider) *runifyServer {
+func newRunifyServer(provider *provider.Provider, showUIMultiplier *showUIMultiplier, moduleLogger *zap.Logger) *runifyServer {
 	return &runifyServer{
-		provider: provider,
+		provider:         provider,
+		showUIMultiplier: showUIMultiplier,
+		moduleLogger:     moduleLogger,
 	}
+}
+
+func (s *runifyServer) WaitShowWindow(empty *pb.Empty, stream pb.Runify_WaitShowWindowServer) error {
+	id, ch := s.showUIMultiplier.subscribe()
+	defer s.showUIMultiplier.unsubscribe(id)
+
+	isLive := true
+	for isLive {
+		select {
+		case msg := <-ch:
+			if err := stream.Send(msg); err != nil {
+				s.moduleLogger.Warn("Failed send ShowWindow to client", zap.Error(err))
+				return err
+			}
+		case <-stream.Context().Done():
+			isLive = false
+		}
+	}
+
+	return nil
 }
 
 func (s *runifyServer) GetRoot(context.Context, *pb.Empty) (*pb.Form, error) {
