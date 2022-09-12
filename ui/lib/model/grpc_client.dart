@@ -2,19 +2,24 @@ import 'dart:io';
 import 'package:grpc/grpc.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:runify/model/logger.dart';
+import 'package:runify/model/command.dart';
 import 'package:runify/router/router.dart';
 import 'package:runify/model/metrics.dart';
+import 'package:runify/model/settings.dart';
+import 'package:runify/model/form_data.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
+import 'package:runify/model/data_filter.dart';
 
 class GrpcClient {
   final Logger logger;
   final Metrics metrics;
+  final Settings settings;
   final RunifyRouter router;
   late RunifyClient _client;
 
-  GrpcClient(this.logger, this.metrics, this.router, String address) {
+  GrpcClient(this.logger, this.metrics, this.settings, this.router) {
     final channel = ClientChannel(
-      InternetAddress(address, type: InternetAddressType.unix),
+      InternetAddress(settings.grpcAddress, type: InternetAddressType.unix),
       options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
     );
 
@@ -34,12 +39,22 @@ class GrpcClient {
     }
   }
 
-  Future<List<CardItem>> getRoot() async {
+  FormData openForm() {
+    final dataFilter = DataFilter.future(getRoot());
+    return FormData(dataFilter);
+  }
+
+  Future<List<Command>> getRoot() async {
     final timer = Stopwatch()..start();
-    final result = await _client.getRoot(Empty());
+    final grpcResult = await _client.getRoot(Empty());
     metrics.grpcCall(timer.elapsedMicroseconds, 'GetRoot');
 
-    return result.cards;
+    final List<Command> result = [];
+    for (final it in grpcResult.cards) {
+      result.add(Command(it.cardID, it.name, "Application", it.icon));
+    }
+
+    return result;
   }
 
   Future<List<ActionItem>> getActions(Int64 cardID) async {
