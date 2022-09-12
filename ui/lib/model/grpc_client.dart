@@ -1,28 +1,43 @@
 import 'dart:io';
-
 import 'package:grpc/grpc.dart';
 import 'package:fixnum/fixnum.dart';
+import 'package:runify/model/logger.dart';
+import 'package:runify/router/router.dart';
+import 'package:runify/model/metrics.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
 
 class GrpcClient {
-  late ClientChannel _channel;
+  final Logger logger;
+  final Metrics metrics;
+  final RunifyRouter router;
   late RunifyClient _client;
 
-  GrpcClient(String address) {
-    _channel = ClientChannel(
+  GrpcClient(this.logger, this.metrics, this.router, String address) {
+    final channel = ClientChannel(
       InternetAddress(address, type: InternetAddressType.unix),
       options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
     );
 
-    _client = RunifyClient(_channel,
-        options: CallOptions(timeout: const Duration(seconds: 30)));
+    _client = RunifyClient(channel);
+    waitShowWindow();
+  }
+
+  waitShowWindow() async {
+    try {
+      final stream = _client.waitShowWindow(Empty());
+      await for (var _ in stream) {
+        router.show();
+      }
+    } catch (e) {
+      // TODO: add policy for reconnect
+      logger.log('gRPC WaitShowWindow method ended with error: $e');
+    }
   }
 
   Future<List<CardItem>> getRoot() async {
     final timer = Stopwatch()..start();
     final result = await _client.getRoot(Empty());
-    final dt = timer.elapsedMicroseconds;
-    print("getRoot = $dt mcs");
+    metrics.grpcCall(timer.elapsedMicroseconds, 'GetRoot');
 
     return result.cards;
   }
@@ -30,8 +45,7 @@ class GrpcClient {
   Future<List<ActionItem>> getActions(Int64 cardID) async {
     final timer = Stopwatch()..start();
     final result = await _client.getActions(SelectedCard(cardID: cardID));
-    final dt = timer.elapsedMicroseconds;
-    print("getActions = $dt mcs");
+    metrics.grpcCall(timer.elapsedMicroseconds, 'GetActions');
 
     return result.items;
   }
@@ -39,8 +53,7 @@ class GrpcClient {
   Future<void> executeDefault(Int64 cardID) async {
     final timer = Stopwatch()..start();
     await _client.executeDefault(SelectedCard(cardID: cardID));
-    final dt = timer.elapsedMicroseconds;
-    print("executeDefault = $dt mcs");
+    metrics.grpcCall(timer.elapsedMicroseconds, 'ExecuteDefault');
 
     return;
   }
@@ -48,8 +61,7 @@ class GrpcClient {
   Future<void> execute(Int64 cardID, int actionID) async {
     final timer = Stopwatch()..start();
     await _client.execute(SelectedAction(cardID: cardID, actionID: actionID));
-    final dt = timer.elapsedMicroseconds;
-    print("execute = $dt mcs");
+    metrics.grpcCall(timer.elapsedMicroseconds, 'Execute');
 
     return;
   }
