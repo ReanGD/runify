@@ -1,5 +1,6 @@
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
+import 'package:runify/form/meta/meta_model.dart';
 import 'package:runify/model/command.dart';
 import 'package:runify/model/grpc_client.dart';
 import 'package:runify/model/data_filter.dart';
@@ -16,8 +17,8 @@ class MetaController {
   MetaController(this.service, this.runifyNative);
 
   Widget openForm() {
-    final model = DataFilter.future(service.getRoot());
-    return MetaView(this, model);
+    final model = MetaModel(service.getRoot());
+    return MetaView(model, this);
   }
 
   Future openMenu(BuildContext context, Command command) {
@@ -26,8 +27,8 @@ class MetaController {
       barrierColor: null,
       builder: (BuildContext context) {
         _cardID = command.id;
-        final model = DataFilter.future(service.getActions(_cardID));
-        return MetaViewMenu(this, model);
+        final model = MetaMenuModel(service.getActions(_cardID));
+        return MetaViewMenu(model, this);
       },
     );
   }

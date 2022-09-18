@@ -1,19 +1,17 @@
-import 'package:runify/form/meta/meta_controller.dart';
-import 'package:runify/model/data_filter.dart';
 import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:runify/model/command.dart';
-import 'package:runify/model/data_provider.dart';
+import 'package:runify/form/meta/meta_model.dart';
+import 'package:runify/form/meta/meta_controller.dart';
 import 'package:runify/form/meta/meta_widget_menu.dart';
 import 'package:runify/widgets/disable_focus_trap_behavior.dart';
 
 class MetaViewMenu extends StatelessWidget {
+  final MetaMenuModel model;
   final MetaController controller;
-  final DataFilter<CommandAction> model;
   final listController = ListControllerMenu();
 
-  MetaViewMenu(this.controller, this.model, {super.key});
+  MetaViewMenu(this.model, this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +19,8 @@ class MetaViewMenu extends StatelessWidget {
     final dialogTheme = theme.dialogTheme;
     final dividerTheme = theme.dividerTheme;
 
-    return ChangeNotifierProvider<CommandActionFilter>.value(
-      value: model,
+    return ChangeNotifierProvider.value(
+      value: model.filter,
       child: Padding(
         padding: EdgeInsets.only(
           right: dialogTheme.horizontalOffset,
