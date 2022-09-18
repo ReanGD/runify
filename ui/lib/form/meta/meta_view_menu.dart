@@ -1,26 +1,19 @@
+import 'package:runify/form/meta/meta_controller.dart';
+import 'package:runify/model/data_filter.dart';
 import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/model/command.dart';
 import 'package:runify/model/data_provider.dart';
-import 'package:runify/view/commands/action_list.dart';
+import 'package:runify/form/meta/meta_widget_menu.dart';
 import 'package:runify/widgets/disable_focus_trap_behavior.dart';
 
-class CommandMenuDialog extends StatelessWidget {
-  final Command command;
-  final controller = ActionListController();
+class MetaViewMenu extends StatelessWidget {
+  final MetaController controller;
+  final DataFilter<CommandAction> model;
+  final listController = ListControllerMenu();
 
-  CommandMenuDialog({super.key, required this.command});
-
-  static Future show(BuildContext context, Command command) {
-    return showDialog(
-      context: context,
-      barrierColor: null,
-      builder: (BuildContext context) {
-        return CommandMenuDialog(command: command);
-      },
-    );
-  }
+  MetaViewMenu(this.controller, this.model, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +21,8 @@ class CommandMenuDialog extends StatelessWidget {
     final dialogTheme = theme.dialogTheme;
     final dividerTheme = theme.dividerTheme;
 
-    return ChangeNotifierProvider<CommandActionFilter>(
-      create: (_) => CommandActionFilter.future(
-          DataProvider.instance.getActions(command.id)),
+    return ChangeNotifierProvider<CommandActionFilter>.value(
+      value: model,
       child: Padding(
         padding: EdgeInsets.only(
           right: dialogTheme.horizontalOffset,
@@ -46,15 +38,15 @@ class CommandMenuDialog extends StatelessWidget {
             ),
             child: DisableFocusTrapBehavior(
               child: Shortcuts(
-                shortcuts: controller.getShortcuts(),
+                shortcuts: listController.getShortcuts(),
                 child: Actions(
-                  actions: controller.getActions(),
+                  actions: listController.getActions(),
                   child: SizedBox(
                     width: dialogTheme.actionsWidth,
                     height: dialogTheme.actionsHeight,
-                    child: ActionList(
-                      controller: controller,
-                      command: command,
+                    child: MetaWidgetMenu(
+                      controller,
+                      listController,
                     ),
                   ),
                 ),

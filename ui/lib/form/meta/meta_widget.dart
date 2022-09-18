@@ -4,39 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/model/command.dart';
 import 'package:runify/widgets/hdivider.dart';
-import 'package:runify/model/data_provider.dart';
 import 'package:runify/widgets/command_card.dart';
+import 'package:runify/form/meta/meta_controller.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
-import 'package:runify/view/commands/command_menu_dialog.dart';
 
-class CommandListController extends DataListController {
+class ListController extends DataListController {
   @override
   List<int> getVisibleItems(BuildContext context) {
     return context.watch<CommandFilter>().visibleItems;
   }
 }
 
-class CommandList extends StatelessWidget {
-  final CommandListController controller;
+class MetaWidget extends StatelessWidget {
+  final MetaController controller;
+  final ListController listController;
 
-  const CommandList({super.key, required this.controller});
-
-  void _onDataItemEvent(
-      BuildContext context, DataItemEvent event, Command? command) {
-    if (event == DataItemEvent.onMenu && command != null) {
-      CommandMenuDialog.show(context, command);
-      return;
-    }
-    if (event == DataItemEvent.onChoice && command != null) {
-      DataProvider.instance.executeDefault(command.id);
-      return;
-    }
-  }
+  const MetaWidget(this.controller, this.listController, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    final storage = context.read<CommandFilter>();
+    final model = context.read<CommandFilter>();
 
     final theme = Theme.of(context);
     final cardTheme = theme.cardTheme;
@@ -59,20 +47,19 @@ class CommandList extends StatelessWidget {
           child: SearchField(
             padding: searchFieldPadding,
             hintText: UIText.searchCommandHint,
-            onChanged: (String query) => storage.applyFilter(query),
+            onChanged: (String query) => model.applyFilter(query),
           ),
         ),
         HDivider(padding: dividerPadding),
         Expanded(
           child: DataListView(
-            controller: controller,
+            controller: listController,
             padding: windowPadding,
-            onDataItemEvent: (DataItemEvent event, int? id) {
-              _onDataItemEvent(
-                  context, event, (id != null) ? storage[id] : null);
+            onDataItemEvent: (DataItemEvent event, int id) {
+              controller.onFormListItemEvent(context, event, model[id]);
             },
             itemBuilder: (context, int id) {
-              final item = storage[id];
+              final item = model[id];
               return CommandCard(
                 name: item.name,
                 category: item.category,
