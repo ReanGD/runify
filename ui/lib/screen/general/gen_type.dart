@@ -1,5 +1,5 @@
 import 'package:fixnum/fixnum.dart';
-import 'package:runify/model/data_filter.dart';
+import 'package:runify/system/data_filter.dart';
 
 class Command implements Matcher {
   Int64 id;

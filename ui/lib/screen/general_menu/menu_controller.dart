@@ -2,7 +2,7 @@ import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:runify/screen/router.dart';
-import 'package:runify/model/data_filter.dart';
+import 'package:runify/system/data_filter.dart';
 import 'package:runify/widgets/data_list_view.dart';
 import 'package:runify/screen/general_menu/menu_type.dart';
 import 'package:runify/screen/general_menu/menu_screen.dart';

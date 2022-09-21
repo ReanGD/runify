@@ -1,4 +1,4 @@
-import 'package:runify/model/data_filter.dart';
+import 'package:runify/system/data_filter.dart';
 
 class CommandAction implements Matcher {
   int id;

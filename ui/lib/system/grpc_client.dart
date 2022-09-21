@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:grpc/grpc.dart';
-import 'package:runify/model/settings.dart';
+import 'package:runify/system/settings.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
 
 RunifyClient newGrpcClient(Settings settings) {

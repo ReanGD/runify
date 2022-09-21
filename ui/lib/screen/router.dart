@@ -1,7 +1,7 @@
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
-import 'package:runify/model/logger.dart';
-import 'package:runify/model/metrics.dart';
+import 'package:runify/system/logger.dart';
+import 'package:runify/system/metrics.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
 import 'package:runify/plugin/runify_native.dart';
 import 'package:runify/screen/router_service.dart';

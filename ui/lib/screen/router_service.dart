@@ -1,4 +1,4 @@
-import 'package:runify/model/logger.dart';
+import 'package:runify/system/logger.dart';
 import 'package:runify/screen/router.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
 
