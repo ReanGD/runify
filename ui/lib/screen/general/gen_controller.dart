@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:runify/screen/router.dart';
 import 'package:runify/model/data_filter.dart';
 import 'package:runify/widgets/data_list_view.dart';
-import 'package:runify/screen/general/gen_types.dart';
+import 'package:runify/screen/general/gen_type.dart';
 import 'package:runify/screen/general/gen_screen.dart';
 import 'package:runify/screen/general/gen_service.dart';
 

@@ -1,12 +1,12 @@
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:runify/model/command.dart';
 import 'package:runify/screen/router.dart';
-import 'package:runify/model/grpc_client.dart';
 import 'package:runify/model/data_filter.dart';
 import 'package:runify/widgets/data_list_view.dart';
+import 'package:runify/screen/general_menu/menu_type.dart';
 import 'package:runify/screen/general_menu/menu_screen.dart';
+import 'package:runify/screen/general_menu/menu_service.dart';
 
 class _ListController extends DataListController {
   @override
@@ -16,14 +16,14 @@ class _ListController extends DataListController {
 }
 
 class MenuController {
-  final GrpcClient service;
+  final MenuService service;
   final ScreenRouter router;
   final Int64 itemID;
   final DataFilter<CommandAction> filter;
   final listController = _ListController();
 
   MenuController(this.service, this.router, {required this.itemID})
-      : filter = DataFilter.future(service.getActions(itemID));
+      : filter = DataFilter.future(service.openForm(itemID));
 
   Widget build() {
     return ChangeNotifierProvider.value(

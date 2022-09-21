@@ -2,7 +2,9 @@ import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:runify/model/grpc_client.dart';
 import 'package:runify/plugin/runify_native.dart';
+import 'package:runify/screen/general/gen_service.dart';
 import 'package:runify/screen/general/gen_controller.dart';
+import 'package:runify/screen/general_menu/menu_service.dart';
 import 'package:runify/screen/general_menu/menu_controller.dart';
 
 class ScreenRouter {
@@ -12,11 +14,13 @@ class ScreenRouter {
   ScreenRouter(this.service, this.runifyNative);
 
   Widget openGScreen() {
-    return GenController(service, this).build();
+    final genService = GenService(service.metrics, service.client);
+    return GenController(genService, this).build();
   }
 
   Future openGScreenMenu(BuildContext context, Int64 itemID) async {
-    final controller = MenuController(service, this, itemID: itemID);
+    final menuService = MenuService(service.metrics, service.client);
+    final controller = MenuController(menuService, this, itemID: itemID);
     return showDialog(
       context: context,
       barrierColor: null,

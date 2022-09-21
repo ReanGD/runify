@@ -1,7 +1,7 @@
 import 'package:fixnum/fixnum.dart';
 import 'package:runify/model/metrics.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
-import 'package:runify/screen/general/gen_types.dart';
+import 'package:runify/screen/general/gen_type.dart';
 
 class GenService {
   final Metrics metrics;
