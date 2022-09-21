@@ -1,12 +1,12 @@
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:runify/model/command.dart';
 import 'package:runify/screen/router.dart';
-import 'package:runify/model/grpc_client.dart';
 import 'package:runify/model/data_filter.dart';
 import 'package:runify/widgets/data_list_view.dart';
+import 'package:runify/screen/general/gen_types.dart';
 import 'package:runify/screen/general/gen_screen.dart';
+import 'package:runify/screen/general/gen_service.dart';
 
 class _ListController extends DataListController {
   @override
@@ -16,13 +16,13 @@ class _ListController extends DataListController {
 }
 
 class GenController {
-  final GrpcClient service;
+  final GenService service;
   final ScreenRouter router;
   final DataFilter<Command> filter;
   final listController = _ListController();
 
   GenController(this.service, this.router)
-      : filter = DataFilter.future(service.getRoot());
+      : filter = DataFilter.future(service.openForm());
 
   Widget build() {
     return ChangeNotifierProvider.value(
@@ -48,7 +48,7 @@ class GenController {
   }
 
   Future<void> _execute(Int64 cardID) async {
-    await service.executeDefault(cardID);
+    await service.execute(cardID);
     return router.hideWindow();
   }
 }
