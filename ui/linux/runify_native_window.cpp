@@ -2,7 +2,7 @@
 
 
 static FlMethodResponse* flBool(bool value) {
-    g_autoptr(FlValue) result = fl_value_new_bool(true);
+    g_autoptr(FlValue) result = fl_value_new_bool(value);
     return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
@@ -21,8 +21,13 @@ RNWindow::RNWindow(GtkWindow* gtk_window)
     m_window_height_ppm = static_cast<float>(frame.height) / static_cast<float>(gdk_monitor_get_height_mm(monitor));
 }
 
+FlMethodResponse* RNWindow::IsVisible() {
+  bool is_visible = gtk_widget_is_visible(GTK_WIDGET(m_gtk_window));
+
+  return flBool(is_visible);
+}
+
 FlMethodResponse* RNWindow::Show() {
-  gtk_window_move(m_gtk_window, 0, 0);
   gtk_widget_show(GTK_WIDGET(m_gtk_window));
   gtk_window_present(m_gtk_window);
 
@@ -34,6 +39,19 @@ FlMethodResponse* RNWindow::Hide() {
 
   return flBool(true);
 }
+
+FlMethodResponse* RNWindow::IsFocused() {
+  bool is_focused = gtk_window_is_active(m_gtk_window);
+
+  return flBool(is_focused);
+}
+
+FlMethodResponse* RNWindow::Focus() {
+  gtk_window_present(m_gtk_window);
+
+  return flBool(true);
+}
+
 
 FlMethodResponse* RNWindow::SetOpacity(FlValue* args) {
     gdouble opacity = fl_value_get_float(fl_value_lookup_string(args, "opacity"));

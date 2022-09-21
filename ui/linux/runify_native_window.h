@@ -9,8 +9,11 @@ public:
     ~RNWindow() = default;
 
 public:
+    FlMethodResponse* IsVisible();
     FlMethodResponse* Show();
     FlMethodResponse* Hide();
+    FlMethodResponse* IsFocused();
+    FlMethodResponse* Focus();
     FlMethodResponse* SetOpacity(FlValue* args);
     FlMethodResponse* GetGeometry();
     FlMethodResponse* SetGeometry(FlValue* args);
