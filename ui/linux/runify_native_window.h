@@ -3,20 +3,29 @@
 #include <flutter_linux/flutter_linux.h>
 
 
+struct Geometry;
 class RNWindow {
 public:
     RNWindow(GtkWindow* gtk_window);
     ~RNWindow() = default;
 
 public:
-    FlMethodResponse* IsVisible();
-    FlMethodResponse* Show();
-    FlMethodResponse* Hide();
-    FlMethodResponse* IsFocused();
-    FlMethodResponse* Focus();
-    FlMethodResponse* SetOpacity(FlValue* args);
-    FlMethodResponse* GetGeometry();
-    FlMethodResponse* SetGeometry(FlValue* args);
+    void Init();
+    bool IsVisible();
+    void Show();
+    void Hide();
+    void Close();
+    bool IsFocused();
+    void Focus();
+    void SetOpacity(double opacity);
+    void GetGeometry(Geometry& g);
+    void SetGeometry(const Geometry& g);
+    void HandleMethodCall(FlMethodCall* method_call);
+
+public:
+    bool EnableClose() const {
+        return m_enable_close;
+    }
 
 private:
     GtkWindow* m_gtk_window = nullptr;
@@ -26,4 +35,5 @@ private:
     int m_monitor_hheight_px;
     float m_window_width_ppm; // pixel per mm
     float m_window_height_ppm; // pixel per mm
+    bool m_enable_close = false;
 };
