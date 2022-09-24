@@ -21,7 +21,7 @@ class ScreenRouter extends StatelessWidget {
   late final ScreenRouterService _service;
 
   ScreenRouter({super.key}) {
-    _runifyPlugin.initWindow(const Offset(0, 0), const Size(150, 200));
+    _runifyPlugin.initWindow(_settings.windowOffset, _settings.windowSize);
     _grpcClient = newGrpcClient(_settings);
     _service = ScreenRouterService(_logger, _grpcClient);
     _service.waitShowWindow(this);
