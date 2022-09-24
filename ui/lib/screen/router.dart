@@ -2,7 +2,9 @@ import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:runify/system/logger.dart';
 import 'package:runify/system/metrics.dart';
+import 'package:runify/system/settings.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
+import 'package:runify/system/grpc_client.dart';
 import 'package:runify/plugin/runify_native.dart';
 import 'package:runify/screen/router_service.dart';
 import 'package:runify/screen/general/gen_service.dart';
@@ -10,29 +12,28 @@ import 'package:runify/screen/general/gen_controller.dart';
 import 'package:runify/screen/general_menu/menu_service.dart';
 import 'package:runify/screen/general_menu/menu_controller.dart';
 
-class ScreenRouter {
-  final Logger logger;
-  final Metrics metrics;
-  final RunifyClient grpcClient;
-  final RunifyNative runifyPlugin;
-  final ScreenRouterService _service;
+class ScreenRouter extends StatelessWidget {
+  final _logger = Logger();
+  final _metrics = Metrics(true);
+  final _settings = Settings();
+  final _runifyPlugin = RunifyNative();
+  late final RunifyClient _grpcClient;
+  late final ScreenRouterService _service;
 
-  ScreenRouter({
-    required this.logger,
-    required this.metrics,
-    required this.grpcClient,
-    required this.runifyPlugin,
-  }) : _service = ScreenRouterService(logger, grpcClient) {
+  ScreenRouter({super.key}) {
+    _runifyPlugin.initWindow(const Offset(0, 0), const Size(150, 200));
+    _grpcClient = newGrpcClient(_settings);
+    _service = ScreenRouterService(_logger, _grpcClient);
     _service.waitShowWindow(this);
   }
 
   Widget openGScreen() {
-    final service = GenService(metrics, grpcClient);
+    final service = GenService(_metrics, _grpcClient);
     return GenController(service, this).build();
   }
 
   Future openGScreenMenu(BuildContext context, Int64 itemID) async {
-    final service = MenuService(metrics, grpcClient);
+    final service = MenuService(_metrics, _grpcClient);
     final controller = MenuController(service, this, itemID: itemID);
     return showDialog(
       context: context,
@@ -44,10 +45,15 @@ class ScreenRouter {
   }
 
   Future<void> hideWindow() async {
-    return runifyPlugin.hide();
+    return _runifyPlugin.hide();
   }
 
   Future<void> showWindow() async {
-    return runifyPlugin.show();
+    return _runifyPlugin.show();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return openGScreen();
   }
 }
