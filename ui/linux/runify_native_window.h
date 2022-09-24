@@ -10,7 +10,7 @@ public:
     ~RNWindow() = default;
 
 public:
-    void Init();
+    void Init(const Geometry& g);
     bool IsVisible();
     void Show();
     void Hide();
@@ -20,6 +20,7 @@ public:
     void SetOpacity(double opacity);
     void GetGeometry(Geometry& g);
     void SetGeometry(const Geometry& g);
+    void SetGeometryHint(int min_width, int min_height);
     void HandleMethodCall(FlMethodCall* method_call);
 
 public:

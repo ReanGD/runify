@@ -54,8 +54,9 @@ RNWindow::RNWindow(GtkWindow* gtk_window)
     m_window_height_ppm = static_cast<float>(frame.height) / static_cast<float>(gdk_monitor_get_height_mm(monitor));
 }
 
-void RNWindow::Init() {
-
+void RNWindow::Init(const Geometry& g) {
+  SetGeometry(g);
+  SetGeometryHint(480, 640);
 }
 
 bool RNWindow::IsVisible() {
@@ -109,6 +110,16 @@ void RNWindow::SetGeometry(const Geometry& g) {
     gdk_window_move_resize(m_gdk_window, x_px, y_px, width_px, height_px);
 }
 
+void RNWindow::SetGeometryHint(int min_width, int min_height) {
+    GdkGeometry geometry;
+    geometry.min_width = min_width;
+    geometry.min_height = min_height;
+    geometry.max_width = G_MAXINT;
+    geometry.max_height = G_MAXINT;
+
+    gdk_window_set_geometry_hints(m_gdk_window, &geometry, static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
+}
+
 void RNWindow::HandleMethodCall(FlMethodCall* method_call) {
   g_autoptr(FlMethodResponse) response = nullptr;
 
@@ -116,7 +127,8 @@ void RNWindow::HandleMethodCall(FlMethodCall* method_call) {
   FlValue* args = fl_method_call_get_args(method_call);
 
   if (strcmp(method, "init") == 0) {
-    Init();
+    Geometry geometry(args);
+    Init(geometry);
     response = flBool(true);
   } else if (strcmp(method, "isVisible") == 0) {
     response = flBool(IsVisible());
@@ -144,7 +156,7 @@ void RNWindow::HandleMethodCall(FlMethodCall* method_call) {
     response = geometry.ToFlResponse();
   } else if (strcmp(method, "setGeometry") == 0) {
     Geometry geometry(args);
-    SetGeometry(args);
+    SetGeometry(geometry);
     response = flBool(true);
   } else {
     response = flNotImplemented();
