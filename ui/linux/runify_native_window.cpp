@@ -39,6 +39,10 @@ static FlMethodResponse* flNotImplemented() {
   return FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
 }
 
+static gboolean gSignalCallback(GtkWidget* widget, GdkEvent* event, gpointer data) {
+  return RNWindow::HandleGtkSignal(event);
+}
+
 RNWindow* RNWindow::instance = nullptr;
 
 RNWindow::RNWindow(GtkWindow* gtk_window, FlMethodChannel* channel)
@@ -63,55 +67,15 @@ RNWindow::~RNWindow() {
   RNWindow::instance = nullptr;
 }
 
-gboolean on_window_close(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  if ((RNWindow::instance != nullptr) && (!RNWindow::instance->EnableClose())) {
-    RNWindow::instance->EmitEvent("try_close");
-    return FALSE;
-  }
-
-  return TRUE;
-}
-
-gboolean on_window_focus(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  if (RNWindow::instance != nullptr) {
-    RNWindow::instance->EmitEvent("focus");
-  }
-  return false;
-}
-
-gboolean on_window_unfocus(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  if (RNWindow::instance != nullptr) {
-    RNWindow::instance->EmitEvent("unfocus");
-  }
-
-  return false;
-}
-
-static gboolean on_window_resize(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  if (RNWindow::instance != nullptr) {
-    RNWindow::instance->EmitEvent("resize");
-  }
-
-  return false;
-}
-
-static gboolean on_window_move(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  if (RNWindow::instance != nullptr) {
-    RNWindow::instance->EmitEvent("move");
-  }
-
-  return false;
-}
-
 void RNWindow::InitWindow(const Geometry& g) const {
   SetGeometry(g);
   SetGeometryHint(480, 640);
 
-  g_signal_connect(m_gtk_window, "delete_event", G_CALLBACK(on_window_close), nullptr);
-  g_signal_connect(m_gtk_window, "focus-in-event", G_CALLBACK(on_window_focus), nullptr);
-  g_signal_connect(m_gtk_window, "focus-out-event", G_CALLBACK(on_window_unfocus), nullptr);
-  g_signal_connect(m_gtk_window, "check-resize", G_CALLBACK(on_window_resize), nullptr);
-  g_signal_connect(m_gtk_window, "configure-event", G_CALLBACK(on_window_move), nullptr);
+  auto callback = G_CALLBACK(gSignalCallback);
+  g_signal_connect(m_gtk_window, "delete_event", callback, nullptr);
+  g_signal_connect(m_gtk_window, "focus-in-event", callback, nullptr);
+  g_signal_connect(m_gtk_window, "focus-out-event", callback, nullptr);
+  g_signal_connect(m_gtk_window, "configure-event", callback, nullptr);
 }
 
 bool RNWindow::IsVisible() const {
@@ -175,10 +139,28 @@ void RNWindow::SetGeometryHint(int min_width, int min_height) const {
   gdk_window_set_geometry_hints(m_gdk_window, &geometry, static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
 }
 
-void RNWindow::EmitEvent(const char* event_name) const {
+bool RNWindow::OnDelete() const {
+  fl_method_channel_invoke_method(m_channel, "onTryClose", nullptr, nullptr, nullptr, nullptr);
+  return !m_enable_close;
+}
+
+bool RNWindow::OnFocusChange(GdkEventFocus* event) const {
   g_autoptr(FlValue) result_data = fl_value_new_map();
-  fl_value_set_string_take(result_data, "eventName", fl_value_new_string(event_name));
-  fl_method_channel_invoke_method(m_channel, "onEvent", result_data, nullptr, nullptr, nullptr);
+  fl_value_set_string_take(result_data, "hasFocus", fl_value_new_bool(event->in == TRUE));
+  fl_method_channel_invoke_method(m_channel, "onFocusChange", result_data, nullptr, nullptr, nullptr);
+
+  return false;
+}
+
+bool RNWindow::OnConfigure(GdkEventConfigure* event) const {
+  g_autoptr(FlValue) result_data = fl_value_new_map();
+  fl_value_set_string_take(result_data, "x", fl_value_new_int(event->x));
+  fl_value_set_string_take(result_data, "y", fl_value_new_int(event->y));
+  fl_value_set_string_take(result_data, "width", fl_value_new_int(event->width));
+  fl_value_set_string_take(result_data, "height", fl_value_new_int(event->height));
+  fl_method_channel_invoke_method(m_channel, "onConfigure", result_data, nullptr, nullptr, nullptr);
+
+  return false;
 }
 
 void RNWindow::HandleMethodCall(FlMethodCall* method_call) {
@@ -224,4 +206,22 @@ void RNWindow::HandleMethodCall(FlMethodCall* method_call) {
   }
 
   fl_method_call_respond(method_call, response, nullptr);
+}
+
+bool RNWindow::HandleGtkSignal(GdkEvent* event) {
+  RNWindow* self = RNWindow::instance;
+  if (self == nullptr) {
+    return false;
+  }
+
+  switch (event->type) {
+    case GDK_FOCUS_CHANGE:
+      return self->OnFocusChange(reinterpret_cast<GdkEventFocus*>(event));
+    case GDK_CONFIGURE:
+      return self->OnConfigure(reinterpret_cast<GdkEventConfigure*>(event));
+    case GDK_DELETE:
+      return self->OnDelete();
+    default:
+      return false;
+  }
 }

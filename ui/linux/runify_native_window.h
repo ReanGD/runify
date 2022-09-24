@@ -22,15 +22,18 @@ public:
     void SetGeometry(const Geometry& g) const;
     void SetGeometryHint(int min_width, int min_height) const;
 
-public:
-    bool EnableClose() const { return m_enable_close; }
-    void EmitEvent(const char* event_name) const;
-    void HandleMethodCall(FlMethodCall* method_call);
+private:
+    bool OnDelete() const;
+    bool OnFocusChange(GdkEventFocus* event) const;
+    bool OnConfigure(GdkEventConfigure* event) const;
 
 public:
-    static RNWindow* instance;
+    void HandleMethodCall(FlMethodCall* method_call);
+    static bool HandleGtkSignal(GdkEvent* event);
 
 private:
+    static RNWindow* instance;
+
     GtkWindow* m_gtk_window = nullptr;
     GdkWindow* m_gdk_window = nullptr;
     FlMethodChannel* m_channel = nullptr;
