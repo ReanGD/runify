@@ -1,5 +1,6 @@
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:runify/system/logger.dart';
 import 'package:runify/system/metrics.dart';
 import 'package:runify/system/settings.dart';
@@ -12,6 +13,25 @@ import 'package:runify/screen/general/gen_controller.dart';
 import 'package:runify/screen/general_menu/menu_service.dart';
 import 'package:runify/screen/general_menu/menu_controller.dart';
 
+class OnBackIntent extends Intent {
+  const OnBackIntent();
+}
+
+class OnBackAction extends ContextAction<OnBackIntent> {
+  final ScreenRouter router;
+
+  OnBackAction(this.router);
+
+  @override
+  Object? invoke(covariant OnBackIntent intent, [BuildContext? context]) {
+    if (context != null) {
+      router.back(context);
+    }
+
+    return null;
+  }
+}
+
 class ScreenRouter extends StatelessWidget {
   final _logger = Logger();
   final _metrics = Metrics(true);
@@ -21,9 +41,13 @@ class ScreenRouter extends StatelessWidget {
   late final ScreenRouterService _service;
 
   ScreenRouter({super.key}) {
-    _runifyPlugin.initWindow(_settings.windowOffset, _settings.windowSize);
     _grpcClient = newGrpcClient(_settings);
     _service = ScreenRouterService(_logger, _grpcClient);
+  }
+
+  Future<void> init() async {
+    await _runifyPlugin.initPlugin(
+        _settings.windowOffset, _settings.windowSize);
     _service.waitShowWindow(this);
   }
 
@@ -50,6 +74,27 @@ class ScreenRouter extends StatelessWidget {
 
   Future<void> showWindow() async {
     return _runifyPlugin.show();
+  }
+
+  Map<Type, Action<Intent>> getActions() {
+    return <Type, Action<Intent>>{
+      OnBackIntent: OnBackAction(this),
+    };
+  }
+
+  Map<LogicalKeySet, Intent> getShortcuts() {
+    return <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.escape): const OnBackIntent(),
+    };
+  }
+
+  void back(BuildContext context) {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    _runifyPlugin.close();
   }
 
   @override
