@@ -67,15 +67,35 @@ RNWindow::~RNWindow() {
   RNWindow::instance = nullptr;
 }
 
-void RNWindow::InitWindow(const Geometry& g) const {
+void RNWindow::InitPlugin(const Geometry& g) {
   SetGeometry(g);
   SetGeometryHint(480, 640);
 
   auto callback = G_CALLBACK(gSignalCallback);
-  g_signal_connect(m_gtk_window, "delete_event", callback, nullptr);
-  g_signal_connect(m_gtk_window, "focus-in-event", callback, nullptr);
-  g_signal_connect(m_gtk_window, "focus-out-event", callback, nullptr);
-  g_signal_connect(m_gtk_window, "configure-event", callback, nullptr);
+  m_delete_handler = g_signal_connect(m_gtk_window, "delete_event", callback, nullptr);
+  m_focus_in_handler = g_signal_connect(m_gtk_window, "focus-in-event", callback, nullptr);
+  m_focus_out_handler = g_signal_connect(m_gtk_window, "focus-out-event", callback, nullptr);
+  m_configure_handler = g_signal_connect(m_gtk_window, "configure-event", callback, nullptr);
+}
+
+void RNWindow::ClosePlugin() {
+  auto disconnect = [this](gulong id) {
+    if ((id != 0) && g_signal_handler_is_connected(m_gtk_window, id)) {
+      g_signal_handler_disconnect(m_gtk_window, id);
+    }
+  };
+
+  disconnect(m_delete_handler);
+  disconnect(m_focus_in_handler);
+  disconnect(m_focus_out_handler);
+  disconnect(m_configure_handler);
+
+  m_delete_handler = 0;
+  m_focus_in_handler = 0;
+  m_focus_out_handler = 0;
+  m_configure_handler = 0;
+
+  RNWindow::instance = nullptr;
 }
 
 bool RNWindow::IsVisible() const {
@@ -89,11 +109,6 @@ void RNWindow::Show() const {
 
 void RNWindow::Hide() const {
   gtk_widget_hide(GTK_WIDGET(m_gtk_window));
-}
-
-void RNWindow::Close() {
-  m_enable_close = true;
-  gtk_window_close(m_gtk_window);
 }
 
 bool RNWindow::IsFocused() const {
@@ -141,7 +156,7 @@ void RNWindow::SetGeometryHint(int min_width, int min_height) const {
 
 bool RNWindow::OnDelete() const {
   fl_method_channel_invoke_method(m_channel, "onTryClose", nullptr, nullptr, nullptr, nullptr);
-  return !m_enable_close;
+  return true;
 }
 
 bool RNWindow::OnFocusChange(GdkEventFocus* event) const {
@@ -169,9 +184,12 @@ void RNWindow::HandleMethodCall(FlMethodCall* method_call) {
   const gchar* method = fl_method_call_get_name(method_call);
   FlValue* args = fl_method_call_get_args(method_call);
 
-  if (strcmp(method, "initWindow") == 0) {
+  if (strcmp(method, "initPlugin") == 0) {
     Geometry geometry(args);
-    InitWindow(geometry);
+    InitPlugin(geometry);
+    response = flBool(true);
+  } else if (strcmp(method, "closePlugin") == 0) {
+    ClosePlugin();
     response = flBool(true);
   } else if (strcmp(method, "isVisible") == 0) {
     response = flBool(IsVisible());
@@ -180,9 +198,6 @@ void RNWindow::HandleMethodCall(FlMethodCall* method_call) {
     response = flBool(true);
   } else if (strcmp(method, "hide") == 0) {
     Hide();
-    response = flBool(true);
-  } else if (strcmp(method, "close") == 0) {
-    Close();
     response = flBool(true);
   } else if (strcmp(method, "isFocused") == 0) {
     response = flBool(IsFocused());

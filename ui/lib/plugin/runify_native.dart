@@ -78,14 +78,19 @@ class RunifyNative {
   //   turns on callbacks for the listener.
   // position = {0, 0} - is center of screen
   // All parameters are in millimeters.
-  Future<void> initWindow(Offset position, Size size) async {
+  Future<void> initPlugin(Offset position, Size size) async {
     final Map<String, dynamic> arguments = {
       'x': position.dx,
       'y': position.dy,
       'width': size.width,
       'height': size.height,
     };
-    await _channel.invokeMethod('initWindow', arguments);
+    await _channel.invokeMethod('initPlugin', arguments);
+  }
+
+  // Turns on callbacks for the listener.
+  Future<void> _closePlugin() async {
+    await _channel.invokeMethod('closePlugin');
   }
 
   // Whether the window is visible to the user.
@@ -114,7 +119,8 @@ class RunifyNative {
 
   // Close the window.
   Future<void> close() async {
-    await _channel.invokeMethod('close');
+    await _closePlugin();
+    await SystemNavigator.pop();
   }
 
   // Whether window is focused.
