@@ -14,7 +14,7 @@ enum DataItemEvent {
   onFocus,
 }
 
-typedef OnDataItemEvent = void Function(DataItemEvent event, int? id);
+typedef OnDataItemEvent = void Function(DataItemEvent event, int id);
 typedef _OnDataItemIndexEvent = void Function(DataItemEvent event, int index);
 
 class OnEventIntent extends Intent {
@@ -85,7 +85,7 @@ abstract class DataListController {
     };
   }
 
-  void onItemEvent(DataItemEvent event) {
+  Future onItemEvent(DataItemEvent event) async {
     return _dataScroll?.onItemIndexEvent(event);
   }
 
@@ -103,12 +103,12 @@ class _DataListScroll extends ScrollController {
   _DataListScroll({double initialScrollOffset = 0.0})
       : super(initialScrollOffset: initialScrollOffset, keepScrollOffset: true);
 
-  void onItemIndexEvent(DataItemEvent event, {int? index}) {
-    _onItemIndexEvent?.call(event, index ?? _focusedIndex);
+  Future onItemIndexEvent(DataItemEvent event, {int? index}) async {
+    return _onItemIndexEvent?.call(event, index ?? _focusedIndex);
   }
 
   Future moveFocus(int moveOffset) async {
-    return runByOrder(this, () => _moveFocus(moveOffset));
+    return _runByOrder(this, () => _moveFocus(moveOffset));
   }
 
   void update(int indexCount, _OnDataItemIndexEvent callbackOnItemIndexEvent) {
@@ -398,11 +398,10 @@ class DataListView extends StatelessWidget {
       required this.itemBuilder});
 
   void _onItemIndexEvent(DataItemEvent event, int index) {
-    int? id;
     if (index >= 0 && index < _visibleItems.length) {
-      id = _visibleItems[index];
+      final id = _visibleItems[index];
+      onDataItemEvent?.call(event, id);
     }
-    onDataItemEvent?.call(event, id);
   }
 
   @override
@@ -434,7 +433,7 @@ class DataListView extends StatelessWidget {
 }
 
 /// used to invoke async functions in order
-Future<T> runByOrder<T>(key, FutureOr<T> Function() action) async {
+Future<T> _runByOrder<T>(key, FutureOr<T> Function() action) async {
   for (;;) {
     final c = _locks[key];
     if (c == null) break;
