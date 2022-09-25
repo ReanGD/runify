@@ -34,21 +34,23 @@ class OnBackAction extends ContextAction<OnBackIntent> {
 
 class ScreenRouter extends StatelessWidget {
   final _logger = Logger();
-  final _metrics = Metrics(true);
   final _settings = Settings();
   final _runifyPlugin = RunifyNative();
+  late final Metrics _metrics;
   late final RunifyClient _grpcClient;
   late final ScreenRouterService _service;
 
   ScreenRouter({super.key}) {
-    _grpcClient = newGrpcClient(_settings);
-    _service = ScreenRouterService(_logger, _grpcClient);
+    _metrics = Metrics(_settings.metricsEnabled);
   }
 
   Future<void> init() async {
-    await _runifyPlugin.initPlugin(
-        _settings.windowOffset, _settings.windowSize);
+    final initFuture =
+        _runifyPlugin.initPlugin(_settings.windowOffset, _settings.windowSize);
+    _grpcClient = newGrpcClient(_settings);
+    _service = ScreenRouterService(_logger, _grpcClient);
     _service.waitShowWindow(this);
+    return initFuture;
   }
 
   Widget openGScreen() {

@@ -86,6 +86,14 @@ class RunifyNative {
       'height': size.height,
     };
     await _channel.invokeMethod('initPlugin', arguments);
+
+    while (true) {
+      await Future.delayed(const Duration(milliseconds: 1));
+      final g = await getGeometry();
+      if (g.width > 1) {
+        break;
+      }
+    }
   }
 
   // Turns on callbacks for the listener.
