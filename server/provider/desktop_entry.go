@@ -68,7 +68,7 @@ func (p *desktopEntry) onStart() {
 func (p *desktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *desktop.Entry)) {
 	exists := make(map[string]struct{})
 	for _, dirname := range paths.GetXDGAppDirs() {
-		paths.Walk(dirname, func(fullpath string, mode paths.PathMode) {
+		paths.Walk(dirname, p.moduleLogger, func(fullpath string, mode paths.PathMode) {
 			if mode != paths.ModeRegFile || filepath.Ext(fullpath) != ".desktop" {
 				return
 			}
@@ -95,7 +95,7 @@ func (p *desktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *des
 			if props.NoDisplay || props.Hidden {
 				return
 			}
-			props.Icon = paths.GetNonSvgIconPath(props.Icon, 48)
+			props.Icon = paths.GetNonSvgIconPath(props.Icon, 48, p.moduleLogger)
 
 			fn(fullpath, props)
 		})
@@ -139,6 +139,7 @@ func (p *desktopEntry) execute(cardID uint64, actionID uint32) (*pb.Result, erro
 			zap.String("Request", "Execute"),
 			zap.Uint64("CardID", cardID),
 			zap.Uint32("ActionID", actionID),
+			zap.String("EntryPath", entry.path),
 			zap.Error(err))
 
 		return &pb.Result{

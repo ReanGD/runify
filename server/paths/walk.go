@@ -1,13 +1,14 @@
 package paths
 
 import (
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"syscall"
 	"unsafe"
 
-	"github.com/ReanGD/runify/server/logger"
+	"go.uber.org/zap"
 )
 
 const (
@@ -51,7 +52,7 @@ func readDir(dirPath string) ([]fs.DirEntry, error) {
 }
 
 // see /usr/lib/go/src/path/filepath/symlink.go
-func resolve(path string, linksWalked int, startPos int) (string, int, uint32, bool) {
+func resolve(path string, linksWalked int, startPos int, logger *zap.Logger) (string, int, uint32, bool) {
 	volLen := 0
 	if len(path) > 0 && path[0] == runePathSeparator {
 		volLen++
@@ -126,7 +127,7 @@ func resolve(path string, linksWalked int, startPos int) (string, int, uint32, b
 			if os.IsNotExist(err) {
 				// Path {dest} is not exists, it is not error
 			} else {
-				logger.Write("Failed read file stat for path %s, error: %s", dest, err)
+				logger.Error("Failed get file stat", zap.String("path", dest), zap.Error(err))
 			}
 
 			return "", linksWalked, modeType, false
@@ -135,7 +136,7 @@ func resolve(path string, linksWalked int, startPos int) (string, int, uint32, b
 		if modeType != syscall.S_IFLNK {
 			if modeType != syscall.S_IFDIR && end < len(path) {
 				// found not dir inside path
-				logger.Write("Failed resolve path %s, error: %s", path, syscall.ENOTDIR)
+				logger.Error("Failed resolve path", zap.String("path", path), zap.Error(syscall.ENOTDIR))
 				return "", linksWalked, modeType, false
 			}
 
@@ -146,7 +147,7 @@ func resolve(path string, linksWalked int, startPos int) (string, int, uint32, b
 		modeType = 0
 		linksWalked++
 		if linksWalked > linksWalkedMax {
-			logger.Write("Failed resolve path %s, error: too many links", path, syscall.ENOTDIR)
+			logger.Info("Failed resolve path", zap.String("path", path), zap.Error(errors.New("too many links")))
 			return "", linksWalked, modeType, false
 
 		}
@@ -156,7 +157,7 @@ func resolve(path string, linksWalked int, startPos int) (string, int, uint32, b
 			if os.IsNotExist(err) {
 				// Path {dest} is not exists, it is not error
 			} else {
-				logger.Write("Failed read file stat for path %s, error: %s", dest, err)
+				logger.Error("Failed get file stat", zap.String("path", dest), zap.Error(err))
 			}
 
 			return "", linksWalked, modeType, false
@@ -167,7 +168,7 @@ func resolve(path string, linksWalked int, startPos int) (string, int, uint32, b
 		}
 
 		if !allowDots && (resolvedPath == "." || resolvedPath == "..") {
-			logger.Write("Path %s is circle links", dest)
+			logger.Info("Failed resolve path", zap.String("path", dest), zap.Error(errors.New("circle links")))
 			return "", linksWalked, modeType, false
 		}
 		allowDots = true
@@ -199,7 +200,7 @@ func resolve(path string, linksWalked int, startPos int) (string, int, uint32, b
 
 	if modeType == 0 {
 		if modeType, err = lStatMode(dest); err != nil {
-			logger.Write("Unexpected error for get stat for path %s, error: %s", dest, err)
+			logger.Error("Failed get file stat", zap.String("path", dest), zap.Error(err))
 			return "", linksWalked, modeType, false
 		}
 	}
@@ -223,10 +224,10 @@ func join(first string, last string) string {
 	return *(*string)(unsafe.Pointer(&buf))
 }
 
-func walkDir(linkPath string, realPath string, linksWalked int, fn WalkFunc) {
+func walkDir(linkPath string, realPath string, linksWalked int, logger *zap.Logger, fn WalkFunc) {
 	children, err := readDir(realPath)
 	if err != nil {
-		logger.Write("Failed read dir items for path %s, error: %s", realPath, err)
+		logger.Info("Failed get dir items", zap.String("path", realPath), zap.Error(err))
 		return
 	}
 
@@ -234,28 +235,28 @@ func walkDir(linkPath string, realPath string, linksWalked int, fn WalkFunc) {
 		childRealPath := join(realPath, child.Name())
 		childLinkPath := join(linkPath, child.Name())
 		if (child.Type() & os.ModeSymlink) != 0 {
-			resolvedPath, linksWalkedChild, modeType, ok := resolve(childRealPath, linksWalked, len(realPath))
+			resolvedPath, linksWalkedChild, modeType, ok := resolve(childRealPath, linksWalked, len(realPath), logger)
 			if !ok {
 				continue
 			}
 
 			fn(childLinkPath, statModeToPathMode(modeType))
 			if modeType == syscall.S_IFDIR {
-				walkDir(childLinkPath, resolvedPath, linksWalkedChild, fn)
+				walkDir(childLinkPath, resolvedPath, linksWalkedChild, logger, fn)
 			}
 		} else {
 			fn(childLinkPath, dirEntryModeToPathMode(child.Type()))
 			if child.IsDir() {
-				walkDir(childLinkPath, childRealPath, linksWalked, fn)
+				walkDir(childLinkPath, childRealPath, linksWalked, logger, fn)
 			}
 		}
 	}
 }
 
-func Walk(dirPath string, fn WalkFunc) {
+func Walk(dirPath string, logger *zap.Logger, fn WalkFunc) {
 	fullDirPath, err := filepath.Abs(ExpandUser(dirPath))
 	if err != nil {
-		logger.Write("Failed find abs path for %s, error: %s", dirPath, err)
+		logger.Error("Failed get abs path", zap.String("path", dirPath), zap.Error(err))
 		return
 	}
 
@@ -264,26 +265,26 @@ func Walk(dirPath string, fn WalkFunc) {
 		if os.IsNotExist(err) {
 			// Path {fullDirPath} is not exists, it is not error
 		} else {
-			logger.Write("Failed read file stat for path %s, error: %s", fullDirPath, err)
+			logger.Error("Failed get file stat", zap.String("path", fullDirPath), zap.Error(err))
 		}
 
 		return
 	}
 
 	if modeType == syscall.S_IFLNK {
-		resolvedPath, linksWalked, modeType, ok := resolve(fullDirPath, 0, 0)
+		resolvedPath, linksWalked, modeType, ok := resolve(fullDirPath, 0, 0, logger)
 		if !ok {
 			return
 		}
 
 		fn(fullDirPath, statModeToPathMode(modeType))
 		if modeType == syscall.S_IFDIR {
-			walkDir(fullDirPath, resolvedPath, linksWalked, fn)
+			walkDir(fullDirPath, resolvedPath, linksWalked, logger, fn)
 		}
 	} else {
 		fn(fullDirPath, statModeToPathMode(modeType))
 		if modeType == syscall.S_IFDIR {
-			walkDir(fullDirPath, fullDirPath, 0, fn)
+			walkDir(fullDirPath, fullDirPath, 0, logger, fn)
 		}
 	}
 }

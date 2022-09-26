@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/ReanGD/runify/server/gtk"
-	"github.com/ReanGD/runify/server/logger"
+	"go.uber.org/zap"
 )
 
 const (
@@ -112,11 +112,11 @@ func getXDGAppDirs(xdgDataDirs []string) []string {
 	return xdgAppDirs
 }
 
-func scanIcons(dirPath string) {
-	Walk(dirPath, func(fullpath string, mode PathMode) {
+func scanIcons(dirPath string, logger *zap.Logger) {
+	Walk(dirPath, logger, func(fullpath string, mode PathMode) {
 		if mode == ModeRegFile {
 			if key, err := newIconKeyFromPath(fullpath); err != nil {
-				logger.Write(err.Error())
+				logger.Info("Failed scan icons", zap.Error(err))
 			} else {
 				cache.iconPathCache[key] = fullpath
 			}
@@ -138,7 +138,7 @@ func createDir(dirPath string) (existed bool, err error) {
 	return existed, err
 }
 
-func New() error {
+func New(logger *zap.Logger) error {
 	var ok bool
 	var err error
 
@@ -177,7 +177,7 @@ func New() error {
 	if existed, err := createDir(cache.appIconCache); err != nil {
 		return err
 	} else if existed {
-		defer scanIcons(cache.appIconCache)
+		defer scanIcons(cache.appIconCache, logger)
 	}
 
 	cache.xdgDataDirs = getXDGDataDirs()

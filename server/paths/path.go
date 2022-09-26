@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/ReanGD/runify/server/gtk"
-	"github.com/ReanGD/runify/server/logger"
+	"go.uber.org/zap"
 )
 
 func GetSysTmp() string {
@@ -63,7 +63,7 @@ func ResolveIcon(name string, size int) string {
 	return iconPath
 }
 
-func GetNonSvgIconPath(name string, size int) string {
+func GetNonSvgIconPath(name string, size int, logger *zap.Logger) string {
 	key := newIconKey(size, name)
 	if path, ok := cache.iconPathCache[key]; ok {
 		return path
@@ -83,14 +83,14 @@ func GetNonSvgIconPath(name string, size int) string {
 
 	pBuf, err := cache.defaultIconTheme.LoadIcon(name, size, 0)
 	if err != nil {
-		logger.Write("Failed load icon %s, error: %s", name, err)
+		logger.Info("Failed load icon", zap.String("name", name), zap.Error(err))
 		return ""
 	}
 
 	path = key.toFullPath()
 	err = pBuf.SavePNG(path, 0)
 	if err != nil {
-		logger.Write("Failed save icon %s to file %s, error: %s", name, path, err)
+		logger.Info("Failed save icon", zap.String("name", name), zap.String("path", path), zap.Error(err))
 		return ""
 	}
 
