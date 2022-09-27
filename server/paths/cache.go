@@ -5,69 +5,23 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
-
-	"github.com/ReanGD/runify/server/gtk"
-	"go.uber.org/zap"
 )
 
 const (
 	appName = "runify"
 )
 
-type iconKey struct {
-	size int
-	name string
-}
-
-func newIconKey(size int, name string) iconKey {
-	return iconKey{
-		size: size,
-		name: name,
-	}
-}
-
-func newIconKeyFromPath(fullpath string) (iconKey, error) {
-	_, filename := filepath.Split(fullpath)
-	extIndex := strings.LastIndexByte(filename, '.')
-	if extIndex == -1 {
-		return iconKey{}, fmt.Errorf("Wrong icon cache filename %s, error: not found extension", fullpath)
-	}
-	filename = filename[:extIndex]
-
-	sepIndex := strings.IndexByte(filename, '_')
-	if sepIndex == -1 {
-		return iconKey{}, fmt.Errorf("Wrong icon cache filename %s, error: not found separator", fullpath)
-	}
-
-	size, err := strconv.Atoi(filename[:sepIndex])
-	if err != nil {
-		return iconKey{}, fmt.Errorf("Wrong icon cache filename %s, error: can't parse size: %s", fullpath, err)
-	}
-
-	return iconKey{
-		size: size,
-		name: filename[sepIndex+1:],
-	}, nil
-}
-
-func (k iconKey) toFullPath() string {
-	return filepath.Join(GetAppIconCache(), fmt.Sprintf("%d_%s.png", k.size, k.name))
-}
-
 type cachePaths struct {
-	defaultIconTheme *gtk.IconTheme
-	iconPathCache    map[iconKey]string
-	sysTmp           string
-	userHome         string
-	userConfig       string
-	userCache        string
-	appConfig        string
-	appCache         string
-	appIconCache     string
-	xdgDataDirs      []string
-	xdgAppDirs       []string
+	sysTmp       string
+	userHome     string
+	userConfig   string
+	userCache    string
+	appConfig    string
+	appCache     string
+	appIconCache string
+	xdgDataDirs  []string
+	xdgAppDirs   []string
 }
 
 var (
@@ -112,18 +66,6 @@ func getXDGAppDirs(xdgDataDirs []string) []string {
 	return xdgAppDirs
 }
 
-func scanIcons(dirPath string, logger *zap.Logger) {
-	Walk(dirPath, logger, func(fullpath string, mode PathMode) {
-		if mode == ModeRegFile {
-			if key, err := newIconKeyFromPath(fullpath); err != nil {
-				logger.Info("Failed scan icons", zap.Error(err))
-			} else {
-				cache.iconPathCache[key] = fullpath
-			}
-		}
-	})
-}
-
 func createDir(dirPath string) (existed bool, err error) {
 	if existed, err = ExistsDir(dirPath); err != nil {
 		return existed, fmt.Errorf("Getting info about dir (%s) ended with error: %s", dirPath, err)
@@ -138,20 +80,12 @@ func createDir(dirPath string) (existed bool, err error) {
 	return existed, err
 }
 
-func New(logger *zap.Logger) error {
+func New() error {
 	var ok bool
-	var err error
 
 	if len(appName) == 0 {
 		return errors.New("Application name is empty")
 	}
-
-	gtk.Init()
-	cache.defaultIconTheme, err = gtk.IconThemeGetDefault()
-	if err != nil {
-		return fmt.Errorf("Getting default theme for icons ended with error: %s", err)
-	}
-	cache.iconPathCache = make(map[iconKey]string)
 
 	if cache.sysTmp, ok = getenv("TMPDIR"); !ok {
 		cache.sysTmp = "/tmp"
@@ -174,10 +108,8 @@ func New(logger *zap.Logger) error {
 	}
 
 	cache.appIconCache = filepath.Join(cache.appCache, "icon")
-	if existed, err := createDir(cache.appIconCache); err != nil {
+	if _, err := createDir(cache.appIconCache); err != nil {
 		return err
-	} else if existed {
-		defer scanIcons(cache.appIconCache, logger)
 	}
 
 	cache.xdgDataDirs = getXDGDataDirs()

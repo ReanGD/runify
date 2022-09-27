@@ -10,6 +10,7 @@ import (
 	"github.com/ReanGD/runify/server/test/utils/fsh"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap"
 )
 
 type WalkSuite struct {
@@ -87,7 +88,7 @@ func (s *WalkSuite) checkWalkFiles(startItem *fsh.FSItem) {
 
 	actualCnt := 0
 	expected := startItem.GetExistChildrenRecursive(s.rootItem)
-	Walk(startItem.FullPath, func(path string, mode PathMode) {
+	Walk(startItem.FullPath, zap.NewNop(), func(path string, mode PathMode) {
 		_, ok := expected[path]
 		require.True(t, ok, fmt.Sprintf("not found actual path %s inside expected", path))
 		actualCnt++

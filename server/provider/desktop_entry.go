@@ -9,6 +9,7 @@ import (
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/pb"
+	"github.com/ReanGD/runify/server/provider/icons"
 	"github.com/rkoesters/xdg/desktop"
 	"go.uber.org/zap"
 )
@@ -20,6 +21,7 @@ type entry struct {
 
 type desktopEntry struct {
 	providerID   uint64
+	iconsCache   *icons.Cache
 	entries      []*entry
 	cache        []*pb.CardItem
 	moduleLogger *zap.Logger
@@ -28,6 +30,7 @@ type desktopEntry struct {
 func newDesktopEntry() *desktopEntry {
 	return &desktopEntry{
 		providerID:   0,
+		iconsCache:   nil,
 		entries:      []*entry{},
 		cache:        []*pb.CardItem{},
 		moduleLogger: nil,
@@ -41,7 +44,9 @@ func (p *desktopEntry) getName() string {
 func (p *desktopEntry) onInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error {
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
-	return nil
+	var err error
+	p.iconsCache, err = icons.New(moduleLogger)
+	return err
 }
 
 func (p *desktopEntry) onStart() {
@@ -95,7 +100,7 @@ func (p *desktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *des
 			if props.NoDisplay || props.Hidden {
 				return
 			}
-			props.Icon = paths.GetNonSvgIconPath(props.Icon, 48, p.moduleLogger)
+			props.Icon = p.iconsCache.GetNonSvgIconPath(props.Icon, 48)
 
 			fn(fullpath, props)
 		})
