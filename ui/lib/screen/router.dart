@@ -32,6 +32,23 @@ class OnBackAction extends ContextAction<OnBackIntent> {
   }
 }
 
+class listener extends WindowListener {
+  final ScreenRouter router;
+
+  listener(this.router);
+
+  @override
+  void onTryClose() {
+    router.hideWindow();
+  }
+
+  @override
+  void onFocusChange(bool focused) {}
+
+  @override
+  void onConfigure(int x, int y, int width, int height) {}
+}
+
 class ScreenRouter extends StatelessWidget {
   final _logger = Logger();
   final _settings = Settings();
@@ -50,6 +67,7 @@ class ScreenRouter extends StatelessWidget {
     _grpcClient = newGrpcClient(_settings);
     _service = ScreenRouterService(_logger, _grpcClient);
     _service.waitShowWindow(this);
+    _runifyPlugin.addListener(listener(this));
     return initFuture;
   }
 
@@ -96,7 +114,7 @@ class ScreenRouter extends StatelessWidget {
       return;
     }
 
-    _runifyPlugin.close();
+    _runifyPlugin.hide();
   }
 
   @override
