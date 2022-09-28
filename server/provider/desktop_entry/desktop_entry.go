@@ -3,7 +3,6 @@ package desktop_entry
 import (
 	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/ReanGD/runify/server/config"
@@ -135,10 +134,8 @@ func (p *DesktopEntry) Execute(cardID uint64, actionID uint32) (*pb.Result, erro
 		return nil, errors.New("not found item by cardID")
 	}
 
-	// TODO: copy run from dex
 	entry := p.entries[itemID]
-	c := exec.Command("dex", entry.path)
-	err := c.Run()
+	err := execCmd(entry.props.Exec, entry.props.Terminal, "sh")
 	if err != nil {
 		p.moduleLogger.Warn("Failed execute desktop entry",
 			zap.String("Request", "Execute"),
