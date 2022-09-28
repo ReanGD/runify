@@ -6,6 +6,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/pb"
+	"github.com/ReanGD/runify/server/provider/desktop_entry"
 	"go.uber.org/zap"
 )
 
@@ -23,7 +24,7 @@ func newProviderHandler() *providerHandler {
 
 func (h *providerHandler) onInit(cfg *config.Config, moduleLogger *zap.Logger) error {
 	h.moduleLogger = moduleLogger
-	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, newDesktopEntry())
+	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.NewDesktopEntry())
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
 	for _, dp := range h.dataProviders {

@@ -9,16 +9,15 @@ import (
 const (
 	desktopEntryID = uint64(1) << 32
 	providerIDMask = uint64(0xFFFF) << 32
-	cardIDMask     = (uint64(1) << 32) - 1
 )
 
 type dataProviderHandler interface {
-	getName() string
-	onInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error
-	onStart()
-	getRoot() ([]*pb.CardItem, error)
-	getActions(cardID uint64) ([]*pb.ActionItem, error)
-	execute(cardID uint64, actionID uint32) (*pb.Result, error)
+	GetName() string
+	OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error
+	OnStart()
+	GetRoot() ([]*pb.CardItem, error)
+	GetActions(cardID uint64) ([]*pb.ActionItem, error)
+	Execute(cardID uint64, actionID uint32) (*pb.Result, error)
 }
 
 type getRootCmd struct {

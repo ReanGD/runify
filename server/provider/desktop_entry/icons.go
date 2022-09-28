@@ -1,4 +1,4 @@
-package icons
+package desktop_entry
 
 import (
 	"fmt"
@@ -51,13 +51,13 @@ func (k iconKey) toFullPath() string {
 	return filepath.Join(paths.GetAppIconCache(), fmt.Sprintf("%d_%s.png", k.size, k.name))
 }
 
-type Cache struct {
+type iconCache struct {
 	defaultIconTheme *gtk.IconTheme
 	iconPathCache    map[iconKey]string
 	logger           *zap.Logger
 }
 
-func New(logger *zap.Logger) (*Cache, error) {
+func newIconCache(logger *zap.Logger) (*iconCache, error) {
 	gtk.Init()
 
 	defaultIconTheme, err := gtk.IconThemeGetDefault()
@@ -76,14 +76,14 @@ func New(logger *zap.Logger) (*Cache, error) {
 		}
 	})
 
-	return &Cache{
+	return &iconCache{
 		defaultIconTheme: defaultIconTheme,
 		iconPathCache:    iconPathCache,
 		logger:           logger,
 	}, nil
 }
 
-func (c *Cache) ResolveIcon(name string, size int) string {
+func (c *iconCache) resolveIcon(name string, size int) string {
 	if len(name) == 0 {
 		return ""
 	}
@@ -102,13 +102,13 @@ func (c *Cache) ResolveIcon(name string, size int) string {
 	return iconPath
 }
 
-func (c *Cache) GetNonSvgIconPath(name string, size int) string {
+func (c *iconCache) getNonSvgIconPath(name string, size int) string {
 	key := newIconKey(size, name)
 	if path, ok := c.iconPathCache[key]; ok {
 		return path
 	}
 
-	path := c.ResolveIcon(name, size)
+	path := c.resolveIcon(name, size)
 	if len(path) == 0 {
 		c.iconPathCache[key] = ""
 		return ""

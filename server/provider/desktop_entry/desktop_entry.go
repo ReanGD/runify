@@ -1,4 +1,4 @@
-package provider
+package desktop_entry
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/pb"
-	"github.com/ReanGD/runify/server/provider/icons"
+	"github.com/ReanGD/runify/server/provider/pcommon"
 	"github.com/rkoesters/xdg/desktop"
 	"go.uber.org/zap"
 )
@@ -19,16 +19,16 @@ type entry struct {
 	props *desktop.Entry
 }
 
-type desktopEntry struct {
+type DesktopEntry struct {
 	providerID   uint64
-	iconsCache   *icons.Cache
+	iconsCache   *iconCache
 	entries      []*entry
 	cache        []*pb.CardItem
 	moduleLogger *zap.Logger
 }
 
-func newDesktopEntry() *desktopEntry {
-	return &desktopEntry{
+func NewDesktopEntry() *DesktopEntry {
+	return &DesktopEntry{
 		providerID:   0,
 		iconsCache:   nil,
 		entries:      []*entry{},
@@ -37,19 +37,19 @@ func newDesktopEntry() *desktopEntry {
 	}
 }
 
-func (p *desktopEntry) getName() string {
+func (p *DesktopEntry) GetName() string {
 	return "desktopEntry"
 }
 
-func (p *desktopEntry) onInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error {
+func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error {
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
 	var err error
-	p.iconsCache, err = icons.New(moduleLogger)
+	p.iconsCache, err = newIconCache(moduleLogger)
 	return err
 }
 
-func (p *desktopEntry) onStart() {
+func (p *DesktopEntry) OnStart() {
 	id := p.providerID
 	entries := p.entries
 	cache := p.cache
@@ -70,7 +70,7 @@ func (p *desktopEntry) onStart() {
 	p.cache = cache
 }
 
-func (p *desktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *desktop.Entry)) {
+func (p *DesktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *desktop.Entry)) {
 	exists := make(map[string]struct{})
 	for _, dirname := range paths.GetXDGAppDirs() {
 		paths.Walk(dirname, p.moduleLogger, func(fullpath string, mode paths.PathMode) {
@@ -100,19 +100,19 @@ func (p *desktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *des
 			if props.NoDisplay || props.Hidden {
 				return
 			}
-			props.Icon = p.iconsCache.GetNonSvgIconPath(props.Icon, 48)
+			props.Icon = p.iconsCache.getNonSvgIconPath(props.Icon, 48)
 
 			fn(fullpath, props)
 		})
 	}
 }
 
-func (p *desktopEntry) getRoot() ([]*pb.CardItem, error) {
+func (p *DesktopEntry) GetRoot() ([]*pb.CardItem, error) {
 	return p.cache, nil
 }
 
-func (p *desktopEntry) getActions(cardID uint64) ([]*pb.ActionItem, error) {
-	itemID := int(cardID & cardIDMask)
+func (p *DesktopEntry) GetActions(cardID uint64) ([]*pb.ActionItem, error) {
+	itemID := int(cardID & pcommon.CardIDMask)
 	if itemID >= len(p.entries) {
 		return nil, errors.New("not found item by cardID")
 	}
@@ -129,8 +129,8 @@ func (p *desktopEntry) getActions(cardID uint64) ([]*pb.ActionItem, error) {
 	}}, nil
 }
 
-func (p *desktopEntry) execute(cardID uint64, actionID uint32) (*pb.Result, error) {
-	itemID := int(cardID & cardIDMask)
+func (p *DesktopEntry) Execute(cardID uint64, actionID uint32) (*pb.Result, error) {
+	itemID := int(cardID & pcommon.CardIDMask)
 	if itemID >= len(p.entries) {
 		return nil, errors.New("not found item by cardID")
 	}

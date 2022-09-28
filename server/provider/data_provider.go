@@ -32,9 +32,9 @@ func (p *dataProvider) onInit(cfg *config.Config, rootProviderLogger *zap.Logger
 	ch := make(chan error)
 	go func() {
 		channelLen := cfg.Get().Provider.SubModuleChannelLen
-		p.InitSubmodule(rootProviderLogger, p.handler.getName(), channelLen)
+		p.InitSubmodule(rootProviderLogger, p.handler.GetName(), channelLen)
 
-		ch <- p.handler.onInit(cfg, p.ModuleLogger, p.providerID)
+		ch <- p.handler.OnInit(cfg, p.ModuleLogger, p.providerID)
 	}()
 
 	return ch
@@ -43,7 +43,7 @@ func (p *dataProvider) onInit(cfg *config.Config, rootProviderLogger *zap.Logger
 func (p *dataProvider) onStart(ctx context.Context, wg *sync.WaitGroup, errCh chan<- error) {
 	wg.Add(1)
 	go func() {
-		p.handler.onStart()
+		p.handler.OnStart()
 
 		for {
 			if isFinish, err := p.safeRequestLoop(ctx); isFinish {
@@ -91,13 +91,13 @@ func (p *dataProvider) safeRequestLoop(ctx context.Context) (resultIsFinish bool
 func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *getRootCmd:
-		if data, err := p.handler.getRoot(); err != nil {
+		if data, err := p.handler.GetRoot(); err != nil {
 			r.onRequestDefault(p.ModuleLogger, err.Error())
 		} else {
 			r.result <- data
 		}
 	case *getActionsCmd:
-		if data, err := p.handler.getActions(r.cardID); err != nil {
+		if data, err := p.handler.GetActions(r.cardID); err != nil {
 			r.onRequestDefault(p.ModuleLogger, err.Error())
 		} else {
 			r.result <- &pb.Actions{
@@ -105,7 +105,7 @@ func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 			}
 		}
 	case *executeCmd:
-		if data, err := p.handler.execute(r.cardID, r.actionID); err != nil {
+		if data, err := p.handler.Execute(r.cardID, r.actionID); err != nil {
 			r.onRequestDefault(p.ModuleLogger, err.Error())
 		} else {
 			r.result <- data
