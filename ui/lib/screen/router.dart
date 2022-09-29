@@ -32,10 +32,10 @@ class OnBackAction extends ContextAction<OnBackIntent> {
   }
 }
 
-class listener extends WindowListener {
+class _Listener extends WindowListener {
   final ScreenRouter router;
 
-  listener(this.router);
+  _Listener(this.router);
 
   @override
   void onTryClose() {
@@ -65,9 +65,9 @@ class ScreenRouter extends StatelessWidget {
     final initFuture =
         _runifyPlugin.initPlugin(_settings.windowOffset, _settings.windowSize);
     _grpcClient = newGrpcClient(_settings);
-    _service = ScreenRouterService(_logger, _grpcClient);
+    _service = ScreenRouterService(_logger, _grpcClient, this);
     _service.waitShowWindow(this);
-    _runifyPlugin.addListener(listener(this));
+    _runifyPlugin.addListener(_Listener(this));
     return initFuture;
   }
 
@@ -94,6 +94,10 @@ class ScreenRouter extends StatelessWidget {
 
   Future<void> showWindow() async {
     return _runifyPlugin.show();
+  }
+
+  Future<void> closeWindow() async {
+    return _runifyPlugin.close();
   }
 
   Map<Type, Action<Intent>> getActions() {

@@ -5,8 +5,9 @@ import 'package:runify/pb/runify.pbgrpc.dart';
 class ScreenRouterService {
   final Logger logger;
   final RunifyClient grpcClient;
+  final ScreenRouter router;
 
-  ScreenRouterService(this.logger, this.grpcClient);
+  ScreenRouterService(this.logger, this.grpcClient, this.router);
 
   Future<void> waitShowWindow(ScreenRouter router) async {
     try {
@@ -15,8 +16,9 @@ class ScreenRouterService {
         router.showWindow();
       }
     } catch (e) {
-      // TODO: add policy for reconnect
-      logger.log('gRPC WaitShowWindow method ended with error: $e');
+      logger
+          .log('gRPC WaitShowWindow method ended with error: $e. Stop runify.');
+      await router.closeWindow();
     }
   }
 }
