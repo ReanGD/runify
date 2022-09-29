@@ -121,10 +121,13 @@ func (h *rpcHandler) onStop() {
 
 func (h *rpcHandler) onShowUI() {
 	if !h.showUIMultiplier.sendToAll() {
-		if err := exec.Command(h.binaryPath).Start(); err != nil {
-			h.moduleLogger.Error("Failed start UI", zap.String("binary", h.binaryPath), zap.Error(err))
-		} else {
-			h.moduleLogger.Info("UI started", zap.String("binary", h.binaryPath))
+		cmd := exec.Command(h.binaryPath)
+		if err := cmd.Start(); err != nil {
+			h.moduleLogger.Error("Failed start runify UI process", zap.String("binary", h.binaryPath), zap.Error(err))
+			return
 		}
+
+		h.moduleLogger.Info("Runify UI process started", zap.String("binary", h.binaryPath))
+		go cmd.Wait()
 	}
 }

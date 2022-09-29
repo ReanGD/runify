@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 func buildArgs(agrsStr string, needTerminal bool, terminal string) ([]string, error) {
@@ -112,5 +113,15 @@ func execCmd(agrsStr string, needTerminal bool, terminal string) error {
 		cmd = exec.Command(name, args[1:]...)
 	}
 
-	return cmd.Start()
+	// If the parent process does not exit correctly, then all child processes will also be killed
+	// This code cancel this behavior
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pgid: 0}
+
+	if err = cmd.Start(); err != nil {
+		return err
+	}
+
+	go cmd.Wait()
+
+	return nil
 }
