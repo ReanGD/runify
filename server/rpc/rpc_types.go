@@ -39,11 +39,13 @@ func (m *showUIMultiplier) unsubscribe(id uint32) {
 	m.mutex.Unlock()
 }
 
-func (m *showUIMultiplier) sendToAll() {
+func (m *showUIMultiplier) sendToAll() bool {
 	msg := &pb.ShowWindow{}
 	m.mutex.RLock()
+	defer m.mutex.RUnlock()
 	for _, ch := range m.subs {
 		ch <- msg
 	}
-	m.mutex.RUnlock()
+
+	return len(m.subs) > 0
 }

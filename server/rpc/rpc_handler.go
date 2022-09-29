@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
@@ -17,6 +18,7 @@ import (
 )
 
 type rpcHandler struct {
+	binaryPath       string
 	unixAddr         string
 	netUnixAddr      *net.UnixAddr
 	showUIMultiplier *showUIMultiplier
@@ -28,6 +30,7 @@ type rpcHandler struct {
 
 func newRpcHandler() *rpcHandler {
 	return &rpcHandler{
+		binaryPath:       "",
 		unixAddr:         "",
 		netUnixAddr:      nil,
 		showUIMultiplier: newShowUIMultiplier(),
@@ -37,11 +40,12 @@ func newRpcHandler() *rpcHandler {
 	}
 }
 
-func (h *rpcHandler) onInit(cfg *config.RpcCfg, moduleLogger *zap.Logger, provider *provider.Provider) error {
+func (h *rpcHandler) onInit(cfg *config.Configuration, moduleLogger *zap.Logger, provider *provider.Provider) error {
 	h.moduleLogger = moduleLogger
+	h.binaryPath = cfg.UI.BinaryPath
 
 	var err error
-	h.unixAddr = cfg.Address
+	h.unixAddr = cfg.Rpc.Address
 	h.netUnixAddr, err = h.resolveUnixAddr(h.unixAddr)
 	if err != nil {
 		moduleLogger.Error("Failed resolve unit address", zap.String("address", h.unixAddr), zap.Error(err))
@@ -116,5 +120,11 @@ func (h *rpcHandler) onStop() {
 }
 
 func (h *rpcHandler) onShowUI() {
-	h.showUIMultiplier.sendToAll()
+	if !h.showUIMultiplier.sendToAll() {
+		if err := exec.Command(h.binaryPath).Start(); err != nil {
+			h.moduleLogger.Error("Failed start UI", zap.String("binary", h.binaryPath), zap.Error(err))
+		} else {
+			h.moduleLogger.Info("UI started", zap.String("binary", h.binaryPath))
+		}
+	}
 }

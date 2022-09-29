@@ -35,7 +35,7 @@ func (m *Rpc) OnInit(cfg *config.Config, provider *provider.Provider, rootLogger
 		rpcCfg := &cfg.Get().Rpc
 		m.Init(rootLogger, ModuleName, rpcCfg.ChannelLen)
 
-		ch <- m.handler.onInit(rpcCfg, m.ModuleLogger, provider)
+		ch <- m.handler.onInit(cfg.Get(), m.ModuleLogger, provider)
 	}()
 
 	return ch
