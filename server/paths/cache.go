@@ -16,8 +16,10 @@ type cachePaths struct {
 	sysTmp       string
 	userHome     string
 	userConfig   string
+	userData     string
 	userCache    string
 	appConfig    string
+	appData      string
 	appCache     string
 	appIconCache string
 	xdgDataDirs  []string
@@ -96,16 +98,26 @@ func New() error {
 	}
 
 	cache.userConfig = ExpandUser(getenvDef("XDG_CONFIG_HOM", filepath.Join(cache.userHome, ".config")))
+	cache.userData = ExpandUser(getenvDef("XDG_DATA_HOME", filepath.Join(cache.userHome, ".local", "share")))
 	cache.userCache = ExpandUser(getenvDef("XDG_CACHE_HOME", filepath.Join(cache.userHome, ".cache")))
 
 	cache.appConfig = filepath.Join(cache.userConfig, appName)
 	if _, err := createDir(cache.appConfig); err != nil {
 		return err
 	}
+	setenv("RUNIFY_CONFIG_DIR", cache.appConfig)
+
+	cache.appData = filepath.Join(cache.userData, appName)
+	if _, err := createDir(cache.appData); err != nil {
+		return err
+	}
+	setenv("RUNIFY_DATA_DIR", cache.appData)
+
 	cache.appCache = filepath.Join(cache.userCache, appName)
 	if _, err := createDir(cache.appCache); err != nil {
 		return err
 	}
+	setenv("RUNIFY_CACHE_DIR", cache.appCache)
 
 	cache.appIconCache = filepath.Join(cache.appCache, "icon")
 	if _, err := createDir(cache.appIconCache); err != nil {

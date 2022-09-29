@@ -1,6 +1,7 @@
 package paths
 
 import (
+	"os"
 	"path/filepath"
 )
 
@@ -47,4 +48,8 @@ func ExpandUser(path string) string {
 	}
 
 	return path
+}
+
+func ExpandAll(path string) string {
+	return os.ExpandEnv(ExpandUser(path))
 }
