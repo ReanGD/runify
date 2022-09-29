@@ -7,4 +7,4 @@ PROJECT_DIR=`dirname $CI_DIR`
 UI_DIR=$PROJECT_DIR/ui
 
 cd "${UI_DIR}"
-flutter build linux ${MODE}
+cp -r ./build/linux/x64/release/bundle/* ~/.local/share/runify
