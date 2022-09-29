@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/ReanGD/runify/server/paths"
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
 )
@@ -9,6 +10,16 @@ type BuildCfg struct {
 	Version       string
 	BuildCommit   string
 	BuildDateTime string
+}
+
+type UICfg struct {
+	BinaryPath string
+}
+
+func (c UICfg) setDefault(vp *viper.Viper) {
+	vp.SetDefault("UI", map[string]interface{}{
+		"BinaryPath": "$RUNIFY_DATA_DIR/runify",
+	})
 }
 
 type RpcCfg struct {
@@ -38,6 +49,7 @@ func (c X11Cfg) setDefault(vp *viper.Viper) {
 type ProviderCfg struct {
 	ChannelLen          uint32
 	SubModuleChannelLen uint32
+	Terminal            string
 	Hides               []string
 }
 
@@ -45,6 +57,7 @@ func (c *ProviderCfg) setDefault(vp *viper.Viper) {
 	vp.SetDefault("Provider", map[string]interface{}{
 		"ChannelLen":          100,
 		"SubModuleChannelLen": 100,
+		"Terminal":            "sh",
 		"Hides":               []string{},
 	})
 }
@@ -107,10 +120,16 @@ func (c LoggerCfg) setDefault(vp *viper.Viper) {
 }
 
 type ConfigurationSaved struct {
+	UI       UICfg
 	Rpc      RpcCfg
 	X11      X11Cfg
 	Provider ProviderCfg
 	Logger   LoggerCfg
+}
+
+func (c *ConfigurationSaved) process() {
+	c.UI.BinaryPath = paths.ExpandAll(c.UI.BinaryPath)
+	c.Rpc.Address = paths.ExpandAll(c.Rpc.Address)
 }
 
 type Configuration struct {
@@ -126,6 +145,7 @@ func newConfiguration(buildCfg *BuildCfg) *Configuration {
 }
 
 func (c *Configuration) setDefault(vp *viper.Viper) {
+	c.UI.setDefault(vp)
 	c.Rpc.setDefault(vp)
 	c.X11.setDefault(vp)
 	c.Provider.setDefault(vp)
