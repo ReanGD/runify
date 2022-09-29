@@ -20,6 +20,7 @@ type entry struct {
 
 type DesktopEntry struct {
 	providerID   uint64
+	terminal     string
 	iconsCache   *iconCache
 	entries      []*entry
 	cache        []*pb.CardItem
@@ -29,6 +30,7 @@ type DesktopEntry struct {
 func NewDesktopEntry() *DesktopEntry {
 	return &DesktopEntry{
 		providerID:   0,
+		terminal:     "",
 		iconsCache:   nil,
 		entries:      []*entry{},
 		cache:        []*pb.CardItem{},
@@ -43,6 +45,7 @@ func (p *DesktopEntry) GetName() string {
 func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error {
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
+	p.terminal = cfg.Get().Provider.Terminal
 	var err error
 	p.iconsCache, err = newIconCache(moduleLogger)
 	return err
@@ -135,7 +138,7 @@ func (p *DesktopEntry) Execute(cardID uint64, actionID uint32) (*pb.Result, erro
 	}
 
 	entry := p.entries[itemID]
-	err := execCmd(entry.props.Exec, entry.props.Terminal, "sh")
+	err := execCmd(entry.props.Exec, entry.props.Terminal, p.terminal)
 	if err != nil {
 		p.moduleLogger.Warn("Failed execute desktop entry",
 			zap.String("Request", "Execute"),
