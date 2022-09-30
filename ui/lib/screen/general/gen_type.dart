@@ -10,8 +10,8 @@ class Command implements Matcher {
   Command(this.id, this.name, this.category, this.icon);
 
   @override
-  bool match(String filter) {
-    return name.toLowerCase().contains(filter);
+  bool match(RegExp rexp) {
+    return rexp.hasMatch(name);
   }
 }
 

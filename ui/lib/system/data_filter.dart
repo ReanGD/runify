@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 abstract class Matcher {
-  bool match(String filter);
+  bool match(RegExp rexp);
 }
 
 class DataFilter<T extends Matcher> with ChangeNotifier {
@@ -34,8 +34,10 @@ class DataFilter<T extends Matcher> with ChangeNotifier {
 
   void _update() {
     _visibleItems.clear();
+    final rfilter = RegExp.escape(_filter.trim()).replaceAll(" ", ".*");
+    final RegExp rexp = RegExp(rfilter, caseSensitive: false);
     for (var i = 0; i != _items.length; i++) {
-      if (_items[i].match(_filter)) {
+      if (_items[i].match(rexp)) {
         _visibleItems.add(i);
       }
     }

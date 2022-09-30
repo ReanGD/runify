@@ -7,8 +7,8 @@ class CommandAction implements Matcher {
   CommandAction(this.id, this.name);
 
   @override
-  bool match(String filter) {
-    return name.toLowerCase().contains(filter);
+  bool match(RegExp rexp) {
+    return rexp.hasMatch(name);
   }
 }
 
