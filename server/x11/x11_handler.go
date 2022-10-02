@@ -14,6 +14,7 @@ import (
 type x11Handler struct {
 	xConnection *xgbutil.XUtil
 	keybind     *x11Keybind
+	clipboard   *x11Clipboard
 
 	moduleLogger *zap.Logger
 }
@@ -22,6 +23,7 @@ func newX11Handler() *x11Handler {
 	return &x11Handler{
 		xConnection:  nil,
 		keybind:      newX11Keybind(),
+		clipboard:    newX11Clipboard(),
 		moduleLogger: nil,
 	}
 }
@@ -40,7 +42,17 @@ func (h *x11Handler) onInit(cfg *config.Config, rpc *rpc.Rpc, moduleLogger *zap.
 		return errors.New("Failed connect to x server")
 	}
 
-	return h.keybind.onInit(cfg, h.xConnection, rpc, moduleLogger)
+	err = h.keybind.onInit(cfg, h.xConnection, rpc, moduleLogger)
+	if err != nil {
+		return err
+	}
+
+	err = h.clipboard.onInit(cfg, h.xConnection, moduleLogger)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (h *x11Handler) onStart(wg *sync.WaitGroup) {
@@ -56,6 +68,7 @@ func (h *x11Handler) onStart(wg *sync.WaitGroup) {
 
 	startWG.Wait()
 	h.keybind.onStart()
+	h.clipboard.onStart()
 }
 
 func (h *x11Handler) onHotkey(id hotkeyID) {
@@ -64,6 +77,7 @@ func (h *x11Handler) onHotkey(id hotkeyID) {
 
 func (h *x11Handler) onStop() {
 	h.keybind.onStop()
+	h.clipboard.onStop()
 	h.xConnection.Quit = true
 	h.xConnection = nil
 }

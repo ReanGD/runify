@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/gofrs/uuid v4.2.0+incompatible
+	github.com/jezek/xgb v1.0.1
 	github.com/jezek/xgbutil v0.0.0-20210302171758-530099784e66
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rkoesters/xdg v0.0.1
@@ -22,7 +23,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/jezek/xgb v1.0.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
