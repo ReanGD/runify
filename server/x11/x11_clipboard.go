@@ -8,7 +8,6 @@ import (
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 	"github.com/jezek/xgbutil"
-	"github.com/jezek/xgbutil/xevent"
 	"go.uber.org/zap"
 )
 
@@ -92,6 +91,9 @@ func (h *x11Clipboard) onInit(cfg *config.Config, xConnection *xgbutil.XUtil, mo
 	return nil
 }
 
+func (h *x11Clipboard) onStart() {
+}
+
 func (h *x11Clipboard) getClipboardOwner(selection xproto.Atom) (xproto.Window, bool) {
 	reply, err := xproto.GetSelectionOwner(h.getConnection(), selection).Reply()
 	if err != nil {
@@ -123,35 +125,6 @@ func (h *x11Clipboard) convertSelection(selection xproto.Atom) bool {
 
 	xproto.ConvertSelection(
 		h.getConnection(), h.getWindow(), selection, h.atomUTF8String, selection, xproto.TimeCurrentTime)
-
-	return true
-}
-
-func (h *x11Clipboard) onStart() {
-	xevent.HookFun(h.eventHandlerHook).Connect(h.xConnection)
-}
-
-func (h *x11Clipboard) eventHandlerHook(xu *xgbutil.XUtil, eventRaw interface{}) bool {
-	switch event := eventRaw.(type) {
-	case xproto.SelectionNotifyEvent:
-		if event.Requestor == h.getWindow() {
-			xu.TimeSet(event.Time)
-			h.onSelectionNotify(event)
-			return false
-		}
-	case xproto.SelectionRequestEvent:
-		if event.Owner == h.getWindow() {
-			xu.TimeSet(event.Time)
-			h.onSelectionRequest(event)
-			return false
-		}
-	case xproto.SelectionClearEvent:
-		if event.Owner == h.getWindow() {
-			xu.TimeSet(event.Time)
-			h.onSelectionClear(event)
-			return false
-		}
-	}
 
 	return true
 }
@@ -246,7 +219,14 @@ func (h *x11Clipboard) onSelectionRequest(event xproto.SelectionRequestEvent) {
 }
 
 func (h *x11Clipboard) onSelectionClear(event xproto.SelectionClearEvent) {
-	fmt.Println("onSelectionClear")
+	switch event.Selection {
+	case h.atomClipboardSel:
+		delete(h.ownClipboardData, h.atomClipboardSel)
+	case h.atomPrimarySel:
+		delete(h.ownClipboardData, h.atomPrimarySel)
+	default:
+		h.moduleLogger.Info("Unknown selection clear event", zap.Uint32("selection", uint32(event.Selection)))
+	}
 }
 
 func (h *x11Clipboard) onStop() {

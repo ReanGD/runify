@@ -75,6 +75,7 @@ func (m *X11) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultE
 	}()
 
 	done := ctx.Done()
+	x11EventsCh := m.handler.getX11EventsCh()
 	hotkeyCh := m.handler.getHotkeysCh()
 	messageCh := m.GetReadChannel()
 
@@ -85,6 +86,8 @@ func (m *X11) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultE
 			resultIsFinish = true
 			resultErr = nil
 			return
+		case event := <-x11EventsCh:
+			m.handler.onX11Event(event)
 		case id := <-hotkeyCh:
 			m.handler.onHotkey(id)
 		case request = <-messageCh:

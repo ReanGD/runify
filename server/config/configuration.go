@@ -35,14 +35,16 @@ func (c RpcCfg) setDefault(vp *viper.Viper) {
 }
 
 type X11Cfg struct {
-	ChannelLen        uint32
-	HotkeysChannelLen uint32
+	ChannelLen         uint32
+	HotkeysChannelLen  uint32
+	X11EventChannelLen uint32
 }
 
 func (c X11Cfg) setDefault(vp *viper.Viper) {
 	vp.SetDefault("X11", map[string]interface{}{
-		"ChannelLen":        100,
-		"HotkeysChannelLen": 100,
+		"ChannelLen":         100,
+		"HotkeysChannelLen":  100,
+		"X11EventChannelLen": 100,
 	})
 }
 
