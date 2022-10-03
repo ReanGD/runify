@@ -6,6 +6,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/rpc"
+	"github.com/jezek/xgb/xfixes"
 	"github.com/jezek/xgb/xproto"
 	"github.com/jezek/xgbutil"
 	"github.com/jezek/xgbutil/xevent"
@@ -57,7 +58,7 @@ func (h *x11Handler) onInit(cfg *config.Config, rpc *rpc.Rpc, moduleLogger *zap.
 		return err
 	}
 
-	err = h.clipboard.onInit(cfg, h.xConnection, moduleLogger)
+	err = h.clipboard.onInit(h.xConnection.Conn(), h.xConnection.Dummy(), moduleLogger)
 	if err != nil {
 		return err
 	}
@@ -85,6 +86,10 @@ func (h *x11Handler) onStart(wg *sync.WaitGroup) {
 // called in external goroutine
 func (h *x11Handler) hookX11Event(xu *xgbutil.XUtil, event interface{}) bool {
 	switch e := event.(type) {
+	case xfixes.SelectionNotifyEvent:
+		xu.TimeSet(e.Timestamp)
+		h.x11EventsCh <- event
+		return false
 	case xproto.SelectionNotifyEvent:
 		xu.TimeSet(e.Time)
 		h.x11EventsCh <- event
@@ -104,6 +109,8 @@ func (h *x11Handler) hookX11Event(xu *xgbutil.XUtil, event interface{}) bool {
 
 func (h *x11Handler) onX11Event(event interface{}) {
 	switch e := event.(type) {
+	case xfixes.SelectionNotifyEvent:
+		h.clipboard.onSelectionChange(e)
 	case xproto.SelectionNotifyEvent:
 		h.clipboard.onSelectionNotify(e)
 	case xproto.SelectionRequestEvent:
