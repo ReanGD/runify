@@ -58,7 +58,12 @@ func (h *x11Handler) onInit(cfg *config.Config, rpc *rpc.Rpc, moduleLogger *zap.
 		return err
 	}
 
-	err = h.clipboard.onInit(h.xConnection.Conn(), h.xConnection.Dummy(), moduleLogger)
+	atoms, ok := newAtomStorage(h.xConnection.Conn(), moduleLogger)
+	if !ok {
+		return errInitX11
+	}
+
+	err = h.clipboard.onInit(atoms, h.xConnection.Conn(), h.xConnection.Dummy(), moduleLogger)
 	if err != nil {
 		return err
 	}

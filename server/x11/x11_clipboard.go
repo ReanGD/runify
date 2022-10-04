@@ -9,9 +9,14 @@ import (
 	"go.uber.org/zap"
 )
 
+var (
+	methodSelectionChange = zap.String("Method", "x11Clipboard::onSelectionChange")
+)
+
 type readData struct {
-	owner xproto.Window
-	data  Mimes
+	owner     xproto.Window
+	timestamp xproto.Timestamp
+	data      Mimes
 }
 
 type writeData struct {
@@ -19,6 +24,7 @@ type writeData struct {
 }
 
 type x11Clipboard struct {
+	atoms            *atomStorage
 	connection       *xgb.Conn
 	window           xproto.Window
 	atomIncr         xproto.Atom
@@ -35,6 +41,7 @@ type x11Clipboard struct {
 
 func newX11Clipboard() *x11Clipboard {
 	return &x11Clipboard{
+		atoms:            nil,
 		connection:       nil,
 		window:           0,
 		atomIncr:         0,
@@ -49,50 +56,18 @@ func newX11Clipboard() *x11Clipboard {
 	}
 }
 
-func (h *x11Clipboard) createAtom(name string) (xproto.Atom, error) {
-	r, err := xproto.InternAtom(h.connection, false, uint16(len(name)), name).Reply()
-	if err != nil {
-		h.moduleLogger.Error("Failed create x11 atom", zap.String("name", name), zap.Error(err))
-		return 0, errInitX11Clipboard
-	}
-	if r == nil {
-		h.moduleLogger.Error("Failed create x11 atom", zap.String("name", name))
-		return 0, errInitX11Clipboard
-	}
-
-	return r.Atom, nil
-}
-
-func (h *x11Clipboard) onInit(connection *xgb.Conn, window xproto.Window, moduleLogger *zap.Logger) error {
+func (h *x11Clipboard) onInit(atoms *atomStorage, connection *xgb.Conn, window xproto.Window, moduleLogger *zap.Logger) error {
+	h.atoms = atoms
 	h.connection = connection
 	h.window = window
 	h.moduleLogger = moduleLogger
 
-	var err error
-
-	if h.atomIncr, err = h.createAtom("INCR"); err != nil {
-		return err
-	}
-
-	if h.atomTargets, err = h.createAtom("TARGETS"); err != nil {
-		return err
-	}
-
-	if h.atomTimestamp, err = h.createAtom("TIMESTAMP"); err != nil {
-		return err
-	}
-
-	if h.atomUTF8String, err = h.createAtom("UTF8_STRING"); err != nil {
-		return err
-	}
-
-	if h.atomPrimarySel, err = h.createAtom("PRIMARY"); err != nil {
-		return err
-	}
-
-	if h.atomClipboardSel, err = h.createAtom("CLIPBOARD"); err != nil {
-		return err
-	}
+	h.atomIncr = atoms.getByNameUnchecked(atomNameIncr)
+	h.atomTargets = atoms.getByNameUnchecked(atomNameTargets)
+	h.atomTimestamp = atoms.getByNameUnchecked(atomNameTimestamp)
+	h.atomUTF8String = atoms.getByNameUnchecked(atomNameUTF8String)
+	h.atomPrimarySel = atoms.getByNameUnchecked(atomNamePrimarySel)
+	h.atomClipboardSel = atoms.getByNameUnchecked(atomNameClipboardSel)
 
 	// https://www.x.org/releases/X11R7.7/doc/fixesproto/fixesproto.txt
 	if err := xfixes.Init(h.connection); err != nil {
@@ -205,15 +180,13 @@ func (h *x11Clipboard) writeToClipboard(selection xproto.Atom, data Mimes) bool 
 }
 
 func (h *x11Clipboard) onSelectionChange(event xfixes.SelectionNotifyEvent) {
-	if event.Selection != h.atomPrimarySel && event.Selection != h.atomClipboardSel {
-		h.moduleLogger.Info("Unknown selection atom",
-			zap.String("Method", "onSelectionChange"), zap.Uint32("selection", uint32(event.Selection)))
+	selection := event.Selection
+	if !h.atoms.checkSelection(selection, methodSelectionChange) {
 		return
 	}
 
 	if event.Subtype != xfixes.SelectionEventSetSelectionOwner {
-		h.moduleLogger.Info("Unknown subtype",
-			zap.String("Method", "onSelectionChange"), zap.Uint32("subtype", uint32(event.Subtype)))
+		h.moduleLogger.Info("Unknown subtype", methodSelectionChange, zap.Uint32("subtype", uint32(event.Subtype)))
 	}
 
 	if event.Owner == h.window {
@@ -221,12 +194,18 @@ func (h *x11Clipboard) onSelectionChange(event xfixes.SelectionNotifyEvent) {
 	}
 
 	if event.Owner == xproto.AtomNone {
-		delete(h.lastRead, event.Selection)
+		delete(h.lastRead, selection)
 		return
 	}
 
+	h.lastRead[selection] = readData{
+		owner:     event.Owner,
+		timestamp: event.Timestamp,
+		data:      nil,
+	}
+
 	fmt.Println("onSelectionChange", event)
-	if !h.convertSelection(event.Selection, h.atomTargets) {
+	if !h.convertSelection(selection, h.atomTargets) {
 		return
 	}
 }
