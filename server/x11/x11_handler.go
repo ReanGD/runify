@@ -99,6 +99,10 @@ func (h *x11Handler) hookX11Event(xu *xgbutil.XUtil, event interface{}) bool {
 		xu.TimeSet(e.Time)
 		h.x11EventsCh <- event
 		return false
+	case xproto.PropertyNotifyEvent:
+		xu.TimeSet(e.Time)
+		h.x11EventsCh <- event
+		return false
 	case xproto.SelectionRequestEvent:
 		xu.TimeSet(e.Time)
 		h.x11EventsCh <- event
@@ -118,6 +122,8 @@ func (h *x11Handler) onX11Event(event interface{}) {
 		h.clipboard.onSelectionChange(e)
 	case xproto.SelectionNotifyEvent:
 		h.clipboard.onSelectionNotify(e)
+	case xproto.PropertyNotifyEvent:
+		h.clipboard.onPropertyNotify(e)
 	case xproto.SelectionRequestEvent:
 		h.clipboard.onSelectionRequest(e)
 	case xproto.SelectionClearEvent:
