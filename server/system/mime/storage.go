@@ -1,5 +1,11 @@
 package mime
 
+import (
+	"os"
+
+	"github.com/ReanGD/runify/server/paths"
+)
+
 type Data struct {
 	Type Type
 	Data []byte
@@ -40,4 +46,18 @@ func (m *Data) Append(data []byte) {
 	} else {
 		m.Data = append(m.Data, data...)
 	}
+}
+
+func (m *Data) WriteToFile(path string) error {
+	f, err := os.OpenFile(paths.ExpandUser(path), os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+	if _, err := f.Write(m.Data); err != nil {
+		return err
+	}
+
+	return nil
 }

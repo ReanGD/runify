@@ -3,6 +3,7 @@ package x11
 import (
 	"fmt"
 
+	"github.com/ReanGD/runify/server/system/mime"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
@@ -26,6 +27,7 @@ const (
 	atomNameTimestamp     atomName = "TIMESTAMP"
 	atomNameImagePng      atomName = "image/png"
 	atomNameImageBmp      atomName = "image/bmp"
+	atomNameImageJpeg     atomName = "image/jpeg"
 	atomNameTextPlain     atomName = "text/plain"
 	atomNameUTF8String    atomName = "UTF8_STRING"
 	atomNamePrimarySel    atomName = "PRIMARY"
@@ -42,6 +44,7 @@ var (
 		atomNameTimestamp,
 		atomNameImagePng,
 		atomNameImageBmp,
+		atomNameImageJpeg,
 		atomNameTextPlain,
 		atomNameUTF8String,
 		atomNamePrimarySel,
@@ -51,21 +54,30 @@ var (
 	}
 )
 
+type mimeAtom struct {
+	mType mime.Type
+	atom  xproto.Atom
+}
+
 type atomStorage struct {
 	atomsByName      map[atomName]xproto.Atom
 	atomsByID        map[xproto.Atom]atomName
 	connection       *xgb.Conn
 	moduleLogger     *zap.Logger
+	mimeAtoms        []mimeAtom
 	atomPrimarySel   xproto.Atom
 	atomClipboardSel xproto.Atom
 }
 
 func newAtomStorage(connection *xgb.Conn, moduleLogger *zap.Logger) (*atomStorage, bool) {
 	res := &atomStorage{
-		atomsByName:  make(map[atomName]xproto.Atom),
-		atomsByID:    make(map[xproto.Atom]atomName),
-		connection:   connection,
-		moduleLogger: moduleLogger,
+		atomsByName:      make(map[atomName]xproto.Atom),
+		atomsByID:        make(map[xproto.Atom]atomName),
+		connection:       connection,
+		moduleLogger:     moduleLogger,
+		mimeAtoms:        nil,
+		atomPrimarySel:   0,
+		atomClipboardSel: 0,
 	}
 
 	for _, name := range allAtoms {
@@ -75,6 +87,14 @@ func newAtomStorage(connection *xgb.Conn, moduleLogger *zap.Logger) (*atomStorag
 	}
 	res.atomsByName[atomNameNone] = xproto.AtomNone
 	res.atomsByID[xproto.AtomNone] = atomNameNone
+
+	res.mimeAtoms = []mimeAtom{
+		{mime.ImagePng, res.getByNameUnchecked(atomNameImagePng)},
+		{mime.ImageBmp, res.getByNameUnchecked(atomNameImageBmp)},
+		{mime.ImageJpeg, res.getByNameUnchecked(atomNameImageJpeg)},
+		{mime.TextPlain, res.getByNameUnchecked(atomNameUTF8String)},
+		{mime.TextPlain, res.getByNameUnchecked(atomNameTextPlain)},
+	}
 
 	res.atomPrimarySel = res.getByNameUnchecked(atomNamePrimarySel)
 	res.atomClipboardSel = res.getByNameUnchecked(atomNameClipboardSel)
@@ -161,4 +181,28 @@ func (s *atomStorage) checkSelection(selection xproto.Atom, fields ...zap.Field)
 	}
 
 	return true
+}
+
+func (s *atomStorage) choiceTarget(selection xproto.Atom, targets map[xproto.Atom]struct{}) (mimeAtom, bool) {
+	for _, it := range s.mimeAtoms {
+		if _, ok := targets[it.atom]; ok {
+			return it, true
+		}
+	}
+
+	return mimeAtom{mime.None, xproto.AtomNone}, false
+}
+
+func (s *atomStorage) checkSelectionNotifyTarget(target xproto.Atom, mType mime.Type) bool {
+	if mType == mime.None || target == xproto.AtomNone {
+		return false
+	}
+
+	for _, it := range s.mimeAtoms {
+		if it.mType == mType && it.atom == target {
+			return true
+		}
+	}
+
+	return false
 }
