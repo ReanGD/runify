@@ -3,20 +3,21 @@ package rpc
 import (
 	"context"
 
-	"github.com/ReanGD/runify/server/pb"
-	"github.com/ReanGD/runify/server/provider"
 	"go.uber.org/zap"
+
+	"github.com/ReanGD/runify/server/pb"
+	"github.com/ReanGD/runify/server/system/module"
 )
 
 type runifyServer struct {
-	provider         *provider.Provider
+	provider         module.Provider
 	showUIMultiplier *showUIMultiplier
 	moduleLogger     *zap.Logger
 
 	pb.UnimplementedRunifyServer
 }
 
-func newRunifyServer(provider *provider.Provider, showUIMultiplier *showUIMultiplier, moduleLogger *zap.Logger) *runifyServer {
+func newRunifyServer(provider module.Provider, showUIMultiplier *showUIMultiplier, moduleLogger *zap.Logger) *runifyServer {
 	return &runifyServer{
 		provider:         provider,
 		showUIMultiplier: showUIMultiplier,

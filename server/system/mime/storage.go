@@ -25,10 +25,10 @@ func NewData(typ Type, data []byte) *Data {
 	}
 }
 
-func NewTextData(text []byte) *Data {
+func NewTextData(text string) *Data {
 	return &Data{
 		Type: TextPlain,
-		Data: text,
+		Data: []byte(text),
 	}
 }
 

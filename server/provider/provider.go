@@ -28,14 +28,14 @@ func New() *Provider {
 	}
 }
 
-func (p *Provider) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
+func (p *Provider) OnInit(cfg *config.Config, x11 module.X11, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {
 		channelLen := cfg.Get().Provider.ChannelLen
 		p.Init(rootLogger, ModuleName, channelLen)
 
-		ch <- p.handler.onInit(cfg, p.ModuleLogger)
+		ch <- p.handler.onInit(cfg, x11, p.ModuleLogger)
 	}()
 
 	return ch

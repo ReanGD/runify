@@ -84,7 +84,7 @@ func (r *Runify) init(cfgFile string) bool {
 
 	rpcCh := r.rpc.OnInit(r.cfg, r.provider, rootLogger)
 	x11Ch := r.x11.OnInit(r.cfg, r.rpc, rootLogger)
-	providerCh := r.provider.OnInit(r.cfg, rootLogger)
+	providerCh := r.provider.OnInit(r.cfg, r.x11, rootLogger)
 
 	if err = r.checkOnInit(provider.ModuleName, providerCh); err != nil {
 		return false

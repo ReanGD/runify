@@ -9,8 +9,17 @@ import (
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/pb"
 	"github.com/ReanGD/runify/server/provider/pcommon"
+	"github.com/ReanGD/runify/server/system/mime"
+	"github.com/ReanGD/runify/server/system/module"
 	"github.com/rkoesters/xdg/desktop"
 	"go.uber.org/zap"
+)
+
+const (
+	actionOpen uint32 = iota
+	actionCopyName
+	actionCopyPath
+	actionLast
 )
 
 type entry struct {
@@ -21,16 +30,18 @@ type entry struct {
 type DesktopEntry struct {
 	providerID   uint64
 	terminal     string
+	x11          module.X11
 	iconsCache   *iconCache
 	entries      []*entry
 	cache        []*pb.CardItem
 	moduleLogger *zap.Logger
 }
 
-func NewDesktopEntry() *DesktopEntry {
+func NewDesktopEntry(x11 module.X11) *DesktopEntry {
 	return &DesktopEntry{
 		providerID:   0,
 		terminal:     "",
+		x11:          x11,
 		iconsCache:   nil,
 		entries:      []*entry{},
 		cache:        []*pb.CardItem{},
@@ -120,13 +131,13 @@ func (p *DesktopEntry) GetActions(cardID uint64) ([]*pb.ActionItem, error) {
 	}
 
 	return []*pb.ActionItem{{
-		ActionID: 0,
+		ActionID: actionOpen,
 		Name:     "Open",
 	}, {
-		ActionID: 1,
+		ActionID: actionCopyName,
 		Name:     "Copy name",
 	}, {
-		ActionID: 2,
+		ActionID: actionCopyPath,
 		Name:     "Copy path",
 	}}, nil
 }
@@ -136,24 +147,34 @@ func (p *DesktopEntry) Execute(cardID uint64, actionID uint32) (*pb.Result, erro
 	if itemID >= len(p.entries) {
 		return nil, errors.New("not found item by cardID")
 	}
+	if actionID >= actionLast {
+		return nil, errors.New("not found action by actionID")
+	}
 
 	entry := p.entries[itemID]
-	err := execCmd(entry.props.Exec, entry.props.Terminal, p.terminal)
-	if err != nil {
-		p.moduleLogger.Warn("Failed execute desktop entry",
-			zap.String("Request", "Execute"),
-			zap.Uint64("CardID", cardID),
-			zap.Uint32("ActionID", actionID),
-			zap.String("EntryPath", entry.path),
-			zap.Error(err))
+	switch actionID {
+	case actionOpen:
+		err := execCmd(entry.props.Exec, entry.props.Terminal, p.terminal)
+		if err != nil {
+			p.moduleLogger.Warn("Failed execute desktop entry",
+				zap.String("Request", "Execute"),
+				zap.Uint64("CardID", cardID),
+				zap.Uint32("ActionID", actionID),
+				zap.String("EntryPath", entry.path),
+				zap.Error(err))
 
-		return &pb.Result{
-			Payload: &pb.Result_Hide{
-				Hide: &pb.HideWindow{
-					Error: "Failed execute desktop entry",
+			return &pb.Result{
+				Payload: &pb.Result_Hide{
+					Hide: &pb.HideWindow{
+						Error: "Failed execute desktop entry",
+					},
 				},
-			},
-		}, nil
+			}, nil
+		}
+	case actionCopyName:
+		p.x11.WriteToClipboard(false, mime.NewTextData(entry.props.Name))
+	case actionCopyPath:
+		p.x11.WriteToClipboard(false, mime.NewTextData(entry.path))
 	}
 
 	return &pb.Result{
