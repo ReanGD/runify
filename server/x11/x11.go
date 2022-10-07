@@ -9,7 +9,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/logger"
-	"github.com/ReanGD/runify/server/rpc"
+	"github.com/ReanGD/runify/server/system/mime"
 	"github.com/ReanGD/runify/server/system/module"
 	"go.uber.org/zap"
 )
@@ -28,7 +28,7 @@ func New() *X11 {
 	}
 }
 
-func (m *X11) OnInit(cfg *config.Config, rpc *rpc.Rpc, rootLogger *zap.Logger) <-chan error {
+func (m *X11) OnInit(cfg *config.Config, rpc module.Rpc, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {
@@ -100,8 +100,9 @@ func (m *X11) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultE
 }
 
 func (m *X11) onRequest(request interface{}) (bool, error) {
-	switch request.(type) {
-
+	switch r := request.(type) {
+	case *writeToClipboardCmd:
+		m.handler.writeToClipboard(r)
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
 			zap.String("Request", fmt.Sprintf("%v", request)),
@@ -110,12 +111,13 @@ func (m *X11) onRequest(request interface{}) (bool, error) {
 		return true, errors.New("unknown message received")
 	}
 
-	// return false, nil
+	return false, nil
 }
 
 func (m *X11) onRequestDefault(request interface{}, reason string) (bool, error) {
-	switch request.(type) {
-
+	switch r := request.(type) {
+	case *writeToClipboardCmd:
+		r.onRequestDefault(m.ModuleLogger, reason)
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
 			zap.String("Request", fmt.Sprintf("%v", request)),
@@ -125,5 +127,12 @@ func (m *X11) onRequestDefault(request interface{}, reason string) (bool, error)
 		return true, errors.New("unknown message received")
 	}
 
-	// return false, nil
+	return false, nil
+}
+
+func (m *X11) WriteToClipboard(isPrimary bool, data *mime.Data) {
+	m.AddToChannel(&writeToClipboardCmd{
+		isPrimary: isPrimary,
+		data:      data,
+	})
 }

@@ -11,30 +11,13 @@ import (
 )
 
 var (
-	zapOnSelectionChange = zap.String("Method", "x11Clipboard::onSelectionChange")
-	zapOnSelectionNotify = zap.String("Method", "x11Clipboard::onSelectionNotify")
-	zapOnPropertyNotify  = zap.String("Method", "x11Clipboard::onPropertyNotify")
+	zapWriteToClipboard   = zap.String("Method", "x11Clipboard::writeToClipboard")
+	zapOnSelectionChange  = zap.String("Method", "x11Clipboard::onSelectionChange")
+	zapOnSelectionNotify  = zap.String("Method", "x11Clipboard::onSelectionNotify")
+	zapOnPropertyNotify   = zap.String("Method", "x11Clipboard::onPropertyNotify")
+	zapOnSelectionRequest = zap.String("Method", "x11Clipboard::onSelectionRequest")
+	zapOnSelectionClear   = zap.String("Method", "x11Clipboard::onSelectionClear")
 )
-
-type readData struct {
-	finish    bool
-	owner     xproto.Window
-	timestamp xproto.Timestamp
-	data      *mime.Data
-}
-
-func newReadData(owner xproto.Window, timestamp xproto.Timestamp) *readData {
-	return &readData{
-		finish:    false,
-		owner:     owner,
-		timestamp: timestamp,
-		data:      nil,
-	}
-}
-
-type writeData struct {
-	data *mime.Data
-}
 
 type x11Clipboard struct {
 	atoms             *atomStorage
@@ -49,7 +32,7 @@ type x11Clipboard struct {
 	atomClipboardSel  xproto.Atom
 	atomClipboardProp xproto.Atom
 	lastRead          map[xproto.Atom]*readData
-	lastWrite         map[xproto.Atom]writeData
+	lastWrite         map[xproto.Atom]*writeData
 	incrReadMode      bool
 
 	moduleLogger *zap.Logger
@@ -69,7 +52,7 @@ func newX11Clipboard() *x11Clipboard {
 		atomClipboardSel:  0,
 		atomClipboardProp: 0,
 		lastRead:          make(map[xproto.Atom]*readData),
-		lastWrite:         make(map[xproto.Atom]writeData),
+		lastWrite:         make(map[xproto.Atom]*writeData),
 		incrReadMode:      false,
 		moduleLogger:      nil,
 	}
@@ -128,6 +111,10 @@ func (h *x11Clipboard) onInit(atoms *atomStorage, connection *xgb.Conn, window x
 }
 
 func (h *x11Clipboard) onStart() {
+
+}
+
+func (h *x11Clipboard) onStop() {
 
 }
 
@@ -195,6 +182,19 @@ func (h *x11Clipboard) readProperty(property xproto.Atom, fields ...zap.Field) (
 	return result, rpSuccess
 }
 
+func (h *x11Clipboard) writeProperty(
+	window xproto.Window, property xproto.Atom, target xproto.Atom, valueLen byte, data []byte, fields ...zap.Field) {
+
+	format := valueLen * 8
+	dataLen := uint32(len(data) / int(valueLen))
+	err := xproto.ChangePropertyChecked(
+		h.connection, xproto.PropModeReplace, window, property, target, format, dataLen, data).Check()
+	if err != nil {
+		h.moduleLogger.Warn("Failed call x11 change property",
+			append(fields, h.atoms.getZapFieldPrefix("Property", property), zap.Error(err))...)
+	}
+}
+
 func (h *x11Clipboard) getClipboardOwner(selection xproto.Atom, fields ...zap.Field) (xproto.Window, bool) {
 	reply, err := xproto.GetSelectionOwner(h.connection, selection).Reply()
 	if err != nil {
@@ -229,16 +229,35 @@ func (h *x11Clipboard) convertSelection(
 	return true
 }
 
-// func (h *x11Clipboard) writeToClipboard(selection xproto.Atom, data Mimes) bool {
-// 	h.lastWrite[selection] = writeData{data: data}
-// 	h.lastRead[selection] = readData{data: data, owner: h.window}
-// 	if err := xproto.SetSelectionOwnerChecked(h.connection, h.window, selection, xproto.TimeCurrentTime).Check(); err != nil {
-// 		h.moduleLogger.Warn("Failed set x11 clipboard owner", zap.Error(err))
-// 		return false
-// 	}
+func (h *x11Clipboard) setSelectionOwner(selection xproto.Atom, fields ...zap.Field) bool {
+	err := xproto.SetSelectionOwnerChecked(h.connection, h.window, selection, xproto.TimeCurrentTime).Check()
+	if err != nil {
+		h.moduleLogger.Warn("Failed call x11 set selection owner",
+			append(fields,
+				h.atoms.getZapFieldPrefix("Selection", selection),
+				zap.Error(err),
+			)...)
+		return false
+	}
 
-// 	return true
-// }
+	return true
+}
+
+func (h *x11Clipboard) writeToClipboard(isPrimary bool, data *mime.Data) bool {
+	selection := h.atoms.atomClipboardSel
+	if isPrimary {
+		selection = h.atoms.atomPrimarySel
+	}
+	targetAtoms := h.atoms.getTargetAtomsByMime(data.Type)
+	if len(targetAtoms) == 0 {
+		h.moduleLogger.Warn("Failed write to clipboard, mime type not supported",
+			data.Type.ZapField(), zapWriteToClipboard)
+		return false
+	}
+
+	h.lastWrite[selection] = newWriteData(data, targetAtoms)
+	return h.setSelectionOwner(selection, zapWriteToClipboard)
+}
 
 func (h *x11Clipboard) onSelectionChange(event xfixes.SelectionNotifyEvent) {
 	selection := event.Selection
@@ -380,68 +399,69 @@ func (h *x11Clipboard) onPropertyNotify(event xproto.PropertyNotifyEvent) {
 }
 
 func (h *x11Clipboard) onSelectionRequest(event xproto.SelectionRequestEvent) {
-	// reply := xproto.SelectionNotifyEvent{
-	// 	Time:      event.Time,
-	// 	Requestor: event.Requestor,
-	// 	Selection: event.Selection,
-	// 	Target:    event.Target,
-	// 	Property:  xproto.AtomNone,
-	// }
+	selection := event.Selection
+	property := event.Property
+	if property == xproto.AtomNone {
+		property = event.Target
+	}
 
-	// mask := xproto.EventMaskNoEvent
-	// if clipboardData, ok := h.ownClipboardData[event.Selection]; ok {
-	// 	reply.Property = event.Property
-	// 	if reply.Property == xproto.AtomNone {
-	// 		reply.Property = reply.Target
-	// 	}
-	// 	switch reply.Target {
-	// 	case h.atomTargets:
-	// 		mask = xproto.EventMaskPropertyChange
-	// 		targs := make([]byte, 4*3)
-	// 		bi := 0
-	// 		xgb.Put32(targs[bi:], uint32(h.atomUTF8String))
-	// 		bi += 4
-	// 		xgb.Put32(targs[bi:], uint32(h.atomTimestamp))
-	// 		bi += 4
-	// 		xgb.Put32(targs[bi:], uint32(h.atomTargets))
-	// 		xproto.ChangeProperty(h.connection, xproto.PropModeReplace, reply.Requestor,
-	// 			reply.Property, xproto.AtomAtom, 32, 3, targs)
-	// 	case h.atomTimestamp:
-	// 		mask = xproto.EventMaskPropertyChange
-	// 		targs := make([]byte, 4*1)
-	// 		xgb.Put32(targs, uint32(xproto.TimeCurrentTime))
-	// 		xproto.ChangeProperty(h.connection, xproto.PropModeReplace, reply.Requestor,
-	// 			reply.Property, xproto.AtomInteger, 32, 1, targs)
-	// 	case h.atomUTF8String:
-	// 		mask = xproto.EventMaskPropertyChange
-	// 		if len(clipboardData) > 1 {
-	// 			mpd := clipboardData.ToMultipart()
-	// 			xproto.ChangeProperty(h.connection, xproto.PropModeReplace, reply.Requestor,
-	// 				reply.Property, reply.Target, 8, uint32(len(mpd)), mpd)
-	// 		} else {
-	// 			d := clipboardData[0]
-	// 			xproto.ChangeProperty(h.connection, xproto.PropModeReplace, reply.Requestor,
-	// 				reply.Property, reply.Target, 8, uint32(len(d.Data)), d.Data)
-	// 		}
-	// 	}
-	// }
+	success := true
+	if !h.atoms.checkSelection(selection, zapOnSelectionRequest) {
+		success = false
+	} else if writeData, ok := h.lastWrite[selection]; !ok {
+		success = false
+		h.moduleLogger.Info("Not found write context", zapOnSelectionRequest, h.atoms.getZapFieldPrefix("Selection", selection))
+	} else if event.Target == h.atomTargets {
+		propData := make([]byte, 4*(len(writeData.targetAtoms)+2))
 
-	// xproto.SendEvent(h.connection, false, reply.Requestor, uint32(mask), string(reply.Bytes()))
+		offset := 0
+		xgb.Put32(propData[offset:], uint32(h.atomTargets))
+		offset += 4
+		xgb.Put32(propData[offset:], uint32(h.atomTimestamp))
+		offset += 4
+		for _, atom := range writeData.targetAtoms {
+			xgb.Put32(propData[offset:], uint32(atom))
+			offset += 4
+		}
+		h.writeProperty(event.Requestor, property, xproto.AtomAtom, 4, propData, zapOnSelectionRequest)
+	} else if event.Target == h.atomTimestamp {
+		propData := make([]byte, 4*1)
+		xgb.Put32(propData, uint32(xproto.TimeCurrentTime))
+		h.writeProperty(event.Requestor, property, xproto.AtomInteger, 4, propData, zapOnSelectionRequest)
+	} else if writeData.isTargetAtom(event.Target) {
+		h.writeProperty(event.Requestor, property, event.Target, 1, writeData.data.Data, zapOnSelectionRequest)
+	} else {
+		success = false
+		h.moduleLogger.Debug("Unknown event target",
+			zapOnSelectionRequest,
+			h.atoms.getZapFieldPrefix("Target", event.Target),
+			h.atoms.getZapFieldPrefix("Selection", selection))
+	}
+
+	mask := xproto.EventMaskPropertyChange
+	if !success {
+		mask = xproto.EventMaskNoEvent
+		property = xproto.AtomNone
+	}
+
+	reply := xproto.SelectionNotifyEvent{
+		Time:      event.Time,
+		Requestor: event.Requestor,
+		Selection: event.Selection,
+		Target:    event.Target,
+		Property:  property,
+	}
+
+	xproto.SendEvent(h.connection, false, reply.Requestor, uint32(mask), string(reply.Bytes()))
 }
 
 func (h *x11Clipboard) onSelectionClear(event xproto.SelectionClearEvent) {
-	// switch event.Selection {
-	// case h.atomClipboardSel:
-	// 	delete(h.ownClipboardData, h.atomClipboardSel)
-	// case h.atomPrimarySel:
-	// 	delete(h.ownClipboardData, h.atomPrimarySel)
-	// default:
-	// 	h.moduleLogger.Info("Unknown selection clear event", zap.Uint32("selection", uint32(event.Selection)))
-	// }
-}
+	selection := event.Selection
+	if !h.atoms.checkSelection(selection, zapOnSelectionClear) {
+		return
+	}
 
-func (h *x11Clipboard) onStop() {
-	// ci.lastWrite = nil
-	// xproto.SetSelectionOwner(theApp.xc, xproto.AtomNone, theApp.atomClipboardSel, xproto.TimeCurrentTime)
-	// keybind.Detach(h.xConnection, h.getWindow())
+	if _, ok := h.lastWrite[selection]; ok {
+		delete(h.lastWrite, selection)
+	}
 }

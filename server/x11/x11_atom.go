@@ -29,6 +29,7 @@ const (
 	atomNameImageBmp      atomName = "image/bmp"
 	atomNameImageJpeg     atomName = "image/jpeg"
 	atomNameTextPlain     atomName = "text/plain"
+	atomNameTextPlainUtf8 atomName = "text/plain;charset=utf-8"
 	atomNameUTF8String    atomName = "UTF8_STRING"
 	atomNamePrimarySel    atomName = "PRIMARY"
 	atomNamePrimaryProp   atomName = "PRIMARY_PROP"
@@ -46,6 +47,7 @@ var (
 		atomNameImageBmp,
 		atomNameImageJpeg,
 		atomNameTextPlain,
+		atomNameTextPlainUtf8,
 		atomNameUTF8String,
 		atomNamePrimarySel,
 		atomNamePrimaryProp,
@@ -94,6 +96,7 @@ func newAtomStorage(connection *xgb.Conn, moduleLogger *zap.Logger) (*atomStorag
 		{mime.ImageJpeg, res.getByNameUnchecked(atomNameImageJpeg)},
 		{mime.TextPlain, res.getByNameUnchecked(atomNameUTF8String)},
 		{mime.TextPlain, res.getByNameUnchecked(atomNameTextPlain)},
+		{mime.TextPlain, res.getByNameUnchecked(atomNameTextPlainUtf8)},
 	}
 
 	res.atomPrimarySel = res.getByNameUnchecked(atomNamePrimarySel)
@@ -181,6 +184,17 @@ func (s *atomStorage) checkSelection(selection xproto.Atom, fields ...zap.Field)
 	}
 
 	return true
+}
+
+func (s *atomStorage) getTargetAtomsByMime(mType mime.Type) []xproto.Atom {
+	var res []xproto.Atom
+	for _, atom := range s.mimeAtoms {
+		if atom.mType == mType {
+			res = append(res, atom.atom)
+		}
+	}
+
+	return res
 }
 
 func (s *atomStorage) choiceTarget(selection xproto.Atom, targets map[xproto.Atom]struct{}) (mimeAtom, bool) {

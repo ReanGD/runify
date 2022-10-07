@@ -4,13 +4,14 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/ReanGD/runify/server/config"
-	"github.com/ReanGD/runify/server/rpc"
 	"github.com/jezek/xgb/xfixes"
 	"github.com/jezek/xgb/xproto"
 	"github.com/jezek/xgbutil"
 	"github.com/jezek/xgbutil/xevent"
 	"go.uber.org/zap"
+
+	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/system/module"
 )
 
 type x11Handler struct {
@@ -40,7 +41,7 @@ func (h *x11Handler) getHotkeysCh() <-chan hotkeyID {
 	return h.keybind.hotkeysCh
 }
 
-func (h *x11Handler) onInit(cfg *config.Config, rpc *rpc.Rpc, moduleLogger *zap.Logger) error {
+func (h *x11Handler) onInit(cfg *config.Config, rpc module.Rpc, moduleLogger *zap.Logger) error {
 	h.moduleLogger = moduleLogger
 
 	var err error
@@ -133,6 +134,10 @@ func (h *x11Handler) onX11Event(event interface{}) {
 
 func (h *x11Handler) onHotkey(id hotkeyID) {
 	h.keybind.onHotkey(id)
+}
+
+func (h *x11Handler) writeToClipboard(cmd *writeToClipboardCmd) {
+	h.clipboard.writeToClipboard(cmd.isPrimary, cmd.data)
 }
 
 func (h *x11Handler) onStop() {

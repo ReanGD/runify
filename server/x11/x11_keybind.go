@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/ReanGD/runify/server/config"
-	"github.com/ReanGD/runify/server/rpc"
+	"github.com/ReanGD/runify/server/system/module"
 	"github.com/jezek/xgbutil"
 	"github.com/jezek/xgbutil/keybind"
 	"github.com/jezek/xgbutil/xevent"
@@ -20,7 +20,7 @@ func (h hotkeyID) ZapField() zap.Field {
 type x11Keybind struct {
 	hotkeysCh   chan hotkeyID
 	xConnection *xgbutil.XUtil
-	rpc         *rpc.Rpc
+	rpc         module.Rpc
 
 	moduleLogger *zap.Logger
 }
@@ -34,7 +34,7 @@ func newX11Keybind() *x11Keybind {
 	}
 }
 
-func (h *x11Keybind) onInit(cfg *config.Config, xConnection *xgbutil.XUtil, rpc *rpc.Rpc, moduleLogger *zap.Logger) error {
+func (h *x11Keybind) onInit(cfg *config.Config, xConnection *xgbutil.XUtil, rpc module.Rpc, moduleLogger *zap.Logger) error {
 	channelLen := cfg.Get().X11.HotkeysChannelLen
 	h.hotkeysCh = make(chan hotkeyID, channelLen)
 	h.xConnection = xConnection
