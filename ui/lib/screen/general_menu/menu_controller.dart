@@ -35,7 +35,7 @@ class MenuController {
   void onListItemEvent(
       BuildContext context, DataItemEvent event, CommandAction action) {
     if (event == DataItemEvent.onChoice) {
-      _execute(action.id);
+      _execute(context, action.id);
       return;
     }
   }
@@ -44,8 +44,9 @@ class MenuController {
     filter.applyFilter(query);
   }
 
-  Future<void> _execute(int actionID) async {
+  Future<void> _execute(BuildContext context, int actionID) async {
+    final navigator = router.getNavigator(context);
     await service.execute(itemID, actionID);
-    return router.hideWindow();
+    return router.backAndHide(navigator);
   }
 }

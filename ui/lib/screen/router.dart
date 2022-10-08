@@ -112,13 +112,24 @@ class ScreenRouter extends StatelessWidget {
     };
   }
 
-  void back(BuildContext context) {
+  NavigatorState getNavigator(BuildContext context) {
+    return Navigator.of(context);
+  }
+
+  Future<void> backAndHide(NavigatorState navigator) async {
+    if (navigator.canPop()) {
+      navigator.pop();
+    }
+    return _runifyPlugin.hide();
+  }
+
+  Future<void> back(BuildContext context) async {
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
       return;
     }
 
-    _runifyPlugin.hide();
+    return _runifyPlugin.hide();
   }
 
   @override
