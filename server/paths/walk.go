@@ -127,7 +127,7 @@ func resolve(path string, linksWalked int, startPos int, logger *zap.Logger) (st
 			if os.IsNotExist(err) {
 				// Path {dest} is not exists, it is not error
 			} else {
-				logger.Error("Failed get file stat", zap.String("path", dest), zap.Error(err))
+				logger.Warn("Failed get file stat", zap.String("path", dest), zap.Error(err))
 			}
 
 			return "", linksWalked, modeType, false
@@ -136,7 +136,7 @@ func resolve(path string, linksWalked int, startPos int, logger *zap.Logger) (st
 		if modeType != syscall.S_IFLNK {
 			if modeType != syscall.S_IFDIR && end < len(path) {
 				// found not dir inside path
-				logger.Error("Failed resolve path", zap.String("path", path), zap.Error(syscall.ENOTDIR))
+				logger.Warn("Failed resolve path", zap.String("path", path), zap.Error(syscall.ENOTDIR))
 				return "", linksWalked, modeType, false
 			}
 
@@ -157,7 +157,7 @@ func resolve(path string, linksWalked int, startPos int, logger *zap.Logger) (st
 			if os.IsNotExist(err) {
 				// Path {dest} is not exists, it is not error
 			} else {
-				logger.Error("Failed get file stat", zap.String("path", dest), zap.Error(err))
+				logger.Warn("Failed get file stat", zap.String("path", dest), zap.Error(err))
 			}
 
 			return "", linksWalked, modeType, false
@@ -200,7 +200,7 @@ func resolve(path string, linksWalked int, startPos int, logger *zap.Logger) (st
 
 	if modeType == 0 {
 		if modeType, err = lStatMode(dest); err != nil {
-			logger.Error("Failed get file stat", zap.String("path", dest), zap.Error(err))
+			logger.Warn("Failed get file stat", zap.String("path", dest), zap.Error(err))
 			return "", linksWalked, modeType, false
 		}
 	}
@@ -256,7 +256,7 @@ func walkDir(linkPath string, realPath string, linksWalked int, logger *zap.Logg
 func Walk(dirPath string, logger *zap.Logger, fn WalkFunc) {
 	fullDirPath, err := filepath.Abs(ExpandUser(dirPath))
 	if err != nil {
-		logger.Error("Failed get abs path", zap.String("path", dirPath), zap.Error(err))
+		logger.Warn("Failed get abs path", zap.String("path", dirPath), zap.Error(err))
 		return
 	}
 
@@ -265,7 +265,7 @@ func Walk(dirPath string, logger *zap.Logger, fn WalkFunc) {
 		if os.IsNotExist(err) {
 			// Path {fullDirPath} is not exists, it is not error
 		} else {
-			logger.Error("Failed get file stat", zap.String("path", fullDirPath), zap.Error(err))
+			logger.Warn("Failed get file stat", zap.String("path", fullDirPath), zap.Error(err))
 		}
 
 		return
