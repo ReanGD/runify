@@ -127,7 +127,7 @@ func (h *rpcHandler) onShowUI() {
 			return
 		}
 
-		h.moduleLogger.Info("Runify UI process started", zap.String("binary", h.binaryPath))
+		h.moduleLogger.Debug("Runify UI process started", zap.String("binary", h.binaryPath))
 		go cmd.Wait()
 	}
 }

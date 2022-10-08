@@ -58,7 +58,7 @@ func (s *runifyServer) GetActions(ctx context.Context, selectedCard *pb.Selected
 }
 
 func (s *runifyServer) ExecuteDefault(ctx context.Context, selectedCard *pb.SelectedCard) (*pb.Result, error) {
-	data := <-s.provider.Execute(selectedCard.CardID, 1)
+	data := <-s.provider.Execute(selectedCard.CardID, 0)
 	return data, nil
 }
 
