@@ -90,15 +90,14 @@ class ScreenRouter extends StatelessWidget {
     return MenuController(service, this, itemID: itemID);
   }
 
-  Future openGScreenMenu(
-      BuildContext context, MenuController controller) async {
-    return showDialog(
-      context: context,
+  Future openGScreenMenu(MenuController controller) async {
+    return _navigator.push(RawDialogRoute(
       barrierColor: null,
-      builder: (BuildContext context) {
+      barrierLabel: "Label",
+      pageBuilder: (BuildContext a, Animation<double> b, Animation<double> c) {
         return controller.build();
       },
-    );
+    ));
   }
 
   Future<void> hideWindow() async {

@@ -36,7 +36,7 @@ class MenuView extends StatelessWidget {
             child: DataListView(
               controller: controller.listController,
               onDataItemEvent: (DataItemEvent event, int id) {
-                controller.onListItemEvent(context, event, filter[id]);
+                controller.onListItemEvent(event, filter[id]);
               },
               itemBuilder: (context, int id) {
                 final item = filter[id];
