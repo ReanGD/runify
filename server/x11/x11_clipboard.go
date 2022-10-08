@@ -1,8 +1,6 @@
 package x11
 
 import (
-	"fmt"
-
 	"github.com/ReanGD/runify/server/system/mime"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xfixes"
@@ -33,7 +31,6 @@ type x11Clipboard struct {
 	atomClipboardProp xproto.Atom
 	lastRead          map[xproto.Atom]*readData
 	lastWrite         map[xproto.Atom]*writeData
-	incrReadMode      bool
 
 	moduleLogger *zap.Logger
 }
@@ -53,7 +50,6 @@ func newX11Clipboard() *x11Clipboard {
 		atomClipboardProp: 0,
 		lastRead:          make(map[xproto.Atom]*readData),
 		lastWrite:         make(map[xproto.Atom]*writeData),
-		incrReadMode:      false,
 		moduleLogger:      nil,
 	}
 }
@@ -119,28 +115,27 @@ func (h *x11Clipboard) onStop() {
 }
 
 func (h *x11Clipboard) readFinish(selection xproto.Atom) {
-	readData := h.lastRead[selection]
-	readData.finish = true
-	data := readData.data
-	if data.IsText() {
-		fmt.Println("read clipboard text:", string(data.Data))
-	} else {
-		fmt.Println("read clipboard image:")
+	// readData := h.lastRead[selection]
+	// data := readData.data
+	// if data.IsText() {
+	// 	fmt.Println("read clipboard text:", string(data.Data))
+	// } else {
+	// 	fmt.Println("read clipboard image:")
 
-		var fileExt string
-		switch data.Type {
-		case mime.ImagePng:
-			fileExt = "png"
-		case mime.ImageBmp:
-			fileExt = "bmp"
-		case mime.ImageJpeg:
-			fileExt = "jpeg"
-		}
+	// 	var fileExt string
+	// 	switch data.Type {
+	// 	case mime.ImagePng:
+	// 		fileExt = "png"
+	// 	case mime.ImageBmp:
+	// 		fileExt = "bmp"
+	// 	case mime.ImageJpeg:
+	// 		fileExt = "jpeg"
+	// 	}
 
-		if err := data.WriteToFile(fmt.Sprintf("~/tmp/clipboard.%s", fileExt)); err != nil {
-			h.moduleLogger.Warn("Failed write to file", zapOnSelectionNotify, zap.Error(err))
-		}
-	}
+	// 	if err := data.WriteToFile(fmt.Sprintf("~/tmp/clipboard.%s", fileExt)); err != nil {
+	// 		h.moduleLogger.Warn("Failed write to file", zapOnSelectionNotify, zap.Error(err))
+	// 	}
+	// }
 }
 
 func (h *x11Clipboard) readProperty(property xproto.Atom, fields ...zap.Field) ([]byte, readPropertyResult) {
@@ -303,7 +298,7 @@ func (h *x11Clipboard) onSelectionNotify(event xproto.SelectionNotifyEvent) {
 		return
 	}
 
-	if event.Target == h.atomTargets {
+	if readData.state == rdsWaitType && event.Target == h.atomTargets {
 		data, result := h.readProperty(event.Property, zapOnSelectionNotify)
 		if result != rpSuccess {
 			return
@@ -326,7 +321,7 @@ func (h *x11Clipboard) onSelectionNotify(event xproto.SelectionNotifyEvent) {
 			} else if !h.convertSelection(event.Selection, res.atom, selectionProp) {
 				delete(h.lastRead, selection)
 			} else {
-				readData.data = mime.NewEmptyData(res.mType)
+				readData.setType(res.mType)
 			}
 
 			return
@@ -338,15 +333,16 @@ func (h *x11Clipboard) onSelectionNotify(event xproto.SelectionNotifyEvent) {
 		return
 	}
 
-	if h.atoms.checkSelectionNotifyTarget(event.Target, readData.data.Type) {
+	if readData.state == rdsWaitData && h.atoms.checkSelectionNotifyTarget(event.Target, readData.data.Type) {
 		data, result := h.readProperty(event.Property, zapOnSelectionNotify)
 		if result == rpFailed {
 			delete(h.lastRead, selection)
 		} else if result == rpSuccess {
 			readData.data.Append(data)
+			readData.finish()
 			h.readFinish(selection)
 		} else if result == rpIncremental && selection == h.atoms.atomClipboardSel {
-			h.incrReadMode = true
+			readData.setIncrState()
 		} else if result == rpIncremental && selection == h.atoms.atomPrimarySel {
 			delete(h.lastRead, selection)
 			h.moduleLogger.Info("Incremental data for primary clipboard not supported", zapOnSelectionNotify)
@@ -362,33 +358,18 @@ func (h *x11Clipboard) onSelectionNotify(event xproto.SelectionNotifyEvent) {
 }
 
 func (h *x11Clipboard) onPropertyNotify(event xproto.PropertyNotifyEvent) {
-	if event.Window == h.window && event.State == xproto.PropertyNewValue && event.Atom == h.atomClipboardProp && h.incrReadMode {
+	if event.Window == h.window && event.State == xproto.PropertyNewValue && event.Atom == h.atomClipboardProp {
 		readData, ok := h.lastRead[h.atomClipboardSel]
-		if !ok {
-			h.incrReadMode = false
-			h.moduleLogger.Warn("Not found read context for incremental mode", zapOnPropertyNotify)
-			return
-		}
-		if readData.data.Type == mime.None {
-			h.incrReadMode = false
-			h.moduleLogger.Warn("Wrong read context state for incremental mode, mType == mime.None", zapOnPropertyNotify)
-			return
-		}
-		if readData.finish {
-			h.incrReadMode = false
-			h.moduleLogger.Warn("Wrong read context state for incremental mode, reading finished", zapOnPropertyNotify)
+		if !ok || readData.state != rdsReadIncr {
 			return
 		}
 
 		data, result := h.readProperty(event.Atom, zapOnPropertyNotify)
 		if result == rpFailed || result == rpIncremental {
-			h.incrReadMode = false
 			delete(h.lastRead, h.atomClipboardSel)
 			h.moduleLogger.Warn("Failed read clipboard data in incremental mode, wrong result", zapOnPropertyNotify)
-			return
-		}
-		if len(data) == 0 {
-			h.incrReadMode = false
+		} else if len(data) == 0 {
+			readData.finish()
 			h.readFinish(h.atomClipboardSel)
 		} else {
 			readData.data.Append(data)

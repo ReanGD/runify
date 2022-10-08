@@ -26,8 +26,17 @@ const (
 	rpIncremental
 )
 
+type readDataState uint8
+
+const (
+	rdsWaitType readDataState = iota
+	rdsWaitData
+	rdsReadIncr
+	rdsFinished
+)
+
 type readData struct {
-	finish    bool
+	state     readDataState
 	owner     xproto.Window
 	timestamp xproto.Timestamp
 	data      *mime.Data
@@ -35,11 +44,23 @@ type readData struct {
 
 func newReadData(owner xproto.Window, timestamp xproto.Timestamp) *readData {
 	return &readData{
-		finish:    false,
+		state:     rdsWaitType,
 		owner:     owner,
 		timestamp: timestamp,
 		data:      nil,
 	}
+}
+
+func (r *readData) setType(mType mime.Type) {
+	r.state = rdsWaitData
+	r.data = mime.NewEmptyData(mType)
+}
+
+func (r *readData) setIncrState() {
+	r.state = rdsReadIncr
+}
+func (r *readData) finish() {
+	r.state = rdsFinished
 }
 
 type writeData struct {
