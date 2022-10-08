@@ -34,7 +34,8 @@ class GenController {
   void onListItemEvent(
       BuildContext context, DataItemEvent event, Command command) {
     if (event == DataItemEvent.onMenu) {
-      router.openGScreenMenu(context, command.id);
+      final controller = router.prepareGScreenMenu(command.id);
+      router.openGScreenMenu(context, controller);
       return;
     }
     if (event == DataItemEvent.onChoice) {

@@ -17,17 +17,14 @@ class OnBackIntent extends Intent {
   const OnBackIntent();
 }
 
-class OnBackAction extends ContextAction<OnBackIntent> {
+class OnBackAction extends Action<OnBackIntent> {
   final ScreenRouter router;
 
   OnBackAction(this.router);
 
   @override
-  Object? invoke(covariant OnBackIntent intent, [BuildContext? context]) {
-    if (context != null) {
-      router.back(context);
-    }
-
+  Object? invoke(covariant OnBackIntent intent) {
+    router.back();
     return null;
   }
 }
@@ -55,6 +52,7 @@ class ScreenRouter extends StatelessWidget {
   final _runifyPlugin = RunifyNative();
   late final Metrics _metrics;
   late final RunifyClient _grpcClient;
+  late final NavigatorState _navigator;
   late final ScreenRouterService _service;
 
   ScreenRouter({super.key}) {
@@ -71,14 +69,29 @@ class ScreenRouter extends StatelessWidget {
     return initFuture;
   }
 
-  Widget openGScreen() {
+  GenController prepareGScreen() {
     final service = GenService(_metrics, _grpcClient);
-    return GenController(service, this).build();
+    return GenController(service, this);
   }
 
-  Future openGScreenMenu(BuildContext context, Int64 itemID) async {
+  Future openGScreen(GenController controller) async {
+    return _navigator.pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return controller.build();
+        },
+      ),
+      (route) => false,
+    );
+  }
+
+  MenuController prepareGScreenMenu(Int64 itemID) {
     final service = MenuService(_metrics, _grpcClient);
-    final controller = MenuController(service, this, itemID: itemID);
+    return MenuController(service, this, itemID: itemID);
+  }
+
+  Future openGScreenMenu(
+      BuildContext context, MenuController controller) async {
     return showDialog(
       context: context,
       barrierColor: null,
@@ -93,7 +106,9 @@ class ScreenRouter extends StatelessWidget {
   }
 
   Future<void> showWindow() async {
-    return _runifyPlugin.show();
+    final controller = prepareGScreen();
+    await _runifyPlugin.show();
+    return openGScreen(controller);
   }
 
   Future<void> closeWindow() async {
@@ -112,28 +127,22 @@ class ScreenRouter extends StatelessWidget {
     };
   }
 
-  NavigatorState getNavigator(BuildContext context) {
-    return Navigator.of(context);
-  }
-
-  Future<void> backAndHide(NavigatorState navigator) async {
-    if (navigator.canPop()) {
-      navigator.pop();
-    }
-    return _runifyPlugin.hide();
-  }
-
-  Future<void> back(BuildContext context) async {
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-      return;
+  Future<void> back({bool forceHide = false}) async {
+    bool hide = forceHide;
+    if (_navigator.canPop()) {
+      _navigator.pop();
+    } else {
+      hide = true;
     }
 
-    return _runifyPlugin.hide();
+    if (hide) {
+      return _runifyPlugin.hide();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return openGScreen();
+    _navigator = Navigator.of(context);
+    return prepareGScreen().build();
   }
 }

@@ -45,8 +45,7 @@ class MenuController {
   }
 
   Future<void> _execute(BuildContext context, int actionID) async {
-    final navigator = router.getNavigator(context);
     await service.execute(itemID, actionID);
-    return router.backAndHide(navigator);
+    return router.back(forceHide: true);
   }
 }
