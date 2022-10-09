@@ -13,6 +13,8 @@ import (
 
 var (
 	version       string
+	buildID       string
+	buildUser     string
 	buildCommit   string
 	buildDateTime string
 )
@@ -28,6 +30,8 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			buildCfg := &config.BuildCfg{
 				Version:       version,
+				BuildID:       buildID,
+				BuildUser:     buildUser,
 				BuildCommit:   buildCommit,
 				BuildDateTime: buildDateTime,
 			}
@@ -43,6 +47,8 @@ func main() {
 		Example: "runify-server version",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Printf("Version = %s\n", version)
+			fmt.Printf("buildID = %s\n", buildID)
+			fmt.Printf("buildUser = %s\n", buildUser)
 			fmt.Printf("Commit = %s\n", buildCommit)
 			fmt.Printf("Build data = %s\n", buildDateTime)
 		},

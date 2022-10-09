@@ -8,6 +8,8 @@ import (
 
 type BuildCfg struct {
 	Version       string
+	BuildID       string
+	BuildUser     string
 	BuildCommit   string
 	BuildDateTime string
 }

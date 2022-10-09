@@ -88,6 +88,8 @@ func (c *Config) AddVersionToLog(log *zap.Logger) {
 	cfg := c.cfg.Build
 	log.Info("Runify version",
 		zap.String("Version", cfg.Version),
+		zap.String("BuildID", cfg.BuildID),
+		zap.String("BuildUser", cfg.BuildUser),
 		zap.String("Commit", cfg.BuildCommit),
 		zap.String("Build data", cfg.BuildDateTime),
 	)

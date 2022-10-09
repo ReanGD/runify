@@ -1,9 +1,11 @@
+export RUNIFY_VERSION := "v0.1.0"
 export GOLANGCILINT_VERSION := "v1.48.0"
+export DIR_SCRIPTS := "../ci/make_scripts"
 
-.PHONY: dep test mod_tidy build run help
+.PHONY: dep test mod_tidy build release run help
 
 dep: ## Get the dependencies
-	@../ci/make_scripts/install_server_deps.sh ${GOLANGCILINT_VERSION}
+	@$(DIR_SCRIPTS)/install_server_deps.sh ${GOLANGCILINT_VERSION}
 
 test: ## Run unittests
 	@go test -v -count=1 `go list ./...`
@@ -12,7 +14,10 @@ mod_tidy: ## Removes unused dependencies from go.sum
 	@go mod tidy -v
 
 build: ## Build the binary file
-	@../ci/make_scripts/build_server.sh
+	@$(DIR_SCRIPTS)/build_server.sh
+
+release: build ## Make release for server
+	@cp ./server ../release/
 
 run: build ## Build and run the binary file
 	@./runify-server
