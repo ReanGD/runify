@@ -20,7 +20,7 @@ type UICfg struct {
 
 func (c UICfg) setDefault(vp *viper.Viper) {
 	vp.SetDefault("UI", map[string]interface{}{
-		"BinaryPath": "$RUNIFY_DATA_DIR/runify",
+		"BinaryPath": "/opt/runify/runify-ui",
 	})
 }
 
@@ -113,7 +113,7 @@ func (c LoggerCfg) setDefault(vp *viper.Viper) {
 		"LevelStacktrace":           "error",
 		"AddCallerInfo":             false,
 		"Format":                    "plain",
-		"Output":                    "runify.log",
+		"Output":                    "$RUNIFY_CACHE_DIR/runify.log",
 		"MaxSizeMb":                 100,
 		"MaxAgeDays":                3,
 		"MaxBackups":                0,
@@ -132,8 +132,9 @@ type ConfigurationSaved struct {
 }
 
 func (c *ConfigurationSaved) process() {
-	c.UI.BinaryPath = paths.ExpandAll(c.UI.BinaryPath)
 	c.Rpc.Address = paths.ExpandAll(c.Rpc.Address)
+	c.UI.BinaryPath = paths.ExpandAll(c.UI.BinaryPath)
+	c.Logger.Output = paths.ExpandAll(c.Logger.Output)
 }
 
 type Configuration struct {
