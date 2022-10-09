@@ -20,7 +20,7 @@ release: build ## Make release for server
 	@cp ./runify-server ../release/
 
 run: build ## Build and run the binary file
-	@./runify-server
+	@./runify-server -c ../ci/cfg/dev.json
 
 help: ## Display this help screen
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

@@ -66,11 +66,17 @@ func (r *Runify) checkOnInit(name string, ch <-chan error) error {
 	return nil
 }
 
-func (r *Runify) init(cfgFile string) bool {
+func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	if len(cfgFile) == 0 {
 		cfgFile = filepath.Join(paths.GetAppConfig(), "runify.cfg")
 	}
 	r.cfg.OnInit(cfgFile)
+	if cfgSave {
+		if err := r.cfg.Save(); err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot save logger: %s", err)
+			return false
+		}
+	}
 
 	var err error
 	if r.logger, err = logger.New(r.cfg, r.appID.String()); err != nil {
@@ -134,13 +140,13 @@ func (r *Runify) start() {
 	wg.Wait()
 }
 
-func (r *Runify) Run(cfgFile string, buildCfg *config.BuildCfg) {
+func (r *Runify) Run(cfgFile string, cfgSave bool, buildCfg *config.BuildCfg) {
 	if err := r.create(buildCfg); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		return
 	}
 
-	if !r.init(cfgFile) {
+	if !r.init(cfgFile, cfgSave) {
 		if r.runifyLogger != nil {
 			_ = r.runifyLogger.Sync()
 		}

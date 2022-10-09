@@ -97,7 +97,7 @@ func New() error {
 		return errors.New("Env $HOME is not defined")
 	}
 
-	cache.userConfig = ExpandUser(getenvDef("XDG_CONFIG_HOM", filepath.Join(cache.userHome, ".config")))
+	cache.userConfig = ExpandUser(getenvDef("XDG_CONFIG_HOME", filepath.Join(cache.userHome, ".config")))
 	cache.userData = ExpandUser(getenvDef("XDG_DATA_HOME", filepath.Join(cache.userHome, ".local", "share")))
 	cache.userCache = ExpandUser(getenvDef("XDG_CACHE_HOME", filepath.Join(cache.userHome, ".cache")))
 

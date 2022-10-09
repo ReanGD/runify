@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/root"
@@ -19,12 +18,13 @@ var (
 	buildDateTime string
 )
 
+var cfgSave bool
 var cfgFile string
 
 func main() {
 	runify := root.NewRunify()
 	rootCmd := &cobra.Command{
-		Use:   "runify",
+		Use:   "runify-server",
 		Short: "Server part of runify",
 		Long:  `Server part of runify.`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -36,7 +36,7 @@ func main() {
 				BuildDateTime: buildDateTime,
 			}
 
-			runify.Run(cfgFile, buildCfg)
+			runify.Run(cfgFile, cfgSave, buildCfg)
 		},
 	}
 
@@ -58,12 +58,9 @@ func main() {
 
 	flags := rootCmd.Flags()
 
-	execFilepath, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	defCfgPath := path.Join(filepath.Dir(execFilepath), "config.json")
+	defCfgPath := os.ExpandEnv(path.Join("$XDG_CONFIG_HOME", "runify", "config.json"))
 	flags.StringVarP(&cfgFile, "config", "c", defCfgPath, "Config file path")
+	flags.BoolVarP(&cfgSave, "save", "s", false, "Save config to file")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Command line start error: %s\n", err)
