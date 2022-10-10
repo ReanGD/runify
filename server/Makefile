@@ -17,7 +17,7 @@ build: ## Build the binary file
 	@$(DIR_SCRIPTS)/build_server.sh
 
 release: build ## Make release for server
-	@cp ./runify-server ../release/
+	@cp ./runify-server ../release/opt/runify/
 
 run: build ## Build and run the binary file
 	@./runify-server -c ../ci/cfg/dev.json

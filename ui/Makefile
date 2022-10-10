@@ -12,7 +12,7 @@ build_release: ## Build release version
 	@$(DIR_SCRIPTS)/build_ui.sh "release"
 
 release: build_release ## Make release for UI
-	@cp -r ./build/linux/x64/release/bundle/* ../release/
+	@cp -r ./build/linux/x64/release/bundle/* ../release/opt/runify/
 
 help: ## Display this help screen
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
