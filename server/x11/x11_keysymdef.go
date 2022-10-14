@@ -1,4 +1,4 @@
-package keyboard
+package x11
 
 /*
 This file contains the keysym definitions from X.

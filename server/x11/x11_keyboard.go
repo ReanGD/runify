@@ -1,4 +1,4 @@
-package keyboard
+package x11
 
 import (
 	"fmt"
@@ -40,7 +40,7 @@ func newBindData() *bindData {
 	}
 }
 
-type Keyboard struct {
+type x11Keyboard struct {
 	keysymIdByName map[string]xproto.Keysym
 	keysymNameById map[xproto.Keysym]string
 	keymap         *xproto.GetKeyboardMappingReply
@@ -54,13 +54,13 @@ type Keyboard struct {
 	maxKeycode     xproto.Keycode
 }
 
-func NewKeyboard() *Keyboard {
+func newX11Keyboard() *x11Keyboard {
 	keysymNameById := make(map[xproto.Keysym]string, len(keysyms))
 	for name, id := range keysyms {
 		keysymNameById[id] = name
 	}
 
-	return &Keyboard{
+	return &x11Keyboard{
 		keysymIdByName: keysyms,
 		keysymNameById: keysymNameById,
 		keymap:         nil,
@@ -75,7 +75,7 @@ func NewKeyboard() *Keyboard {
 	}
 }
 
-func (k *Keyboard) OnInit(connection *xgb.Conn, window xproto.Window, moduleLogger *zap.Logger) error {
+func (k *x11Keyboard) onInit(connection *xgb.Conn, window xproto.Window, moduleLogger *zap.Logger) error {
 	setupInfo := xproto.Setup(connection)
 	k.minKeycode = setupInfo.MinKeycode
 	k.maxKeycode = setupInfo.MaxKeycode
@@ -87,7 +87,7 @@ func (k *Keyboard) OnInit(connection *xgb.Conn, window xproto.Window, moduleLogg
 	return nil
 }
 
-func (k *Keyboard) updateMaps() {
+func (k *x11Keyboard) updateMaps() {
 	var err error
 
 	firstKeycode := k.minKeycode
@@ -104,7 +104,7 @@ func (k *Keyboard) updateMaps() {
 	}
 }
 
-func (k *Keyboard) isGrabbed(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) bool {
+func (k *x11Keyboard) isGrabbed(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) bool {
 	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
 	if data, ok := k.binds[key]; ok && data.grabCounter > 0 {
 		return true
@@ -113,7 +113,7 @@ func (k *Keyboard) isGrabbed(evtype int, win xproto.Window, mods uint16, keycode
 	return false
 }
 
-func (k *Keyboard) attachKeyBindCallback(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode, fn CallbackKey) {
+func (k *x11Keyboard) attachKeyBindCallback(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode, fn CallbackKey) {
 	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
 
 	data, ok := k.binds[key]
@@ -126,7 +126,7 @@ func (k *Keyboard) attachKeyBindCallback(evtype int, win xproto.Window, mods uin
 	data.grabCounter++
 }
 
-func (k *Keyboard) addKeyString(callback CallbackKey, evtype int, win xproto.Window, keyStr string, grab bool) {
+func (k *x11Keyboard) addKeyString(callback CallbackKey, evtype int, win xproto.Window, keyStr string, grab bool) {
 	val := KeyString{
 		Str:      keyStr,
 		Callback: callback,
@@ -137,7 +137,7 @@ func (k *Keyboard) addKeyString(callback CallbackKey, evtype int, win xproto.Win
 	k.keystrings = append(k.keystrings, val)
 }
 
-func (k *Keyboard) runKeyBindCallbacks(event interface{}, evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) {
+func (k *x11Keyboard) runKeyBindCallbacks(event interface{}, evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) {
 	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
 	if data, ok := k.binds[key]; ok {
 		fns := make([]CallbackKey, len(data.callbacks))
@@ -148,17 +148,17 @@ func (k *Keyboard) runKeyBindCallbacks(event interface{}, evtype int, win xproto
 	}
 }
 
-func (k *Keyboard) keysymGetWithMap(keycode xproto.Keycode, column byte) xproto.Keysym {
+func (k *x11Keyboard) keysymGetWithMap(keycode xproto.Keycode, column byte) xproto.Keysym {
 	i := (int(keycode)-int(k.minKeycode))*int(k.keymap.KeysymsPerKeycode) + int(column)
 
 	return k.keymap.Keysyms[i]
 }
 
-func (k *Keyboard) keysymGet(keycode xproto.Keycode, column byte) xproto.Keysym {
+func (k *x11Keyboard) keysymGet(keycode xproto.Keycode, column byte) xproto.Keysym {
 	return k.keysymGetWithMap(keycode, column)
 }
 
-func (k *Keyboard) keysymsByKeyCode(keycode xproto.Keycode, column byte) []xproto.Keysym {
+func (k *x11Keyboard) keysymsByKeyCode(keycode xproto.Keycode, column byte) []xproto.Keysym {
 	// if keycode < k.minKeycode || keycode > k.maxKeycode {
 	// }
 	// cnt := int(k.keymap.KeysymsPerKeycode)
@@ -171,7 +171,7 @@ func (k *Keyboard) keysymsByKeyCode(keycode xproto.Keycode, column byte) []xprot
 	return []xproto.Keysym{}
 }
 
-func (k *Keyboard) keycodesGet(keysym xproto.Keysym) []xproto.Keycode {
+func (k *x11Keyboard) keycodesGet(keysym xproto.Keysym) []xproto.Keycode {
 	var c byte
 	var keycode xproto.Keycode
 	keycodes := make([]xproto.Keycode, 0)
@@ -189,7 +189,7 @@ func (k *Keyboard) keycodesGet(keysym xproto.Keysym) []xproto.Keycode {
 	return keycodes
 }
 
-func (k *Keyboard) strToKeycodes(str string) []xproto.Keycode {
+func (k *x11Keyboard) strToKeycodes(str string) []xproto.Keycode {
 	// Do some fancy case stuff before we give up.
 	sym, ok := keysyms[str]
 	if !ok {
@@ -210,7 +210,7 @@ func (k *Keyboard) strToKeycodes(str string) []xproto.Keycode {
 	return k.keycodesGet(sym)
 }
 
-func (k *Keyboard) ParseString(s string) (uint16, []xproto.Keycode, error) {
+func (k *x11Keyboard) ParseString(s string) (uint16, []xproto.Keycode, error) {
 	mods, kcs := uint16(0), []xproto.Keycode{}
 	for _, part := range strings.Split(s, "-") {
 		switch strings.ToLower(part) {
@@ -247,7 +247,7 @@ func (k *Keyboard) ParseString(s string) (uint16, []xproto.Keycode, error) {
 	return mods, kcs, nil
 }
 
-func (k *Keyboard) GrabChecked(win xproto.Window, mods uint16, key xproto.Keycode) error {
+func (k *x11Keyboard) GrabChecked(win xproto.Window, mods uint16, key xproto.Keycode) error {
 	var err error
 	// for _, m := range ignoreMods {
 	// 	err = xproto.GrabKeyChecked(k.connection, true, win, mods|m, key, xproto.GrabModeAsync, xproto.GrabModeAsync).Check()
@@ -265,7 +265,7 @@ func (k *Keyboard) GrabChecked(win xproto.Window, mods uint16, key xproto.Keycod
 
 // Ungrab undoes Grab. It will handle all combinations od modifiers found
 // in ignoreMods.
-func (k *Keyboard) Ungrab(win xproto.Window, mods uint16, key xproto.Keycode) {
+func (k *x11Keyboard) Ungrab(win xproto.Window, mods uint16, key xproto.Keycode) {
 	// for _, m := range ignoreMods {
 	// 	xproto.UngrabKeyChecked(k.connection, key, win, mods|m).Check()
 	// }
@@ -284,7 +284,7 @@ func (k *Keyboard) Ungrab(win xproto.Window, mods uint16, key xproto.Keycode) {
 // 	return false
 // }
 
-func (k *Keyboard) Connect(callback CallbackKey, evtype int, win xproto.Window, keyStr string, grab, reconnect bool) error {
+func (k *x11Keyboard) Connect(callback CallbackKey, evtype int, win xproto.Window, keyStr string, grab, reconnect bool) error {
 	// Get the mods/key first
 	mods, keycodes, err := k.ParseString(keyStr)
 	if err != nil {
@@ -350,7 +350,7 @@ func DeduceKeyInfo(state uint16, detail xproto.Keycode) (uint16, xproto.Keycode)
 	return mods, kc
 }
 
-func (k *Keyboard) OnKeyRelease(event xproto.KeyReleaseEvent) {
+func (k *x11Keyboard) OnKeyRelease(event xproto.KeyReleaseEvent) {
 	mods, keyCode := event.State, event.Detail
 
 	modsStr := ""
@@ -391,7 +391,7 @@ func (k *Keyboard) OnKeyRelease(event xproto.KeyReleaseEvent) {
 	k.runKeyBindCallbacks(event, xevent.KeyRelease, event.Event, mods, kc)
 }
 
-func (k *Keyboard) OnMappingNotify(event xproto.MappingNotifyEvent) {
+func (k *x11Keyboard) OnMappingNotify(event xproto.MappingNotifyEvent) {
 	k.updateMaps()
 	if event.Request == xproto.MappingKeyboard {
 		k.DetachAll()
@@ -404,7 +404,7 @@ func (k *Keyboard) OnMappingNotify(event xproto.MappingNotifyEvent) {
 	}
 }
 
-func (k *Keyboard) keyKeys() []KeyKey {
+func (k *x11Keyboard) keyKeys() []KeyKey {
 	keys := make([]KeyKey, len(k.binds))
 	i := 0
 	for key := range k.binds {
@@ -415,7 +415,7 @@ func (k *Keyboard) keyKeys() []KeyKey {
 	return keys
 }
 
-func (k *Keyboard) DetachKey(key KeyKey) {
+func (k *x11Keyboard) DetachKey(key KeyKey) {
 	if _, ok := k.binds[key]; ok {
 		delete(k.binds, key)
 		if k.isGrabbed(key.Evtype, key.Win, key.Mod, key.Code) {
@@ -424,7 +424,7 @@ func (k *Keyboard) DetachKey(key KeyKey) {
 	}
 }
 
-func (k *Keyboard) DetachAll() {
+func (k *x11Keyboard) DetachAll() {
 	mkeys := k.keyKeys()
 	k.binds = make(map[KeyKey]*bindData, 10)
 	for _, key := range mkeys {
