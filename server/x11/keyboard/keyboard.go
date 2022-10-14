@@ -8,6 +8,7 @@ import (
 	"github.com/jezek/xgb/xproto"
 	"github.com/jezek/xgbutil"
 	"github.com/jezek/xgbutil/xevent"
+	"go.uber.org/zap"
 )
 
 type KeyKey struct {
@@ -40,30 +41,58 @@ func newBindData() *bindData {
 }
 
 type Keyboard struct {
-	connection *xgb.Conn
-	setup      *xproto.SetupInfo
-	keymap     *xproto.GetKeyboardMappingReply
-	modmap     *xproto.GetModifierMappingReply
-	binds      map[KeyKey]*bindData
-	keystrings []KeyString
+	keysymIdByName map[string]xproto.Keysym
+	keysymNameById map[xproto.Keysym]string
+	keymap         *xproto.GetKeyboardMappingReply
+	modmap         *xproto.GetModifierMappingReply
+	binds          map[KeyKey]*bindData
+	keystrings     []KeyString
+	connection     *xgb.Conn
+	moduleLogger   *zap.Logger
+	window         xproto.Window
+	minKeycode     xproto.Keycode
+	maxKeycode     xproto.Keycode
 }
 
-func NewKeyboard(connection *xgb.Conn) *Keyboard {
+func NewKeyboard() *Keyboard {
+	keysymNameById := make(map[xproto.Keysym]string, len(keysyms))
+	for name, id := range keysyms {
+		keysymNameById[id] = name
+	}
+
 	return &Keyboard{
-		connection: connection,
-		setup:      xproto.Setup(connection),
-		keymap:     nil,
-		modmap:     nil,
-		binds:      make(map[KeyKey]*bindData, 10),
-		keystrings: make([]KeyString, 0, 10),
+		keysymIdByName: keysyms,
+		keysymNameById: keysymNameById,
+		keymap:         nil,
+		modmap:         nil,
+		binds:          make(map[KeyKey]*bindData, 8),
+		keystrings:     make([]KeyString, 0, 8),
+		connection:     nil,
+		moduleLogger:   nil,
+		window:         0,
+		minKeycode:     0,
+		maxKeycode:     0,
 	}
 }
 
+func (k *Keyboard) OnInit(connection *xgb.Conn, window xproto.Window, moduleLogger *zap.Logger) error {
+	setupInfo := xproto.Setup(connection)
+	k.minKeycode = setupInfo.MinKeycode
+	k.maxKeycode = setupInfo.MaxKeycode
+	k.connection = connection
+	k.window = window
+	k.moduleLogger = moduleLogger
+
+	k.updateMaps()
+	return nil
+}
+
 func (k *Keyboard) updateMaps() {
-	min := k.setup.MinKeycode
-	max := k.setup.MaxKeycode
 	var err error
-	if k.keymap, err = xproto.GetKeyboardMapping(k.connection, min, byte(max-min+1)).Reply(); err != nil {
+
+	firstKeycode := k.minKeycode
+	count := byte(k.maxKeycode - k.minKeycode + 1)
+	if k.keymap, err = xproto.GetKeyboardMapping(k.connection, firstKeycode, count).Reply(); err != nil {
 		panic(fmt.Sprintf("COULD NOT GET KEYBOARD MAPPING: %v\n"+
 			"THIS IS AN UNRECOVERABLE ERROR.\n",
 			err))
@@ -73,18 +102,6 @@ func (k *Keyboard) updateMaps() {
 			"THIS IS AN UNRECOVERABLE ERROR.\n",
 			err))
 	}
-	for i := 0; i != len(k.modmap.Keycodes)/int(k.modmap.KeycodesPerModifier); i++ {
-		arr := []string{}
-		for j := 0; j != int(k.modmap.KeycodesPerModifier); j++ {
-			arr = append(arr, fmt.Sprintf("0x%x", k.modmap.Keycodes[i*int(k.modmap.KeycodesPerModifier)+j]))
-		}
-		fmt.Println(arr)
-	}
-
-}
-
-func (k *Keyboard) Init() {
-	k.updateMaps()
 }
 
 func (k *Keyboard) isGrabbed(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) bool {
@@ -132,8 +149,7 @@ func (k *Keyboard) runKeyBindCallbacks(event interface{}, evtype int, win xproto
 }
 
 func (k *Keyboard) keysymGetWithMap(keycode xproto.Keycode, column byte) xproto.Keysym {
-	min := k.setup.MinKeycode
-	i := (int(keycode)-int(min))*int(k.keymap.KeysymsPerKeycode) + int(column)
+	i := (int(keycode)-int(k.minKeycode))*int(k.keymap.KeysymsPerKeycode) + int(column)
 
 	return k.keymap.Keysyms[i]
 }
@@ -142,13 +158,26 @@ func (k *Keyboard) keysymGet(keycode xproto.Keycode, column byte) xproto.Keysym 
 	return k.keysymGetWithMap(keycode, column)
 }
 
+func (k *Keyboard) keysymsByKeyCode(keycode xproto.Keycode, column byte) []xproto.Keysym {
+	// if keycode < k.minKeycode || keycode > k.maxKeycode {
+	// }
+	// cnt := int(k.keymap.KeysymsPerKeycode)
+	// res := make([]xproto.Keysym, cnt)
+
+	// offset := (int(keycode) - int(k.minKeycode)) * cnt
+	// for column := byte(0); column != k.keymap.KeysymsPerKeycode; column++ {
+	// 	return k.keysymGetWithMap(keycode, column)
+	// }
+	return []xproto.Keysym{}
+}
+
 func (k *Keyboard) keycodesGet(keysym xproto.Keysym) []xproto.Keycode {
 	var c byte
 	var keycode xproto.Keycode
 	keycodes := make([]xproto.Keycode, 0)
 	set := make(map[xproto.Keycode]bool, 0)
 
-	for kc := int(k.setup.MinKeycode); kc <= int(k.setup.MaxKeycode); kc++ {
+	for kc := int(k.minKeycode); kc <= int(k.maxKeycode); kc++ {
 		keycode = xproto.Keycode(kc)
 		for c = 0; c < k.keymap.KeysymsPerKeycode; c++ {
 			if keysym == k.keysymGet(keycode, c) && !set[keycode] {
@@ -220,11 +249,16 @@ func (k *Keyboard) ParseString(s string) (uint16, []xproto.Keycode, error) {
 
 func (k *Keyboard) GrabChecked(win xproto.Window, mods uint16, key xproto.Keycode) error {
 	var err error
-	for _, m := range ignoreMods {
-		err = xproto.GrabKeyChecked(k.connection, true, win, mods|m, key, xproto.GrabModeAsync, xproto.GrabModeAsync).Check()
-		if err != nil {
-			return err
-		}
+	// for _, m := range ignoreMods {
+	// 	err = xproto.GrabKeyChecked(k.connection, true, win, mods|m, key, xproto.GrabModeAsync, xproto.GrabModeAsync).Check()
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+
+	err = xproto.GrabKeyChecked(k.connection, true, win, mods, key, xproto.GrabModeAsync, xproto.GrabModeAsync).Check()
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -232,9 +266,11 @@ func (k *Keyboard) GrabChecked(win xproto.Window, mods uint16, key xproto.Keycod
 // Ungrab undoes Grab. It will handle all combinations od modifiers found
 // in ignoreMods.
 func (k *Keyboard) Ungrab(win xproto.Window, mods uint16, key xproto.Keycode) {
-	for _, m := range ignoreMods {
-		xproto.UngrabKeyChecked(k.connection, key, win, mods|m).Check()
-	}
+	// for _, m := range ignoreMods {
+	// 	xproto.UngrabKeyChecked(k.connection, key, win, mods|m).Check()
+	// }
+
+	xproto.UngrabKeyChecked(k.connection, key, win, mods).Check()
 }
 
 // func (k *Keyboard) connectedKeyBind(evtype int, win xproto.Window) bool {
@@ -315,8 +351,43 @@ func DeduceKeyInfo(state uint16, detail xproto.Keycode) (uint16, xproto.Keycode)
 }
 
 func (k *Keyboard) OnKeyRelease(event xproto.KeyReleaseEvent) {
-	mods, kc := DeduceKeyInfo(event.State, event.Detail)
+	mods, keyCode := event.State, event.Detail
 
+	modsStr := ""
+	for mask, name := range map[int]string{
+		xproto.ModMaskShift:   "Shift",
+		xproto.ModMaskLock:    "CapsLock",
+		xproto.ModMaskControl: "Control",
+		xproto.ModMask1:       "Alt",
+		xproto.ModMask2:       "NumLock",
+		xproto.ModMask3:       "Mod3",
+		xproto.ModMask4:       "Super",
+		xproto.ModMask5:       "Mod5",
+	} {
+		if mods&uint16(mask) != 0 {
+			modsStr += name + "+"
+			mods &= ^uint16(mask)
+		}
+	}
+
+	if mods != 0 {
+		modsStr += fmt.Sprintf("0x%x+", mods)
+	}
+
+	keyStr := ""
+	for c := byte(0); c < k.keymap.KeysymsPerKeycode; c++ {
+		keysym := k.keysymGet(keyCode, c)
+		for name, ks := range keysyms {
+			if ks == keysym {
+				keyStr += name + "+"
+				break
+			}
+		}
+	}
+
+	fmt.Println("KeyRelease:", modsStr, keyStr)
+
+	mods, kc := DeduceKeyInfo(event.State, event.Detail)
 	k.runKeyBindCallbacks(event, xevent.KeyRelease, event.Event, mods, kc)
 }
 
