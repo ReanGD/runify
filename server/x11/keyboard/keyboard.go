@@ -17,18 +17,6 @@ type KeyKey struct {
 	Code   xproto.Keycode
 }
 
-// type CallbackKey interface {
-// 	// Connect modifies XUtil's state to attach an event handler to a
-// 	// particular key press. If grab is true, connect will request a passive
-// 	// grab.
-// 	Connect(win xproto.Window, keyStr string, grab bool) error
-
-// 	// Run is exported for use in the keybind package but should not be
-// 	// used by the user. (It is used to run the callback function in the
-// 	// main event loop.
-// 	Run(ev interface{})
-// }
-
 type CallbackKey func()
 
 type KeyString struct {
@@ -39,13 +27,24 @@ type KeyString struct {
 	Grab     bool
 }
 
+type bindData struct {
+	grabCounter int
+	callbacks   []CallbackKey
+}
+
+func newBindData() *bindData {
+	return &bindData{
+		grabCounter: 0,
+		callbacks:   make([]CallbackKey, 0),
+	}
+}
+
 type Keyboard struct {
 	connection *xgb.Conn
 	setup      *xproto.SetupInfo
 	keymap     *xproto.GetKeyboardMappingReply
 	modmap     *xproto.GetModifierMappingReply
-	keygrabs   map[KeyKey]int
-	keybinds   map[KeyKey][]CallbackKey
+	binds      map[KeyKey]*bindData
 	keystrings []KeyString
 }
 
@@ -55,8 +54,7 @@ func NewKeyboard(connection *xgb.Conn) *Keyboard {
 		setup:      xproto.Setup(connection),
 		keymap:     nil,
 		modmap:     nil,
-		keygrabs:   make(map[KeyKey]int, 10),
-		keybinds:   make(map[KeyKey][]CallbackKey, 10),
+		binds:      make(map[KeyKey]*bindData, 10),
 		keystrings: make([]KeyString, 0, 10),
 	}
 }
@@ -87,6 +85,50 @@ func (k *Keyboard) updateMaps() {
 
 func (k *Keyboard) Init() {
 	k.updateMaps()
+}
+
+func (k *Keyboard) isGrabbed(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) bool {
+	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
+	if data, ok := k.binds[key]; ok && data.grabCounter > 0 {
+		return true
+	}
+
+	return false
+}
+
+func (k *Keyboard) attachKeyBindCallback(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode, fn CallbackKey) {
+	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
+
+	data, ok := k.binds[key]
+	if !ok {
+		data = newBindData()
+		k.binds[key] = data
+	}
+
+	data.callbacks = append(data.callbacks, fn)
+	data.grabCounter++
+}
+
+func (k *Keyboard) addKeyString(callback CallbackKey, evtype int, win xproto.Window, keyStr string, grab bool) {
+	val := KeyString{
+		Str:      keyStr,
+		Callback: callback,
+		Evtype:   evtype,
+		Win:      win,
+		Grab:     grab,
+	}
+	k.keystrings = append(k.keystrings, val)
+}
+
+func (k *Keyboard) runKeyBindCallbacks(event interface{}, evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) {
+	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
+	if data, ok := k.binds[key]; ok {
+		fns := make([]CallbackKey, len(data.callbacks))
+		copy(fns, data.callbacks)
+		for _, fn := range fns {
+			fn()
+		}
+	}
 }
 
 func (k *Keyboard) keysymGetWithMap(keycode xproto.Keycode, column byte) xproto.Keysym {
@@ -195,45 +237,16 @@ func (k *Keyboard) Ungrab(win xproto.Window, mods uint16, key xproto.Keycode) {
 	}
 }
 
-func (k *Keyboard) keyBindGrabs(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) int {
-	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
-	return k.keygrabs[key] // returns 0 if key does not exist
-}
-
-func (k *Keyboard) connectedKeyBind(evtype int, win xproto.Window) bool {
-	// Since we can't create a full key, loop through all key binds
-	// and check if evtype and window match.
-	for key := range k.keybinds {
-		if key.Evtype == evtype && key.Win == win {
-			return true
-		}
-	}
-	return false
-}
-
-func (k *Keyboard) attachKeyBindCallback(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode, fun CallbackKey) {
-	// Create key
-	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
-
-	// Do we need to allocate?
-	if _, ok := k.keybinds[key]; !ok {
-		k.keybinds[key] = make([]CallbackKey, 0)
-	}
-
-	k.keybinds[key] = append(k.keybinds[key], fun)
-	k.keygrabs[key] += 1
-}
-
-func (k *Keyboard) addKeyString(callback CallbackKey, evtype int, win xproto.Window, keyStr string, grab bool) {
-	val := KeyString{
-		Str:      keyStr,
-		Callback: callback,
-		Evtype:   evtype,
-		Win:      win,
-		Grab:     grab,
-	}
-	k.keystrings = append(k.keystrings, val)
-}
+// func (k *Keyboard) connectedKeyBind(evtype int, win xproto.Window) bool {
+// 	// Since we can't create a full key, loop through all key binds
+// 	// and check if evtype and window match.
+// 	for key := range k.keybinds {
+// 		if key.Evtype == evtype && key.Win == win {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 func (k *Keyboard) Connect(callback CallbackKey, evtype int, win xproto.Window, keyStr string, grab, reconnect bool) error {
 	// Get the mods/key first
@@ -244,7 +257,7 @@ func (k *Keyboard) Connect(callback CallbackKey, evtype int, win xproto.Window, 
 
 	// Only do the grab if we haven't yet on this window.
 	for _, keycode := range keycodes {
-		if grab && k.keyBindGrabs(evtype, win, mods, keycode) == 0 {
+		if grab && !k.isGrabbed(evtype, win, mods, keycode) {
 			if err := k.GrabChecked(win, mods, keycode); err != nil {
 				// If a bad access, let's be nice and give a good error message.
 				switch err.(type) {
@@ -301,19 +314,6 @@ func DeduceKeyInfo(state uint16, detail xproto.Keycode) (uint16, xproto.Keycode)
 	return mods, kc
 }
 
-func (k *Keyboard) keyCallbacks(key KeyKey) []CallbackKey {
-	cbs := make([]CallbackKey, len(k.keybinds[key]))
-	copy(cbs, k.keybinds[key])
-	return cbs
-}
-
-func (k *Keyboard) runKeyBindCallbacks(event interface{}, evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) {
-	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
-	for _, cb := range k.keyCallbacks(key) {
-		cb()
-	}
-}
-
 func (k *Keyboard) OnKeyRelease(event xproto.KeyReleaseEvent) {
 	mods, kc := DeduceKeyInfo(event.State, event.Detail)
 
@@ -323,20 +323,8 @@ func (k *Keyboard) OnKeyRelease(event xproto.KeyReleaseEvent) {
 func (k *Keyboard) OnMappingNotify(event xproto.MappingNotifyEvent) {
 	k.updateMaps()
 	if event.Request == xproto.MappingKeyboard {
-		// We must ungrab everything first, in case two keys are being swapped.
-		keys := k.keyKeys()
-		for _, key := range keys {
-			k.Ungrab(key.Win, key.Mod, key.Code)
-			k.detach(key.Evtype, key.Win)
-		}
-
-		// Wipe the slate clean.
-		k.keybinds = make(map[KeyKey][]CallbackKey, len(keys))
-		k.keygrabs = make(map[KeyKey]int, len(keys))
-		keyStrs := k.keystrings
-
-		// Now rebind everything in Keystrings
-		for _, ks := range keyStrs {
+		k.DetachAll()
+		for _, ks := range k.keystrings {
 			err := k.Connect(ks.Callback, ks.Evtype, ks.Win, ks.Str, ks.Grab, true)
 			if err != nil {
 				xgbutil.Logger.Println(err)
@@ -346,37 +334,31 @@ func (k *Keyboard) OnMappingNotify(event xproto.MappingNotifyEvent) {
 }
 
 func (k *Keyboard) keyKeys() []KeyKey {
-	keys := make([]KeyKey, len(k.keybinds))
+	keys := make([]KeyKey, len(k.binds))
 	i := 0
-	for key := range k.keybinds {
+	for key := range k.binds {
 		keys[i] = key
 		i++
 	}
+
 	return keys
 }
 
-func (k *Keyboard) detachKeyBindWindow(evtype int, win xproto.Window) {
-	// Since we can't create a full key, loop through all key binds
-	// and check if evtype and window match.
-	for key := range k.keybinds {
-		if key.Evtype == evtype && key.Win == win {
-			k.keygrabs[key] -= len(k.keybinds[key])
-			delete(k.keybinds, key)
-		}
-	}
-}
-
-func (k *Keyboard) detach(evtype int, win xproto.Window) {
-	mkeys := k.keyKeys()
-	k.detachKeyBindWindow(evtype, win)
-	for _, key := range mkeys {
-		if k.keyBindGrabs(key.Evtype, key.Win, key.Mod, key.Code) == 0 {
+func (k *Keyboard) DetachKey(key KeyKey) {
+	if _, ok := k.binds[key]; ok {
+		delete(k.binds, key)
+		if k.isGrabbed(key.Evtype, key.Win, key.Mod, key.Code) {
 			k.Ungrab(key.Win, key.Mod, key.Code)
 		}
 	}
 }
 
-func (k *Keyboard) Detach(win xproto.Window) {
-	k.detach(xevent.KeyPress, win)
-	k.detach(xevent.KeyRelease, win)
+func (k *Keyboard) DetachAll() {
+	mkeys := k.keyKeys()
+	k.binds = make(map[KeyKey]*bindData, 10)
+	for _, key := range mkeys {
+		if k.isGrabbed(key.Evtype, key.Win, key.Mod, key.Code) {
+			k.Ungrab(key.Win, key.Mod, key.Code)
+		}
+	}
 }
