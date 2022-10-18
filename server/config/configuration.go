@@ -15,12 +15,14 @@ type BuildCfg struct {
 }
 
 type UICfg struct {
-	BinaryPath string
+	BinaryPath   string
+	ShowShortcut string
 }
 
 func (c UICfg) setDefault(vp *viper.Viper) {
 	vp.SetDefault("UI", map[string]interface{}{
-		"BinaryPath": "/opt/runify/runify-ui",
+		"BinaryPath":   "/opt/runify/runify-ui",
+		"ShowShortcut": "Super+R",
 	})
 }
 
