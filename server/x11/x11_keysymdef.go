@@ -1,40 +1,10 @@
 package x11
 
-/*
-This file contains the keysym definitions from X.
-Taken from X11/keysymdef.h
-
-It also contains the "XFree86 vendor specific keysyms" taken from
-X11/XF86keysym.h.
-
-We store this as a map because we need to be able to do reverse lookups.
-
-keysyms is a mapping from english strings to key symbols.
-strKeysyms is a mapping from key symbols to english strings.
-*/
-
 import "github.com/jezek/xgb/xproto"
 
-// IgnoreMods is a list of X modifiers that we don't want interfering
-// with our mouse or key bindings. In particular, for each mouse or key binding
-// issued, there is a seperate mouse or key binding made for each of the
-// modifiers specified.
-//
-// You may modify this slice to add (or remove) modifiers, but it should be
-// done before *any* key or mouse bindings are attached with the keybind and
-// mousebind packages. It should not be modified afterwards.
-//
-// TODO: We're assuming numlock is in the 'mod2' modifier, which is a pretty
-// common setup, but by no means guaranteed. This should be modified to actually
-// inspect the modifiers table and look for the special Num_Lock keysym.
-var ignoreMods []uint16 = []uint16{
-	0,
-	xproto.ModMaskLock,                   // Caps lock
-	xproto.ModMask2,                      // Num lock
-	xproto.ModMaskLock | xproto.ModMask2, // Caps and Num lock
-}
-
-var keysyms map[string]xproto.Keysym = map[string]xproto.Keysym{
+// Keysym definitions from X taken from X11/keysymdef.h
+// It also contains the "XFree86 vendor specific keysyms" taken from X11/XF86keysym.h.
+var gKeysyms map[string]xproto.Keysym = map[string]xproto.Keysym{
 	"VoidSymbol":                  0xffffff,
 	"BackSpace":                   0xff08,
 	"Tab":                         0xff09,
