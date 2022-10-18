@@ -24,7 +24,7 @@
         {
             "name": "server",
             "cwd": "server",
-            "args": ["-c ${workspaceFolder}/ci/cfg/dev.json"],
+            "args": ["-c", "${workspaceFolder}/ci/cfg/dev.json"],
             "type": "go",
             "request": "launch",
             "mode": "debug",
