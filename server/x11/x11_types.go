@@ -15,6 +15,7 @@ const (
 
 var (
 	errInitX11          = errors.New("failed init X11 server")
+	errInitX11Keyboard  = errors.New("failed init X11 keyboard module")
 	errInitX11Clipboard = errors.New("failed init X11 clipboard module")
 )
 
