@@ -1,186 +1,278 @@
 package x11
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/ReanGD/runify/server/system"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
-	"github.com/jezek/xgbutil"
-	"github.com/jezek/xgbutil/xevent"
 	"go.uber.org/zap"
 )
 
-type KeyKey struct {
-	Evtype int
-	Win    xproto.Window
-	Mod    uint16
-	Code   xproto.Keycode
-}
+const (
+	dbgShowShortcut = true
+)
 
-type CallbackKey func()
+var (
+	zapInitKeyboard    = zap.String("Method", "x11Keyboard::onInit")
+	zapStopKeyboard    = zap.String("Method", "x11Keyboard::onStop")
+	zapBindKeyboard    = zap.String("Method", "x11Keyboard::bind")
+	zapUnbindKeyboard  = zap.String("Method", "x11Keyboard::unbind")
+	zapOnKeyRelease    = zap.String("Method", "x11Keyboard::onKeyRelease")
+	zapOnMappingNotify = zap.String("Method", "x11Keyboard::onMappingNotify")
+)
 
-type KeyString struct {
-	Str      string
-	Callback CallbackKey
-	Evtype   int
-	Win      xproto.Window
-	Grab     bool
+type bindID uint16
+
+type bindKey struct {
+	mods    uint16
+	keycode xproto.Keycode
 }
 
 type bindData struct {
-	grabCounter int
-	callbacks   []CallbackKey
-}
-
-func newBindData() *bindData {
-	return &bindData{
-		grabCounter: 0,
-		callbacks:   make([]CallbackKey, 0),
-	}
+	id       bindID
+	keys     []bindKey
+	shortcut string
 }
 
 type x11Keyboard struct {
+	ignoreMods     []uint16
+	modIdByName    map[string]uint16
+	modNameById    map[uint16]string
 	keysymIdByName map[string]xproto.Keysym
 	keysymNameById map[xproto.Keysym]string
 	keymap         *xproto.GetKeyboardMappingReply
 	modmap         *xproto.GetModifierMappingReply
-	binds          map[KeyKey]*bindData
-	keystrings     []KeyString
+	bindById       map[bindID]*bindData
+	bindByKey      map[bindKey]*bindData
+	errorCh        chan<- error
+	shortcutCh     chan<- bindID
 	connection     *xgb.Conn
 	moduleLogger   *zap.Logger
 	window         xproto.Window
+	nextBindID     bindID
 	minKeycode     xproto.Keycode
 	maxKeycode     xproto.Keycode
 }
 
 func newX11Keyboard() *x11Keyboard {
-	keysymNameById := make(map[xproto.Keysym]string, len(keysyms))
-	for name, id := range keysyms {
+	ignoreMods := []uint16{
+		0,
+		xproto.ModMaskLock,                   // Caps lock
+		xproto.ModMask2,                      // Num lock
+		xproto.ModMaskLock | xproto.ModMask2, // Caps and Num lock
+	}
+
+	modIdByName := map[string]uint16{
+		"Shift":    xproto.ModMaskShift,
+		"CapsLock": xproto.ModMaskLock,
+		"Control":  xproto.ModMaskControl,
+		"Alt":      xproto.ModMask1,
+		"NumLock":  xproto.ModMask2,
+		"Mod3":     xproto.ModMask3,
+		"Super":    xproto.ModMask4,
+		"Mod5":     xproto.ModMask5,
+	}
+
+	modNameById := make(map[uint16]string, len(modIdByName))
+	for name, id := range modIdByName {
+		modNameById[id] = name
+	}
+
+	keysymNameById := make(map[xproto.Keysym]string, len(gKeysyms))
+	for name, id := range gKeysyms {
 		keysymNameById[id] = name
 	}
 
 	return &x11Keyboard{
-		keysymIdByName: keysyms,
+		ignoreMods:     ignoreMods,
+		modIdByName:    modIdByName,
+		modNameById:    modNameById,
+		keysymIdByName: gKeysyms,
 		keysymNameById: keysymNameById,
 		keymap:         nil,
 		modmap:         nil,
-		binds:          make(map[KeyKey]*bindData, 8),
-		keystrings:     make([]KeyString, 0, 8),
+		bindById:       make(map[bindID]*bindData, 8),
+		bindByKey:      make(map[bindKey]*bindData, 8),
+		errorCh:        nil,
+		shortcutCh:     nil,
 		connection:     nil,
 		moduleLogger:   nil,
 		window:         0,
+		nextBindID:     1,
 		minKeycode:     0,
 		maxKeycode:     0,
 	}
 }
 
-func (k *x11Keyboard) onInit(connection *xgb.Conn, window xproto.Window, moduleLogger *zap.Logger) error {
+func (k *x11Keyboard) onInit(
+	connection *xgb.Conn, window xproto.Window, errorCh chan<- error, shortcutCh chan<- bindID, moduleLogger *zap.Logger) error {
+
 	setupInfo := xproto.Setup(connection)
 	k.minKeycode = setupInfo.MinKeycode
 	k.maxKeycode = setupInfo.MaxKeycode
+	k.shortcutCh = shortcutCh
 	k.connection = connection
 	k.window = window
 	k.moduleLogger = moduleLogger
 
-	k.updateMaps()
+	if !k.updateMaps(zapInitKeyboard) {
+		return errInitX11Keyboard
+	}
+
 	return nil
 }
 
-func (k *x11Keyboard) updateMaps() {
+func (k *x11Keyboard) onStart() {
+
+}
+
+func (k *x11Keyboard) onStop() {
+	for key, bindData := range k.bindByKey {
+		_ = k.ungrabKey(
+			key, zapStopKeyboard, zap.String("Shortcut", bindData.shortcut), zap.Uint16("BindID", uint16(bindData.id)))
+	}
+	k.bindByKey = make(map[bindKey]*bindData)
+	k.bindById = make(map[bindID]*bindData)
+}
+
+func (k *x11Keyboard) updateMaps(fields ...zap.Field) bool {
 	var err error
 
 	firstKeycode := k.minKeycode
 	count := byte(k.maxKeycode - k.minKeycode + 1)
 	if k.keymap, err = xproto.GetKeyboardMapping(k.connection, firstKeycode, count).Reply(); err != nil {
-		panic(fmt.Sprintf("COULD NOT GET KEYBOARD MAPPING: %v\n"+
-			"THIS IS AN UNRECOVERABLE ERROR.\n",
-			err))
+		k.moduleLogger.Error("Failed to get keyboard mapping", append(fields, zap.Error(err))...)
+		return false
 	}
+
 	if k.modmap, err = xproto.GetModifierMapping(k.connection).Reply(); err != nil {
-		panic(fmt.Sprintf("COULD NOT GET MODIFIER MAPPING: %v\n"+
-			"THIS IS AN UNRECOVERABLE ERROR.\n",
-			err))
+		k.moduleLogger.Error("Failed to get modifier mapping", append(fields, zap.Error(err))...)
+		return false
 	}
+
+	return true
 }
 
-func (k *x11Keyboard) isGrabbed(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) bool {
-	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
-	if data, ok := k.binds[key]; ok && data.grabCounter > 0 {
-		return true
+func (k *x11Keyboard) grabKey(key bindKey, fields ...zap.Field) system.Error {
+	var err error
+	for _, m := range k.ignoreMods {
+		err = xproto.GrabKeyChecked(
+			k.connection, true, k.window, key.mods|m, key.keycode, xproto.GrabModeAsync, xproto.GrabModeAsync).Check()
+		if err != nil {
+			switch err.(type) {
+			case xproto.AccessError:
+				accessErr := errors.New("keyboard shortcut is already taken by another application")
+				k.moduleLogger.Info("Failed call x11 grab key", append(fields, zap.Error(accessErr))...)
+				return system.ShortcutUsesByExternalApp
+			default:
+				k.moduleLogger.Info("Failed call x11 grab key", append(fields, zap.Error(err))...)
+				return system.ShortcutBindError
+			}
+		}
+	}
+
+	return system.Success
+}
+
+func (k *x11Keyboard) ungrabKey(key bindKey, fields ...zap.Field) bool {
+	for _, m := range k.ignoreMods {
+		err := xproto.UngrabKeyChecked(k.connection, key.keycode, k.window, key.mods|m).Check()
+		if err != nil {
+			k.moduleLogger.Warn("Failed call x11 ungrab key", append(fields, zap.Error(err))...)
+			return false
+		}
 	}
 
 	return false
 }
 
-func (k *x11Keyboard) attachKeyBindCallback(evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode, fn CallbackKey) {
-	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
-
-	data, ok := k.binds[key]
-	if !ok {
-		data = newBindData()
-		k.binds[key] = data
-	}
-
-	data.callbacks = append(data.callbacks, fn)
-	data.grabCounter++
-}
-
-func (k *x11Keyboard) addKeyString(callback CallbackKey, evtype int, win xproto.Window, keyStr string, grab bool) {
-	val := KeyString{
-		Str:      keyStr,
-		Callback: callback,
-		Evtype:   evtype,
-		Win:      win,
-		Grab:     grab,
-	}
-	k.keystrings = append(k.keystrings, val)
-}
-
-func (k *x11Keyboard) runKeyBindCallbacks(event interface{}, evtype int, win xproto.Window, mods uint16, keycode xproto.Keycode) {
-	key := KeyKey{Evtype: evtype, Win: win, Mod: mods, Code: keycode}
-	if data, ok := k.binds[key]; ok {
-		fns := make([]CallbackKey, len(data.callbacks))
-		copy(fns, data.callbacks)
-		for _, fn := range fns {
-			fn()
+func (k *x11Keyboard) modsToStr(mods uint16, joinStr string) string {
+	res := ""
+	for mask, name := range k.modNameById {
+		if mods&uint16(mask) != 0 {
+			if res != "" {
+				res += joinStr
+			}
+			res += name
+			mods &= ^uint16(mask)
 		}
 	}
+
+	if mods != 0 {
+		if res != "" {
+			res += joinStr
+		}
+		res += fmt.Sprintf("0x%04X", mods)
+	}
+
+	return res
 }
 
-func (k *x11Keyboard) keysymGetWithMap(keycode xproto.Keycode, column byte) xproto.Keysym {
-	i := (int(keycode)-int(k.minKeycode))*int(k.keymap.KeysymsPerKeycode) + int(column)
+func (k *x11Keyboard) keysymsByKeycode(keycode xproto.Keycode) []xproto.Keysym {
+	if keycode < k.minKeycode || keycode > k.maxKeycode {
+		k.moduleLogger.Warn("Invalid keycode",
+			zap.Uint8("Keycode", uint8(keycode)),
+			zap.Uint8("MinKeycode", uint8(k.minKeycode)),
+			zap.Uint8("MaxKeycode", uint8(k.maxKeycode)))
+		return []xproto.Keysym{}
+	}
 
-	return k.keymap.Keysyms[i]
+	cnt := int(k.keymap.KeysymsPerKeycode)
+	res := make([]xproto.Keysym, 0, cnt)
+	offset := int(keycode-k.minKeycode) * cnt
+	for column := 0; column != cnt; column++ {
+		unique := true
+		keysym := k.keymap.Keysyms[offset+column]
+		for i := 0; i < len(res); i++ {
+			if keysym == res[i] {
+				unique = false
+				break
+			}
+		}
+		if unique {
+			res = append(res, keysym)
+		}
+	}
+
+	return res
 }
 
-func (k *x11Keyboard) keysymGet(keycode xproto.Keycode, column byte) xproto.Keysym {
-	return k.keysymGetWithMap(keycode, column)
+func (k *x11Keyboard) keycodeToStr(keycode xproto.Keycode, joinStr string) string {
+	keysyms := k.keysymsByKeycode(keycode)
+	if len(keysyms) == 0 {
+		return ""
+	}
+
+	res := ""
+	for _, keysym := range keysyms {
+		if res != "" {
+			res += joinStr
+		}
+		if name, ok := k.keysymNameById[keysym]; ok {
+			res += name
+		} else {
+			res += fmt.Sprintf("0x%08X", keysym)
+		}
+	}
+
+	return res
 }
 
-func (k *x11Keyboard) keysymsByKeyCode(keycode xproto.Keycode, column byte) []xproto.Keysym {
-	// if keycode < k.minKeycode || keycode > k.maxKeycode {
-	// }
-	// cnt := int(k.keymap.KeysymsPerKeycode)
-	// res := make([]xproto.Keysym, cnt)
-
-	// offset := (int(keycode) - int(k.minKeycode)) * cnt
-	// for column := byte(0); column != k.keymap.KeysymsPerKeycode; column++ {
-	// 	return k.keysymGetWithMap(keycode, column)
-	// }
-	return []xproto.Keysym{}
-}
-
-func (k *x11Keyboard) keycodesGet(keysym xproto.Keysym) []xproto.Keycode {
-	var c byte
-	var keycode xproto.Keycode
+func (k *x11Keyboard) keycodesByKeysym(keysym xproto.Keysym) []xproto.Keycode {
 	keycodes := make([]xproto.Keycode, 0)
 	set := make(map[xproto.Keycode]bool, 0)
 
-	for kc := int(k.minKeycode); kc <= int(k.maxKeycode); kc++ {
-		keycode = xproto.Keycode(kc)
-		for c = 0; c < k.keymap.KeysymsPerKeycode; c++ {
-			if keysym == k.keysymGet(keycode, c) && !set[keycode] {
+	minKc := int(k.minKeycode)
+	keysymsPerKeycode := int(k.keymap.KeysymsPerKeycode)
+
+	for kc := minKc; kc <= int(k.maxKeycode); kc++ {
+		keycode := xproto.Keycode(kc)
+		offset := (kc - minKc) * keysymsPerKeycode
+		for ind := offset; ind < offset+keysymsPerKeycode; ind++ {
+			if keysym == k.keymap.Keysyms[ind] && !set[keycode] {
 				keycodes = append(keycodes, keycode)
 				set[keycode] = true
 			}
@@ -189,247 +281,159 @@ func (k *x11Keyboard) keycodesGet(keysym xproto.Keysym) []xproto.Keycode {
 	return keycodes
 }
 
-func (k *x11Keyboard) strToKeycodes(str string) []xproto.Keycode {
-	// Do some fancy case stuff before we give up.
-	sym, ok := keysyms[str]
+func (k *x11Keyboard) keycodesByKeysymStr(str string) []xproto.Keycode {
+	keysym, ok := k.keysymIdByName[str]
 	if !ok {
-		sym, ok = keysyms[strings.Title(str)]
+		keysym, ok = k.keysymIdByName[strings.Title(str)]
 	}
 	if !ok {
-		sym, ok = keysyms[strings.ToLower(str)]
+		keysym, ok = k.keysymIdByName[strings.ToLower(str)]
 	}
 	if !ok {
-		sym, ok = keysyms[strings.ToUpper(str)]
+		keysym, ok = k.keysymIdByName[strings.ToUpper(str)]
 	}
-
-	// If we don't know what 'str' is, return 0.
-	// There will probably be a bad access. We should do better than that...
 	if !ok {
 		return []xproto.Keycode{}
 	}
-	return k.keycodesGet(sym)
+
+	return k.keycodesByKeysym(keysym)
 }
 
-func (k *x11Keyboard) ParseString(s string) (uint16, []xproto.Keycode, error) {
-	mods, kcs := uint16(0), []xproto.Keycode{}
-	for _, part := range strings.Split(s, "-") {
+func (k *x11Keyboard) parseShortcut(shortcut string, fields ...zap.Field) ([]bindKey, system.Error) {
+	mods := uint16(0)
+	keycodes := []xproto.Keycode{}
+
+	for _, part := range strings.Split(shortcut, "+") {
 		switch strings.ToLower(part) {
 		case "shift":
 			mods |= xproto.ModMaskShift
-		case "lock":
-			mods |= xproto.ModMaskLock
 		case "control":
 			mods |= xproto.ModMaskControl
-		case "mod1":
+		case "alt":
 			mods |= xproto.ModMask1
-		case "mod2":
-			mods |= xproto.ModMask2
-		case "mod3":
-			mods |= xproto.ModMask3
-		case "mod4":
+		case "super":
 			mods |= xproto.ModMask4
-		case "mod5":
-			mods |= xproto.ModMask5
-		case "any":
-			mods |= xproto.ModMaskAny
-		default: // a key code!
-			if len(kcs) == 0 { // only accept the first keycode we see
-				kcs = k.strToKeycodes(part)
+		default:
+			if len(keycodes) == 0 {
+				keycodes = k.keycodesByKeysymStr(part)
 			}
 		}
 	}
 
-	if len(kcs) == 0 {
-		return 0, nil, fmt.Errorf("Could not find a valid keycode in the "+
-			"string '%s'. Key binding failed.", s)
+	if len(keycodes) == 0 {
+		k.moduleLogger.Info("Failed parse shortcut", fields...)
+		return []bindKey{}, system.ShortcutParseFailed
 	}
 
-	return mods, kcs, nil
-}
-
-func (k *x11Keyboard) GrabChecked(win xproto.Window, mods uint16, key xproto.Keycode) error {
-	var err error
-	// for _, m := range ignoreMods {
-	// 	err = xproto.GrabKeyChecked(k.connection, true, win, mods|m, key, xproto.GrabModeAsync, xproto.GrabModeAsync).Check()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-
-	err = xproto.GrabKeyChecked(k.connection, true, win, mods, key, xproto.GrabModeAsync, xproto.GrabModeAsync).Check()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Ungrab undoes Grab. It will handle all combinations od modifiers found
-// in ignoreMods.
-func (k *x11Keyboard) Ungrab(win xproto.Window, mods uint16, key xproto.Keycode) {
-	// for _, m := range ignoreMods {
-	// 	xproto.UngrabKeyChecked(k.connection, key, win, mods|m).Check()
-	// }
-
-	xproto.UngrabKeyChecked(k.connection, key, win, mods).Check()
-}
-
-// func (k *Keyboard) connectedKeyBind(evtype int, win xproto.Window) bool {
-// 	// Since we can't create a full key, loop through all key binds
-// 	// and check if evtype and window match.
-// 	for key := range k.keybinds {
-// 		if key.Evtype == evtype && key.Win == win {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
-func (k *x11Keyboard) Connect(callback CallbackKey, evtype int, win xproto.Window, keyStr string, grab, reconnect bool) error {
-	// Get the mods/key first
-	mods, keycodes, err := k.ParseString(keyStr)
-	if err != nil {
-		return err
-	}
-
-	// Only do the grab if we haven't yet on this window.
+	res := make([]bindKey, 0, len(keycodes))
 	for _, keycode := range keycodes {
-		if grab && !k.isGrabbed(evtype, win, mods, keycode) {
-			if err := k.GrabChecked(win, mods, keycode); err != nil {
-				// If a bad access, let's be nice and give a good error message.
-				switch err.(type) {
-				case xproto.AccessError:
-					return fmt.Errorf("Got a bad access error when trying to "+
-						"bind '%s'. This usually means another client has "+
-						"already grabbed this keybinding.", keyStr)
-				default:
-					return fmt.Errorf("Could not bind '%s' because: %s",
-						keyStr, err)
-				}
+		res = append(res, bindKey{mods: mods, keycode: keycode})
+	}
+
+	return res, system.Success
+}
+
+func (k *x11Keyboard) bindImpl(shortcut string, bindID bindID, fields ...zap.Field) system.Error {
+	fields = append(fields, zap.String("Shortcut", shortcut))
+
+	bindKeys, errCode := k.parseShortcut(shortcut, fields...)
+	if errCode != system.Success {
+		return errCode
+	}
+
+	for _, bindKey := range bindKeys {
+		if _, ok := k.bindByKey[bindKey]; ok {
+			k.moduleLogger.Info("Shortcut already binds by runify", fields...)
+			return system.ShortcutUsesByRunify
+		}
+	}
+
+	bindData := &bindData{id: bindID, keys: bindKeys, shortcut: shortcut}
+
+	for _, bindKey := range bindKeys {
+		if errCode := k.grabKey(bindKey, fields...); errCode != system.Success {
+			return errCode
+		}
+	}
+
+	k.bindById[bindID] = bindData
+	for _, bindKey := range bindKeys {
+		k.bindByKey[bindKey] = bindData
+	}
+
+	return system.Success
+}
+
+func (k *x11Keyboard) bind(shortcut string) (bindID, system.Error) {
+	if errCode := k.bindImpl(shortcut, k.nextBindID, zapBindKeyboard); errCode != system.Success {
+		return 0, errCode
+	}
+
+	k.nextBindID++
+	return k.nextBindID - 1, system.Success
+}
+
+func (k *x11Keyboard) unbind(id bindID) bool {
+	if bindData, ok := k.bindById[id]; ok {
+		zapFields := []zap.Field{
+			zapUnbindKeyboard,
+			zap.String("Shortcut", bindData.shortcut),
+			zap.Uint16("BindID", uint16(bindData.id)),
+		}
+
+		delete(k.bindById, id)
+		res := true
+		for _, key := range bindData.keys {
+			delete(k.bindByKey, key)
+			if !k.ungrabKey(key, zapFields...) {
+				res = false
 			}
 		}
 
-		// If we've never grabbed anything on this window before, we need to
-		// make sure we can respond to it in the main event loop.
-		// Never do this if we're reconnecting.
-		if !reconnect {
-			// var allCb xgbutil.Callback
-			// if evtype == xevent.KeyPress {
-			// 	allCb = xevent.KeyPressFun(runKeyPressCallbacks)
-			// } else {
-			// 	allCb = xevent.KeyReleaseFun(runKeyReleaseCallbacks)
-			// }
-
-			// // If this is the first Key{Press|Release}Event on this window,
-			// // then we need to listen to Key{Press|Release} events in the main
-			// // loop.
-			// if !k.connectedKeyBind(evtype, win) {
-			// 	allCb.Connect(xu, win)
-			// }
-		}
-
-		// Finally, attach the callback.
-		k.attachKeyBindCallback(evtype, win, mods, keycode, callback)
+		return res
 	}
 
-	// Keep track of all unique key connections.
-	if !reconnect {
-		k.addKeyString(callback, evtype, win, keyStr, grab)
-	}
-
-	return nil
+	k.moduleLogger.Info("Failed unbind shortcut",
+		zapUnbindKeyboard, zap.Uint16("BindID", uint16(id)), zap.Error(errors.New("bind not found")))
+	return false
 }
 
-// DeduceKeyInfo AND's the "ignored modifiers" out of the state returned by
-// a Key{Press,Release} event. This is useful to connect a (state, keycode)
-// tuple from an event with a tuple specified by the user.
-func DeduceKeyInfo(state uint16, detail xproto.Keycode) (uint16, xproto.Keycode) {
-	mods, kc := state, detail
-	for _, m := range ignoreMods {
+func (k *x11Keyboard) onKeyRelease(event xproto.KeyReleaseEvent) {
+	mods, keycode := event.State, event.Detail
+
+	modsStr := k.modsToStr(mods, "+")
+	keycodeStr := k.keycodeToStr(keycode, "|")
+	shortcut := fmt.Sprintf("%s [%s]", modsStr, keycodeStr)
+	k.moduleLogger.Debug("onKeyRelease", zapOnKeyRelease, zap.String("Shortcut", shortcut))
+
+	for _, m := range k.ignoreMods {
 		mods &= ^m
 	}
-	return mods, kc
+	mods &= ^uint16(xproto.ModMask5)
+
+	bindKey := bindKey{
+		mods:    mods,
+		keycode: keycode,
+	}
+	if bindData, ok := k.bindByKey[bindKey]; ok {
+		k.shortcutCh <- bindData.id
+	}
 }
 
-func (k *x11Keyboard) OnKeyRelease(event xproto.KeyReleaseEvent) {
-	mods, keyCode := event.State, event.Detail
-
-	modsStr := ""
-	for mask, name := range map[int]string{
-		xproto.ModMaskShift:   "Shift",
-		xproto.ModMaskLock:    "CapsLock",
-		xproto.ModMaskControl: "Control",
-		xproto.ModMask1:       "Alt",
-		xproto.ModMask2:       "NumLock",
-		xproto.ModMask3:       "Mod3",
-		xproto.ModMask4:       "Super",
-		xproto.ModMask5:       "Mod5",
-	} {
-		if mods&uint16(mask) != 0 {
-			modsStr += name + "+"
-			mods &= ^uint16(mask)
-		}
+func (k *x11Keyboard) onMappingNotify(event xproto.MappingNotifyEvent) {
+	if !k.updateMaps(zapOnMappingNotify) {
+		k.errorCh <- errors.New("failed update keyboard mapping")
 	}
-
-	if mods != 0 {
-		modsStr += fmt.Sprintf("0x%x+", mods)
-	}
-
-	keyStr := ""
-	for c := byte(0); c < k.keymap.KeysymsPerKeycode; c++ {
-		keysym := k.keysymGet(keyCode, c)
-		for name, ks := range keysyms {
-			if ks == keysym {
-				keyStr += name + "+"
-				break
-			}
-		}
-	}
-
-	fmt.Println("KeyRelease:", modsStr, keyStr)
-
-	mods, kc := DeduceKeyInfo(event.State, event.Detail)
-	k.runKeyBindCallbacks(event, xevent.KeyRelease, event.Event, mods, kc)
-}
-
-func (k *x11Keyboard) OnMappingNotify(event xproto.MappingNotifyEvent) {
-	k.updateMaps()
 	if event.Request == xproto.MappingKeyboard {
-		k.DetachAll()
-		for _, ks := range k.keystrings {
-			err := k.Connect(ks.Callback, ks.Evtype, ks.Win, ks.Str, ks.Grab, true)
-			if err != nil {
-				xgbutil.Logger.Println(err)
-			}
+		bindById := k.bindById
+		for key, bindData := range k.bindByKey {
+			_ = k.ungrabKey(
+				key, zapOnMappingNotify, zap.String("Shortcut", bindData.shortcut), zap.Uint16("BindID", uint16(bindData.id)))
 		}
-	}
-}
-
-func (k *x11Keyboard) keyKeys() []KeyKey {
-	keys := make([]KeyKey, len(k.binds))
-	i := 0
-	for key := range k.binds {
-		keys[i] = key
-		i++
-	}
-
-	return keys
-}
-
-func (k *x11Keyboard) DetachKey(key KeyKey) {
-	if _, ok := k.binds[key]; ok {
-		delete(k.binds, key)
-		if k.isGrabbed(key.Evtype, key.Win, key.Mod, key.Code) {
-			k.Ungrab(key.Win, key.Mod, key.Code)
-		}
-	}
-}
-
-func (k *x11Keyboard) DetachAll() {
-	mkeys := k.keyKeys()
-	k.binds = make(map[KeyKey]*bindData, 10)
-	for _, key := range mkeys {
-		if k.isGrabbed(key.Evtype, key.Win, key.Mod, key.Code) {
-			k.Ungrab(key.Win, key.Mod, key.Code)
+		k.bindByKey = make(map[bindKey]*bindData, 8)
+		k.bindById = make(map[bindID]*bindData, 8)
+		for id, bindData := range bindById {
+			_ = k.bindImpl(bindData.shortcut, id, zapOnMappingNotify)
 		}
 	}
 }
