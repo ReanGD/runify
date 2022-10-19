@@ -5,7 +5,7 @@ on:
   push:
 
 jobs:
-  build-server:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -19,4 +19,6 @@ jobs:
           cache: true
           cache-dependency-path: server/go.sum
 
-      - run: go version
+      - name: Build server
+        working-directory: ./server
+        run: make build
