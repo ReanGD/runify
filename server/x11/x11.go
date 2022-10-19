@@ -18,6 +18,8 @@ const ModuleName = "x11"
 
 type X11 struct {
 	handler *x11Handler
+	rpc     module.Rpc
+	cfg     *config.Configuration
 
 	module.Module
 }
@@ -25,6 +27,8 @@ type X11 struct {
 func New() *X11 {
 	return &X11{
 		handler: newX11Handler(),
+		rpc:     nil,
+		cfg:     nil,
 	}
 }
 
@@ -32,10 +36,12 @@ func (m *X11) OnInit(cfg *config.Config, rpc module.Rpc, rootLogger *zap.Logger)
 	ch := make(chan error)
 
 	go func() {
-		channelLen := cfg.Get().X11.ChannelLen
+		m.rpc = rpc
+		m.cfg = cfg.Get()
+		channelLen := m.cfg.X11.ChannelLen
 		m.Init(rootLogger, ModuleName, channelLen)
 
-		ch <- m.handler.onInit(cfg, rpc, m.ModuleLogger)
+		ch <- m.handler.onInit(m.cfg, rpc, m.ModuleLogger)
 	}()
 
 	return ch
@@ -75,9 +81,12 @@ func (m *X11) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultE
 	}()
 
 	done := ctx.Done()
+	errorCh := m.handler.getErrorCh()
 	x11EventsCh := m.handler.getX11EventsCh()
-	hotkeyCh := m.handler.getHotkeysCh()
+	shortcutCh := m.handler.getShortcutCh()
 	messageCh := m.GetReadChannel()
+
+	bindID, _ := m.handler.bindShortcut(m.cfg.UI.ShowShortcut)
 
 	for {
 		request = nil
@@ -86,10 +95,17 @@ func (m *X11) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultE
 			resultIsFinish = true
 			resultErr = nil
 			return
+		// TODO: move this case
+		case err := <-errorCh:
+			resultIsFinish = true
+			resultErr = err
+			return
 		case event := <-x11EventsCh:
 			m.handler.onX11Event(event)
-		case id := <-hotkeyCh:
-			m.handler.onHotkey(id)
+		case id := <-shortcutCh:
+			if id == bindID {
+				m.rpc.ShowUI()
+			}
 		case request = <-messageCh:
 			m.MessageWasRead()
 			if resultIsFinish, resultErr = m.onRequest(request); resultIsFinish {

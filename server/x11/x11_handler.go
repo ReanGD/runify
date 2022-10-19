@@ -52,8 +52,8 @@ func (h *x11Handler) getShortcutCh() <-chan bindID {
 	return h.shortcutCh
 }
 
-func (h *x11Handler) onInit(cfg *config.Config, rpc module.Rpc, moduleLogger *zap.Logger) error {
-	h.cfg = cfg.Get()
+func (h *x11Handler) onInit(cfg *config.Configuration, rpc module.Rpc, moduleLogger *zap.Logger) error {
+	h.cfg = cfg
 	h.moduleLogger = moduleLogger
 
 	var err error
