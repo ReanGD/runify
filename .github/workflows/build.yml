@@ -1,0 +1,22 @@
+name: Build runify
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'server/go.mod'
+          check-latest: false
+          cache: true
+          cache-dependency-path: server/go.sum
+
+      - run: go version
