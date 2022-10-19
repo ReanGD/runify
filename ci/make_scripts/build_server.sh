@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 SCRIPT_DIR=`cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd`
 CI_DIR=`dirname $SCRIPT_DIR`
