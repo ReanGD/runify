@@ -19,7 +19,7 @@ if [ -z ${GITHUB_SHA+x} ]
 then
     BUILD_COMMIT="undefined (undefined)"
 else
-    BUILD_COMMIT="$GITHUB_REF ($GITHUB_SHA)"
+    BUILD_COMMIT="$GITHUB_REF_NAME ($GITHUB_SHA)"
 fi
 
 if [ -z ${GITHUB_ACTOR+x} ]

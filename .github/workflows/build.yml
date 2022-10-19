@@ -24,11 +24,14 @@ jobs:
         with:
           flutter-version: '3.3.2'
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+          architecture: x64
 
       - name: Setup deps
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: libgtk-3-dev
+          packages: ninja-build libgtk-3-dev
           version: 1.0
 
       - name: Build server
