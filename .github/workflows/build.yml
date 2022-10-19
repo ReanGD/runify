@@ -19,6 +19,12 @@ jobs:
           cache: true
           cache-dependency-path: server/go.sum
 
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.3.2'
+          channel: 'stable'
+
       - name: Setup deps
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
@@ -32,3 +38,7 @@ jobs:
       - name: Check server version
         working-directory: ./server
         run: ./runify-server version
+
+      - name: Build UI
+        working-directory: ./ui
+        run: make build_release

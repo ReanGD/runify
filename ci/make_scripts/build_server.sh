@@ -5,7 +5,7 @@ CI_DIR=`dirname $SCRIPT_DIR`
 PROJECT_DIR=`dirname $CI_DIR`
 SERVER_DIR=$PROJECT_DIR/server
 
-pwd
+env
 cd "${SERVER_DIR}"
 
 if [ -z ${GITHUB_RUN_ID+x} ]
