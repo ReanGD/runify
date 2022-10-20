@@ -60,6 +60,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: release/*
-          draft: true
-          prerelease: true
+          draft: contains(github.ref, 'draft')
+          prerelease: contains(github.ref, 'rc')
           token: ${{ secrets.GITHUB_TOKEN }}
