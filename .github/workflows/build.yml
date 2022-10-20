@@ -34,6 +34,9 @@ jobs:
           packages: ninja-build libgtk-3-dev
           version: 1.0
 
+      - name: Show env
+        run: env
+
       - name: Build UI and server
         run: make release
 
