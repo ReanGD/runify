@@ -34,14 +34,11 @@ jobs:
           packages: ninja-build libgtk-3-dev
           version: 1.0
 
-      - name: Build server
-        working-directory: ./server
-        run: make build
+      - name: Build UI and server
+        run: make release
 
-      - name: Check server version
-        working-directory: ./server
-        run: ./runify-server version
-
-      - name: Build UI
-        working-directory: ./ui
-        run: make build_release
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: runify
+          path: release/
