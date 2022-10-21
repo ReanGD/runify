@@ -41,7 +41,7 @@ jobs:
         run: make release
 
       - name: Save build artifacts
-        uses: actions/upload-artifact@v3.1
+        uses: actions/upload-artifact@v3
         with:
           name: runify_release
           path: release/
