@@ -45,16 +45,27 @@ jobs:
         with:
           name: runify
           path: release/
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
           name: runify
-          path: release/
+
+      - name: Get release version
+        run: |
+          VERSION_VALUE=$(echo ${GITHUB_REF_NAME#v} | cut -d'-' -f 1)
+          echo "RELEASE_VERSION=$VERSION_VALUE" >> $GITHUB_ENV
+
+      - name: Print version
+        run: echo "${{ env.RELEASE_VERSION }}
 
       - name: Create release
         uses: softprops/action-gh-release@v1
