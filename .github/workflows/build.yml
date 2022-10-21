@@ -62,11 +62,9 @@ jobs:
 
       - name: Compress artifact for deployment
         run: |
-          zip -r runify.zip ./release
-          tar -czvf runify.tar.gz ./release
-
-      - name: Show files
-        run: ls
+          cd release
+          zip -r ../runify.zip *
+          tar -czvf ../runify.tar.gz *
 
       - name: Get release version
         run: |

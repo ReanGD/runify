@@ -1,11 +1,21 @@
 # Changelog
 
-## [0.1.0]
+## [Unreleased]
 
 ### Added
 
-- Плагин Desktop entries - запуск установленных приложений
+- TODO
 
 ### Changed
 
+- TODO
+
 ### Fixed
+
+- TODO
+
+## [0.1.0] - 2022-10-21
+
+### Added
+
+- "Desktop entries" plugin - launching installed applications
