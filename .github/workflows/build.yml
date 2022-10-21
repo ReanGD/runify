@@ -40,10 +40,10 @@ jobs:
       - name: Build UI and server
         run: make release
 
-      - name: Archive build artifacts
-        uses: actions/upload-artifact@v3
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v3.1
         with:
-          name: runify
+          name: runify_release
           path: release/
 
   release:
@@ -57,7 +57,10 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: runify
+          name: runify_release
+
+      - name: Show files
+        run: ls
 
       - name: Get release version
         run: |
@@ -65,11 +68,20 @@ jobs:
           echo "RELEASE_VERSION=$VERSION_VALUE" >> $GITHUB_ENV
 
       - name: Print version
-        run: echo "${{ env.RELEASE_VERSION }}
+        run: echo "${{ env.RELEASE_VERSION }}"
+
+      - name: Get Changelog Entry
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          validation_level: warn
+          version: ${{ env.RELEASE_VERSION }}
+          path: ./CHANGELOG.md
 
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
+          body: ${{ steps.changelog_reader.outputs.changes }}
           files: release/*
           draft: contains(github.ref, 'draft')
           prerelease: contains(github.ref, 'rc')
