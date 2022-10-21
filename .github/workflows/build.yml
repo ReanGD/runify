@@ -58,6 +58,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: runify_release
+          path: release/
+
+      - name: Compress artifact for deployment
+        run: |
+          zip -r runify.zip ./release
+          tar -czvf runify.tar.gz ./release
 
       - name: Show files
         run: ls
@@ -66,9 +72,6 @@ jobs:
         run: |
           VERSION_VALUE=$(echo ${GITHUB_REF_NAME#v} | cut -d'-' -f 1)
           echo "RELEASE_VERSION=$VERSION_VALUE" >> $GITHUB_ENV
-
-      - name: Print version
-        run: echo "${{ env.RELEASE_VERSION }}"
 
       - name: Get Changelog Entry
         id: changelog_reader
@@ -82,7 +85,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body: ${{ steps.changelog_reader.outputs.changes }}
-          files: release/*
           draft: contains(github.ref, 'draft')
           prerelease: contains(github.ref, 'rc')
           token: ${{ secrets.GITHUB_TOKEN }}
+          files:  |
+            runify.zip
+            runify.tar.gz
