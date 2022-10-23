@@ -3,7 +3,7 @@ export DIR_SCRIPTS := "ci/make_scripts"
 .PHONY: cloc release help
 
 cloc: ## Count line of code
-	@scc --not-match="pb" .
+	@scc --not-match="pb" --not-match="gocc" .
 
 release: ## Make release
 	@$(DIR_SCRIPTS)/release.sh

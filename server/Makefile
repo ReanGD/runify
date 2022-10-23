@@ -2,10 +2,13 @@ export RUNIFY_VERSION := "v0.1.0"
 export GOLANGCILINT_VERSION := "v1.48.0"
 export DIR_SCRIPTS := "../ci/make_scripts"
 
-.PHONY: dep test mod_tidy build release run help
+.PHONY: dep gocc test mod_tidy build release run help
 
 dep: ## Get the dependencies
 	@$(DIR_SCRIPTS)/install_server_deps.sh ${GOLANGCILINT_VERSION}
+
+gocc: ## Generate the gocc parser
+	@$(DIR_SCRIPTS)/gocc.sh
 
 test: ## Run unittests
 	@go test -v -count=1 `go list ./...`
