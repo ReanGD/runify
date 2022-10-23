@@ -1,0 +1,39 @@
+// Lexical part
+
+_digit : '0'-'9' ;
+
+int64 : '1'-'9' {_digit} ;
+
+!whitespace : ' ' | '\t' | '\n' | '\r' ;
+
+// Syntax part
+
+<<
+import (
+	"github.com/ReanGD/runify/server/provider/calculator/ast"
+)
+>>
+
+Calc : Expr0Lvl;
+
+Expr0Lvl :
+		Expr0Lvl "+" Expr1Lvl	<< ast.Add($0, $2) >>
+	|   Expr0Lvl "-" Expr1Lvl	<< ast.Sub($0, $2) >>
+	|	Expr1Lvl
+;
+
+Expr1Lvl :
+		Expr1Lvl "*" Expr2Lvl	<< ast.Mul($0, $2) >>
+	|	Expr1Lvl "/" Expr2Lvl	<< ast.Div($0, $2) >>
+	|	Expr2Lvl
+;
+
+Expr2Lvl :
+		"-" Expr2Lvl			<< ast.Neg($0) >>
+	|	Expr3Lvl
+;
+
+Expr3Lvl :
+		"(" Expr0Lvl ")"		<< $1, nil >>
+	|	int64					<< ast.NewValueFromToken($0) >>
+;

@@ -50,7 +50,7 @@ func NewDesktopEntry(x11 module.X11) *DesktopEntry {
 }
 
 func (p *DesktopEntry) GetName() string {
-	return "desktopEntry"
+	return "DesktopEntry"
 }
 
 func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error {

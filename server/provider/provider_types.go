@@ -8,6 +8,7 @@ import (
 
 const (
 	desktopEntryID = uint64(1) << 32
+	calculatorID   = uint64(2) << 32
 	providerIDMask = uint64(0xFFFF) << 32
 )
 
