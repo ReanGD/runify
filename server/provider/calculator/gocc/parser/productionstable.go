@@ -102,20 +102,30 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr2Lvl : "-" Expr2Lvl	<< ast.Neg(X[0]) >>`,
+		String: `Expr2Lvl : "-" Expr2Lvl	<< ast.Neg(X[1]) >>`,
 		Id:         "Expr2Lvl",
 		NTType:     4,
 		Index:      8,
 		NumSymbols: 2,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
-			return ast.Neg(X[0])
+			return ast.Neg(X[1])
+		},
+	},
+	ProdTabEntry{
+		String: `Expr2Lvl : "+" Expr2Lvl	<< X[1], nil >>`,
+		Id:         "Expr2Lvl",
+		NTType:     4,
+		Index:      9,
+		NumSymbols: 2,
+		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
+			return X[1], nil
 		},
 	},
 	ProdTabEntry{
 		String: `Expr2Lvl : Expr3Lvl	<<  >>`,
 		Id:         "Expr2Lvl",
 		NTType:     4,
-		Index:      9,
+		Index:      10,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
 			return X[0], nil
@@ -125,7 +135,7 @@ var productionsTable = ProdTab{
 		String: `Expr3Lvl : "(" Expr0Lvl ")"	<< X[1], nil >>`,
 		Id:         "Expr3Lvl",
 		NTType:     5,
-		Index:      10,
+		Index:      11,
 		NumSymbols: 3,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
 			return X[1], nil
@@ -135,7 +145,7 @@ var productionsTable = ProdTab{
 		String: `Expr3Lvl : int64	<< ast.NewValueFromToken(X[0]) >>`,
 		Id:         "Expr3Lvl",
 		NTType:     5,
-		Index:      11,
+		Index:      12,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
 			return ast.NewValueFromToken(X[0])
