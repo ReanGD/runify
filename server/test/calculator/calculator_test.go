@@ -4,56 +4,69 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ReanGD/runify/server/provider/calculator/ast"
 	"github.com/ReanGD/runify/server/provider/calculator/gocc/lexer"
 	"github.com/ReanGD/runify/server/provider/calculator/gocc/parser"
 	"github.com/shopspring/decimal"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
-type testData struct {
-	expression string
-	result     string
+type CalcSuite struct {
+	suite.Suite
+
+	parser *parser.Parser
 }
 
-func equalDecimal(t *testing.T, expected decimal.Decimal, actual decimal.Decimal, msgAndArgs ...interface{}) {
-	t.Helper()
-	if !expected.Equal(actual) {
-		assert.Fail(t, fmt.Sprintf("Not equal: \n"+
-			"expected: %s\n"+
-			"actual  : %s", expected.String(), actual.String()), msgAndArgs...)
-		t.FailNow()
+func (s *CalcSuite) SetupSuite() {
+	s.parser = parser.NewParser()
+}
+
+func (s *CalcSuite) TearDownSuite() {
+	s.parser = nil
+}
+
+func (s *CalcSuite) runTest(expression string, expected decimal.Decimal) {
+	testName := strings.ReplaceAll(expression, " ", "")
+	parser := s.parser
+	s.T().Run(testName, func(t *testing.T) {
+		s := lexer.NewLexer([]byte(expression))
+
+		res, err := parser.Parse(s)
+		require.NoError(t, err, fmt.Errorf("Error in expr: '%s'", expression))
+
+		typedRes, ok := res.(*ast.Value)
+		require.True(t, ok, expression)
+
+		assertEqualDecimal(t, expected, typedRes.Value(), expression)
+	})
+}
+
+func (s *CalcSuite) runTestsFromArr(data []testDataStr) {
+	t := s.T()
+	for _, item := range data {
+		expression := item.expression
+		result, err := decimal.NewFromString(item.result)
+		require.NoError(t, err, expression)
+		s.runTest(expression, result)
 	}
 }
 
-type CalcSuite struct {
-	suite.Suite
-}
+func (s *CalcSuite) TestGenerated() {
+	gen := newTestDataGenerator(time.Now().UnixNano())
 
-func (s *CalcSuite) runTest(tests []testData) {
-	for _, tdata := range tests {
-		expression := tdata.expression
-		testName := strings.ReplaceAll(fmt.Sprintf("%s == %s", expression, tdata.result), " ", "")
-
-		p := parser.NewParser()
-		s.T().Run(testName, func(t *testing.T) {
-			s := lexer.NewLexer([]byte(expression))
-			res, err := p.Parse(s)
-			require.NoError(t, err, expression)
-			typedVal, ok := res.(*ast.Value)
-			require.True(t, ok, expression)
-			typedRes, err := decimal.NewFromString(tdata.result)
-			require.NoError(t, err, expression)
-			equalDecimal(t, typedRes, typedVal.Value(), expression)
-		})
+	for i := 0; i != 1_000_000; i++ {
+		result, expression, err := gen.next()
+		if err == nil {
+			s.runTest(expression, result)
+		}
 	}
 }
 
 func (s *CalcSuite) TestSumAndSubForNegativeAndPositiveInt() {
-	s.runTest([]testData{
+	s.runTestsFromArr([]testDataStr{
 		{"18 + 25", "43"},
 		{"+18 + -25", "-7"},
 		{"-18 + 25", "7"},
