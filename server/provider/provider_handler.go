@@ -26,8 +26,8 @@ func newProviderHandler() *providerHandler {
 
 func (h *providerHandler) onInit(cfg *config.Config, x11 module.X11, moduleLogger *zap.Logger) error {
 	h.moduleLogger = moduleLogger
-	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.NewDesktopEntry(x11))
-	h.dataProviders[calculatorID] = newDataProvider(calculatorID, calculator.NewCalculator())
+	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(x11))
+	h.dataProviders[calculatorID] = newDataProvider(calculatorID, calculator.New())
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
 	for _, dp := range h.dataProviders {

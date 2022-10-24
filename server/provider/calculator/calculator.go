@@ -13,7 +13,7 @@ type Calculator struct {
 	moduleLogger *zap.Logger
 }
 
-func NewCalculator() *Calculator {
+func New() *Calculator {
 	return &Calculator{
 		providerID:   0,
 		moduleLogger: nil,

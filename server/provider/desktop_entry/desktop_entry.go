@@ -37,7 +37,7 @@ type DesktopEntry struct {
 	moduleLogger *zap.Logger
 }
 
-func NewDesktopEntry(x11 module.X11) *DesktopEntry {
+func New(x11 module.X11) *DesktopEntry {
 	return &DesktopEntry{
 		providerID:   0,
 		terminal:     "",
