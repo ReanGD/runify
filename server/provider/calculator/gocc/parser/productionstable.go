@@ -42,23 +42,23 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr0Lvl : Expr0Lvl "+" Expr1Lvl	<< ast.Add(X[0], X[2]) >>`,
+		String: `Expr0Lvl : Expr0Lvl "+" Expr1Lvl	<< ast.BinaryExpr(X[0], X[2], X[1]) >>`,
 		Id:         "Expr0Lvl",
 		NTType:     2,
 		Index:      2,
 		NumSymbols: 3,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
-			return ast.Add(X[0], X[2])
+			return ast.BinaryExpr(X[0], X[2], X[1])
 		},
 	},
 	ProdTabEntry{
-		String: `Expr0Lvl : Expr0Lvl "-" Expr1Lvl	<< ast.Sub(X[0], X[2]) >>`,
+		String: `Expr0Lvl : Expr0Lvl "-" Expr1Lvl	<< ast.BinaryExpr(X[0], X[2], X[1]) >>`,
 		Id:         "Expr0Lvl",
 		NTType:     2,
 		Index:      3,
 		NumSymbols: 3,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
-			return ast.Sub(X[0], X[2])
+			return ast.BinaryExpr(X[0], X[2], X[1])
 		},
 	},
 	ProdTabEntry{
@@ -72,23 +72,23 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr1Lvl : Expr1Lvl "*" Expr2Lvl	<< ast.Mul(X[0], X[2]) >>`,
+		String: `Expr1Lvl : Expr1Lvl "*" Expr2Lvl	<< ast.BinaryExpr(X[0], X[2], X[1]) >>`,
 		Id:         "Expr1Lvl",
 		NTType:     3,
 		Index:      5,
 		NumSymbols: 3,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
-			return ast.Mul(X[0], X[2])
+			return ast.BinaryExpr(X[0], X[2], X[1])
 		},
 	},
 	ProdTabEntry{
-		String: `Expr1Lvl : Expr1Lvl "/" Expr2Lvl	<< ast.Div(X[0], X[2]) >>`,
+		String: `Expr1Lvl : Expr1Lvl "/" Expr2Lvl	<< ast.BinaryExpr(X[0], X[2], X[1]) >>`,
 		Id:         "Expr1Lvl",
 		NTType:     3,
 		Index:      6,
 		NumSymbols: 3,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
-			return ast.Div(X[0], X[2])
+			return ast.BinaryExpr(X[0], X[2], X[1])
 		},
 	},
 	ProdTabEntry{
@@ -102,23 +102,23 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr2Lvl : "-" Expr2Lvl	<< ast.Neg(X[1]) >>`,
+		String: `Expr2Lvl : "-" Expr2Lvl	<< ast.UnaryExpr(X[1], X[0]) >>`,
 		Id:         "Expr2Lvl",
 		NTType:     4,
 		Index:      8,
 		NumSymbols: 2,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
-			return ast.Neg(X[1])
+			return ast.UnaryExpr(X[1], X[0])
 		},
 	},
 	ProdTabEntry{
-		String: `Expr2Lvl : "+" Expr2Lvl	<< X[1], nil >>`,
+		String: `Expr2Lvl : "+" Expr2Lvl	<< ast.UnaryExpr(X[1], X[0]) >>`,
 		Id:         "Expr2Lvl",
 		NTType:     4,
 		Index:      9,
 		NumSymbols: 2,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
-			return X[1], nil
+			return ast.UnaryExpr(X[1], X[0])
 		},
 	},
 	ProdTabEntry{

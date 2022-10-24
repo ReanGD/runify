@@ -8,6 +8,7 @@ require (
 	github.com/jezek/xgbutil v0.0.0-20210302171758-530099784e66
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rkoesters/xdg v0.0.1
+	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0

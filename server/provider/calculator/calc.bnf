@@ -17,20 +17,20 @@ import (
 Calc : Expr0Lvl;
 
 Expr0Lvl :
-		Expr0Lvl "+" Expr1Lvl	<< ast.Add($0, $2) >>
-	|   Expr0Lvl "-" Expr1Lvl	<< ast.Sub($0, $2) >>
+		Expr0Lvl "+" Expr1Lvl	<< ast.BinaryExpr($0, $2, $1) >>
+	|   Expr0Lvl "-" Expr1Lvl	<< ast.BinaryExpr($0, $2, $1) >>
 	|	Expr1Lvl
 ;
 
 Expr1Lvl :
-		Expr1Lvl "*" Expr2Lvl	<< ast.Mul($0, $2) >>
-	|	Expr1Lvl "/" Expr2Lvl	<< ast.Div($0, $2) >>
+		Expr1Lvl "*" Expr2Lvl	<< ast.BinaryExpr($0, $2, $1) >>
+	|	Expr1Lvl "/" Expr2Lvl	<< ast.BinaryExpr($0, $2, $1) >>
 	|	Expr2Lvl
 ;
 
 Expr2Lvl :
-		"-" Expr2Lvl			<< ast.Neg($1) >>
-	|	"+" Expr2Lvl			<< $1, nil >>
+		"-" Expr2Lvl			<< ast.UnaryExpr($1, $0) >>
+	|	"+" Expr2Lvl			<< ast.UnaryExpr($1, $0) >>
 	|	Expr3Lvl
 ;
 
