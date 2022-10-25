@@ -2,7 +2,7 @@
 
 _digit : '0'-'9' ;
 
-int64 : '1'-'9' {_digit} ;
+int : {_digit} ;
 
 !whitespace : ' ' | '\t' | '\n' | '\r' ;
 
@@ -31,10 +31,14 @@ Expr1Lvl :
 Expr2Lvl :
 		"-" Expr2Lvl			<< ast.UnaryExpr($1, $0) >>
 	|	"+" Expr2Lvl			<< ast.UnaryExpr($1, $0) >>
-	|	Expr3Lvl
+	|	Number
 ;
 
-Expr3Lvl :
+Number :
+		int						<< ast.NewValueFromToken($0) >>
+	|	Bracket
+;
+
+Bracket :
 		"(" Expr0Lvl ")"		<< $1, nil >>
-	|	int64					<< ast.NewValueFromToken($0) >>
 ;

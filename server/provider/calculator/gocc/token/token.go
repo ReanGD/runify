@@ -142,9 +142,9 @@ var TokMap = TokenMap{
 		"-",
 		"*",
 		"/",
+		"int",
 		"(",
 		")",
-		"int64",
 	},
 
 	idMap: map[string]Type{
@@ -154,8 +154,8 @@ var TokMap = TokenMap{
 		"-":       3,
 		"*":       4,
 		"/":       5,
-		"(":       6,
-		")":       7,
-		"int64":   8,
+		"int":     6,
+		"(":       7,
+		")":       8,
 	},
 }

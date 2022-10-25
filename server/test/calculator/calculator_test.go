@@ -61,6 +61,13 @@ func (s *CalcSuite) TestGenerated() {
 	}
 }
 
+func (s *CalcSuite) TestCornerCases() {
+	s.runTestsFromArr([]testDataStr{
+		{"0123", "123"},
+		{"+(0)", "0"},
+	})
+}
+
 func (s *CalcSuite) TestSumAndSubForNegativeAndPositiveInt() {
 	s.runTestsFromArr([]testDataStr{
 		{"18 + 25", "43"},
