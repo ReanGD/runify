@@ -70,6 +70,9 @@ func (v *Value) Div(other *Value) (*Value, error) {
 		return nil, fmt.Errorf(`type mismatch for expression "X / Y": %v != %v`, v.typeID, other.typeID)
 	}
 
+	if other.value.Sign() == 0 {
+		return nil, newDivisionByZero()
+	}
 	return &Value{value: v.value.Div(other.value), typeID: v.typeID}, nil
 }
 

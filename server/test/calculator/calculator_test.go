@@ -6,41 +6,41 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ReanGD/runify/server/provider/calculator/ast"
-	"github.com/ReanGD/runify/server/provider/calculator/gocc/lexer"
-	"github.com/ReanGD/runify/server/provider/calculator/gocc/parser"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/ReanGD/runify/server/provider/calculator"
+	"github.com/ReanGD/runify/server/system"
 )
 
 type CalcSuite struct {
 	suite.Suite
 
-	parser *parser.Parser
+	executer *calculator.Executer
 }
 
 func (s *CalcSuite) SetupSuite() {
-	s.parser = parser.NewParser()
+	s.executer = calculator.NewExecuter()
 }
 
 func (s *CalcSuite) TearDownSuite() {
-	s.parser = nil
+	s.executer = nil
 }
 
-func (s *CalcSuite) runTest(expression string, expected decimal.Decimal) {
+func (s *CalcSuite) runTest(expression string, expected decimal.Decimal, expectedErrCode system.Error) {
 	testName := strings.ReplaceAll(expression, " ", "")
-	parser := s.parser
+	executer := s.executer
 	s.T().Run(testName, func(t *testing.T) {
-		s := lexer.NewLexer([]byte(expression))
-
-		res, err := parser.Parse(s)
-		require.NoError(t, err, fmt.Errorf("Error in expr: '%s'", expression))
-
-		typedRes, ok := res.(*ast.Value)
-		require.True(t, ok, expression)
-
-		assertEqualDecimal(t, expected, typedRes.Value(), expression)
+		res, astErr, err := executer.Execute(expression)
+		if expectedErrCode != system.Success {
+			require.Error(t, err, expression)
+			require.Equal(t, expectedErrCode, astErr.Code(), expression)
+		} else {
+			require.NoError(t, err, fmt.Errorf("Error in expr: '%s'", expression))
+			require.Nil(t, astErr, fmt.Errorf("Ast error in expr: '%s'", expression))
+			assertEqualDecimal(t, expected, res, expression)
+		}
 	})
 }
 
@@ -50,18 +50,14 @@ func (s *CalcSuite) runTestsFromArr(data []testDataStr) {
 		expression := item.expression
 		result, err := decimal.NewFromString(item.result)
 		require.NoError(t, err, expression)
-		s.runTest(expression, result)
+		s.runTest(expression, result, system.Success)
 	}
 }
 
 func (s *CalcSuite) TestGenerated() {
 	gen := newTestDataGenerator(time.Now().UnixNano())
-
-	for i := 0; i != 1_000_000; i++ {
-		result, expression, err := gen.next()
-		if err == nil {
-			s.runTest(expression, result)
-		}
+	for i := 0; i != 45_000_000; i++ {
+		s.runTest(gen.next())
 	}
 }
 

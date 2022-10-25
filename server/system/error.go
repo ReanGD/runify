@@ -8,4 +8,5 @@ const (
 	ShortcutUsesByRunify      Error = 2
 	ShortcutUsesByExternalApp Error = 3
 	ShortcutBindError         Error = 4
+	CalculatorDivisionByZero  Error = 5
 )

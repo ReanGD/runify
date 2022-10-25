@@ -1,12 +1,11 @@
 package calculator_test
 
 import (
-	"errors"
 	"fmt"
 	"math/rand"
-	"strings"
 	"testing"
 
+	"github.com/ReanGD/runify/server/system"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,7 +33,8 @@ type testDataStr struct {
 }
 
 type testDataGenerator struct {
-	gen *rand.Rand
+	gen     *rand.Rand
+	errCode system.Error
 }
 
 func newTestDataGenerator(seed int64) *testDataGenerator {
@@ -43,30 +43,10 @@ func newTestDataGenerator(seed int64) *testDataGenerator {
 	}
 }
 
-func (s *testDataGenerator) next() (result decimal.Decimal, expression string, err error) {
-	defer func() {
-		if recoverResult := recover(); recoverResult != nil {
-			switch recoverVal := recoverResult.(type) {
-			case string:
-				if strings.Contains(recoverVal, "division by 0") {
-					err = errors.New("division by 0")
-				} else if strings.Contains(recoverVal, "overflow") {
-					err = errors.New("overflow")
-				} else {
-					err = errors.New("unknown error")
-				}
-			case error:
-				err = errors.New("unknown error")
-			default:
-				err = errors.New("unknown error")
-			}
-		} else {
-			err = errors.New("unknown error")
-		}
-	}()
-
-	result, expression = s.genExprAddSub()
-	return
+func (s *testDataGenerator) next() (string, decimal.Decimal, system.Error) {
+	s.errCode = system.Success
+	result, expression := s.genExprAddSub()
+	return expression, result, s.errCode
 }
 
 func (s *testDataGenerator) genExprAddSub() (decimal.Decimal, string) {
@@ -75,15 +55,20 @@ func (s *testDataGenerator) genExprAddSub() (decimal.Decimal, string) {
 		return s.genExprMulDiv()
 	}
 
+	res := decimal.Zero
 	left, leftStr := s.genExprMulDiv()
 	right, rightStr := s.genExprMulDiv()
 	kind -= firstAction
 	if kind < secondAction {
-		res := left.Add(right)
+		if s.errCode == system.Success {
+			res = left.Add(right)
+		}
 		return res, fmt.Sprintf("%s + %s", leftStr, rightStr)
 	}
 
-	res := left.Sub(right)
+	if s.errCode == system.Success {
+		res = left.Sub(right)
+	}
 	return res, fmt.Sprintf("%s - %s", leftStr, rightStr)
 }
 
@@ -93,15 +78,23 @@ func (s *testDataGenerator) genExprMulDiv() (decimal.Decimal, string) {
 		return s.genExprUnaryPlusMinus()
 	}
 
+	res := decimal.Zero
 	left, leftStr := s.genExprUnaryPlusMinus()
 	right, rightStr := s.genExprUnaryPlusMinus()
 	kind -= firstAction
 	if kind < secondAction {
-		res := left.Mul(right)
+		if s.errCode == system.Success {
+			res = left.Mul(right)
+		}
 		return res, fmt.Sprintf("%s * %s", leftStr, rightStr)
 	}
 
-	res := left.Div(right)
+	if right.Sign() == 0 {
+		s.errCode = system.CalculatorDivisionByZero
+	}
+	if s.errCode == system.Success {
+		res = left.Div(right)
+	}
 	return res, fmt.Sprintf("%s / %s", leftStr, rightStr)
 }
 
@@ -111,13 +104,20 @@ func (s *testDataGenerator) genExprUnaryPlusMinus() (decimal.Decimal, string) {
 		return s.genExprBracketsInt()
 	}
 
-	res, resStr := s.genExprBracketsInt()
+	res := decimal.Zero
+	right, rightStr := s.genExprBracketsInt()
 	kind -= firstAction
 	if kind < secondActionRare {
-		return res.Neg(), fmt.Sprintf("-%s", resStr)
+		if s.errCode == system.Success {
+			res = right.Neg()
+		}
+		return res, fmt.Sprintf("-%s", rightStr)
 	}
 
-	return res, fmt.Sprintf("+%s", resStr)
+	if s.errCode == system.Success {
+		res = right
+	}
+	return res, fmt.Sprintf("+%s", rightStr)
 }
 
 func (s *testDataGenerator) genExprBracketsInt() (decimal.Decimal, string) {
@@ -126,11 +126,20 @@ func (s *testDataGenerator) genExprBracketsInt() (decimal.Decimal, string) {
 		return s.genInt64()
 	}
 
-	res, resStr := s.genExprAddSub()
-	return res, fmt.Sprintf("(%s)", resStr)
+	res := decimal.Zero
+	inner, innerStr := s.genExprAddSub()
+	if s.errCode == system.Success {
+		res = inner
+	}
+	return res, fmt.Sprintf("(%s)", innerStr)
 }
 
 func (s *testDataGenerator) genInt64() (decimal.Decimal, string) {
-	res := decimal.NewFromInt32(s.gen.Int31())
-	return res, res.String()
+	res := decimal.Zero
+
+	val := decimal.NewFromInt32(s.gen.Int31())
+	if s.errCode == system.Success {
+		res = val
+	}
+	return res, val.String()
 }
