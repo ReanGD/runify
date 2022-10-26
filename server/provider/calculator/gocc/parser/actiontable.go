@@ -239,11 +239,11 @@ var actionTab = actionTable{
 		canRecover: false,
 		actions: [numSymbols]action{
 			nil,       // INVALID
-			reduce(9), // $, reduce: Expr2Lvl
-			reduce(9), // +, reduce: Expr2Lvl
-			reduce(9), // -, reduce: Expr2Lvl
-			reduce(9), // *, reduce: Expr2Lvl
-			reduce(9), // /, reduce: Expr2Lvl
+			reduce(8), // $, reduce: Expr2Lvl
+			reduce(8), // +, reduce: Expr2Lvl
+			reduce(8), // -, reduce: Expr2Lvl
+			reduce(8), // *, reduce: Expr2Lvl
+			reduce(8), // /, reduce: Expr2Lvl
 			nil,       // ^
 			nil,       // **
 			nil,       // int
@@ -287,11 +287,11 @@ var actionTab = actionTable{
 		canRecover: false,
 		actions: [numSymbols]action{
 			nil,       // INVALID
-			reduce(8), // $, reduce: Expr2Lvl
-			reduce(8), // +, reduce: Expr2Lvl
-			reduce(8), // -, reduce: Expr2Lvl
-			reduce(8), // *, reduce: Expr2Lvl
-			reduce(8), // /, reduce: Expr2Lvl
+			reduce(9), // $, reduce: Expr2Lvl
+			reduce(9), // +, reduce: Expr2Lvl
+			reduce(9), // -, reduce: Expr2Lvl
+			reduce(9), // *, reduce: Expr2Lvl
+			reduce(9), // /, reduce: Expr2Lvl
 			nil,       // ^
 			nil,       // **
 			nil,       // int
@@ -640,15 +640,15 @@ var actionTab = actionTable{
 		actions: [numSymbols]action{
 			nil,       // INVALID
 			nil,       // $
-			reduce(9), // +, reduce: Expr2Lvl
-			reduce(9), // -, reduce: Expr2Lvl
-			reduce(9), // *, reduce: Expr2Lvl
-			reduce(9), // /, reduce: Expr2Lvl
+			reduce(8), // +, reduce: Expr2Lvl
+			reduce(8), // -, reduce: Expr2Lvl
+			reduce(8), // *, reduce: Expr2Lvl
+			reduce(8), // /, reduce: Expr2Lvl
 			nil,       // ^
 			nil,       // **
 			nil,       // int
 			nil,       // (
-			reduce(9), // ), reduce: Expr2Lvl
+			reduce(8), // ), reduce: Expr2Lvl
 		},
 	},
 	actionRow{ // S40
@@ -688,15 +688,15 @@ var actionTab = actionTable{
 		actions: [numSymbols]action{
 			nil,       // INVALID
 			nil,       // $
-			reduce(8), // +, reduce: Expr2Lvl
-			reduce(8), // -, reduce: Expr2Lvl
-			reduce(8), // *, reduce: Expr2Lvl
-			reduce(8), // /, reduce: Expr2Lvl
+			reduce(9), // +, reduce: Expr2Lvl
+			reduce(9), // -, reduce: Expr2Lvl
+			reduce(9), // *, reduce: Expr2Lvl
+			reduce(9), // /, reduce: Expr2Lvl
 			nil,       // ^
 			nil,       // **
 			nil,       // int
 			nil,       // (
-			reduce(8), // ), reduce: Expr2Lvl
+			reduce(9), // ), reduce: Expr2Lvl
 		},
 	},
 	actionRow{ // S43

@@ -84,56 +84,44 @@ func (v *Value) Pow(other *Value) (*Value, error) {
 	return &Value{value: v.value.Pow(other.value), typeID: v.typeID}, nil
 }
 
-func UnaryExpr(x, operator interface{}) (*Value, error) {
-	typedOp, ok := operator.(*token.Token)
-	if !ok {
-		return nil, fmt.Errorf(`invalid type for binary operator; expected Operator is *token.Token, got %T`, operator)
-	}
-	op := string(typedOp.Lit)
+func UnaryExpr(x interface{}, op byte) (*Value, error) {
 	typedX, ok := x.(*Value)
 	if !ok {
-		return nil, fmt.Errorf(`invalid type for "%s(X)"; expected X is *Value, got %T`, op, x)
+		return nil, fmt.Errorf(`invalid type for "%s(X)"; expected X is *Value, got %T`, string([]byte{op}), x)
 	}
 
 	switch op {
-	case "-":
+	case '-':
 		return typedX.Neg()
-	case "+":
+	case '+':
 		return typedX, nil
 	default:
-		return nil, fmt.Errorf(`unknown unary operator "%s"`, op)
+		return nil, fmt.Errorf(`unknown unary operator "%s"`, string([]byte{op}))
 	}
 }
 
-func BinaryExpr(x, y, operator interface{}) (*Value, error) {
-	typedOp, ok := operator.(*token.Token)
-	if !ok {
-		return nil, fmt.Errorf(`invalid type for binary operator; expected Operator is *token.Token, got %T`, operator)
-	}
-	op := string(typedOp.Lit)
+func BinaryExpr(x, y interface{}, op byte) (*Value, error) {
 	typedX, ok := x.(*Value)
 	if !ok {
-		return nil, fmt.Errorf(`invalid type for expression "X %s Y"; expected X is *Value, got %T`, op, x)
+		return nil, fmt.Errorf(`invalid type for expression "X %s Y"; expected X is *Value, got %T`, string([]byte{op}), x)
 	}
 	typedY, ok := y.(*Value)
 	if !ok {
-		return nil, fmt.Errorf(`invalid type for expression "X %s Y"; expected Y is *Value, got %T`, op, y)
+		return nil, fmt.Errorf(`invalid type for expression "X %s Y"; expected Y is *Value, got %T`, string([]byte{op}), y)
 	}
 
 	switch op {
-	case "+":
+	case '+':
 		return typedX.Add(typedY)
-	case "-":
+	case '-':
 		return typedX.Sub(typedY)
-	case "*":
+	case '*':
 		return typedX.Mul(typedY)
-	case "/":
+	case '/':
 		return typedX.Div(typedY)
-	case "^":
-		return typedX.Pow(typedY)
-	case "**":
+	case '^':
 		return typedX.Pow(typedY)
 	default:
-		return nil, fmt.Errorf(`unknown binary operator "%s"`, op)
+		return nil, fmt.Errorf(`unknown binary operator "%s"`, string([]byte{op}))
 	}
 }

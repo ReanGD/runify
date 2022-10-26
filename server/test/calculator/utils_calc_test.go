@@ -22,10 +22,6 @@ func assertEqualDecimal(t *testing.T, expected decimal.Decimal, actual decimal.D
 }
 
 const (
-	maxChance = 1000
-)
-
-const (
 	Add int = iota
 	Sub
 	Mul
@@ -58,6 +54,7 @@ type testDataStr struct {
 }
 
 type testDataGenerator struct {
+	sgen    rand.Source64
 	gen     *rand.Rand
 	errCode system.Error
 	stats   []int
@@ -67,14 +64,39 @@ type testDataGenerator struct {
 }
 
 func newTestDataGenerator(seed int64) *testDataGenerator {
+	src := rand.NewSource(seed)
 	return &testDataGenerator{
-		gen:     rand.New(rand.NewSource(seed)),
+		sgen:    src.(rand.Source64),
+		gen:     rand.New(src),
 		errCode: system.Success,
 		stats:   make([]int, LastOperation),
 		total:   0,
 		maxSize: 0,
 		sumSize: 0,
 	}
+}
+
+const (
+	kindN         = 1000
+	rngMax        = 1 << 63
+	rngMask       = rngMax - 1
+	rngMax31      = 1 << 31
+	rngMask31     = rngMax31 - 1
+	rndMaxKindGen = uint64(rngMax - 1 - rngMax%uint64(kindN))
+)
+
+// Return value in hange [0, kindN)
+// Analog of s.gen.Intn(kindN)
+func (s *testDataGenerator) getKind() uint64 {
+	v := s.sgen.Uint64()
+	for v > rndMaxKindGen {
+		v = s.sgen.Uint64()
+	}
+	return v % uint64(kindN)
+}
+
+func (s *testDataGenerator) getInt31() int32 {
+	return int32(s.sgen.Uint64() & rngMask31)
 }
 
 func (s *testDataGenerator) showStats(d time.Duration) {
@@ -104,7 +126,7 @@ func (s *testDataGenerator) next() (string, decimal.Decimal, system.Error) {
 }
 
 func (s *testDataGenerator) genExprAddSub() (decimal.Decimal, string) {
-	kind := s.gen.Intn(maxChance)
+	kind := s.getKind()
 	if kind >= 700 {
 		return s.genExprMulDiv()
 	}
@@ -128,7 +150,7 @@ func (s *testDataGenerator) genExprAddSub() (decimal.Decimal, string) {
 }
 
 func (s *testDataGenerator) genExprMulDiv() (decimal.Decimal, string) {
-	kind := s.gen.Intn(maxChance)
+	kind := s.getKind()
 	if kind >= 400 {
 		return s.genExprUnaryPlusMinus()
 	}
@@ -155,7 +177,7 @@ func (s *testDataGenerator) genExprMulDiv() (decimal.Decimal, string) {
 }
 
 func (s *testDataGenerator) genExprUnaryPlusMinus() (decimal.Decimal, string) {
-	kind := s.gen.Intn(maxChance)
+	kind := s.getKind()
 	if kind >= 100 {
 		return s.genExprPow()
 	}
@@ -178,13 +200,14 @@ func (s *testDataGenerator) genExprUnaryPlusMinus() (decimal.Decimal, string) {
 }
 
 func (s *testDataGenerator) genExprPow() (decimal.Decimal, string) {
-	kind := s.gen.Intn(maxChance)
+	kind := s.getKind()
 	if kind >= 10 {
 		return s.genExprBracketsInt()
 	}
 
 	res := decimal.Zero
 	left, leftStr := s.genExprBracketsInt()
+	// TODO: fix pow
 	right, rightStr := decimal.NewFromInt(2), "2"
 	if s.errCode == system.Success {
 		res = left.Pow(right)
@@ -200,7 +223,7 @@ func (s *testDataGenerator) genExprPow() (decimal.Decimal, string) {
 }
 
 func (s *testDataGenerator) genExprBracketsInt() (decimal.Decimal, string) {
-	kind := s.gen.Intn(maxChance)
+	kind := s.getKind()
 	if kind >= 300 {
 		return s.genInt64()
 	}
@@ -217,7 +240,7 @@ func (s *testDataGenerator) genExprBracketsInt() (decimal.Decimal, string) {
 func (s *testDataGenerator) genInt64() (decimal.Decimal, string) {
 	res := decimal.Zero
 
-	val := decimal.NewFromInt32(s.gen.Int31())
+	val := decimal.NewFromInt32(s.getInt31())
 	if s.errCode == system.Success {
 		res = val
 	}
