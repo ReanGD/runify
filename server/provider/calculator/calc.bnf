@@ -31,6 +31,12 @@ Expr1Lvl :
 Expr2Lvl :
 		"-" Expr2Lvl			<< ast.UnaryExpr($1, $0) >>
 	|	"+" Expr2Lvl			<< ast.UnaryExpr($1, $0) >>
+	|	Expr3Lvl
+;
+
+Expr3Lvl :
+		Expr3Lvl "^"  Number	<< ast.BinaryExpr($0, $2, $1) >>
+	|	Expr3Lvl "**" Number	<< ast.BinaryExpr($0, $2, $1) >>
 	|	Number
 ;
 

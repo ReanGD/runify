@@ -44,7 +44,7 @@ func NewTimer() Timer {
 	return Timer(runtimeNano())
 }
 
-func (t Timer) StartTime() Time {
+func (t Timer) GetStartTime() Time {
 	return Time(t)
 }
 

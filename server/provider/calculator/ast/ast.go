@@ -76,6 +76,14 @@ func (v *Value) Div(other *Value) (*Value, error) {
 	return &Value{value: v.value.Div(other.value), typeID: v.typeID}, nil
 }
 
+func (v *Value) Pow(other *Value) (*Value, error) {
+	if v.typeID != other.typeID {
+		return nil, fmt.Errorf(`type mismatch for expression "X ^ Y": %v != %v`, v.typeID, other.typeID)
+	}
+
+	return &Value{value: v.value.Pow(other.value), typeID: v.typeID}, nil
+}
+
 func UnaryExpr(x, operator interface{}) (*Value, error) {
 	typedOp, ok := operator.(*token.Token)
 	if !ok {
@@ -121,6 +129,10 @@ func BinaryExpr(x, y, operator interface{}) (*Value, error) {
 		return typedX.Mul(typedY)
 	case "/":
 		return typedX.Div(typedY)
+	case "^":
+		return typedX.Pow(typedY)
+	case "**":
+		return typedX.Pow(typedY)
 	default:
 		return nil, fmt.Errorf(`unknown binary operator "%s"`, op)
 	}

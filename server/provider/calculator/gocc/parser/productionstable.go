@@ -122,7 +122,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr2Lvl : Number	<<  >>`,
+		String: `Expr2Lvl : Expr3Lvl	<<  >>`,
 		Id:         "Expr2Lvl",
 		NTType:     4,
 		Index:      10,
@@ -132,10 +132,40 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Number : int	<< ast.NewValueFromToken(X[0]) >>`,
-		Id:         "Number",
+		String: `Expr3Lvl : Expr3Lvl "^" Number	<< ast.BinaryExpr(X[0], X[2], X[1]) >>`,
+		Id:         "Expr3Lvl",
 		NTType:     5,
 		Index:      11,
+		NumSymbols: 3,
+		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
+			return ast.BinaryExpr(X[0], X[2], X[1])
+		},
+	},
+	ProdTabEntry{
+		String: `Expr3Lvl : Expr3Lvl "**" Number	<< ast.BinaryExpr(X[0], X[2], X[1]) >>`,
+		Id:         "Expr3Lvl",
+		NTType:     5,
+		Index:      12,
+		NumSymbols: 3,
+		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
+			return ast.BinaryExpr(X[0], X[2], X[1])
+		},
+	},
+	ProdTabEntry{
+		String: `Expr3Lvl : Number	<<  >>`,
+		Id:         "Expr3Lvl",
+		NTType:     5,
+		Index:      13,
+		NumSymbols: 1,
+		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
+			return X[0], nil
+		},
+	},
+	ProdTabEntry{
+		String: `Number : int	<< ast.NewValueFromToken(X[0]) >>`,
+		Id:         "Number",
+		NTType:     6,
+		Index:      14,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
 			return ast.NewValueFromToken(X[0])
@@ -144,8 +174,8 @@ var productionsTable = ProdTab{
 	ProdTabEntry{
 		String: `Number : Bracket	<<  >>`,
 		Id:         "Number",
-		NTType:     5,
-		Index:      12,
+		NTType:     6,
+		Index:      15,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
 			return X[0], nil
@@ -154,8 +184,8 @@ var productionsTable = ProdTab{
 	ProdTabEntry{
 		String: `Bracket : "(" Expr0Lvl ")"	<< X[1], nil >>`,
 		Id:         "Bracket",
-		NTType:     6,
-		Index:      13,
+		NTType:     7,
+		Index:      16,
 		NumSymbols: 3,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
 			return X[1], nil

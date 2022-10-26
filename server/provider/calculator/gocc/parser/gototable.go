@@ -2,7 +2,7 @@
 
 package parser
 
-const numNTSymbols = 7
+const numNTSymbols = 8
 
 type (
 	gotoTable [numStates]gotoRow
@@ -16,8 +16,9 @@ var gotoTab = gotoTable{
 		2,  // Expr0Lvl
 		4,  // Expr1Lvl
 		6,  // Expr2Lvl
-		7,  // Number
-		9,  // Bracket
+		7,  // Expr3Lvl
+		8,  // Number
+		10, // Bracket
 	},
 	gotoRow{ // S1
 		-1, // S'
@@ -25,6 +26,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -34,6 +36,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -42,9 +45,10 @@ var gotoTab = gotoTable{
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		13, // Expr2Lvl
-		7,  // Number
-		9,  // Bracket
+		14, // Expr2Lvl
+		7,  // Expr3Lvl
+		8,  // Number
+		10, // Bracket
 	},
 	gotoRow{ // S4
 		-1, // S'
@@ -52,6 +56,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -60,9 +65,10 @@ var gotoTab = gotoTable{
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		16, // Expr2Lvl
-		7,  // Number
-		9,  // Bracket
+		17, // Expr2Lvl
+		7,  // Expr3Lvl
+		8,  // Number
+		10, // Bracket
 	},
 	gotoRow{ // S6
 		-1, // S'
@@ -70,6 +76,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -79,6 +86,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -88,6 +96,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -97,71 +106,79 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
 	gotoRow{ // S10
 		-1, // S'
 		-1, // Calc
-		17, // Expr0Lvl
-		19, // Expr1Lvl
-		21, // Expr2Lvl
-		22, // Number
-		24, // Bracket
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
 	},
 	gotoRow{ // S11
 		-1, // S'
 		-1, // Calc
-		-1, // Expr0Lvl
-		26, // Expr1Lvl
-		6,  // Expr2Lvl
-		7,  // Number
-		9,  // Bracket
+		20, // Expr0Lvl
+		22, // Expr1Lvl
+		24, // Expr2Lvl
+		25, // Expr3Lvl
+		26, // Number
+		28, // Bracket
 	},
 	gotoRow{ // S12
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
-		27, // Expr1Lvl
+		30, // Expr1Lvl
 		6,  // Expr2Lvl
-		7,  // Number
-		9,  // Bracket
+		7,  // Expr3Lvl
+		8,  // Number
+		10, // Bracket
 	},
 	gotoRow{ // S13
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
-		-1, // Expr1Lvl
-		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		31, // Expr1Lvl
+		6,  // Expr2Lvl
+		7,  // Expr3Lvl
+		8,  // Number
+		10, // Bracket
 	},
 	gotoRow{ // S14
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		28, // Expr2Lvl
-		7,  // Number
-		9,  // Bracket
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
 	},
 	gotoRow{ // S15
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		29, // Expr2Lvl
-		7,  // Number
-		9,  // Bracket
+		32, // Expr2Lvl
+		7,  // Expr3Lvl
+		8,  // Number
+		10, // Bracket
 	},
 	gotoRow{ // S16
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		33, // Expr2Lvl
+		7,  // Expr3Lvl
+		8,  // Number
+		10, // Bracket
 	},
 	gotoRow{ // S17
 		-1, // S'
@@ -169,6 +186,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -177,9 +195,10 @@ var gotoTab = gotoTable{
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		33, // Expr2Lvl
-		22, // Number
-		24, // Bracket
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		34, // Number
+		10, // Bracket
 	},
 	gotoRow{ // S19
 		-1, // S'
@@ -187,26 +206,29 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		-1, // Expr3Lvl
+		35, // Number
+		10, // Bracket
 	},
 	gotoRow{ // S20
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		36, // Expr2Lvl
-		22, // Number
-		24, // Bracket
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
 	},
 	gotoRow{ // S21
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		39, // Expr2Lvl
+		25, // Expr3Lvl
+		26, // Number
+		28, // Bracket
 	},
 	gotoRow{ // S22
 		-1, // S'
@@ -214,6 +236,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -222,9 +245,10 @@ var gotoTab = gotoTable{
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		42, // Expr2Lvl
+		25, // Expr3Lvl
+		26, // Number
+		28, // Bracket
 	},
 	gotoRow{ // S24
 		-1, // S'
@@ -232,17 +256,19 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
 	gotoRow{ // S25
 		-1, // S'
 		-1, // Calc
-		37, // Expr0Lvl
-		19, // Expr1Lvl
-		21, // Expr2Lvl
-		22, // Number
-		24, // Bracket
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
 	},
 	gotoRow{ // S26
 		-1, // S'
@@ -250,6 +276,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -259,6 +286,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -268,35 +296,39 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
 	gotoRow{ // S29
 		-1, // S'
 		-1, // Calc
-		-1, // Expr0Lvl
-		-1, // Expr1Lvl
-		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		45, // Expr0Lvl
+		22, // Expr1Lvl
+		24, // Expr2Lvl
+		25, // Expr3Lvl
+		26, // Number
+		28, // Bracket
 	},
 	gotoRow{ // S30
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
-		38, // Expr1Lvl
-		21, // Expr2Lvl
-		22, // Number
-		24, // Bracket
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
 	},
 	gotoRow{ // S31
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
-		39, // Expr1Lvl
-		21, // Expr2Lvl
-		22, // Number
-		24, // Bracket
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
 	},
 	gotoRow{ // S32
 		-1, // S'
@@ -304,6 +336,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -313,6 +346,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -321,36 +355,40 @@ var gotoTab = gotoTable{
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		40, // Expr2Lvl
-		22, // Number
-		24, // Bracket
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
 	},
 	gotoRow{ // S35
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		41, // Expr2Lvl
-		22, // Number
-		24, // Bracket
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
 	},
 	gotoRow{ // S36
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
-		-1, // Expr1Lvl
-		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		46, // Expr1Lvl
+		24, // Expr2Lvl
+		25, // Expr3Lvl
+		26, // Number
+		28, // Bracket
 	},
 	gotoRow{ // S37
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
-		-1, // Expr1Lvl
-		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		47, // Expr1Lvl
+		24, // Expr2Lvl
+		25, // Expr3Lvl
+		26, // Number
+		28, // Bracket
 	},
 	gotoRow{ // S38
 		-1, // S'
@@ -358,6 +396,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -367,6 +406,7 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},
@@ -375,18 +415,20 @@ var gotoTab = gotoTable{
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		48, // Expr2Lvl
+		25, // Expr3Lvl
+		26, // Number
+		28, // Bracket
 	},
 	gotoRow{ // S41
 		-1, // S'
 		-1, // Calc
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
-		-1, // Expr2Lvl
-		-1, // Number
-		-1, // Bracket
+		49, // Expr2Lvl
+		25, // Expr3Lvl
+		26, // Number
+		28, // Bracket
 	},
 	gotoRow{ // S42
 		-1, // S'
@@ -394,6 +436,107 @@ var gotoTab = gotoTable{
 		-1, // Expr0Lvl
 		-1, // Expr1Lvl
 		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
+	},
+	gotoRow{ // S43
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		50, // Number
+		28, // Bracket
+	},
+	gotoRow{ // S44
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		51, // Number
+		28, // Bracket
+	},
+	gotoRow{ // S45
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
+	},
+	gotoRow{ // S46
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
+	},
+	gotoRow{ // S47
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
+	},
+	gotoRow{ // S48
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
+	},
+	gotoRow{ // S49
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
+	},
+	gotoRow{ // S50
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
+	},
+	gotoRow{ // S51
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
+		-1, // Number
+		-1, // Bracket
+	},
+	gotoRow{ // S52
+		-1, // S'
+		-1, // Calc
+		-1, // Expr0Lvl
+		-1, // Expr1Lvl
+		-1, // Expr2Lvl
+		-1, // Expr3Lvl
 		-1, // Number
 		-1, // Bracket
 	},

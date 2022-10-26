@@ -21,7 +21,7 @@ func (a ActionRow) String() string {
 
 var ActTab = ActionTable{
 	ActionRow{ // S0
-		Accept: 6,
+		Accept: 8,
 		Ignore: "",
 	},
 	ActionRow{ // S1
@@ -29,11 +29,11 @@ var ActTab = ActionTable{
 		Ignore: "!whitespace",
 	},
 	ActionRow{ // S2
-		Accept: 7,
+		Accept: 9,
 		Ignore: "",
 	},
 	ActionRow{ // S3
-		Accept: 8,
+		Accept: 10,
 		Ignore: "",
 	},
 	ActionRow{ // S4
@@ -53,7 +53,15 @@ var ActTab = ActionTable{
 		Ignore: "",
 	},
 	ActionRow{ // S8
+		Accept: 8,
+		Ignore: "",
+	},
+	ActionRow{ // S9
 		Accept: 6,
+		Ignore: "",
+	},
+	ActionRow{ // S10
+		Accept: 7,
 		Ignore: "",
 	},
 }
