@@ -41,6 +41,10 @@ func NewExecuterWithCtx(ctx *ast.AstContext) *Executer {
 	}
 }
 
+func (e *Executer) GetApdContext() apd.Context {
+	return e.ctx.GetApdContext()
+}
+
 func (e *Executer) Execute(expression string) Result {
 	e.ctx.Reset()
 	lexer := lexer.NewLexer([]byte(expression))

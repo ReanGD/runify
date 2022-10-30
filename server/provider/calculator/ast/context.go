@@ -57,6 +57,10 @@ func toAstContext(v interface{}) (*AstContext, error) {
 	return nil, fmt.Errorf("invalid type of parser context; expected *AstContext, got %T", v)
 }
 
+func (c *AstContext) GetApdContext() apd.Context {
+	return c.dctx
+}
+
 func (c *AstContext) Reset() {
 	c.cond = apd.Condition(0)
 }

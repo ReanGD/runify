@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/ReanGD/runify/server/provider/calculator"
-	"github.com/ReanGD/runify/server/provider/calculator/ast"
 	"github.com/ReanGD/runify/server/system"
 	"github.com/cockroachdb/apd/v3"
 	"github.com/stretchr/testify/require"
@@ -14,14 +13,12 @@ import (
 )
 
 type CalcSuite struct {
-	dctx     apd.Context
 	executer *calculator.Executer
 
 	suite.Suite
 }
 
 func (s *CalcSuite) SetupSuite() {
-	s.dctx = ast.BaseAdpContext
 	s.executer = calculator.NewExecuter()
 }
 
@@ -49,9 +46,10 @@ func (s *CalcSuite) runTest(expression string, expectedValue apd.Decimal, expect
 
 func (s *CalcSuite) runTestsFromArr(data []testDataStr) {
 	t := s.T()
+	dctx := s.executer.GetApdContext()
 	for _, item := range data {
 		expression := item.expression
-		expectedValue, _, err := s.dctx.NewFromString(item.result)
+		expectedValue, _, err := dctx.NewFromString(item.result)
 		require.NoError(t, err, expression)
 		s.runTest(expression, *expectedValue, 0)
 	}
@@ -59,7 +57,7 @@ func (s *CalcSuite) runTestsFromArr(data []testDataStr) {
 
 func (s *CalcSuite) TestGenerated() {
 	timer := system.NewTimer()
-	gen := newTestDataGenerator(int64(timer), s.dctx)
+	gen := newTestDataGenerator(int64(timer), s.executer.GetApdContext())
 	for i := 0; i != 30_000; i++ {
 		s.runTest(gen.next())
 	}
