@@ -23,18 +23,6 @@ func NewValue() *Value {
 	return &Value{typeID: NoType}
 }
 
-func NewValueUnaryExprDeductionType(x *Value) *Value {
-	return &Value{typeID: x.typeID}
-}
-
-func NewValueBinaryExprDeductionType(x, y *Value, op byte) (*Value, error) {
-	if x.typeID != y.typeID {
-		return nil, fmt.Errorf(`type mismatch for expression "X %s Y": %v != %v`, string([]byte{op}), x.typeID, y.typeID)
-	}
-
-	return &Value{typeID: x.typeID}, nil
-}
-
 func (v *Value) Value() apd.Decimal {
 	return v.value
 }
@@ -50,11 +38,16 @@ func NewNumber(ctx, x interface{}) (*Value, error) {
 	}
 
 	dst := NewValue()
-	if err = typedCtx.stringToValue(dst, string(typedX.Lit)); err != nil {
+	_, typedCtx.cond, err = dst.value.SetString(string(typedX.Lit))
+	if err != nil {
 		return nil, fmt.Errorf(`runtime error for expression new number: %s`, err)
 	}
 
 	return dst, nil
+}
+
+func unaryExprType(x *Value) TypeID {
+	return x.typeID
 }
 
 func UnaryExpr(ctx, x interface{}, op byte) (*Value, error) {
@@ -67,22 +60,30 @@ func UnaryExpr(ctx, x interface{}, op byte) (*Value, error) {
 		return nil, fmt.Errorf(`invalid type for expression "%s(X)"; expected X is *Value, got %T`, string([]byte{op}), x)
 	}
 
-	var fn func(d, x *Value) error
+	typedX.typeID = unaryExprType(typedX)
+
 	switch op {
 	case '+':
-		fn = typedCtx.pos
+		// pass
 	case '-':
-		fn = typedCtx.neg
+		typedCtx.cond, err = typedCtx.dctx.Neg(&typedX.value, &typedX.value)
 	default:
 		return nil, fmt.Errorf(`unknown unary operator "%s"`, string([]byte{op}))
 	}
 
-	dst := NewValueUnaryExprDeductionType(typedX)
-	if err = fn(dst, typedX); err != nil {
-		return nil, err
+	if err != nil {
+		return nil, fmt.Errorf(`runtime error for expression "%s(X)": %s`, string([]byte{op}), err)
 	}
 
-	return dst, nil
+	return typedX, nil
+}
+
+func binaryExprType(x, y *Value, op byte) (TypeID, error) {
+	if x.typeID != y.typeID {
+		return NoType, fmt.Errorf(`type mismatch for expression "X %s Y": %v != %v`, string([]byte{op}), x.typeID, y.typeID)
+	}
+
+	return x.typeID, nil
 }
 
 func BinaryExpr(ctx, x, y interface{}, op byte) (*Value, error) {
@@ -99,31 +100,30 @@ func BinaryExpr(ctx, x, y interface{}, op byte) (*Value, error) {
 		return nil, fmt.Errorf(`invalid type for expression "X %s Y"; expected Y is *Value, got %T`, string([]byte{op}), y)
 	}
 
-	var fn func(d, x, y *Value) error
-	switch op {
-	case '+':
-		fn = typedCtx.add
-	case '-':
-		fn = typedCtx.sub
-	case '*':
-		fn = typedCtx.mul
-	case '/':
-		fn = typedCtx.div
-	case '^':
-		fn = typedCtx.pow
-	default:
-		return nil, fmt.Errorf(`unknown binary operator "%s"`, string([]byte{op}))
-	}
-
-	dst, err := NewValueBinaryExprDeductionType(typedX, typedY, op)
+	typedX.typeID, err = binaryExprType(typedX, typedY, op)
 	if err != nil {
 		typedCtx.cond = TypeMismatch
 		return nil, err
 	}
 
-	if err = fn(dst, typedX, typedY); err != nil {
+	switch op {
+	case '+':
+		typedCtx.cond, err = typedCtx.dctx.Add(&typedX.value, &typedX.value, &typedY.value)
+	case '-':
+		typedCtx.cond, err = typedCtx.dctx.Sub(&typedX.value, &typedX.value, &typedY.value)
+	case '*':
+		typedCtx.cond, err = typedCtx.dctx.Mul(&typedX.value, &typedX.value, &typedY.value)
+	case '/':
+		typedCtx.cond, err = typedCtx.dctx.Quo(&typedX.value, &typedX.value, &typedY.value)
+	case '^':
+		typedCtx.cond, err = typedCtx.dctx.Pow(&typedX.value, &typedX.value, &typedY.value)
+	default:
+		return nil, fmt.Errorf(`unknown binary operator "%s"`, string([]byte{op}))
+	}
+
+	if err != nil {
 		return nil, fmt.Errorf(`runtime error for expression "X %s Y": %s`, string([]byte{op}), err)
 	}
 
-	return dst, nil
+	return typedX, nil
 }
