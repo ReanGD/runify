@@ -5,21 +5,23 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/shopspring/decimal"
+	"github.com/ReanGD/runify/server/provider/calculator"
+	"github.com/ReanGD/runify/server/provider/calculator/ast"
+	"github.com/ReanGD/runify/server/system"
+	"github.com/cockroachdb/apd/v3"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-
-	"github.com/ReanGD/runify/server/provider/calculator"
-	"github.com/ReanGD/runify/server/system"
 )
 
 type CalcSuite struct {
-	suite.Suite
-
+	dctx     apd.Context
 	executer *calculator.Executer
+
+	suite.Suite
 }
 
 func (s *CalcSuite) SetupSuite() {
+	s.dctx = ast.BaseAdpContext
 	s.executer = calculator.NewExecuter()
 }
 
@@ -27,18 +29,20 @@ func (s *CalcSuite) TearDownSuite() {
 	s.executer = nil
 }
 
-func (s *CalcSuite) runTest(expression string, expected decimal.Decimal, expectedErrCode system.Error) {
+func (s *CalcSuite) runTest(expression string, expectedValue apd.Decimal, expectedCondition apd.Condition) {
 	testName := strings.ReplaceAll(expression, " ", "")
 	executer := s.executer
 	s.T().Run(testName, func(t *testing.T) {
-		res, astErr, err := executer.Execute(expression)
-		if expectedErrCode != system.Success {
-			require.Error(t, err, expression)
-			require.Equal(t, expectedErrCode, astErr.Code(), expression)
+		actualRes := executer.Execute(expression)
+		require.Equal(t, expectedCondition, actualRes.Condition, expression)
+		if expectedCondition != 0 {
+			require.Error(t, actualRes.ParserErr, expression)
+			require.NotEqual(t, system.Success, actualRes.SystemErrCode, expression)
 		} else {
-			require.NoError(t, err, fmt.Errorf("Error in expr: '%s'", expression))
-			require.Nil(t, astErr, fmt.Errorf("Ast error in expr: '%s'", expression))
-			assertEqualDecimal(t, expected, res, expression)
+			require.NoError(t, actualRes.ParserErr, fmt.Errorf("Error in expr: '%s'", expression))
+			require.Equal(t, system.Success, actualRes.SystemErrCode, expression)
+			require.NotNil(t, actualRes.Value, expression)
+			assertEqualDecimal(t, expectedValue, actualRes.Value.Value(), expression)
 		}
 	})
 }
@@ -47,15 +51,15 @@ func (s *CalcSuite) runTestsFromArr(data []testDataStr) {
 	t := s.T()
 	for _, item := range data {
 		expression := item.expression
-		result, err := decimal.NewFromString(item.result)
+		expectedValue, _, err := s.dctx.NewFromString(item.result)
 		require.NoError(t, err, expression)
-		s.runTest(expression, result, system.Success)
+		s.runTest(expression, *expectedValue, 0)
 	}
 }
 
 func (s *CalcSuite) TestGenerated() {
 	timer := system.NewTimer()
-	gen := newTestDataGenerator(int64(timer))
+	gen := newTestDataGenerator(int64(timer), s.dctx)
 	for i := 0; i != 30_000; i++ {
 		s.runTest(gen.next())
 	}

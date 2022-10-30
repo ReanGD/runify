@@ -6,14 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ReanGD/runify/server/system"
-	"github.com/shopspring/decimal"
+	"github.com/cockroachdb/apd/v3"
 	"github.com/stretchr/testify/assert"
 )
 
-func assertEqualDecimal(t *testing.T, expected decimal.Decimal, actual decimal.Decimal, msgAndArgs ...interface{}) {
+func assertEqualDecimal(t *testing.T, expected apd.Decimal, actual apd.Decimal, msgAndArgs ...interface{}) {
 	t.Helper()
-	if !expected.Equal(actual) {
+	if expected.Cmp(&actual) != 0 {
 		assert.Fail(t, fmt.Sprintf("Not equal: \n"+
 			"expected: %s\n"+
 			"actual  : %s", expected.String(), actual.String()), msgAndArgs...)
@@ -56,19 +55,21 @@ type testDataStr struct {
 type testDataGenerator struct {
 	sgen    rand.Source64
 	gen     *rand.Rand
-	errCode system.Error
+	dctx    apd.Context
 	stats   []int
+	cond    apd.Condition
 	total   int
 	maxSize int
 	sumSize int
 }
 
-func newTestDataGenerator(seed int64) *testDataGenerator {
+func newTestDataGenerator(seed int64, dctx apd.Context) *testDataGenerator {
 	src := rand.NewSource(seed)
 	return &testDataGenerator{
 		sgen:    src.(rand.Source64),
 		gen:     rand.New(src),
-		errCode: system.Success,
+		dctx:    dctx,
+		cond:    0,
 		stats:   make([]int, LastOperation),
 		total:   0,
 		maxSize: 0,
@@ -113,8 +114,8 @@ func (s *testDataGenerator) showStats(d time.Duration) {
 	}
 }
 
-func (s *testDataGenerator) next() (string, decimal.Decimal, system.Error) {
-	s.errCode = system.Success
+func (s *testDataGenerator) next() (string, apd.Decimal, apd.Condition) {
+	s.cond = 0
 	result, expression := s.genExprAddSub()
 	eLen := len(expression)
 	s.total++
@@ -122,95 +123,98 @@ func (s *testDataGenerator) next() (string, decimal.Decimal, system.Error) {
 	if s.maxSize < eLen {
 		s.maxSize = eLen
 	}
-	return expression, result, s.errCode
+	return expression, result, s.cond
 }
 
-func (s *testDataGenerator) genExprAddSub() (decimal.Decimal, string) {
+func (s *testDataGenerator) genExprAddSub() (apd.Decimal, string) {
 	kind := s.getKind()
 	if kind >= 700 {
 		return s.genExprMulDiv()
 	}
 
-	res := decimal.Zero
+	var res apd.Decimal
 	left, leftStr := s.genExprMulDiv()
 	right, rightStr := s.genExprMulDiv()
 	if kind >= 350 {
-		if s.errCode == system.Success {
-			res = left.Add(right)
+		if s.cond == 0 {
+			cond, _ := s.dctx.Add(&res, &left, &right)
+			s.cond = cond & s.dctx.Traps
 		}
 		s.stats[Add]++
 		return res, fmt.Sprintf("%s + %s", leftStr, rightStr)
 	}
 
-	if s.errCode == system.Success {
-		res = left.Sub(right)
+	if s.cond == 0 {
+		cond, _ := s.dctx.Sub(&res, &left, &right)
+		s.cond = cond & s.dctx.Traps
 	}
 	s.stats[Sub]++
 	return res, fmt.Sprintf("%s - %s", leftStr, rightStr)
 }
 
-func (s *testDataGenerator) genExprMulDiv() (decimal.Decimal, string) {
+func (s *testDataGenerator) genExprMulDiv() (apd.Decimal, string) {
 	kind := s.getKind()
 	if kind >= 400 {
 		return s.genExprUnaryPlusMinus()
 	}
 
-	res := decimal.Zero
+	var res apd.Decimal
 	left, leftStr := s.genExprUnaryPlusMinus()
 	right, rightStr := s.genExprUnaryPlusMinus()
 	if kind >= 200 {
-		if s.errCode == system.Success {
-			res = left.Mul(right)
+		if s.cond == 0 {
+			cond, _ := s.dctx.Mul(&res, &left, &right)
+			s.cond = cond & s.dctx.Traps
 		}
 		s.stats[Mul]++
 		return res, fmt.Sprintf("%s * %s", leftStr, rightStr)
 	}
 
-	if right.Sign() == 0 {
-		s.errCode = system.CalculatorDivisionByZero
-	}
-	if s.errCode == system.Success {
-		res = left.Div(right)
+	if s.cond == 0 {
+		cond, _ := s.dctx.Quo(&res, &left, &right)
+		s.cond = cond & s.dctx.Traps
 	}
 	s.stats[Div]++
 	return res, fmt.Sprintf("%s / %s", leftStr, rightStr)
 }
 
-func (s *testDataGenerator) genExprUnaryPlusMinus() (decimal.Decimal, string) {
+func (s *testDataGenerator) genExprUnaryPlusMinus() (apd.Decimal, string) {
 	kind := s.getKind()
 	if kind >= 100 {
 		return s.genExprPow()
 	}
 
-	res := decimal.Zero
+	var res apd.Decimal
 	right, rightStr := s.genExprPow()
 	if kind >= 10 {
-		if s.errCode == system.Success {
-			res = right.Neg()
+		if s.cond == 0 {
+			cond, _ := s.dctx.Neg(&res, &right)
+			s.cond = cond & s.dctx.Traps
 		}
 		s.stats[UnaryMinus]++
 		return res, fmt.Sprintf("-%s", rightStr)
 	}
 
-	if s.errCode == system.Success {
+	if s.cond == 0 {
 		res = right
 	}
 	s.stats[UnaryPlus]++
 	return res, fmt.Sprintf("+%s", rightStr)
 }
 
-func (s *testDataGenerator) genExprPow() (decimal.Decimal, string) {
+func (s *testDataGenerator) genExprPow() (apd.Decimal, string) {
 	kind := s.getKind()
 	if kind >= 10 {
 		return s.genExprBracketsInt()
 	}
 
-	res := decimal.Zero
+	var res apd.Decimal
 	left, leftStr := s.genExprBracketsInt()
 	// TODO: fix pow
-	right, rightStr := decimal.NewFromInt(2), "2"
-	if s.errCode == system.Success {
-		res = left.Pow(right)
+	right, rightStr := apd.New(2, 0), "2"
+	if s.cond == 0 {
+		cond, _ := s.dctx.Pow(&res, &left, right)
+		s.cond = cond & s.dctx.Traps
 	}
 
 	if kind >= 5 {
@@ -222,28 +226,28 @@ func (s *testDataGenerator) genExprPow() (decimal.Decimal, string) {
 	return res, fmt.Sprintf("%s ** %s", leftStr, rightStr)
 }
 
-func (s *testDataGenerator) genExprBracketsInt() (decimal.Decimal, string) {
+func (s *testDataGenerator) genExprBracketsInt() (apd.Decimal, string) {
 	kind := s.getKind()
 	if kind >= 300 {
 		return s.genInt64()
 	}
 
-	res := decimal.Zero
+	var res apd.Decimal
 	inner, innerStr := s.genExprAddSub()
-	if s.errCode == system.Success {
+	if s.cond == 0 {
 		res = inner
 	}
 	s.stats[Brackets]++
 	return res, fmt.Sprintf("(%s)", innerStr)
 }
 
-func (s *testDataGenerator) genInt64() (decimal.Decimal, string) {
-	res := decimal.Zero
+func (s *testDataGenerator) genInt64() (apd.Decimal, string) {
+	var res apd.Decimal
 
-	val := decimal.NewFromInt32(s.getInt31())
-	if s.errCode == system.Success {
-		res = val
+	rndVal := s.getInt31()
+	if s.cond == 0 {
+		res = *apd.New(int64(rndVal), 0)
 	}
 	s.stats[Numbers]++
-	return res, val.String()
+	return res, fmt.Sprintf("%d", rndVal)
 }
