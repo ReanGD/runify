@@ -4,41 +4,59 @@ import (
 	"fmt"
 
 	"github.com/ReanGD/runify/server/provider/calculator/ast"
-	goccErr "github.com/ReanGD/runify/server/provider/calculator/gocc/errors"
 	"github.com/ReanGD/runify/server/provider/calculator/gocc/lexer"
 	"github.com/ReanGD/runify/server/provider/calculator/gocc/parser"
-	"github.com/shopspring/decimal"
+	"github.com/ReanGD/runify/server/system"
+	"github.com/cockroachdb/apd/v3"
 )
 
+type Result struct {
+	Value         *ast.Value
+	ParserErr     error
+	SystemErrCode system.Error
+	Condition     apd.Condition
+}
+
 type Executer struct {
+	ctx    *ast.AstContext
 	parser *parser.Parser
 }
 
 func NewExecuter() *Executer {
+	ctx := ast.NewDefaultAstContext()
+	parser := parser.NewParser()
+	parser.Context = ctx
 	return &Executer{
-		parser: parser.NewParser(),
+		parser: parser,
+		ctx:    ctx,
 	}
 }
 
-func (e *Executer) Execute(expression string) (decimal.Decimal, *ast.Error, error) {
+func NewExecuterWithCtx(ctx *ast.AstContext) *Executer {
+	parser := parser.NewParser()
+	parser.Context = ctx
+	return &Executer{
+		parser: parser,
+		ctx:    ctx,
+	}
+}
+
+func (e *Executer) Execute(expression string) Result {
+	e.ctx.Reset()
 	lexer := lexer.NewLexer([]byte(expression))
-	res, err := e.parser.Parse(lexer)
-	if err != nil {
-		var astError *ast.Error
-		parserErr, ok := err.(*goccErr.Error)
-		if ok {
-			if innerErr, ok := parserErr.Err.(*ast.Error); ok {
-				astError = innerErr
-			}
+	parserRes, parserErr := e.parser.Parse(lexer)
+
+	var res Result
+	res.Value = nil
+	res.ParserErr = parserErr
+	res.Condition, res.SystemErrCode = e.ctx.Error()
+
+	if parserErr == nil {
+		var ok bool
+		if res.Value, ok = parserRes.(*ast.Value); !ok {
+			res.ParserErr = fmt.Errorf("invalid result type; expected *ast.Value, got %T", res)
 		}
-
-		return decimal.Zero, astError, err
 	}
 
-	typedRes, ok := res.(*ast.Value)
-	if !ok {
-		return decimal.Zero, nil, fmt.Errorf("invalid result type; expected *ast.Value, got %T", res)
-	}
-
-	return typedRes.Value(), nil, nil
+	return res
 }

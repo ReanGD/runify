@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ReanGD/runify/server/provider/calculator/gocc/token"
-	"github.com/shopspring/decimal"
+	"github.com/cockroachdb/apd/v3"
 )
 
 type TypeID uint16
@@ -15,92 +15,81 @@ const (
 )
 
 type Value struct {
-	value  decimal.Decimal
+	value  apd.Decimal
 	typeID TypeID
 }
 
-func NewValueFromToken(valToken interface{}) (*Value, error) {
-	valTok, ok := valToken.(*token.Token)
-	if !ok {
-		return nil, fmt.Errorf("invalid basic literal type; expected *token.Token, got %T", valToken)
-	}
-
-	val, err := decimal.NewFromString(string(valTok.Lit))
-	if err != nil {
-		return nil, err
-	}
-
-	return &Value{value: val, typeID: NoType}, nil
+func NewValue() *Value {
+	return &Value{typeID: NoType}
 }
 
-func (v *Value) Value() decimal.Decimal {
+func NewValueUnaryExprDeductionType(x *Value) *Value {
+	return &Value{typeID: x.typeID}
+}
+
+func NewValueBinaryExprDeductionType(x, y *Value, op byte) (*Value, error) {
+	if x.typeID != y.typeID {
+		return nil, fmt.Errorf(`type mismatch for expression "X %s Y": %v != %v`, string([]byte{op}), x.typeID, y.typeID)
+	}
+
+	return &Value{typeID: x.typeID}, nil
+}
+
+func (v *Value) Value() apd.Decimal {
 	return v.value
 }
 
-func (v *Value) Neg() (*Value, error) {
-	return &Value{value: v.value.Neg(), typeID: v.typeID}, nil
-}
-
-func (v *Value) Add(other *Value) (*Value, error) {
-	if v.typeID != other.typeID {
-		return nil, fmt.Errorf(`type mismatch for expression "X + Y": %v != %v`, v.typeID, other.typeID)
+func NewNumber(ctx, x interface{}) (*Value, error) {
+	typedCtx, err := toAstContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	typedX, ok := x.(*token.Token)
+	if !ok {
+		return nil, fmt.Errorf("invalid type for expression new number; expected *token.Token, got %T", x)
 	}
 
-	return &Value{value: v.value.Add(other.value), typeID: v.typeID}, nil
-}
-
-func (v *Value) Sub(other *Value) (*Value, error) {
-	if v.typeID != other.typeID {
-		return nil, fmt.Errorf(`type mismatch for expression "X - Y": %v != %v`, v.typeID, other.typeID)
+	dst := NewValue()
+	if err = typedCtx.stringToValue(dst, string(typedX.Lit)); err != nil {
+		return nil, fmt.Errorf(`runtime error for expression new number: %s`, err)
 	}
 
-	return &Value{value: v.value.Sub(other.value), typeID: v.typeID}, nil
+	return dst, nil
 }
 
-func (v *Value) Mul(other *Value) (*Value, error) {
-	if v.typeID != other.typeID {
-		return nil, fmt.Errorf(`type mismatch for expression "X * Y": %v != %v`, v.typeID, other.typeID)
+func UnaryExpr(ctx, x interface{}, op byte) (*Value, error) {
+	typedCtx, err := toAstContext(ctx)
+	if err != nil {
+		return nil, err
 	}
-
-	return &Value{value: v.value.Mul(other.value), typeID: v.typeID}, nil
-}
-
-func (v *Value) Div(other *Value) (*Value, error) {
-	if v.typeID != other.typeID {
-		return nil, fmt.Errorf(`type mismatch for expression "X / Y": %v != %v`, v.typeID, other.typeID)
-	}
-
-	if other.value.Sign() == 0 {
-		return nil, newDivisionByZero()
-	}
-	return &Value{value: v.value.Div(other.value), typeID: v.typeID}, nil
-}
-
-func (v *Value) Pow(other *Value) (*Value, error) {
-	if v.typeID != other.typeID {
-		return nil, fmt.Errorf(`type mismatch for expression "X ^ Y": %v != %v`, v.typeID, other.typeID)
-	}
-
-	return &Value{value: v.value.Pow(other.value), typeID: v.typeID}, nil
-}
-
-func UnaryExpr(x interface{}, op byte) (*Value, error) {
 	typedX, ok := x.(*Value)
 	if !ok {
-		return nil, fmt.Errorf(`invalid type for "%s(X)"; expected X is *Value, got %T`, string([]byte{op}), x)
+		return nil, fmt.Errorf(`invalid type for expression "%s(X)"; expected X is *Value, got %T`, string([]byte{op}), x)
 	}
 
+	var fn func(d, x *Value) error
 	switch op {
-	case '-':
-		return typedX.Neg()
 	case '+':
-		return typedX, nil
+		fn = typedCtx.pos
+	case '-':
+		fn = typedCtx.neg
 	default:
 		return nil, fmt.Errorf(`unknown unary operator "%s"`, string([]byte{op}))
 	}
+
+	dst := NewValueUnaryExprDeductionType(typedX)
+	if err = fn(dst, typedX); err != nil {
+		return nil, err
+	}
+
+	return dst, nil
 }
 
-func BinaryExpr(x, y interface{}, op byte) (*Value, error) {
+func BinaryExpr(ctx, x, y interface{}, op byte) (*Value, error) {
+	typedCtx, err := toAstContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	typedX, ok := x.(*Value)
 	if !ok {
 		return nil, fmt.Errorf(`invalid type for expression "X %s Y"; expected X is *Value, got %T`, string([]byte{op}), x)
@@ -110,18 +99,31 @@ func BinaryExpr(x, y interface{}, op byte) (*Value, error) {
 		return nil, fmt.Errorf(`invalid type for expression "X %s Y"; expected Y is *Value, got %T`, string([]byte{op}), y)
 	}
 
+	var fn func(d, x, y *Value) error
 	switch op {
 	case '+':
-		return typedX.Add(typedY)
+		fn = typedCtx.add
 	case '-':
-		return typedX.Sub(typedY)
+		fn = typedCtx.sub
 	case '*':
-		return typedX.Mul(typedY)
+		fn = typedCtx.mul
 	case '/':
-		return typedX.Div(typedY)
+		fn = typedCtx.div
 	case '^':
-		return typedX.Pow(typedY)
+		fn = typedCtx.pow
 	default:
 		return nil, fmt.Errorf(`unknown binary operator "%s"`, string([]byte{op}))
 	}
+
+	dst, err := NewValueBinaryExprDeductionType(typedX, typedY, op)
+	if err != nil {
+		typedCtx.cond = TypeMismatch
+		return nil, err
+	}
+
+	if err = fn(dst, typedX, typedY); err != nil {
+		return nil, fmt.Errorf(`runtime error for expression "X %s Y": %s`, string([]byte{op}), err)
+	}
+
+	return dst, nil
 }
