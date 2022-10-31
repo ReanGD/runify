@@ -2,7 +2,8 @@
 
 _digit : '0'-'9' ;
 
-int : {_digit} ;
+int : _digit {_digit};
+float : _digit {_digit} '.' {_digit};
 
 !whitespace : ' ' | '\t' | '\n' | '\r' ;
 
@@ -42,6 +43,7 @@ Expr3Lvl :
 
 Number :
 		int						<< ast.NewNumber($Context, $0) >>
+	|	float					<< ast.NewNumber($Context, $0) >>
 	|	Bracket
 ;
 

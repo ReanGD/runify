@@ -30,7 +30,8 @@ const (
 	UnaryPlus
 	UnaryMinus
 	Brackets
-	Numbers
+	Int
+	Float
 	LastOperation
 )
 
@@ -44,7 +45,8 @@ var opNames = map[int]string{
 	UnaryPlus:  "UnaryPlus",
 	UnaryMinus: "UnaryMinus",
 	Brackets:   "Brackets",
-	Numbers:    "Numbers",
+	Int:        "Int",
+	Float:      "Float",
 }
 
 type testDataStr struct {
@@ -94,6 +96,10 @@ func (s *testDataGenerator) getKind() uint64 {
 		v = s.sgen.Uint64()
 	}
 	return v % uint64(kindN)
+}
+
+func (s *testDataGenerator) getInt63() int64 {
+	return int64(s.sgen.Uint64() & rngMask)
 }
 
 func (s *testDataGenerator) getInt31() int32 {
@@ -210,10 +216,9 @@ func (s *testDataGenerator) genExprPow() (apd.Decimal, string) {
 
 	var res apd.Decimal
 	left, leftStr := s.genExprBracketsInt()
-	// TODO: fix pow
-	right, rightStr := apd.New(2, 0), "2"
+	right, rightStr := s.genSmallNumber()
 	if s.cond == 0 {
-		cond, _ := s.dctx.Pow(&res, &left, right)
+		cond, _ := s.dctx.Pow(&res, &left, &right)
 		s.cond = cond & s.dctx.Traps
 	}
 
@@ -229,7 +234,7 @@ func (s *testDataGenerator) genExprPow() (apd.Decimal, string) {
 func (s *testDataGenerator) genExprBracketsInt() (apd.Decimal, string) {
 	kind := s.getKind()
 	if kind >= 300 {
-		return s.genInt64()
+		return s.genNumber()
 	}
 
 	var res apd.Decimal
@@ -241,13 +246,45 @@ func (s *testDataGenerator) genExprBracketsInt() (apd.Decimal, string) {
 	return res, fmt.Sprintf("(%s)", innerStr)
 }
 
-func (s *testDataGenerator) genInt64() (apd.Decimal, string) {
-	var res apd.Decimal
+func (s *testDataGenerator) genNumber() (apd.Decimal, string) {
+	kind := s.getKind()
 
-	rndVal := s.getInt31()
-	if s.cond == 0 {
-		res = *apd.New(int64(rndVal), 0)
+	var res apd.Decimal
+	if kind >= 500 {
+		rndVal := s.getInt31()
+		if s.cond == 0 {
+			res = *apd.New(int64(rndVal), 0)
+		}
+		s.stats[Int]++
+		return res, fmt.Sprintf("%d", rndVal)
+	} else {
+		rndVal := s.getInt63()
+		rndExp := int8(s.getInt31())
+		if s.cond == 0 {
+			res = *apd.New(rndVal, int32(rndExp))
+		}
+		s.stats[Float]++
+		return res, res.Text('f')
 	}
-	s.stats[Numbers]++
-	return res, fmt.Sprintf("%d", rndVal)
+}
+
+func (s *testDataGenerator) genSmallNumber() (apd.Decimal, string) {
+	kind := s.getKind()
+
+	var res apd.Decimal
+	if kind >= 500 {
+		rndVal := s.getInt63() % 10
+		if s.cond == 0 {
+			res = *apd.New(int64(rndVal), 0)
+		}
+		s.stats[Int]++
+		return res, fmt.Sprintf("%d", rndVal)
+	} else {
+		rndVal := s.getInt63() % 1000
+		if s.cond == 0 {
+			res = *apd.New(rndVal, -2)
+		}
+		s.stats[Float]++
+		return res, res.Text('f')
+	}
 }

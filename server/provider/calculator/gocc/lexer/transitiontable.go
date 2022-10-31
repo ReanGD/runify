@@ -87,6 +87,8 @@ var TransTab = TransitionTable{
 	// S8
 	func(r rune) int {
 		switch {
+		case r == 46: // ['.','.']
+			return 11
 		case 48 <= r && r <= 57: // ['0','9']
 			return 8
 		}
@@ -101,6 +103,22 @@ var TransTab = TransitionTable{
 	// S10
 	func(r rune) int {
 		switch {
+		}
+		return NoState
+	},
+	// S11
+	func(r rune) int {
+		switch {
+		case 48 <= r && r <= 57: // ['0','9']
+			return 12
+		}
+		return NoState
+	},
+	// S12
+	func(r rune) int {
+		switch {
+		case 48 <= r && r <= 57: // ['0','9']
+			return 12
 		}
 		return NoState
 	},

@@ -172,10 +172,20 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Number : Bracket	<<  >>`,
+		String: `Number : float	<< ast.NewNumber(C, X[0]) >>`,
 		Id:         "Number",
 		NTType:     6,
 		Index:      15,
+		NumSymbols: 1,
+		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
+			return ast.NewNumber(C, X[0])
+		},
+	},
+	ProdTabEntry{
+		String: `Number : Bracket	<<  >>`,
+		Id:         "Number",
+		NTType:     6,
+		Index:      16,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
 			return X[0], nil
@@ -185,7 +195,7 @@ var productionsTable = ProdTab{
 		String: `Bracket : "(" Expr0Lvl ")"	<< X[1], nil >>`,
 		Id:         "Bracket",
 		NTType:     7,
-		Index:      16,
+		Index:      17,
 		NumSymbols: 3,
 		ReduceFunc: func(X []Attrib, C interface{}) (Attrib, error) {
 			return X[1], nil
