@@ -8,15 +8,11 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	xfixesMajorVersion = 5
-	xfixesMinorVersion = 0
-)
-
 var (
-	errInitX11          = errors.New("failed init X11 server")
-	errInitX11Keyboard  = errors.New("failed init X11 keyboard module")
-	errInitX11Clipboard = errors.New("failed init X11 clipboard module")
+	errInitX11           = errors.New("failed init X11 server")
+	errInitX11Connection = errors.New("failed init X11 connection")
+	errInitX11Keyboard   = errors.New("failed init X11 keyboard module")
+	errInitX11Clipboard  = errors.New("failed init X11 clipboard module")
 )
 
 type readPropertyResult uint8

@@ -6,7 +6,6 @@ require (
 	github.com/cockroachdb/apd/v3 v3.1.1
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/jezek/xgb v1.0.1
-	github.com/jezek/xgbutil v0.0.0-20210302171758-530099784e66
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rkoesters/xdg v0.0.1
 	github.com/spf13/cobra v1.5.0

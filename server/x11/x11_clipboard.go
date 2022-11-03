@@ -69,35 +69,12 @@ func (h *x11Clipboard) onInit(atoms *atomStorage, connection *xgb.Conn, window x
 	h.atomClipboardSel = atoms.getByNameUnchecked(atomNameClipboardSel)
 	h.atomClipboardProp = atoms.getByNameUnchecked(atomNameClipboardProp)
 
-	// https://www.x.org/releases/X11R7.7/doc/fixesproto/fixesproto.txt
-	if err := xfixes.Init(h.connection); err != nil {
-		h.moduleLogger.Warn("Failed init xfixes extension", zap.Error(err))
-		return errInitX11Clipboard
-	}
-
-	xfixesVersion, err := xfixes.QueryVersion(h.connection, xfixesMajorVersion, xfixesMinorVersion).Reply()
-	if err != nil {
-		h.moduleLogger.Warn("Failed get xfixes extension version", zap.Error(err))
-		return errInitX11Clipboard
-	}
-
-	if (xfixesVersion.MajorVersion < xfixesMajorVersion) ||
-		(xfixesVersion.MajorVersion == xfixesMajorVersion && xfixesVersion.MinorVersion < xfixesMinorVersion) {
-		h.moduleLogger.Warn("Wrong xfixes extension version",
-			zap.Uint32("expectedMajorVersion", xfixesMajorVersion),
-			zap.Uint32("expectedMinorVersion", xfixesMinorVersion),
-			zap.Uint32("actualMajorVersion", xfixesVersion.MajorVersion),
-			zap.Uint32("actualMinorVersion", xfixesVersion.MinorVersion),
-		)
-		return errInitX11Clipboard
-	}
-
-	if err = xfixes.SelectSelectionInputChecked(
+	if err := xfixes.SelectSelectionInputChecked(
 		h.connection, h.window, h.atomPrimarySel, xfixes.SelectionEventMaskSetSelectionOwner).Check(); err != nil {
 		h.moduleLogger.Warn("Failed Subscribe to primary buffer changes", zap.Error(err))
 		return errInitX11Clipboard
 	}
-	if err = xfixes.SelectSelectionInputChecked(
+	if err := xfixes.SelectSelectionInputChecked(
 		h.connection, h.window, h.atomClipboardSel, xfixes.SelectionEventMaskSetSelectionOwner).Check(); err != nil {
 		h.moduleLogger.Warn("Failed Subscribe to clipboard buffer changes", zap.Error(err))
 		return errInitX11Clipboard

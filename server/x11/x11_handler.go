@@ -1,13 +1,10 @@
 package x11
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/jezek/xgb/xfixes"
 	"github.com/jezek/xgb/xproto"
-	"github.com/jezek/xgbutil"
-	"github.com/jezek/xgbutil/xevent"
 	"go.uber.org/zap"
 
 	"github.com/ReanGD/runify/server/config"
@@ -17,7 +14,7 @@ import (
 
 type x11Handler struct {
 	cfg         *config.Configuration
-	xConnection *xgbutil.XUtil
+	xConnection *x11Connection
 	errorCh     chan error
 	x11EventsCh chan interface{}
 	shortcutCh  chan bindID
@@ -30,7 +27,7 @@ type x11Handler struct {
 func newX11Handler() *x11Handler {
 	return &x11Handler{
 		cfg:          nil,
-		xConnection:  nil,
+		xConnection:  newX11Connection(),
 		errorCh:      make(chan error),
 		x11EventsCh:  nil,
 		shortcutCh:   nil,
@@ -57,26 +54,25 @@ func (h *x11Handler) onInit(cfg *config.Configuration, rpc module.Rpc, moduleLog
 	h.moduleLogger = moduleLogger
 
 	var err error
-	h.xConnection, err = xgbutil.NewConn()
-	if err != nil {
-		h.moduleLogger.Warn("Failed connect to x server", zap.Error(err))
-		return errors.New("Failed connect to x server")
+	display := ""
+	if err = h.xConnection.onInit(display, moduleLogger); err != nil {
+		return err
 	}
 
 	x11EventChannelLen := h.cfg.X11.X11EventChannelLen
 	h.x11EventsCh = make(chan interface{}, x11EventChannelLen)
 	h.shortcutCh = make(chan bindID, h.cfg.X11.HotkeysChannelLen)
-	err = h.keyboard.onInit(h.xConnection.Conn(), h.xConnection.RootWin(), h.errorCh, h.shortcutCh, moduleLogger)
+	err = h.keyboard.onInit(h.xConnection.connection, h.xConnection.rootWindowID, h.errorCh, h.shortcutCh, moduleLogger)
 	if err != nil {
 		return err
 	}
 
-	atoms, ok := newAtomStorage(h.xConnection.Conn(), moduleLogger)
+	atoms, ok := newAtomStorage(h.xConnection.connection, moduleLogger)
 	if !ok {
 		return errInitX11
 	}
 
-	err = h.clipboard.onInit(atoms, h.xConnection.Conn(), h.xConnection.Dummy(), moduleLogger)
+	err = h.clipboard.onInit(atoms, h.xConnection.connection, h.xConnection.dummyWindowID, moduleLogger)
 	if err != nil {
 		return err
 	}
@@ -91,49 +87,15 @@ func (h *x11Handler) onStart(wg *sync.WaitGroup) {
 	startWG.Add(1)
 	go func() {
 		startWG.Done()
-		xevent.Main(h.xConnection)
+		if err := h.xConnection.onStart(h.x11EventsCh); err != nil {
+			h.errorCh <- err
+		}
 		wg.Done()
 	}()
 
 	startWG.Wait()
-	xevent.HookFun(h.hookX11Event).Connect(h.xConnection)
 	h.keyboard.onStart()
 	h.clipboard.onStart()
-}
-
-// called in external goroutine
-func (h *x11Handler) hookX11Event(xu *xgbutil.XUtil, event interface{}) bool {
-	switch e := event.(type) {
-	case xproto.MappingNotifyEvent:
-		h.x11EventsCh <- event
-		return false
-	case xproto.KeyReleaseEvent:
-		xu.TimeSet(e.Time)
-		h.x11EventsCh <- event
-		return false
-	case xfixes.SelectionNotifyEvent:
-		xu.TimeSet(e.Timestamp)
-		h.x11EventsCh <- event
-		return false
-	case xproto.SelectionNotifyEvent:
-		xu.TimeSet(e.Time)
-		h.x11EventsCh <- event
-		return false
-	case xproto.PropertyNotifyEvent:
-		xu.TimeSet(e.Time)
-		h.x11EventsCh <- event
-		return false
-	case xproto.SelectionRequestEvent:
-		xu.TimeSet(e.Time)
-		h.x11EventsCh <- event
-		return false
-	case xproto.SelectionClearEvent:
-		xu.TimeSet(e.Time)
-		h.x11EventsCh <- event
-		return false
-	}
-
-	return true
 }
 
 func (h *x11Handler) onX11Event(event interface{}) {
@@ -166,6 +128,6 @@ func (h *x11Handler) writeToClipboard(cmd *writeToClipboardCmd) {
 func (h *x11Handler) onStop() {
 	h.keyboard.onStop()
 	h.clipboard.onStop()
-	h.xConnection.Quit = true
+	h.xConnection.quit = true
 	h.xConnection = nil
 }
