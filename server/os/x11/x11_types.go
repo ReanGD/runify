@@ -101,9 +101,25 @@ type bindData struct {
 	shortcut string
 }
 
+type subscribeToClipboardCmd struct {
+	isPrimary bool
+	ch        chan<- *mime.Data
+	result    chan<- bool
+}
+
+func (c *subscribeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "subscribeToClipboard"),
+		zap.Bool("IsPrimary", c.isPrimary),
+		zap.String("Reason", reason),
+		zap.String("Action", "subscription not activated"))
+	c.result <- false
+}
+
 type writeToClipboardCmd struct {
 	isPrimary bool
 	data      *mime.Data
+	result    chan<- bool
 }
 
 func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -112,4 +128,5 @@ func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string
 		zap.Bool("IsPrimary", c.isPrimary),
 		zap.String("Reason", reason),
 		zap.String("Action", "return empty result"))
+	c.result <- false
 }

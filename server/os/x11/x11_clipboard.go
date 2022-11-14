@@ -11,6 +11,7 @@ import (
 var (
 	zapInitClipboard      = zap.String("Method", "x11.clipboard::init")
 	zapWriteToClipboard   = zap.String("Method", "x11.clipboard::writeToClipboard")
+	zapReadFinish         = zap.String("Method", "x11.clipboard::readFinish")
 	zapOnSelectionChange  = zap.String("Method", "x11.clipboard::onSelectionChange")
 	zapOnSelectionNotify  = zap.String("Method", "x11.clipboard::onSelectionNotify")
 	zapOnPropertyNotify   = zap.String("Method", "x11.clipboard::onPropertyNotify")
@@ -19,23 +20,25 @@ var (
 )
 
 type clipboard struct {
-	conn      *connection
-	atoms     *atomStorage
-	window    *window
-	lastRead  map[xproto.Atom]*readData
-	lastWrite map[xproto.Atom]*writeData
+	conn          *connection
+	atoms         *atomStorage
+	window        *window
+	subscriptions map[xproto.Atom][]chan<- *mime.Data
+	lastRead      map[xproto.Atom]*readData
+	lastWrite     map[xproto.Atom]*writeData
 
 	moduleLogger *zap.Logger
 }
 
 func newClipboard() *clipboard {
 	return &clipboard{
-		conn:         nil,
-		atoms:        nil,
-		window:       nil,
-		lastRead:     make(map[xproto.Atom]*readData),
-		lastWrite:    make(map[xproto.Atom]*writeData),
-		moduleLogger: nil,
+		conn:          nil,
+		atoms:         nil,
+		window:        nil,
+		subscriptions: make(map[xproto.Atom][]chan<- *mime.Data),
+		lastRead:      make(map[xproto.Atom]*readData),
+		lastWrite:     make(map[xproto.Atom]*writeData),
+		moduleLogger:  nil,
 	}
 }
 
@@ -55,31 +58,36 @@ func (c *clipboard) init(conn *connection, atoms *atomStorage, window *window, m
 		return false
 	}
 
+	c.subscriptions[c.atoms.atomPrimarySel] = make([]chan<- *mime.Data, 0, 1)
+	c.subscriptions[c.atoms.atomClipboardSel] = make([]chan<- *mime.Data, 0, 1)
+
 	return true
 }
 
 func (c *clipboard) readFinish(selection xproto.Atom) {
-	// readData := h.lastRead[selection]
-	// data := readData.data
-	// if data.IsText() {
-	// 	fmt.Println("read clipboard text:", string(data.Data))
-	// } else {
-	// 	fmt.Println("read clipboard image:")
+	data, ok := c.lastRead[selection]
+	if !ok {
+		return
+	}
 
-	// 	var fileExt string
-	// 	switch data.Type {
-	// 	case mime.ImagePng:
-	// 		fileExt = "png"
-	// 	case mime.ImageBmp:
-	// 		fileExt = "bmp"
-	// 	case mime.ImageJpeg:
-	// 		fileExt = "jpeg"
-	// 	}
+	for _, ch := range c.subscriptions[selection] {
+		select {
+		case ch <- data.data:
+		default:
+			c.moduleLogger.Warn("Failed send clipboard data to channel, channel is full",
+				zapReadFinish, c.atoms.getZapField(selection))
+		}
+	}
+}
 
-	// 	if err := data.WriteToFile(fmt.Sprintf("~/tmp/clipboard.%s", fileExt)); err != nil {
-	// 		h.moduleLogger.Warn("Failed write to file", zapOnSelectionNotify, zap.Error(err))
-	// 	}
-	// }
+func (c *clipboard) subscribeToClipboard(isPrimary bool, ch chan<- *mime.Data) bool {
+	selection := c.atoms.atomClipboardSel
+	if isPrimary {
+		selection = c.atoms.atomPrimarySel
+	}
+
+	c.subscriptions[selection] = append(c.subscriptions[selection], ch)
+	return true
 }
 
 func (c *clipboard) writeToClipboard(isPrimary bool, data *mime.Data) bool {
