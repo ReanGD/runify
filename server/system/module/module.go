@@ -10,6 +10,27 @@ import (
 	"go.uber.org/zap"
 )
 
+type ErrorCtx struct {
+	ch chan error
+}
+
+func newErrorCtx() *ErrorCtx {
+	return &ErrorCtx{
+		ch: make(chan error, 1),
+	}
+}
+
+func (e *ErrorCtx) GetChannel() <-chan error {
+	return e.ch
+}
+
+func (e *ErrorCtx) SendError(err error) {
+	select {
+	case e.ch <- err:
+	default:
+	}
+}
+
 type Channel struct {
 	messageCh chan interface{}
 
@@ -55,6 +76,7 @@ func (c *Channel) IsOverflow() bool {
 }
 
 type Module struct {
+	ErrorCtx     *ErrorCtx
 	RootLogger   *zap.Logger
 	ModuleLogger *zap.Logger
 
@@ -62,6 +84,7 @@ type Module struct {
 }
 
 func (m *Module) Init(rootLogger *zap.Logger, moduleName string, channelLen uint32) {
+	m.ErrorCtx = newErrorCtx()
 	m.RootLogger = rootLogger
 	m.ModuleLogger = rootLogger.With(zap.String("module", moduleName))
 	m.Channel.Init(channelLen)
