@@ -3,7 +3,7 @@ package x11
 import (
 	"errors"
 
-	"github.com/ReanGD/runify/server/system/mime"
+	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
 )

@@ -1,4 +1,4 @@
-package system
+package global
 
 type Error uint32
 

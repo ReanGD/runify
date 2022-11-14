@@ -3,17 +3,17 @@ package calculator
 import (
 	"fmt"
 
+	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/provider/calculator/ast"
 	"github.com/ReanGD/runify/server/provider/calculator/gocc/lexer"
 	"github.com/ReanGD/runify/server/provider/calculator/gocc/parser"
-	"github.com/ReanGD/runify/server/system"
 	"github.com/cockroachdb/apd/v3"
 )
 
 type Result struct {
 	Value         *ast.Value
 	ParserErr     error
-	SystemErrCode system.Error
+	SystemErrCode global.Error
 	Condition     apd.Condition
 }
 

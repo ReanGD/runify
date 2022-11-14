@@ -5,8 +5,8 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/pb"
-	"github.com/ReanGD/runify/server/system/module"
 )
 
 type runifyServer struct {

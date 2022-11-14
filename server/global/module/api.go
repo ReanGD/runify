@@ -1,8 +1,8 @@
 package module
 
 import (
+	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/pb"
-	"github.com/ReanGD/runify/server/system/mime"
 )
 
 type Provider interface {

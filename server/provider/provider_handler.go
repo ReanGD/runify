@@ -5,10 +5,10 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/pb"
 	"github.com/ReanGD/runify/server/provider/calculator"
 	"github.com/ReanGD/runify/server/provider/desktop_entry"
-	"github.com/ReanGD/runify/server/system/module"
 	"go.uber.org/zap"
 )
 

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/ReanGD/runify/server/system"
-	"github.com/ReanGD/runify/server/system/module"
+	"github.com/ReanGD/runify/server/global"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xfixes"
 	"github.com/jezek/xgb/xinerama"
@@ -310,7 +310,7 @@ func (c *connection) createWindow(rootWindowID xproto.Window, screen *xproto.Scr
 	return c.newWindow(windowID), true
 }
 
-func (c *connection) grabKey(windowID xproto.Window, modifiers uint16, keycode xproto.Keycode, fields ...zap.Field) system.Error {
+func (c *connection) grabKey(windowID xproto.Window, modifiers uint16, keycode xproto.Keycode, fields ...zap.Field) global.Error {
 	if err := xproto.GrabKeyChecked(
 		c.impl, true, windowID, modifiers, keycode, xproto.GrabModeAsync, xproto.GrabModeAsync).Check(); err != nil {
 		switch err.(type) {
@@ -320,17 +320,17 @@ func (c *connection) grabKey(windowID xproto.Window, modifiers uint16, keycode x
 				append(fields,
 					zap.Error(accessErr),
 				)...)
-			return system.ShortcutUsesByExternalApp
+			return global.ShortcutUsesByExternalApp
 		default:
 			c.moduleLogger.Warn("Failed call x11 grab key",
 				append(fields,
 					zap.Error(err),
 				)...)
-			return system.ShortcutBindError
+			return global.ShortcutBindError
 		}
 	}
 
-	return system.Success
+	return global.Success
 }
 
 func (c *connection) ungrabKey(windowID xproto.Window, modifiers uint16, keycode xproto.Keycode, fields ...zap.Field) bool {

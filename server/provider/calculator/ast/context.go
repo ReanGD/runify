@@ -3,7 +3,7 @@ package ast
 import (
 	"fmt"
 
-	"github.com/ReanGD/runify/server/system"
+	"github.com/ReanGD/runify/server/global"
 	"github.com/cockroachdb/apd/v3"
 )
 
@@ -65,43 +65,43 @@ func (c *AstContext) Reset() {
 	c.cond = apd.Condition(0)
 }
 
-func (c *AstContext) Error() (apd.Condition, system.Error) {
+func (c *AstContext) Error() (apd.Condition, global.Error) {
 	cond := c.cond
 	cond &= (c.dctx.Traps | TypeMismatch)
 
 	if cond == 0 {
-		return cond, system.Success
+		return cond, global.Success
 	}
 
 	if cond&TypeMismatch != 0 {
-		return cond, system.CalculatorTypeMismatch
+		return cond, global.CalculatorTypeMismatch
 	}
 
 	if cond&apd.SystemOverflow != 0 || cond&apd.Overflow != 0 {
-		return cond, system.CalculatorResultTooBig
+		return cond, global.CalculatorResultTooBig
 	}
 
 	// Result of apd.Rem or apd.QuoInteger is more than Precision
 	if cond&apd.DivisionImpossible != 0 {
-		return cond, system.CalculatorResultTooBig
+		return cond, global.CalculatorResultTooBig
 	}
 
 	// Result is NaN
 	if cond&apd.InvalidOperation != 0 {
-		return cond, system.CalculatorResultTooBig
+		return cond, global.CalculatorResultTooBig
 	}
 
 	if cond&apd.SystemUnderflow != 0 || cond&apd.Underflow != 0 {
-		return cond, system.CalculatorResultTooSmall
+		return cond, global.CalculatorResultTooSmall
 	}
 
 	if cond&apd.DivisionByZero != 0 || cond&apd.DivisionUndefined != 0 {
-		return cond, system.CalculatorDivisionByZero
+		return cond, global.CalculatorDivisionByZero
 	}
 
 	if cond&apd.Inexact != 0 || cond&apd.Subnormal != 0 || cond&apd.Rounded != 0 || apd.Clamped != 0 {
-		return cond, system.CalculatorResultRounded
+		return cond, global.CalculatorResultRounded
 	}
 
-	return cond, system.Success
+	return cond, global.Success
 }

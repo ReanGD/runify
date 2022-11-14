@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ReanGD/runify/server/system"
+	"github.com/ReanGD/runify/server/global"
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
@@ -156,7 +156,7 @@ func (k *x11Keyboard) updateMaps(fields ...zap.Field) bool {
 	return true
 }
 
-func (k *x11Keyboard) grabKey(key bindKey, fields ...zap.Field) system.Error {
+func (k *x11Keyboard) grabKey(key bindKey, fields ...zap.Field) global.Error {
 	var err error
 	for _, m := range k.ignoreMods {
 		err = xproto.GrabKeyChecked(
@@ -166,15 +166,15 @@ func (k *x11Keyboard) grabKey(key bindKey, fields ...zap.Field) system.Error {
 			case xproto.AccessError:
 				accessErr := errors.New("keyboard shortcut is already taken by another application")
 				k.moduleLogger.Info("Failed call x11 grab key", append(fields, zap.Error(accessErr))...)
-				return system.ShortcutUsesByExternalApp
+				return global.ShortcutUsesByExternalApp
 			default:
 				k.moduleLogger.Info("Failed call x11 grab key", append(fields, zap.Error(err))...)
-				return system.ShortcutBindError
+				return global.ShortcutBindError
 			}
 		}
 	}
 
-	return system.Success
+	return global.Success
 }
 
 func (k *x11Keyboard) ungrabKey(key bindKey, fields ...zap.Field) bool {
@@ -299,7 +299,7 @@ func (k *x11Keyboard) keycodesByKeysymStr(str string) []xproto.Keycode {
 	return k.keycodesByKeysym(keysym)
 }
 
-func (k *x11Keyboard) parseShortcut(shortcut string, fields ...zap.Field) ([]bindKey, system.Error) {
+func (k *x11Keyboard) parseShortcut(shortcut string, fields ...zap.Field) ([]bindKey, global.Error) {
 	mods := uint16(0)
 	keycodes := []xproto.Keycode{}
 
@@ -322,7 +322,7 @@ func (k *x11Keyboard) parseShortcut(shortcut string, fields ...zap.Field) ([]bin
 
 	if len(keycodes) == 0 {
 		k.moduleLogger.Info("Failed parse shortcut", fields...)
-		return []bindKey{}, system.ShortcutParseFailed
+		return []bindKey{}, global.ShortcutParseFailed
 	}
 
 	res := make([]bindKey, 0, len(keycodes))
@@ -330,28 +330,28 @@ func (k *x11Keyboard) parseShortcut(shortcut string, fields ...zap.Field) ([]bin
 		res = append(res, bindKey{mods: mods, keycode: keycode})
 	}
 
-	return res, system.Success
+	return res, global.Success
 }
 
-func (k *x11Keyboard) bindImpl(shortcut string, bindID bindID, fields ...zap.Field) system.Error {
+func (k *x11Keyboard) bindImpl(shortcut string, bindID bindID, fields ...zap.Field) global.Error {
 	fields = append(fields, zap.String("Shortcut", shortcut))
 
 	bindKeys, errCode := k.parseShortcut(shortcut, fields...)
-	if errCode != system.Success {
+	if errCode != global.Success {
 		return errCode
 	}
 
 	for _, bindKey := range bindKeys {
 		if _, ok := k.bindByKey[bindKey]; ok {
 			k.moduleLogger.Info("Shortcut already binds by runify", fields...)
-			return system.ShortcutUsesByRunify
+			return global.ShortcutUsesByRunify
 		}
 	}
 
 	bindData := &bindData{id: bindID, keys: bindKeys, shortcut: shortcut}
 
 	for _, bindKey := range bindKeys {
-		if errCode := k.grabKey(bindKey, fields...); errCode != system.Success {
+		if errCode := k.grabKey(bindKey, fields...); errCode != global.Success {
 			return errCode
 		}
 	}
@@ -361,16 +361,16 @@ func (k *x11Keyboard) bindImpl(shortcut string, bindID bindID, fields ...zap.Fie
 		k.bindByKey[bindKey] = bindData
 	}
 
-	return system.Success
+	return global.Success
 }
 
-func (k *x11Keyboard) bind(shortcut string) (bindID, system.Error) {
-	if errCode := k.bindImpl(shortcut, k.nextBindID, zapBindKeyboard); errCode != system.Success {
+func (k *x11Keyboard) bind(shortcut string) (bindID, global.Error) {
+	if errCode := k.bindImpl(shortcut, k.nextBindID, zapBindKeyboard); errCode != global.Success {
 		return 0, errCode
 	}
 
 	k.nextBindID++
-	return k.nextBindID - 1, system.Success
+	return k.nextBindID - 1, global.Success
 }
 
 func (k *x11Keyboard) unbind(id bindID) bool {

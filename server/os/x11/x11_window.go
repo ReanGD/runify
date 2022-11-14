@@ -1,7 +1,7 @@
 package x11
 
 import (
-	"github.com/ReanGD/runify/server/system"
+	"github.com/ReanGD/runify/server/global"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
 )
@@ -22,7 +22,7 @@ func (w *window) sendEvent(eventMask int, event string, fields ...zap.Field) boo
 	return w.conn.sendEvent(w.id, eventMask, event, fields...)
 }
 
-func (w *window) grabKey(modifiers uint16, keycode xproto.Keycode, fields ...zap.Field) system.Error {
+func (w *window) grabKey(modifiers uint16, keycode xproto.Keycode, fields ...zap.Field) global.Error {
 	return w.conn.grabKey(w.id, modifiers, keycode, fields...)
 }
 

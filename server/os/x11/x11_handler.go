@@ -1,7 +1,7 @@
 package x11
 
 import (
-	"github.com/ReanGD/runify/server/system/module"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/jezek/xgb/xfixes"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
@@ -84,7 +84,7 @@ func (h *x11Handler) onX11Event(event interface{}) {
 	}
 }
 
-// func (h *x11Handler) bindShortcut(shortcut string) (bindID, system.Error) {
+// func (h *x11Handler) bindShortcut(shortcut string) (bindID, global.Error) {
 // 	return h.keyboard.bind(shortcut)
 // }
 

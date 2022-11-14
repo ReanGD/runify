@@ -8,8 +8,8 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/logger"
-	"github.com/ReanGD/runify/server/system/module"
 	"go.uber.org/zap"
 )
 

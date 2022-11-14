@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/mime"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/pb"
 	"github.com/ReanGD/runify/server/provider/pcommon"
-	"github.com/ReanGD/runify/server/system/mime"
-	"github.com/ReanGD/runify/server/system/module"
 	"github.com/rkoesters/xdg/desktop"
 	"go.uber.org/zap"
 )

@@ -8,8 +8,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ReanGD/runify/server/config"
-	"github.com/ReanGD/runify/server/system"
-	"github.com/ReanGD/runify/server/system/module"
+	"github.com/ReanGD/runify/server/global"
+	"github.com/ReanGD/runify/server/global/module"
 )
 
 type x11Handler struct {
@@ -117,7 +117,7 @@ func (h *x11Handler) onX11Event(event interface{}) {
 	}
 }
 
-func (h *x11Handler) bindShortcut(shortcut string) (bindID, system.Error) {
+func (h *x11Handler) bindShortcut(shortcut string) (bindID, global.Error) {
 	return h.keyboard.bind(shortcut)
 }
 

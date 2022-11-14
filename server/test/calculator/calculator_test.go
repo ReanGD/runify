@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/provider/calculator"
-	"github.com/ReanGD/runify/server/system"
 	"github.com/cockroachdb/apd/v3"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -34,10 +34,10 @@ func (s *CalcSuite) runTest(expression string, expectedValue apd.Decimal, expect
 		require.Equal(t, expectedCondition, actualRes.Condition, expression)
 		if expectedCondition != 0 {
 			require.Error(t, actualRes.ParserErr, expression)
-			require.NotEqual(t, system.Success, actualRes.SystemErrCode, expression)
+			require.NotEqual(t, global.Success, actualRes.SystemErrCode, expression)
 		} else {
 			require.NoError(t, actualRes.ParserErr, fmt.Errorf("Error in expr: '%s'", expression))
-			require.Equal(t, system.Success, actualRes.SystemErrCode, expression)
+			require.Equal(t, global.Success, actualRes.SystemErrCode, expression)
 			require.NotNil(t, actualRes.Value, expression)
 			assertEqualDecimal(t, expectedValue, actualRes.Value.Value(), expression)
 		}
@@ -56,7 +56,7 @@ func (s *CalcSuite) runTestsFromArr(data []testDataStr) {
 }
 
 func (s *CalcSuite) TestGenerated() {
-	timer := system.NewTimer()
+	timer := global.NewTimer()
 	gen := newTestDataGenerator(int64(timer), s.executer.GetApdContext())
 	for i := 0; i != 30_000; i++ {
 		s.runTest(gen.next())
