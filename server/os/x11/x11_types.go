@@ -3,6 +3,7 @@ package x11
 import (
 	"errors"
 
+	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/jezek/xgb/xproto"
@@ -126,7 +127,7 @@ func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string
 		zap.String("Request", "writeToClipboard"),
 		zap.Bool("IsPrimary", c.isPrimary),
 		zap.String("Reason", reason),
-		zap.String("Action", "return empty result"))
+		zap.String("Action", "return error"))
 	c.result <- false
 }
 
@@ -140,5 +141,33 @@ func (c *subscribeToHotkeysCmd) onRequestDefault(logger *zap.Logger, reason stri
 		zap.String("Request", "subscribeToHotkeys"),
 		zap.String("Reason", reason),
 		zap.String("Action", "subscription not activated"))
+	c.result <- false
+}
+
+type bindHotkeyCmd struct {
+	hotkey *shortcut.Hotkey
+	result chan<- global.Error
+}
+
+func (c *bindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "bindHotkey"),
+		c.hotkey.ZapField(),
+		zap.String("Reason", reason),
+		zap.String("Action", "return error"))
+	c.result <- global.HotkeyBindError
+}
+
+type unbindHotkeyCmd struct {
+	hotkey *shortcut.Hotkey
+	result chan<- bool
+}
+
+func (c *unbindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "unbindHotkey"),
+		c.hotkey.ZapField(),
+		zap.String("Reason", reason),
+		zap.String("Action", "return error"))
 	c.result <- false
 }

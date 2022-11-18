@@ -84,10 +84,6 @@ func (h *x11Handler) onX11Event(event interface{}) {
 	}
 }
 
-// func (h *x11Handler) bindShortcut(shortcut string) (bindID, global.Error) {
-// 	return h.keyboard.bind(shortcut)
-// }
-
 func (h *x11Handler) subscribeToClipboard(cmd *subscribeToClipboardCmd) {
 	cmd.result <- h.clipboard.subscribeToClipboard(cmd.isPrimary, cmd.ch)
 }
@@ -98,6 +94,14 @@ func (h *x11Handler) writeToClipboard(cmd *writeToClipboardCmd) {
 
 func (h *x11Handler) subscribeToHotkeys(cmd *subscribeToHotkeysCmd) {
 	cmd.result <- h.keyboard.subscribeToHotkeys(cmd.ch)
+}
+
+func (h *x11Handler) bindHotkey(cmd *bindHotkeyCmd) {
+	cmd.result <- h.keyboard.bind(cmd.hotkey)
+}
+
+func (h *x11Handler) unbindHotkey(cmd *unbindHotkeyCmd) {
+	cmd.result <- h.keyboard.unbind(cmd.hotkey)
 }
 
 func (h *x11Handler) stop() {

@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
@@ -110,6 +111,10 @@ func (m *X11) onRequest(request interface{}) (bool, error) {
 		m.handler.writeToClipboard(r)
 	case *subscribeToHotkeysCmd:
 		m.handler.subscribeToHotkeys(r)
+	case *bindHotkeyCmd:
+		m.handler.bindHotkey(r)
+	case *unbindHotkeyCmd:
+		m.handler.unbindHotkey(r)
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
 			zap.String("Request", fmt.Sprintf("%v", request)),
@@ -128,6 +133,10 @@ func (m *X11) onRequestDefault(request interface{}, reason string) (bool, error)
 	case *writeToClipboardCmd:
 		r.onRequestDefault(m.ModuleLogger, reason)
 	case *subscribeToHotkeysCmd:
+		r.onRequestDefault(m.ModuleLogger, reason)
+	case *bindHotkeyCmd:
+		r.onRequestDefault(m.ModuleLogger, reason)
+	case *unbindHotkeyCmd:
 		r.onRequestDefault(m.ModuleLogger, reason)
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
@@ -167,6 +176,26 @@ func (m *X11) SubscribeToHotkeys(ch chan<- *shortcut.Hotkey) <-chan bool {
 	result := make(chan bool, 1)
 	m.AddToChannel(&subscribeToHotkeysCmd{
 		ch:     ch,
+		result: result,
+	})
+
+	return result
+}
+
+func (m *X11) bindHotkey(hotkey *shortcut.Hotkey) <-chan global.Error {
+	result := make(chan global.Error, 1)
+	m.AddToChannel(&bindHotkeyCmd{
+		hotkey: hotkey,
+		result: result,
+	})
+
+	return result
+}
+
+func (m *X11) unbindHotkey(hotkey *shortcut.Hotkey) <-chan bool {
+	result := make(chan bool, 1)
+	m.AddToChannel(&unbindHotkeyCmd{
+		hotkey: hotkey,
 		result: result,
 	})
 
