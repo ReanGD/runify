@@ -13,13 +13,13 @@ var (
 	ErrNoKeySpecified       = errors.New("no key specified")
 )
 
-type Shortcut struct {
+type Hotkey struct {
 	mods ModId
 	key  KeyId
 	text string
 }
 
-func NewShortcut(s string) (*Shortcut, error) {
+func NewHotkey(s string) (*Hotkey, error) {
 	var ok bool
 	var key KeyId
 	var mods ModId
@@ -43,7 +43,7 @@ func NewShortcut(s string) (*Shortcut, error) {
 				return nil, ErrDuplicateModifier
 			}
 			mods |= ModControl
-			textMods += "Ctrl+"
+			textMods += "Control+"
 
 		case "alt":
 			if mods&ModAlt != 0 {
@@ -88,37 +88,37 @@ func NewShortcut(s string) (*Shortcut, error) {
 		return nil, ErrNoKeySpecified
 	}
 
-	return &Shortcut{
+	return &Hotkey{
 		mods: mods,
 		key:  key,
 		text: textMods + textKey,
 	}, nil
 }
 
-func (s *Shortcut) Mods() ModId {
-	return s.mods
+func (h *Hotkey) Mods() ModId {
+	return h.mods
 }
 
-func (s *Shortcut) Key() KeyId {
-	return s.key
+func (h *Hotkey) Key() KeyId {
+	return h.key
 }
 
-func (s *Shortcut) IsEqual(other *Shortcut) bool {
-	return s.mods == other.mods && s.key == other.key
+func (h *Hotkey) Id() HotkeyId {
+	return HotkeyId(uint32(h.mods)<<16 | uint32(h.key))
 }
 
-func (s *Shortcut) String() string {
-	return s.text
+func (h *Hotkey) String() string {
+	return h.text
 }
 
-func (s *Shortcut) GoString() string {
-	return s.String()
+func (h *Hotkey) GoString() string {
+	return h.String()
 }
 
-func (s *Shortcut) ZapField() zap.Field {
-	return zap.String("Shortcut", s.String())
+func (h *Hotkey) ZapField() zap.Field {
+	return zap.String("Hotkey", h.String())
 }
 
-func (s *Shortcut) ZapFieldPrefix(prefix string) zap.Field {
-	return zap.String(prefix+"Shortcut", s.String())
+func (h *Hotkey) ZapFieldPrefix(prefix string) zap.Field {
+	return zap.String(prefix+"Hotkey", h.String())
 }
