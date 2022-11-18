@@ -166,10 +166,10 @@ func (k *x11Keyboard) grabKey(key bindKey, fields ...zap.Field) global.Error {
 			case xproto.AccessError:
 				accessErr := errors.New("keyboard shortcut is already taken by another application")
 				k.moduleLogger.Info("Failed call x11 grab key", append(fields, zap.Error(accessErr))...)
-				return global.ShortcutUsesByExternalApp
+				return global.HotkeyUsesByExternalApp
 			default:
 				k.moduleLogger.Info("Failed call x11 grab key", append(fields, zap.Error(err))...)
-				return global.ShortcutBindError
+				return global.HotkeyBindError
 			}
 		}
 	}
@@ -322,7 +322,7 @@ func (k *x11Keyboard) parseShortcut(shortcut string, fields ...zap.Field) ([]bin
 
 	if len(keycodes) == 0 {
 		k.moduleLogger.Info("Failed parse shortcut", fields...)
-		return []bindKey{}, global.ShortcutParseFailed
+		return []bindKey{}, global.HotkeyParseFailed
 	}
 
 	res := make([]bindKey, 0, len(keycodes))
@@ -344,7 +344,7 @@ func (k *x11Keyboard) bindImpl(shortcut string, bindID bindID, fields ...zap.Fie
 	for _, bindKey := range bindKeys {
 		if _, ok := k.bindByKey[bindKey]; ok {
 			k.moduleLogger.Info("Shortcut already binds by runify", fields...)
-			return global.ShortcutUsesByRunify
+			return global.HotkeyUsesByRunify
 		}
 	}
 
