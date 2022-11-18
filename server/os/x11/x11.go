@@ -10,6 +10,7 @@ import (
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
@@ -107,6 +108,8 @@ func (m *X11) onRequest(request interface{}) (bool, error) {
 		m.handler.subscribeToClipboard(r)
 	case *writeToClipboardCmd:
 		m.handler.writeToClipboard(r)
+	case *subscribeToHotkeysCmd:
+		m.handler.subscribeToHotkeys(r)
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
 			zap.String("Request", fmt.Sprintf("%v", request)),
@@ -123,6 +126,8 @@ func (m *X11) onRequestDefault(request interface{}, reason string) (bool, error)
 	case *subscribeToClipboardCmd:
 		r.onRequestDefault(m.ModuleLogger, reason)
 	case *writeToClipboardCmd:
+		r.onRequestDefault(m.ModuleLogger, reason)
+	case *subscribeToHotkeysCmd:
 		r.onRequestDefault(m.ModuleLogger, reason)
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
@@ -153,6 +158,16 @@ func (m *X11) WriteToClipboard(isPrimary bool, data *mime.Data) <-chan bool {
 		isPrimary: isPrimary,
 		data:      data,
 		result:    result,
+	})
+
+	return result
+}
+
+func (m *X11) SubscribeToHotkeys(ch chan<- *shortcut.Hotkey) <-chan bool {
+	result := make(chan bool, 1)
+	m.AddToChannel(&subscribeToHotkeysCmd{
+		ch:     ch,
+		result: result,
 	})
 
 	return result

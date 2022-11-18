@@ -74,7 +74,7 @@ func (c *clipboard) readFinish(selection xproto.Atom) {
 		select {
 		case ch <- data.data:
 		default:
-			c.moduleLogger.Warn("Failed send clipboard data to channel, channel is full",
+			c.moduleLogger.Warn("Failed send clipboard data to subscription channel, channel is full",
 				zapReadFinish, c.atoms.getZapField(selection))
 		}
 	}

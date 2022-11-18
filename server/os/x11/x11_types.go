@@ -129,3 +129,16 @@ func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string
 		zap.String("Action", "return empty result"))
 	c.result <- false
 }
+
+type subscribeToHotkeysCmd struct {
+	ch     chan<- *shortcut.Hotkey
+	result chan<- bool
+}
+
+func (c *subscribeToHotkeysCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "subscribeToHotkeys"),
+		zap.String("Reason", reason),
+		zap.String("Action", "subscription not activated"))
+	c.result <- false
+}

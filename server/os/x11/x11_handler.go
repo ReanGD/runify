@@ -96,6 +96,10 @@ func (h *x11Handler) writeToClipboard(cmd *writeToClipboardCmd) {
 	cmd.result <- h.clipboard.writeToClipboard(cmd.isPrimary, cmd.data)
 }
 
+func (h *x11Handler) subscribeToHotkeys(cmd *subscribeToHotkeysCmd) {
+	cmd.result <- h.keyboard.subscribeToHotkeys(cmd.ch)
+}
+
 func (h *x11Handler) stop() {
 	h.conn.stop()
 	h.keyboard.close()

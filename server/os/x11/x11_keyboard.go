@@ -25,6 +25,7 @@ type keyboard struct {
 	modmap           *xproto.GetModifierMappingReply
 	indexByX11Hotkey map[x11Hotkey]*bindData
 	indexByHotkeyId  map[shortcut.HotkeyId]*bindData
+	subscriptions    []chan<- *shortcut.Hotkey
 	conn             *connection
 	window           *window
 	errorCtx         *module.ErrorCtx
@@ -47,6 +48,7 @@ func newKeyboard() *keyboard {
 		modmap:           nil,
 		indexByX11Hotkey: make(map[x11Hotkey]*bindData, 8),
 		indexByHotkeyId:  make(map[shortcut.HotkeyId]*bindData, 8),
+		subscriptions:    make([]chan<- *shortcut.Hotkey, 0, 1),
 		conn:             nil,
 		window:           nil,
 		errorCtx:         nil,
@@ -79,6 +81,7 @@ func (k *keyboard) close() {
 	}
 	k.indexByX11Hotkey = make(map[x11Hotkey]*bindData)
 	k.indexByHotkeyId = make(map[shortcut.HotkeyId]*bindData)
+	k.subscriptions = []chan<- *shortcut.Hotkey{}
 }
 
 func (k *keyboard) updateMaps(fields ...zap.Field) bool {
@@ -176,6 +179,11 @@ func (k *keyboard) parseHotkey(hotkey *shortcut.Hotkey, fields ...zap.Field) ([]
 	return res, global.Success
 }
 
+func (k *keyboard) subscribeToHotkeys(ch chan<- *shortcut.Hotkey) bool {
+	k.subscriptions = append(k.subscriptions, ch)
+	return true
+}
+
 func (k *keyboard) bind(hotkey *shortcut.Hotkey, fields ...zap.Field) global.Error {
 	zapFields := append(fields, zapBindKeyboard, hotkey.ZapField())
 
@@ -245,8 +253,17 @@ func (k *keyboard) onKeyRelease(event xproto.KeyReleaseEvent) {
 		keycode: keycode,
 	}
 	if bindData, ok := k.indexByX11Hotkey[x11Hotkey]; ok {
-		k.moduleLogger.Debug("onKeyRelease", zapOnKeyRelease, bindData.hotkey.ZapField())
-		// TODO: send bindData.id
+		hotkey := bindData.hotkey
+		k.moduleLogger.Debug("onKeyRelease", zapOnKeyRelease, hotkey.ZapField())
+
+		for _, ch := range k.subscriptions {
+			select {
+			case ch <- hotkey:
+			default:
+				k.moduleLogger.Warn("Failed send hotkey data to subscription channel, channel is full",
+					zapReadFinish, hotkey.ZapField())
+			}
+		}
 	}
 }
 
