@@ -115,6 +115,7 @@ func (m *X11) onRequest(request interface{}) (bool, error) {
 		m.handler.bindHotkey(r)
 	case *unbindHotkeyCmd:
 		m.handler.unbindHotkey(r)
+
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
 			zap.String("Request", fmt.Sprintf("%v", request)),
@@ -138,6 +139,7 @@ func (m *X11) onRequestDefault(request interface{}, reason string) (bool, error)
 		r.onRequestDefault(m.ModuleLogger, reason)
 	case *unbindHotkeyCmd:
 		r.onRequestDefault(m.ModuleLogger, reason)
+
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
 			zap.String("Request", fmt.Sprintf("%v", request)),

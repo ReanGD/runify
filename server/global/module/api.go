@@ -28,3 +28,9 @@ type DisplayServer interface {
 	BindHotkey(hotkey *shortcut.Hotkey) <-chan global.Error
 	UnbindHotkey(hotkey *shortcut.Hotkey) <-chan bool
 }
+
+type Desktop interface {
+	WriteToClipboard(isPrimary bool, data *mime.Data) <-chan bool
+	SetHotkey(action *shortcut.Action, hotkey *shortcut.Hotkey) <-chan global.Error
+	RemoveHotkey(action *shortcut.Action) <-chan bool
+}

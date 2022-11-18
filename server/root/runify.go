@@ -9,6 +9,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/logger"
+	"github.com/ReanGD/runify/server/os/desktop"
 	dsX11 "github.com/ReanGD/runify/server/os/x11"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/provider"
@@ -27,6 +28,7 @@ type Runify struct {
 	rpc      *rpc.Rpc
 	x11      *x11.X11
 	ds       *dsX11.X11
+	desktop  *desktop.Desktop
 	provider *provider.Provider
 
 	runifyLogger *zap.Logger
@@ -52,6 +54,7 @@ func (r *Runify) create(buildCfg *config.BuildCfg) error {
 	r.rpc = rpc.New()
 	r.x11 = x11.New()
 	r.ds = dsX11.New()
+	r.desktop = desktop.New()
 	r.provider = provider.New()
 	r.runifyLogger = nil
 
@@ -87,6 +90,7 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 		{rpc.ModuleName, r.rpc.OnInit(r.cfg, r.provider, rootLogger)},
 		{x11.ModuleName, r.x11.OnInit(r.cfg, r.rpc, rootLogger)},
 		{dsX11.ModuleName, r.ds.OnInit(r.cfg, rootLogger)},
+		{desktop.ModuleName, r.desktop.OnInit(r.cfg, r.ds, rootLogger)},
 		{provider.ModuleName, r.provider.OnInit(r.cfg, r.x11, rootLogger)},
 	} {
 		err := <-it.initCh
@@ -111,6 +115,7 @@ func (r *Runify) start() {
 	rpcCh := r.rpc.OnStart(ctx, wg)
 	x11Ch := r.x11.OnStart(ctx, wg)
 	dsCh := r.ds.OnStart(ctx, wg)
+	desktopCh := r.desktop.OnStart(ctx, wg)
 	providerCh := r.provider.OnStart(ctx, wg)
 
 	r.runifyLogger.Info("Start")
@@ -126,6 +131,8 @@ func (r *Runify) start() {
 		name = x11.ModuleName
 	case err = <-dsCh:
 		name = dsX11.ModuleName
+	case err = <-desktopCh:
+		name = desktop.ModuleName
 	case err = <-providerCh:
 		name = provider.ModuleName
 	}
