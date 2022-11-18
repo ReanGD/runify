@@ -182,7 +182,7 @@ func (m *X11) SubscribeToHotkeys(ch chan<- *shortcut.Hotkey) <-chan bool {
 	return result
 }
 
-func (m *X11) bindHotkey(hotkey *shortcut.Hotkey) <-chan global.Error {
+func (m *X11) BindHotkey(hotkey *shortcut.Hotkey) <-chan global.Error {
 	result := make(chan global.Error, 1)
 	m.AddToChannel(&bindHotkeyCmd{
 		hotkey: hotkey,
@@ -192,7 +192,7 @@ func (m *X11) bindHotkey(hotkey *shortcut.Hotkey) <-chan global.Error {
 	return result
 }
 
-func (m *X11) unbindHotkey(hotkey *shortcut.Hotkey) <-chan bool {
+func (m *X11) UnbindHotkey(hotkey *shortcut.Hotkey) <-chan bool {
 	result := make(chan bool, 1)
 	m.AddToChannel(&unbindHotkeyCmd{
 		hotkey: hotkey,

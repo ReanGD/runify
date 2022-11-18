@@ -9,6 +9,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/logger"
+	dsX11 "github.com/ReanGD/runify/server/os/x11"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/provider"
 	"github.com/ReanGD/runify/server/rpc"
@@ -25,6 +26,7 @@ type Runify struct {
 	logger   *logger.Logger
 	rpc      *rpc.Rpc
 	x11      *x11.X11
+	ds       *dsX11.X11
 	provider *provider.Provider
 
 	runifyLogger *zap.Logger
@@ -49,20 +51,10 @@ func (r *Runify) create(buildCfg *config.BuildCfg) error {
 	r.logger = nil
 	r.rpc = rpc.New()
 	r.x11 = x11.New()
+	r.ds = dsX11.New()
 	r.provider = provider.New()
 	r.runifyLogger = nil
 
-	return nil
-}
-
-func (r *Runify) checkOnInit(name string, ch <-chan error) error {
-	err := <-ch
-	if err != nil {
-		r.runifyLogger.Error("OnInit finished with error",
-			zap.String("module", name),
-			zap.Error(err))
-		return err
-	}
 	return nil
 }
 
@@ -88,20 +80,23 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	r.runifyLogger = rootLogger.With(logModule)
 	r.cfg.AddVersionToLog(rootLogger)
 
-	rpcCh := r.rpc.OnInit(r.cfg, r.provider, rootLogger)
-	x11Ch := r.x11.OnInit(r.cfg, r.rpc, rootLogger)
-	providerCh := r.provider.OnInit(r.cfg, r.x11, rootLogger)
-
-	if err = r.checkOnInit(provider.ModuleName, providerCh); err != nil {
-		return false
-	}
-
-	if err = r.checkOnInit(rpc.ModuleName, rpcCh); err != nil {
-		return false
-	}
-
-	if err = r.checkOnInit(x11.ModuleName, x11Ch); err != nil {
-		return false
+	for _, it := range []struct {
+		moduleName string
+		initCh     <-chan error
+	}{
+		{rpc.ModuleName, r.rpc.OnInit(r.cfg, r.provider, rootLogger)},
+		{x11.ModuleName, r.x11.OnInit(r.cfg, r.rpc, rootLogger)},
+		{dsX11.ModuleName, r.ds.OnInit(r.cfg, rootLogger)},
+		{provider.ModuleName, r.provider.OnInit(r.cfg, r.x11, rootLogger)},
+	} {
+		err := <-it.initCh
+		if err != nil {
+			r.runifyLogger.Error("OnInit finished with error",
+				zap.String("module", it.moduleName),
+				zap.Error(err),
+			)
+			return false
+		}
 	}
 
 	r.runifyLogger.Info("Init")
@@ -115,6 +110,7 @@ func (r *Runify) start() {
 	cfgCh := r.cfg.OnStart(ctx, wg, r.logger.GetRoot())
 	rpcCh := r.rpc.OnStart(ctx, wg)
 	x11Ch := r.x11.OnStart(ctx, wg)
+	dsCh := r.ds.OnStart(ctx, wg)
 	providerCh := r.provider.OnStart(ctx, wg)
 
 	r.runifyLogger.Info("Start")
@@ -128,6 +124,8 @@ func (r *Runify) start() {
 		name = rpc.ModuleName
 	case err = <-x11Ch:
 		name = x11.ModuleName
+	case err = <-dsCh:
+		name = dsX11.ModuleName
 	case err = <-providerCh:
 		name = provider.ModuleName
 	}
