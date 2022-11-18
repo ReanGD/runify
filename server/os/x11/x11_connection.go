@@ -318,15 +318,19 @@ func (c *connection) grabKey(windowID xproto.Window, modifiers uint16, keycode x
 			accessErr := errors.New("keyboard shortcut is already taken by another application")
 			c.moduleLogger.Debug("Failed call x11 grab key",
 				append(fields,
+					zap.Uint8("X11Keycode", uint8(keycode)),
+					zap.Uint16("X11Modifiers", modifiers),
 					zap.Error(accessErr),
 				)...)
-			return global.ShortcutUsesByExternalApp
+			return global.HotkeyUsesByExternalApp
 		default:
 			c.moduleLogger.Warn("Failed call x11 grab key",
 				append(fields,
+					zap.Uint8("X11Keycode", uint8(keycode)),
+					zap.Uint16("X11Modifiers", modifiers),
 					zap.Error(err),
 				)...)
-			return global.ShortcutBindError
+			return global.HotkeyBindError
 		}
 	}
 
@@ -337,6 +341,8 @@ func (c *connection) ungrabKey(windowID xproto.Window, modifiers uint16, keycode
 	if err := xproto.UngrabKeyChecked(c.impl, keycode, windowID, modifiers).Check(); err != nil {
 		c.moduleLogger.Warn("Failed call x11 ungrab key",
 			append(fields,
+				zap.Uint8("X11Keycode", uint8(keycode)),
+				zap.Uint16("X11Modifiers", modifiers),
 				zap.Error(err),
 			)...)
 		return false
