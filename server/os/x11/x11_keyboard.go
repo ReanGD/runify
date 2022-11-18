@@ -2,17 +2,12 @@ package x11
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 
 	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
-)
-
-const (
-	dbgShowShortcut = true
 )
 
 var (
@@ -25,22 +20,17 @@ var (
 )
 
 type keyboard struct {
-	ignoreMods     []uint16
-	modIdByName    map[string]uint16
-	modNameById    map[uint16]string
-	keysymIdByName map[string]xproto.Keysym
-	keysymNameById map[xproto.Keysym]string
-	keymap         *xproto.GetKeyboardMappingReply
-	modmap         *xproto.GetModifierMappingReply
-	bindById       map[bindID]*bindData
-	bindByKey      map[bindKey]*bindData
-	conn           *connection
-	window         *window
-	errorCtx       *module.ErrorCtx
-	moduleLogger   *zap.Logger
-	nextBindID     bindID
-	minKeycode     xproto.Keycode
-	maxKeycode     xproto.Keycode
+	ignoreMods       []uint16
+	keymap           *xproto.GetKeyboardMappingReply
+	modmap           *xproto.GetModifierMappingReply
+	indexByX11Hotkey map[x11Hotkey]*bindData
+	indexByHotkeyId  map[shortcut.HotkeyId]*bindData
+	conn             *connection
+	window           *window
+	errorCtx         *module.ErrorCtx
+	moduleLogger     *zap.Logger
+	minKeycode       xproto.Keycode
+	maxKeycode       xproto.Keycode
 }
 
 func newKeyboard() *keyboard {
@@ -51,44 +41,18 @@ func newKeyboard() *keyboard {
 		xproto.ModMaskLock | xproto.ModMask2, // Caps and Num lock
 	}
 
-	modIdByName := map[string]uint16{
-		"Shift":    xproto.ModMaskShift,
-		"CapsLock": xproto.ModMaskLock,
-		"Control":  xproto.ModMaskControl,
-		"Alt":      xproto.ModMask1,
-		"NumLock":  xproto.ModMask2,
-		"Mod3":     xproto.ModMask3,
-		"Super":    xproto.ModMask4,
-		"Mod5":     xproto.ModMask5,
-	}
-
-	modNameById := make(map[uint16]string, len(modIdByName))
-	for name, id := range modIdByName {
-		modNameById[id] = name
-	}
-
-	keysymNameById := make(map[xproto.Keysym]string, len(gKeysyms))
-	for name, id := range gKeysyms {
-		keysymNameById[id] = name
-	}
-
 	return &keyboard{
-		ignoreMods:     ignoreMods,
-		modIdByName:    modIdByName,
-		modNameById:    modNameById,
-		keysymIdByName: gKeysyms,
-		keysymNameById: keysymNameById,
-		keymap:         nil,
-		modmap:         nil,
-		bindById:       make(map[bindID]*bindData, 8),
-		bindByKey:      make(map[bindKey]*bindData, 8),
-		conn:           nil,
-		window:         nil,
-		errorCtx:       nil,
-		moduleLogger:   nil,
-		nextBindID:     1,
-		minKeycode:     0,
-		maxKeycode:     0,
+		ignoreMods:       ignoreMods,
+		keymap:           nil,
+		modmap:           nil,
+		indexByX11Hotkey: make(map[x11Hotkey]*bindData, 8),
+		indexByHotkeyId:  make(map[shortcut.HotkeyId]*bindData, 8),
+		conn:             nil,
+		window:           nil,
+		errorCtx:         nil,
+		moduleLogger:     nil,
+		minKeycode:       0,
+		maxKeycode:       0,
 	}
 }
 
@@ -110,12 +74,11 @@ func (k *keyboard) init(conn *connection, window *window, errorCtx *module.Error
 }
 
 func (k *keyboard) close() {
-	for key, bindData := range k.bindByKey {
-		_ = k.ungrabKey(
-			key, zapStopKeyboard, zap.String("Shortcut", bindData.shortcut), zap.Uint16("BindID", uint16(bindData.id)))
+	for key, bindData := range k.indexByX11Hotkey {
+		_ = k.ungrabKey(key, zapStopKeyboard, bindData.hotkey.ZapField())
 	}
-	k.bindByKey = make(map[bindKey]*bindData)
-	k.bindById = make(map[bindID]*bindData)
+	k.indexByX11Hotkey = make(map[x11Hotkey]*bindData)
+	k.indexByHotkeyId = make(map[shortcut.HotkeyId]*bindData)
 }
 
 func (k *keyboard) updateMaps(fields ...zap.Field) bool {
@@ -131,7 +94,7 @@ func (k *keyboard) updateMaps(fields ...zap.Field) bool {
 	return true
 }
 
-func (k *keyboard) grabKey(key bindKey, fields ...zap.Field) global.Error {
+func (k *keyboard) grabKey(key x11Hotkey, fields ...zap.Field) global.Error {
 	for _, m := range k.ignoreMods {
 		if errCode := k.window.grabKey(key.mods|m, key.keycode, fields...); errCode != global.Success {
 			return errCode
@@ -141,83 +104,11 @@ func (k *keyboard) grabKey(key bindKey, fields ...zap.Field) global.Error {
 	return global.Success
 }
 
-func (k *keyboard) ungrabKey(key bindKey, fields ...zap.Field) bool {
+func (k *keyboard) ungrabKey(key x11Hotkey, fields ...zap.Field) bool {
 	res := true
 	for _, m := range k.ignoreMods {
 		if !k.window.ungrabKey(key.mods|m, key.keycode, fields...) {
 			res = false
-		}
-	}
-
-	return res
-}
-
-func (k *keyboard) modsToStr(mods uint16, joinStr string) string {
-	res := ""
-	for mask, name := range k.modNameById {
-		if mods&uint16(mask) != 0 {
-			if res != "" {
-				res += joinStr
-			}
-			res += name
-			mods &= ^uint16(mask)
-		}
-	}
-
-	if mods != 0 {
-		if res != "" {
-			res += joinStr
-		}
-		res += fmt.Sprintf("0x%04X", mods)
-	}
-
-	return res
-}
-
-func (k *keyboard) keysymsByKeycode(keycode xproto.Keycode) []xproto.Keysym {
-	if keycode < k.minKeycode || keycode > k.maxKeycode {
-		k.moduleLogger.Warn("Invalid keycode",
-			zap.Uint8("Keycode", uint8(keycode)),
-			zap.Uint8("MinKeycode", uint8(k.minKeycode)),
-			zap.Uint8("MaxKeycode", uint8(k.maxKeycode)))
-		return []xproto.Keysym{}
-	}
-
-	cnt := int(k.keymap.KeysymsPerKeycode)
-	res := make([]xproto.Keysym, 0, cnt)
-	offset := int(keycode-k.minKeycode) * cnt
-	for column := 0; column != cnt; column++ {
-		unique := true
-		keysym := k.keymap.Keysyms[offset+column]
-		for i := 0; i < len(res); i++ {
-			if keysym == res[i] {
-				unique = false
-				break
-			}
-		}
-		if unique {
-			res = append(res, keysym)
-		}
-	}
-
-	return res
-}
-
-func (k *keyboard) keycodeToStr(keycode xproto.Keycode, joinStr string) string {
-	keysyms := k.keysymsByKeycode(keycode)
-	if len(keysyms) == 0 {
-		return ""
-	}
-
-	res := ""
-	for _, keysym := range keysyms {
-		if res != "" {
-			res += joinStr
-		}
-		if name, ok := k.keysymNameById[keysym]; ok {
-			res += name
-		} else {
-			res += fmt.Sprintf("0x%08X", keysym)
 		}
 	}
 
@@ -244,110 +135,92 @@ func (k *keyboard) keycodesByKeysym(keysym xproto.Keysym) []xproto.Keycode {
 	return keycodes
 }
 
-func (k *keyboard) keycodesByKeysymStr(str string) []xproto.Keycode {
-	keysym, ok := k.keysymIdByName[str]
-	if !ok {
-		keysym, ok = k.keysymIdByName[strings.Title(str)]
-	}
-	if !ok {
-		keysym, ok = k.keysymIdByName[strings.ToLower(str)]
-	}
-	if !ok {
-		keysym, ok = k.keysymIdByName[strings.ToUpper(str)]
-	}
-	if !ok {
-		return []xproto.Keycode{}
-	}
-
-	return k.keycodesByKeysym(keysym)
-}
-
-func (k *keyboard) parseShortcut(shortcut string, fields ...zap.Field) ([]bindKey, global.Error) {
+func (k *keyboard) parseHotkey(hotkey *shortcut.Hotkey, fields ...zap.Field) ([]x11Hotkey, global.Error) {
 	mods := uint16(0)
-	keycodes := []xproto.Keycode{}
-
-	for _, part := range strings.Split(shortcut, "+") {
-		switch strings.ToLower(part) {
-		case "shift":
-			mods |= xproto.ModMaskShift
-		case "control":
-			mods |= xproto.ModMaskControl
-		case "alt":
-			mods |= xproto.ModMask1
-		case "super":
-			mods |= xproto.ModMask4
-		default:
-			if len(keycodes) == 0 {
-				keycodes = k.keycodesByKeysymStr(part)
-			}
-		}
+	sMods := hotkey.Mods()
+	if sMods&shortcut.ModShift != 0 {
+		mods |= xproto.ModMaskShift
+		sMods &^= shortcut.ModShift
+	}
+	if sMods&shortcut.ModControl != 0 {
+		mods |= xproto.ModMaskControl
+		sMods &^= shortcut.ModControl
+	}
+	if sMods&shortcut.ModAlt != 0 {
+		mods |= xproto.ModMask1
+		sMods &^= shortcut.ModAlt
+	}
+	if sMods&shortcut.ModSuper != 0 {
+		mods |= xproto.ModMask4
+		sMods &^= shortcut.ModSuper
 	}
 
-	if len(keycodes) == 0 {
-		k.moduleLogger.Info("Failed parse shortcut", fields...)
-		return []bindKey{}, global.ShortcutParseFailed
+	if sMods != 0 {
+		k.moduleLogger.Warn("Unsupported hotkey modifier", append(fields, sMods.ZapField())...)
+		return []x11Hotkey{}, global.HotkeyParseFailed
 	}
 
-	res := make([]bindKey, 0, len(keycodes))
+	sKey := hotkey.Key()
+	keysym, ok := gKeysyms[sKey]
+	if !ok {
+		k.moduleLogger.Warn("Unsupported hotkey key", append(fields, sKey.ZapField())...)
+		return []x11Hotkey{}, global.HotkeyParseFailed
+	}
+
+	keycodes := k.keycodesByKeysym(keysym)
+	res := make([]x11Hotkey, 0, len(keycodes))
 	for _, keycode := range keycodes {
-		res = append(res, bindKey{mods: mods, keycode: keycode})
+		res = append(res, x11Hotkey{mods: mods, keycode: keycode})
 	}
 
 	return res, global.Success
 }
 
-func (k *keyboard) bindImpl(shortcut string, bindID bindID, fields ...zap.Field) global.Error {
-	fields = append(fields, zap.String("Shortcut", shortcut))
+func (k *keyboard) bind(hotkey *shortcut.Hotkey, fields ...zap.Field) global.Error {
+	zapFields := append(fields, zapBindKeyboard, hotkey.ZapField())
 
-	bindKeys, errCode := k.parseShortcut(shortcut, fields...)
+	id := hotkey.Id()
+	if _, ok := k.indexByHotkeyId[id]; ok {
+		k.moduleLogger.Warn("Hotkey already bound", zapFields...)
+		return global.HotkeyUsesByRunify
+	}
+
+	x11Hotkeys, errCode := k.parseHotkey(hotkey, zapFields...)
 	if errCode != global.Success {
 		return errCode
 	}
 
-	for _, bindKey := range bindKeys {
-		if _, ok := k.bindByKey[bindKey]; ok {
-			k.moduleLogger.Info("Shortcut already binds by runify", fields...)
-			return global.ShortcutUsesByRunify
+	for _, x11Hotkey := range x11Hotkeys {
+		if _, ok := k.indexByX11Hotkey[x11Hotkey]; ok {
+			k.moduleLogger.Info("Hotkey already binds by runify", zapFields...)
+			return global.HotkeyUsesByRunify
 		}
 	}
 
-	bindData := &bindData{id: bindID, keys: bindKeys, shortcut: shortcut}
-
-	for _, bindKey := range bindKeys {
-		if errCode := k.grabKey(bindKey, fields...); errCode != global.Success {
+	for _, bindKey := range x11Hotkeys {
+		if errCode := k.grabKey(bindKey, zapFields...); errCode != global.Success {
 			return errCode
 		}
 	}
 
-	k.bindById[bindID] = bindData
-	for _, bindKey := range bindKeys {
-		k.bindByKey[bindKey] = bindData
+	bindData := &bindData{id: id, x11Hotkeys: x11Hotkeys, hotkey: hotkey}
+	k.indexByHotkeyId[id] = bindData
+	for _, x11Hotkey := range x11Hotkeys {
+		k.indexByX11Hotkey[x11Hotkey] = bindData
 	}
 
 	return global.Success
 }
 
-func (k *keyboard) bind(shortcut string) (bindID, global.Error) {
-	if errCode := k.bindImpl(shortcut, k.nextBindID, zapBindKeyboard); errCode != global.Success {
-		return 0, errCode
-	}
+func (k *keyboard) unbind(hotkey *shortcut.Hotkey) bool {
+	zapFields := []zap.Field{zapUnbindKeyboard, hotkey.ZapField()}
 
-	k.nextBindID++
-	return k.nextBindID - 1, global.Success
-}
-
-func (k *keyboard) unbind(id bindID) bool {
-	if bindData, ok := k.bindById[id]; ok {
-		zapFields := []zap.Field{
-			zapUnbindKeyboard,
-			zap.String("Shortcut", bindData.shortcut),
-			zap.Uint16("BindID", uint16(bindData.id)),
-		}
-
-		delete(k.bindById, id)
+	id := hotkey.Id()
+	if bindData, ok := k.indexByHotkeyId[id]; ok {
+		delete(k.indexByHotkeyId, id)
 		res := true
-		for _, key := range bindData.keys {
-			delete(k.bindByKey, key)
+		for _, key := range bindData.x11Hotkeys {
+			delete(k.indexByX11Hotkey, key)
 			if !k.ungrabKey(key, zapFields...) {
 				res = false
 			}
@@ -356,31 +229,24 @@ func (k *keyboard) unbind(id bindID) bool {
 		return res
 	}
 
-	k.moduleLogger.Info("Failed unbind shortcut",
-		zapUnbindKeyboard, zap.Uint16("BindID", uint16(id)), zap.Error(errors.New("bind not found")))
-	return false
+	return true
 }
 
 func (k *keyboard) onKeyRelease(event xproto.KeyReleaseEvent) {
 	mods, keycode := event.State, event.Detail
-
-	modsStr := k.modsToStr(mods, "+")
-	keycodeStr := k.keycodeToStr(keycode, "|")
-	shortcut := fmt.Sprintf("%s [%s]", modsStr, keycodeStr)
-	k.moduleLogger.Debug("onKeyRelease", zapOnKeyRelease, zap.String("Shortcut", shortcut))
 
 	for _, m := range k.ignoreMods {
 		mods &= ^m
 	}
 	mods &= ^uint16(xproto.ModMask5)
 
-	bindKey := bindKey{
+	x11Hotkey := x11Hotkey{
 		mods:    mods,
 		keycode: keycode,
 	}
-	if bindData, ok := k.bindByKey[bindKey]; ok {
+	if bindData, ok := k.indexByX11Hotkey[x11Hotkey]; ok {
+		k.moduleLogger.Debug("onKeyRelease", zapOnKeyRelease, bindData.hotkey.ZapField())
 		// TODO: send bindData.id
-		_ = bindData
 	}
 }
 
@@ -391,15 +257,14 @@ func (k *keyboard) onMappingNotify(event xproto.MappingNotifyEvent) {
 		return
 	}
 	if event.Request == xproto.MappingKeyboard {
-		bindById := k.bindById
-		for key, bindData := range k.bindByKey {
-			_ = k.ungrabKey(
-				key, zapOnMappingNotify, zap.String("Shortcut", bindData.shortcut), zap.Uint16("BindID", uint16(bindData.id)))
+		hotkeys := k.indexByHotkeyId
+		for key, bindData := range k.indexByX11Hotkey {
+			_ = k.ungrabKey(key, zapOnMappingNotify, bindData.hotkey.ZapField())
 		}
-		k.bindByKey = make(map[bindKey]*bindData, 8)
-		k.bindById = make(map[bindID]*bindData, 8)
-		for id, bindData := range bindById {
-			_ = k.bindImpl(bindData.shortcut, id, zapOnMappingNotify)
+		k.indexByX11Hotkey = make(map[x11Hotkey]*bindData, 8)
+		k.indexByHotkeyId = make(map[shortcut.HotkeyId]*bindData, 8)
+		for _, bindData := range hotkeys {
+			_ = k.bind(bindData.hotkey, zapOnMappingNotify)
 		}
 	}
 }

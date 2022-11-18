@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/ReanGD/runify/server/global/mime"
+	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
 )
@@ -88,17 +89,15 @@ func (w *writeData) exists(atom xproto.Atom) bool {
 	return false
 }
 
-type bindID uint16
-
-type bindKey struct {
+type x11Hotkey struct {
 	mods    uint16
 	keycode xproto.Keycode
 }
 
 type bindData struct {
-	id       bindID
-	keys     []bindKey
-	shortcut string
+	id         shortcut.HotkeyId
+	x11Hotkeys []x11Hotkey
+	hotkey     *shortcut.Hotkey
 }
 
 type subscribeToClipboardCmd struct {
