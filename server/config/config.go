@@ -23,6 +23,7 @@ type logItem struct {
 type Config struct {
 	vp           *viper.Viper
 	cfg          *Configuration
+	scfg         *SConfiguration
 	deferredLog  []logItem
 	moduleLogger *zap.Logger
 }
@@ -39,6 +40,7 @@ func New(buildCfg *BuildCfg) *Config {
 	return &Config{
 		vp:           vp,
 		cfg:          configuration,
+		scfg:         newSConfiguration(),
 		deferredLog:  []logItem{},
 		moduleLogger: nil,
 	}
@@ -97,6 +99,11 @@ func (c *Config) AddVersionToLog(log *zap.Logger) {
 
 func (c *Config) Get() *Configuration {
 	return c.cfg
+}
+
+// Get the static configuration for the server
+func (c *Config) GetS() *SConfiguration {
+	return c.scfg
 }
 
 func (c *Config) Save() error {
