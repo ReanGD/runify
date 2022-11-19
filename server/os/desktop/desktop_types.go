@@ -1,11 +1,35 @@
 package desktop
 
 import (
+	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/mime"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"go.uber.org/zap"
 )
+
+type moduleCtx struct {
+	ds           module.DisplayServer
+	primaryCh    chan *mime.Data
+	clipboardCh  chan *mime.Data
+	hotkeyCh     chan *shortcut.Hotkey
+	errorCtx     *module.ErrorCtx
+	moduleLogger *zap.Logger
+}
+
+func newModuleCtx(
+	cfg *config.DesktopCfg, ds module.DisplayServer, ErrorCtx *module.ErrorCtx, moduleLogger *zap.Logger) *moduleCtx {
+
+	return &moduleCtx{
+		ds:           ds,
+		primaryCh:    make(chan *mime.Data, cfg.PrimarySubscriptionChLen),
+		clipboardCh:  make(chan *mime.Data, cfg.ClipboardSubscriptionChLen),
+		hotkeyCh:     make(chan *shortcut.Hotkey, cfg.HotkeySubscriptionChLen),
+		errorCtx:     ErrorCtx,
+		moduleLogger: moduleLogger,
+	}
+}
 
 type writeToClipboardCmd struct {
 	isPrimary bool

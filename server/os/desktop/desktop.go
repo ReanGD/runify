@@ -20,12 +20,15 @@ const ModuleName = "desktop"
 
 type Desktop struct {
 	handler *handler
+	mCtx    *moduleCtx
+
 	module.Module
 }
 
 func New() *Desktop {
 	return &Desktop{
 		handler: newHandler(),
+		mCtx:    nil,
 	}
 }
 
@@ -33,8 +36,10 @@ func (d *Desktop) OnInit(cfg *config.Config, ds module.DisplayServer, rootLogger
 	ch := make(chan error)
 
 	go func() {
-		d.Init(rootLogger, ModuleName, cfg.Get().X11.ChannelLen)
-		ch <- d.handler.init(d.ErrorCtx, d.ModuleLogger)
+		desktopCfg := cfg.GetS().Desktop
+		d.Init(rootLogger, ModuleName, desktopCfg.ModuleChLen)
+		d.mCtx = newModuleCtx(desktopCfg, ds, d.ErrorCtx, d.ModuleLogger)
+		ch <- d.handler.init(d.mCtx)
 	}()
 
 	return ch
@@ -76,6 +81,9 @@ func (d *Desktop) safeRequestLoop(ctx context.Context) (resultIsFinish bool, res
 	done := ctx.Done()
 	errorCh := d.ErrorCtx.GetChannel()
 	messageCh := d.GetReadChannel()
+	primaryCh := d.mCtx.primaryCh
+	clipboardCh := d.mCtx.clipboardCh
+	hotkeyCh := d.mCtx.hotkeyCh
 
 	for {
 		request = nil
@@ -88,6 +96,12 @@ func (d *Desktop) safeRequestLoop(ctx context.Context) (resultIsFinish bool, res
 			resultIsFinish = true
 			resultErr = err
 			return
+		case msg := <-primaryCh:
+			d.handler.onClipboardMsg(true, msg)
+		case msg := <-clipboardCh:
+			d.handler.onClipboardMsg(false, msg)
+		case msg := <-hotkeyCh:
+			d.handler.onHotkeyMsg(msg)
 		case request = <-messageCh:
 			d.MessageWasRead()
 			if resultIsFinish, resultErr = d.onRequest(request); resultIsFinish {
