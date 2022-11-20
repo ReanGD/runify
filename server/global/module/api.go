@@ -22,11 +22,11 @@ type X11 interface {
 }
 
 type DisplayServer interface {
-	SubscribeToClipboard(isPrimary bool, ch chan<- *mime.Data) <-chan bool
-	WriteToClipboard(isPrimary bool, data *mime.Data) <-chan bool
-	SubscribeToHotkeys(ch chan<- *shortcut.Hotkey) <-chan bool
-	BindHotkey(hotkey *shortcut.Hotkey) <-chan global.Error
-	UnbindHotkey(hotkey *shortcut.Hotkey) <-chan bool
+	SubscribeToClipboard(isPrimary bool, ch chan<- *mime.Data, result BoolResult)
+	WriteToClipboard(isPrimary bool, data *mime.Data, result BoolResult)
+	SubscribeToHotkeys(ch chan<- *shortcut.Hotkey, result BoolResult)
+	BindHotkey(hotkey *shortcut.Hotkey, result ErrorCodeResult)
+	UnbindHotkey(hotkey *shortcut.Hotkey, result BoolResult)
 }
 
 type Desktop interface {

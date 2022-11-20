@@ -5,6 +5,7 @@ import (
 
 	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/mime"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
@@ -104,7 +105,7 @@ type bindData struct {
 type subscribeToClipboardCmd struct {
 	isPrimary bool
 	ch        chan<- *mime.Data
-	result    chan<- bool
+	result    module.BoolResult
 }
 
 func (c *subscribeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -113,13 +114,13 @@ func (c *subscribeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason st
 		zap.Bool("IsPrimary", c.isPrimary),
 		zap.String("Reason", reason),
 		zap.String("Action", "subscription not activated"))
-	c.result <- false
+	c.result.SetResult(false)
 }
 
 type writeToClipboardCmd struct {
 	isPrimary bool
 	data      *mime.Data
-	result    chan<- bool
+	result    module.BoolResult
 }
 
 func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -128,12 +129,12 @@ func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string
 		zap.Bool("IsPrimary", c.isPrimary),
 		zap.String("Reason", reason),
 		zap.String("Action", "return error"))
-	c.result <- false
+	c.result.SetResult(false)
 }
 
 type subscribeToHotkeysCmd struct {
 	ch     chan<- *shortcut.Hotkey
-	result chan<- bool
+	result module.BoolResult
 }
 
 func (c *subscribeToHotkeysCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -141,12 +142,12 @@ func (c *subscribeToHotkeysCmd) onRequestDefault(logger *zap.Logger, reason stri
 		zap.String("Request", "subscribeToHotkeys"),
 		zap.String("Reason", reason),
 		zap.String("Action", "subscription not activated"))
-	c.result <- false
+	c.result.SetResult(false)
 }
 
 type bindHotkeyCmd struct {
 	hotkey *shortcut.Hotkey
-	result chan<- global.Error
+	result module.ErrorCodeResult
 }
 
 func (c *bindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -155,12 +156,12 @@ func (c *bindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
 		c.hotkey.ZapField(),
 		zap.String("Reason", reason),
 		zap.String("Action", "return error"))
-	c.result <- global.HotkeyBindError
+	c.result.SetResult(global.HotkeyBindError)
 }
 
 type unbindHotkeyCmd struct {
 	hotkey *shortcut.Hotkey
-	result chan<- bool
+	result module.BoolResult
 }
 
 func (c *unbindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -169,5 +170,5 @@ func (c *unbindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
 		c.hotkey.ZapField(),
 		zap.String("Reason", reason),
 		zap.String("Action", "return error"))
-	c.result <- false
+	c.result.SetResult(false)
 }
