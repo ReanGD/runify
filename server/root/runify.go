@@ -90,7 +90,7 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 		{rpc.ModuleName, r.rpc.OnInit(r.cfg, r.provider, rootLogger)},
 		{x11.ModuleName, r.x11.OnInit(r.cfg, r.rpc, rootLogger)},
 		{dsX11.ModuleName, r.ds.OnInit(r.cfg, rootLogger)},
-		{desktop.ModuleName, r.desktop.OnInit(r.cfg, r.ds, rootLogger)},
+		{desktop.ModuleName, r.desktop.OnInit(r.cfg, r.ds, r.provider, rootLogger)},
 		{provider.ModuleName, r.provider.OnInit(r.cfg, r.x11, rootLogger)},
 	} {
 		err := <-it.initCh

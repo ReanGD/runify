@@ -2,6 +2,38 @@ package module
 
 import "github.com/ReanGD/runify/server/global"
 
+type VoidResult interface {
+	SetResult()
+}
+
+type FuncVoidResult struct {
+	action func()
+}
+
+func NewFuncVoidResult(action func()) *FuncVoidResult {
+	return &FuncVoidResult{
+		action: action,
+	}
+}
+
+func (r *FuncVoidResult) SetResult() {
+	r.action()
+}
+
+type ChanVoidResult struct {
+	ch chan struct{}
+}
+
+func NewChanVoidResult() *ChanVoidResult {
+	return &ChanVoidResult{
+		ch: make(chan struct{}, 1),
+	}
+}
+
+func (r *ChanVoidResult) SetResult() {
+	r.ch <- struct{}{}
+}
+
 type BoolResult interface {
 	SetResult(value bool)
 }

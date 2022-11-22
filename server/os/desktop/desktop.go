@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
-	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
@@ -32,13 +31,14 @@ func New() *Desktop {
 	}
 }
 
-func (d *Desktop) OnInit(cfg *config.Config, ds module.DisplayServer, rootLogger *zap.Logger) <-chan error {
+func (d *Desktop) OnInit(
+	cfg *config.Config, ds module.DisplayServer, provider module.Provider, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {
 		desktopCfg := cfg.GetS().Desktop
 		d.Init(rootLogger, ModuleName, desktopCfg.ModuleChLen)
-		d.mCtx = newModuleCtx(desktopCfg, ds, d.ErrorCtx, d.ModuleLogger)
+		d.mCtx = newModuleCtx(d, desktopCfg, ds, provider, d.ErrorCtx, d.ModuleLogger)
 		ch <- d.handler.init(d.mCtx)
 	}()
 
@@ -49,6 +49,7 @@ func (d *Desktop) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error 
 	wg.Add(1)
 	ch := make(chan error, 1)
 	go func() {
+		d.mCtx.setStopCtx(ctx)
 		d.handler.start()
 		d.ModuleLogger.Info("Start")
 
@@ -115,10 +116,12 @@ func (d *Desktop) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *writeToClipboardCmd:
 		d.handler.writeToClipboard(r)
-	case *setHotkeyCmd:
-		d.handler.setHotkey(r)
-	case *removeHotkeyCmd:
-		d.handler.removeHotkey(r)
+	case *addShortcutCmd:
+		d.handler.addShortcut(r)
+	case *removeShortcutCmd:
+		d.handler.removeShortcut(r)
+	case *removeShortcutWithoutCheckCmd:
+		d.handler.removeShortcutWithoutCheck(r)
 
 	default:
 		d.ModuleLogger.Warn("Unknown message received",
@@ -135,9 +138,11 @@ func (d *Desktop) onRequestDefault(request interface{}, reason string) (bool, er
 	switch r := request.(type) {
 	case *writeToClipboardCmd:
 		r.onRequestDefault(d.ModuleLogger, reason)
-	case *setHotkeyCmd:
+	case *addShortcutCmd:
 		r.onRequestDefault(d.ModuleLogger, reason)
-	case *removeHotkeyCmd:
+	case *removeShortcutCmd:
+		r.onRequestDefault(d.ModuleLogger, reason)
+	case *removeShortcutWithoutCheckCmd:
 		r.onRequestDefault(d.ModuleLogger, reason)
 
 	default:
@@ -152,34 +157,32 @@ func (d *Desktop) onRequestDefault(request interface{}, reason string) (bool, er
 	return false, nil
 }
 
-func (d *Desktop) WriteToClipboard(isPrimary bool, data *mime.Data) <-chan bool {
-	result := make(chan bool, 1)
+func (d *Desktop) WriteToClipboard(isPrimary bool, data *mime.Data, result module.BoolResult) {
 	d.AddToChannel(&writeToClipboardCmd{
 		isPrimary: isPrimary,
 		data:      data,
 		result:    result,
 	})
-
-	return result
 }
 
-func (d *Desktop) SetHotkey(action *shortcut.Action, hotkey *shortcut.Hotkey) <-chan global.Error {
-	result := make(chan global.Error, 1)
-	d.AddToChannel(&setHotkeyCmd{
+func (d *Desktop) AddShortcut(action *shortcut.Action, hotkey *shortcut.Hotkey, result module.ErrorCodeResult) {
+	d.AddToChannel(&addShortcutCmd{
 		action: action,
 		hotkey: hotkey,
 		result: result,
 	})
-
-	return result
 }
 
-func (d *Desktop) RemoveHotkey(action *shortcut.Action) <-chan bool {
-	result := make(chan bool, 1)
-	d.AddToChannel(&removeHotkeyCmd{
+func (d *Desktop) RemoveShortcut(action *shortcut.Action, result module.VoidResult) {
+	d.AddToChannel(&removeShortcutCmd{
 		action: action,
 		result: result,
 	})
+}
 
-	return result
+func (d *Desktop) removeShortcutWithoutCheck(action *shortcut.Action, hotkey *shortcut.Hotkey) {
+	d.AddToChannel(&removeShortcutWithoutCheckCmd{
+		action: action,
+		hotkey: hotkey,
+	})
 }

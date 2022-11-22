@@ -32,6 +32,16 @@ func (id HotkeyId) ZapFieldPrefix(prefix string) zap.Field {
 	return zap.Uint32(prefix+"HotkeyId", uint32(id))
 }
 
+type ActionId uint32
+
+func (id ActionId) ZapField() zap.Field {
+	return zap.Uint32("ActionId", uint32(id))
+}
+
+func (id ActionId) ZapFieldPrefix(prefix string) zap.Field {
+	return zap.Uint32(prefix+"ActionId", uint32(id))
+}
+
 const (
 	ModShift ModId = 1 << iota
 	ModControl

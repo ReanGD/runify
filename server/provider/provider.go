@@ -9,6 +9,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/logger"
 	"github.com/ReanGD/runify/server/pb"
 	"go.uber.org/zap"
@@ -164,4 +165,8 @@ func (p *Provider) Execute(cardID uint64, actionID uint32) <-chan *pb.Result {
 	})
 
 	return ch
+}
+
+func (p *Provider) Activate(action *shortcut.Action) {
+	// TODO: implement
 }

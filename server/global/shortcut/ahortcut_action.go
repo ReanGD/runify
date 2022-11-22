@@ -12,6 +12,11 @@ func NewAction(name string) *Action {
 	}
 }
 
+func (a *Action) Id() ActionId {
+	var id ActionId
+	return id
+}
+
 func (a *Action) String() string {
 	return a.name
 }

@@ -113,7 +113,7 @@ func (c *subscribeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason st
 		zap.String("Request", "subscribeToClipboard"),
 		zap.Bool("IsPrimary", c.isPrimary),
 		zap.String("Reason", reason),
-		zap.String("Action", "subscription not activated"))
+		zap.String("Action", "subscription not activated, return false"))
 	c.result.SetResult(false)
 }
 
@@ -128,7 +128,7 @@ func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string
 		zap.String("Request", "writeToClipboard"),
 		zap.Bool("IsPrimary", c.isPrimary),
 		zap.String("Reason", reason),
-		zap.String("Action", "return error"))
+		zap.String("Action", "return false"))
 	c.result.SetResult(false)
 }
 
@@ -141,7 +141,7 @@ func (c *subscribeToHotkeysCmd) onRequestDefault(logger *zap.Logger, reason stri
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "subscribeToHotkeys"),
 		zap.String("Reason", reason),
-		zap.String("Action", "subscription not activated"))
+		zap.String("Action", "subscription not activated, return false"))
 	c.result.SetResult(false)
 }
 
@@ -169,6 +169,6 @@ func (c *unbindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
 		zap.String("Request", "unbindHotkey"),
 		c.hotkey.ZapField(),
 		zap.String("Reason", reason),
-		zap.String("Action", "return error"))
+		zap.String("Action", "return false"))
 	c.result.SetResult(false)
 }

@@ -1,6 +1,8 @@
 package desktop
 
 import (
+	"context"
+
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/mime"
@@ -10,31 +12,46 @@ import (
 )
 
 type moduleCtx struct {
+	root         *Desktop
 	ds           module.DisplayServer
+	provider     module.Provider
 	primaryCh    chan *mime.Data
 	clipboardCh  chan *mime.Data
 	hotkeyCh     chan *shortcut.Hotkey
 	errorCtx     *module.ErrorCtx
+	stopCtx      context.Context
 	moduleLogger *zap.Logger
 }
 
 func newModuleCtx(
-	cfg *config.DesktopCfg, ds module.DisplayServer, ErrorCtx *module.ErrorCtx, moduleLogger *zap.Logger) *moduleCtx {
+	root *Desktop,
+	cfg *config.DesktopCfg,
+	ds module.DisplayServer,
+	provider module.Provider,
+	ErrorCtx *module.ErrorCtx,
+	moduleLogger *zap.Logger) *moduleCtx {
 
 	return &moduleCtx{
+		root:         root,
 		ds:           ds,
+		provider:     provider,
 		primaryCh:    make(chan *mime.Data, cfg.PrimarySubscriptionChLen),
 		clipboardCh:  make(chan *mime.Data, cfg.ClipboardSubscriptionChLen),
 		hotkeyCh:     make(chan *shortcut.Hotkey, cfg.HotkeySubscriptionChLen),
 		errorCtx:     ErrorCtx,
+		stopCtx:      nil,
 		moduleLogger: moduleLogger,
 	}
+}
+
+func (c *moduleCtx) setStopCtx(stopCtx context.Context) {
+	c.stopCtx = stopCtx
 }
 
 type writeToClipboardCmd struct {
 	isPrimary bool
 	data      *mime.Data
-	result    chan<- bool
+	result    module.BoolResult
 }
 
 func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -43,35 +60,48 @@ func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string
 		zap.Bool("IsPrimary", c.isPrimary),
 		zap.String("Reason", reason),
 		zap.String("Action", "return error"))
-	c.result <- false
+	c.result.SetResult(false)
 }
 
-type setHotkeyCmd struct {
+type addShortcutCmd struct {
 	action *shortcut.Action
 	hotkey *shortcut.Hotkey
-	result chan<- global.Error
+	result module.ErrorCodeResult
 }
 
-func (c *setHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *addShortcutCmd) onRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
-		zap.String("Request", "setHotkey"),
+		zap.String("Request", "addShortcut"),
 		c.action.ZapField(),
 		c.hotkey.ZapField(),
 		zap.String("Reason", reason),
 		zap.String("Action", "return error"))
-	c.result <- global.HotkeyBindError
+	c.result.SetResult(global.HotkeyBindError)
 }
 
-type removeHotkeyCmd struct {
+type removeShortcutCmd struct {
 	action *shortcut.Action
-	result chan<- bool
+	result module.VoidResult
 }
 
-func (c *removeHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *removeShortcutCmd) onRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
-		zap.String("Request", "removeHotkey"),
+		zap.String("Request", "removeShortcut"),
 		c.action.ZapField(),
 		zap.String("Reason", reason),
-		zap.String("Action", "return error"))
-	c.result <- false
+		zap.String("Action", "Do nothing, just log error and return"))
+	c.result.SetResult()
+}
+
+type removeShortcutWithoutCheckCmd struct {
+	action *shortcut.Action
+	hotkey *shortcut.Hotkey
+}
+
+func (c *removeShortcutWithoutCheckCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "removeShortcutWithoutCheck"),
+		c.action.ZapField(),
+		zap.String("Reason", reason),
+		zap.String("Action", "Do nothing"))
 }
