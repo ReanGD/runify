@@ -36,7 +36,7 @@ func (d *Desktop) OnInit(
 	ch := make(chan error)
 
 	go func() {
-		desktopCfg := cfg.GetS().Desktop
+		desktopCfg := cfg.Get().Desktop
 		d.Init(rootLogger, ModuleName, desktopCfg.ModuleChLen)
 		d.mCtx = newModuleCtx(d, desktopCfg, ds, provider, d.ErrorCtx, d.ModuleLogger)
 		ch <- d.handler.init(d.mCtx)

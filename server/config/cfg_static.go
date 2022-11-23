@@ -51,15 +51,15 @@ func newDesktopCfg() *DesktopCfg {
 }
 
 // Static configuration
-type SConfiguration struct {
+type CfgStatic struct {
 	Rpc      *RpcCfg
 	Provider *ProviderCfg
 	DsX11    *DsX11Cfg
 	Desktop  *DesktopCfg
 }
 
-func newSConfiguration() *SConfiguration {
-	return &SConfiguration{
+func newCfgStatic() *CfgStatic {
+	return &CfgStatic{
 		Rpc:      newRpcCfg(),
 		Provider: newProviderCfg(),
 		DsX11:    newDsX11Cfg(),

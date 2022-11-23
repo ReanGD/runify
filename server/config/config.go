@@ -23,7 +23,6 @@ type logItem struct {
 type Config struct {
 	vp           *viper.Viper
 	cfg          *Configuration
-	scfg         *SConfiguration
 	deferredLog  []logItem
 	moduleLogger *zap.Logger
 }
@@ -31,7 +30,8 @@ type Config struct {
 func New(buildCfg *BuildCfg) *Config {
 	vp := viper.New()
 	configuration := newConfiguration(buildCfg)
-	configuration.setDefault(vp)
+	configuration.CfgDynamic.setDefault(vp)
+	configuration.CfgDynamic.postProcess()
 	vp.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	vp.SetConfigType("json")
 	vp.AutomaticEnv()
@@ -40,7 +40,6 @@ func New(buildCfg *BuildCfg) *Config {
 	return &Config{
 		vp:           vp,
 		cfg:          configuration,
-		scfg:         newSConfiguration(),
 		deferredLog:  []logItem{},
 		moduleLogger: nil,
 	}
@@ -54,14 +53,14 @@ func (c *Config) OnInit(cfgFilePath string) {
 		c.deferredLog = append(c.deferredLog, logItem{lvl: zap.WarnLevel, msg: fmt.Sprintf(msg, err)})
 	}
 
-	cfg := newConfigurationSaved()
-	err := c.vp.Unmarshal(&cfg, zapLevelDecoder)
+	cfgDynamic := newCfgDynamic()
+	err := c.vp.Unmarshal(&cfgDynamic, zapLevelDecoder)
 	if err != nil {
 		msg := "Couldn't decode config from file (%s), so let's switch to the config from the env variables and default values"
 		c.deferredLog = append(c.deferredLog, logItem{lvl: zap.WarnLevel, msg: fmt.Sprintf(msg, err)})
 	} else {
-		cfg.process()
-		c.cfg.ConfigurationSaved = cfg
+		cfgDynamic.postProcess()
+		c.cfg.CfgDynamic = cfgDynamic
 	}
 }
 
@@ -99,11 +98,6 @@ func (c *Config) AddVersionToLog(log *zap.Logger) {
 
 func (c *Config) Get() *Configuration {
 	return c.cfg
-}
-
-// Get the static configuration for the server
-func (c *Config) GetS() *SConfiguration {
-	return c.scfg
 }
 
 func (c *Config) Save() error {

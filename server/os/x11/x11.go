@@ -34,7 +34,7 @@ func (m *X11) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {
-		x11Cfg := cfg.GetS().DsX11
+		x11Cfg := cfg.Get().DsX11
 		m.Init(rootLogger, ModuleName, x11Cfg.ModuleChLen)
 		m.x11EventsCh = make(chan interface{}, x11Cfg.X11EventChLen)
 		ch <- m.handler.init(m.x11EventsCh, m.ErrorCtx, m.ModuleLogger)
