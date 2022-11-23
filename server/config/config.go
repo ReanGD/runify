@@ -54,7 +54,7 @@ func (c *Config) OnInit(cfgFilePath string) {
 		c.deferredLog = append(c.deferredLog, logItem{lvl: zap.WarnLevel, msg: fmt.Sprintf(msg, err)})
 	}
 
-	cfg := new(ConfigurationSaved)
+	cfg := newConfigurationSaved()
 	err := c.vp.Unmarshal(&cfg, zapLevelDecoder)
 	if err != nil {
 		msg := "Couldn't decode config from file (%s), so let's switch to the config from the env variables and default values"

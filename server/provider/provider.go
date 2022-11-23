@@ -33,7 +33,7 @@ func (p *Provider) OnInit(cfg *config.Config, desktop module.Desktop, rpc module
 	ch := make(chan error)
 
 	go func() {
-		channelLen := cfg.Get().Provider.ChannelLen
+		channelLen := cfg.GetS().Provider.ChannelLen
 		p.Init(rootLogger, ModuleName, channelLen)
 
 		ch <- p.handler.onInit(cfg, desktop, rpc, p.ModuleLogger)

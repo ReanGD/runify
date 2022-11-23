@@ -31,8 +31,7 @@ func (m *Rpc) OnInit(cfg *config.Config, provider module.Provider, rootLogger *z
 	ch := make(chan error)
 
 	go func() {
-		rpcCfg := &cfg.Get().Rpc
-		m.Init(rootLogger, ModuleName, rpcCfg.ChannelLen)
+		m.Init(rootLogger, ModuleName, cfg.GetS().Rpc.ChannelLen)
 
 		ch <- m.handler.onInit(cfg.Get(), m.ModuleLogger, provider)
 	}()

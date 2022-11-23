@@ -14,57 +14,27 @@ type BuildCfg struct {
 	BuildDateTime string
 }
 
-type UICfg struct {
-	BinaryPath   string
-	ShowShortcut string
+type SystemCfg struct {
+	UIBinaryPath string
+	RpcAddress   string
+	Terminal     string
 }
 
-func (c UICfg) setDefault(vp *viper.Viper) {
-	vp.SetDefault("UI", map[string]interface{}{
-		"BinaryPath":   "/opt/runify/runify-ui",
-		"ShowShortcut": "Super+R",
+func (c *SystemCfg) setDefault(vp *viper.Viper) {
+	vp.SetDefault("System", map[string]interface{}{
+		"UIBinaryPath": "/opt/runify/runify-ui",
+		"RpcAddress":   "/tmp/runify.socket",
+		"Terminal":     "sh",
 	})
 }
 
-type RpcCfg struct {
-	ChannelLen uint32
-	Address    string
+type ShortcutsCfg struct {
+	Root string
 }
 
-func (c RpcCfg) setDefault(vp *viper.Viper) {
-	vp.SetDefault("Rpc", map[string]interface{}{
-		"ChannelLen": 100,
-		"Address":    "/tmp/runify.socket",
-	})
-}
-
-type X11Cfg struct {
-	ChannelLen         uint32
-	HotkeysChannelLen  uint32
-	X11EventChannelLen uint32
-}
-
-func (c X11Cfg) setDefault(vp *viper.Viper) {
-	vp.SetDefault("X11", map[string]interface{}{
-		"ChannelLen":         100,
-		"HotkeysChannelLen":  100,
-		"X11EventChannelLen": 100,
-	})
-}
-
-type ProviderCfg struct {
-	ChannelLen          uint32
-	SubModuleChannelLen uint32
-	Terminal            string
-	Hides               []string
-}
-
-func (c *ProviderCfg) setDefault(vp *viper.Viper) {
-	vp.SetDefault("Provider", map[string]interface{}{
-		"ChannelLen":          100,
-		"SubModuleChannelLen": 100,
-		"Terminal":            "sh",
-		"Hides":               []string{},
+func (c *ShortcutsCfg) setDefault(vp *viper.Viper) {
+	vp.SetDefault("Shortcuts", map[string]interface{}{
+		"Root": "Super+R",
 	})
 }
 
@@ -109,7 +79,7 @@ type LoggerCfg struct {
 	EnableRotate bool
 }
 
-func (c LoggerCfg) setDefault(vp *viper.Viper) {
+func (c *LoggerCfg) setDefault(vp *viper.Viper) {
 	vp.SetDefault("Logger", map[string]interface{}{
 		"Level":                     "info",
 		"LevelStacktrace":           "error",
@@ -126,16 +96,22 @@ func (c LoggerCfg) setDefault(vp *viper.Viper) {
 }
 
 type ConfigurationSaved struct {
-	UI       UICfg
-	Rpc      RpcCfg
-	X11      X11Cfg
-	Provider ProviderCfg
-	Logger   LoggerCfg
+	System    *SystemCfg
+	Shortcuts *ShortcutsCfg
+	Logger    *LoggerCfg
+}
+
+func newConfigurationSaved() *ConfigurationSaved {
+	return &ConfigurationSaved{
+		System:    &SystemCfg{},
+		Shortcuts: &ShortcutsCfg{},
+		Logger:    &LoggerCfg{},
+	}
 }
 
 func (c *ConfigurationSaved) process() {
-	c.Rpc.Address = paths.ExpandAll(c.Rpc.Address)
-	c.UI.BinaryPath = paths.ExpandAll(c.UI.BinaryPath)
+	c.System.UIBinaryPath = paths.ExpandAll(c.System.UIBinaryPath)
+	c.System.RpcAddress = paths.ExpandAll(c.System.RpcAddress)
 	c.Logger.Output = paths.ExpandAll(c.Logger.Output)
 }
 
@@ -147,14 +123,12 @@ type Configuration struct {
 func newConfiguration(buildCfg *BuildCfg) *Configuration {
 	return &Configuration{
 		Build:              buildCfg,
-		ConfigurationSaved: new(ConfigurationSaved),
+		ConfigurationSaved: newConfigurationSaved(),
 	}
 }
 
 func (c *Configuration) setDefault(vp *viper.Viper) {
-	c.UI.setDefault(vp)
-	c.Rpc.setDefault(vp)
-	c.X11.setDefault(vp)
-	c.Provider.setDefault(vp)
+	c.System.setDefault(vp)
+	c.Shortcuts.setDefault(vp)
 	c.Logger.setDefault(vp)
 }

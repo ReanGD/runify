@@ -1,5 +1,27 @@
 package config
 
+type RpcCfg struct {
+	ChannelLen uint32
+}
+
+func newRpcCfg() *RpcCfg {
+	return &RpcCfg{
+		ChannelLen: 100,
+	}
+}
+
+type ProviderCfg struct {
+	ChannelLen          uint32
+	SubModuleChannelLen uint32
+}
+
+func newProviderCfg() *ProviderCfg {
+	return &ProviderCfg{
+		ChannelLen:          100,
+		SubModuleChannelLen: 100,
+	}
+}
+
 type DsX11Cfg struct {
 	ModuleChLen   uint32
 	X11EventChLen uint32
@@ -30,13 +52,17 @@ func newDesktopCfg() *DesktopCfg {
 
 // Static configuration
 type SConfiguration struct {
-	DsX11   *DsX11Cfg
-	Desktop *DesktopCfg
+	Rpc      *RpcCfg
+	Provider *ProviderCfg
+	DsX11    *DsX11Cfg
+	Desktop  *DesktopCfg
 }
 
 func newSConfiguration() *SConfiguration {
 	return &SConfiguration{
-		DsX11:   newDsX11Cfg(),
-		Desktop: newDesktopCfg(),
+		Rpc:      newRpcCfg(),
+		Provider: newProviderCfg(),
+		DsX11:    newDsX11Cfg(),
+		Desktop:  newDesktopCfg(),
 	}
 }

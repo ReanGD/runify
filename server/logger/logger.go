@@ -71,7 +71,7 @@ func newOptions(cfg *config.LoggerCfg) ([]zap.Option, error) {
 }
 
 func New(cfg *config.Config, appID string) (*Logger, error) {
-	logCfg := &cfg.Get().Logger
+	logCfg := cfg.Get().Logger
 	level := zap.NewAtomicLevelAt(logCfg.Level)
 	obj := &Logger{
 		level: &level,

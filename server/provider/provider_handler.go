@@ -45,7 +45,7 @@ func (h *providerHandler) onInit(cfg *config.Config, desktop module.Desktop, rpc
 			return err
 		}
 	}
-	hotkey, err := shortcut.NewHotkey(cfg.Get().UI.ShowShortcut)
+	hotkey, err := shortcut.NewHotkey(cfg.Get().Shortcuts.Root)
 	if err != nil {
 		return err
 	}

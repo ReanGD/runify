@@ -56,7 +56,7 @@ func (p *DesktopEntry) GetName() string {
 func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error {
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
-	p.terminal = cfg.Get().Provider.Terminal
+	p.terminal = cfg.Get().System.Terminal
 	var err error
 	p.iconsCache, err = newIconCache(moduleLogger)
 	return err

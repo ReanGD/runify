@@ -1,34 +1,23 @@
 {
   "logger": {
-    "AddCallerInfo": false,
-    "Compress": true,
-    "EnableRotate": true,
-    "Format": "plain",
-    "Level": "debug",
-    "LevelStackTrace": "error",
-    "LocalTimeInBackupFilename": true,
-    "MaxAgeDays": 3,
-    "MaxBackups": 0,
-    "MaxSizeMB": 100,
-    "Output": "runify.log"
+    "addcallerinfo": false,
+    "compress": true,
+    "enablerotate": true,
+    "format": "plain",
+    "level": "debug",
+    "levelstacktrace": "error",
+    "localtimeinbackupfilename": true,
+    "maxagedays": 3,
+    "maxbackups": 0,
+    "maxsizemb": 100,
+    "output": "runify.log"
   },
-  "provider": {
-    "ChannelLen": 100,
-    "Hides": [],
-    "SubmoduleChannelLen": 100,
-    "Terminal": "sh"
+  "shortcuts": {
+    "root": "Super+R"
   },
-  "rpc": {
-    "Address": "/tmp/runify.socket",
-    "ChannelLen": 100
-  },
-  "ui": {
-    "BinaryPath": "../ui/build/linux/x64/debug/bundle/runify-ui",
-    "ShowShortcut": "Super+R"
-  },
-  "x11": {
-    "ChannelLen": 100,
-    "HotkeysChannelLen": 100,
-    "xX11EventChannelLen": 100
+  "system": {
+    "RpcAddress": "/tmp/runify.socket",
+    "Terminal": "sh",
+    "UIBinaryPath": "../ui/build/linux/x64/debug/bundle/runify-ui"
   }
 }

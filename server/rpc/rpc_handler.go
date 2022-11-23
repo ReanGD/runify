@@ -18,7 +18,7 @@ import (
 )
 
 type rpcHandler struct {
-	binaryPath       string
+	uiBinaryPath     string
 	unixAddr         string
 	netUnixAddr      *net.UnixAddr
 	showUIMultiplier *showUIMultiplier
@@ -30,7 +30,7 @@ type rpcHandler struct {
 
 func newRpcHandler() *rpcHandler {
 	return &rpcHandler{
-		binaryPath:       "",
+		uiBinaryPath:     "",
 		unixAddr:         "",
 		netUnixAddr:      nil,
 		showUIMultiplier: newShowUIMultiplier(),
@@ -42,10 +42,10 @@ func newRpcHandler() *rpcHandler {
 
 func (h *rpcHandler) onInit(cfg *config.Configuration, moduleLogger *zap.Logger, provider module.Provider) error {
 	h.moduleLogger = moduleLogger
-	h.binaryPath = cfg.UI.BinaryPath
+	h.uiBinaryPath = cfg.System.UIBinaryPath
 
 	var err error
-	h.unixAddr = cfg.Rpc.Address
+	h.unixAddr = cfg.System.RpcAddress
 	h.netUnixAddr, err = h.resolveUnixAddr(h.unixAddr)
 	if err != nil {
 		moduleLogger.Error("Failed resolve unit address", zap.String("address", h.unixAddr), zap.Error(err))
@@ -121,13 +121,13 @@ func (h *rpcHandler) onStop() {
 
 func (h *rpcHandler) onShowUI() {
 	if !h.showUIMultiplier.sendToAll() {
-		cmd := exec.Command(h.binaryPath)
+		cmd := exec.Command(h.uiBinaryPath)
 		if err := cmd.Start(); err != nil {
-			h.moduleLogger.Error("Failed start runify UI process", zap.String("binary", h.binaryPath), zap.Error(err))
+			h.moduleLogger.Error("Failed start runify UI process", zap.String("binary", h.uiBinaryPath), zap.Error(err))
 			return
 		}
 
-		h.moduleLogger.Debug("Runify UI process started", zap.String("binary", h.binaryPath))
+		h.moduleLogger.Debug("Runify UI process started", zap.String("binary", h.uiBinaryPath))
 		go cmd.Wait()
 	}
 }
