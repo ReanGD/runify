@@ -10,11 +10,10 @@ import (
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/logger"
 	"github.com/ReanGD/runify/server/os/desktop"
-	dsX11 "github.com/ReanGD/runify/server/os/x11"
+	"github.com/ReanGD/runify/server/os/x11"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/provider"
 	"github.com/ReanGD/runify/server/rpc"
-	"github.com/ReanGD/runify/server/x11"
 	"github.com/gofrs/uuid"
 	"go.uber.org/zap"
 )
@@ -26,8 +25,7 @@ type Runify struct {
 	cfg      *config.Config
 	logger   *logger.Logger
 	rpc      *rpc.Rpc
-	x11      *x11.X11
-	ds       *dsX11.X11
+	ds       *x11.X11
 	desktop  *desktop.Desktop
 	provider *provider.Provider
 
@@ -52,8 +50,7 @@ func (r *Runify) create(buildCfg *config.BuildCfg) error {
 	r.cfg = config.New(buildCfg)
 	r.logger = nil
 	r.rpc = rpc.New()
-	r.x11 = x11.New()
-	r.ds = dsX11.New()
+	r.ds = x11.New()
 	r.desktop = desktop.New()
 	r.provider = provider.New()
 	r.runifyLogger = nil
@@ -88,8 +85,7 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 		initCh     <-chan error
 	}{
 		{rpc.ModuleName, r.rpc.OnInit(r.cfg, r.provider, rootLogger)},
-		{x11.ModuleName, r.x11.OnInit(r.cfg, r.rpc, rootLogger)},
-		{dsX11.ModuleName, r.ds.OnInit(r.cfg, rootLogger)},
+		{x11.ModuleName, r.ds.OnInit(r.cfg, rootLogger)},
 		{desktop.ModuleName, r.desktop.OnInit(r.cfg, r.ds, r.provider, rootLogger)},
 		{provider.ModuleName, r.provider.OnInit(r.cfg, r.desktop, r.rpc, rootLogger)},
 	} {
@@ -113,7 +109,6 @@ func (r *Runify) start() {
 
 	cfgCh := r.cfg.OnStart(ctx, wg, r.logger.GetRoot())
 	rpcCh := r.rpc.OnStart(ctx, wg)
-	x11Ch := r.x11.OnStart(ctx, wg)
 	dsCh := r.ds.OnStart(ctx, wg)
 	desktopCh := r.desktop.OnStart(ctx, wg)
 	providerCh := r.provider.OnStart(ctx, wg)
@@ -127,10 +122,8 @@ func (r *Runify) start() {
 		name = config.ModuleName
 	case err = <-rpcCh:
 		name = rpc.ModuleName
-	case err = <-x11Ch:
-		name = x11.ModuleName
 	case err = <-dsCh:
-		name = dsX11.ModuleName
+		name = x11.ModuleName
 	case err = <-desktopCh:
 		name = desktop.ModuleName
 	case err = <-providerCh:
