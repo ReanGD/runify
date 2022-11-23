@@ -29,14 +29,14 @@ func New() *Provider {
 	}
 }
 
-func (p *Provider) OnInit(cfg *config.Config, x11 module.X11, rootLogger *zap.Logger) <-chan error {
+func (p *Provider) OnInit(cfg *config.Config, desktop module.Desktop, rpc module.Rpc, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {
 		channelLen := cfg.Get().Provider.ChannelLen
 		p.Init(rootLogger, ModuleName, channelLen)
 
-		ch <- p.handler.onInit(cfg, x11, p.ModuleLogger)
+		ch <- p.handler.onInit(cfg, desktop, rpc, p.ModuleLogger)
 	}()
 
 	return ch
@@ -104,6 +104,8 @@ func (p *Provider) onRequest(request interface{}) (bool, error) {
 		p.handler.getActions(r)
 	case *executeCmd:
 		p.handler.execute(r)
+	case *activateCmd:
+		p.handler.activate(r)
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -123,6 +125,8 @@ func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, e
 	case *getActionsCmd:
 		r.onRequestDefault(p.ModuleLogger, reason)
 	case *executeCmd:
+		r.onRequestDefault(p.ModuleLogger, reason)
+	case *activateCmd:
 		r.onRequestDefault(p.ModuleLogger, reason)
 
 	default:
@@ -168,5 +172,7 @@ func (p *Provider) Execute(cardID uint64, actionID uint32) <-chan *pb.Result {
 }
 
 func (p *Provider) Activate(action *shortcut.Action) {
-	// TODO: implement
+	p.AddToChannel(&activateCmd{
+		action: action,
+	})
 }

@@ -5,7 +5,9 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/pb"
 	"github.com/ReanGD/runify/server/provider/calculator"
 	"github.com/ReanGD/runify/server/provider/desktop_entry"
@@ -14,19 +16,24 @@ import (
 
 type providerHandler struct {
 	dataProviders map[uint64]*dataProvider
+	rpc           module.Rpc
+	desktop       module.Desktop
 	moduleLogger  *zap.Logger
 }
 
 func newProviderHandler() *providerHandler {
 	return &providerHandler{
 		dataProviders: make(map[uint64]*dataProvider),
+		rpc:           nil,
 		moduleLogger:  nil,
 	}
 }
 
-func (h *providerHandler) onInit(cfg *config.Config, x11 module.X11, moduleLogger *zap.Logger) error {
+func (h *providerHandler) onInit(cfg *config.Config, desktop module.Desktop, rpc module.Rpc, moduleLogger *zap.Logger) error {
+	h.rpc = rpc
+	h.desktop = desktop
 	h.moduleLogger = moduleLogger
-	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(x11))
+	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(desktop))
 	h.dataProviders[calculatorID] = newDataProvider(calculatorID, calculator.New())
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
@@ -38,6 +45,12 @@ func (h *providerHandler) onInit(cfg *config.Config, x11 module.X11, moduleLogge
 			return err
 		}
 	}
+	hotkey, err := shortcut.NewHotkey(cfg.Get().UI.ShowShortcut)
+	if err != nil {
+		return err
+	}
+	result := module.NewFuncErrorCodeResult(func(result global.Error) {})
+	h.desktop.AddShortcut(shortcut.NewAction("Show UI"), hotkey, result)
 
 	return nil
 }
@@ -86,4 +99,8 @@ func (h *providerHandler) execute(cmd *executeCmd) {
 		data := <-provider.execute(cmd.cardID, cmd.actionID)
 		cmd.result <- data
 	}
+}
+
+func (h *providerHandler) activate(cmd *activateCmd) {
+	h.rpc.ShowUI()
 }

@@ -30,18 +30,18 @@ type entry struct {
 type DesktopEntry struct {
 	providerID   uint64
 	terminal     string
-	x11          module.X11
+	desktop      module.Desktop
 	iconsCache   *iconCache
 	entries      []*entry
 	cache        []*pb.CardItem
 	moduleLogger *zap.Logger
 }
 
-func New(x11 module.X11) *DesktopEntry {
+func New(desktop module.Desktop) *DesktopEntry {
 	return &DesktopEntry{
 		providerID:   0,
 		terminal:     "",
-		x11:          x11,
+		desktop:      desktop,
 		iconsCache:   nil,
 		entries:      []*entry{},
 		cache:        []*pb.CardItem{},
@@ -172,9 +172,11 @@ func (p *DesktopEntry) Execute(cardID uint64, actionID uint32) (*pb.Result, erro
 			}, nil
 		}
 	case actionCopyName:
-		p.x11.WriteToClipboard(false, mime.NewTextData(entry.props.Name))
+		result := module.NewFuncBoolResult(func(result bool) {})
+		p.desktop.WriteToClipboard(false, mime.NewTextData(entry.props.Name), result)
 	case actionCopyPath:
-		p.x11.WriteToClipboard(false, mime.NewTextData(entry.path))
+		result := module.NewFuncBoolResult(func(result bool) {})
+		p.desktop.WriteToClipboard(false, mime.NewTextData(entry.path), result)
 	}
 
 	return &pb.Result{

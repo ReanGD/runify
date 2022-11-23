@@ -2,6 +2,7 @@ package provider
 
 import (
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/pb"
 	"go.uber.org/zap"
 )
@@ -28,7 +29,7 @@ type getRootCmd struct {
 func (c *getRootCmd) onRequestDefault(logger *zap.Logger, reason string) {
 	c.result <- []*pb.CardItem{}
 	logger.Warn("Process message finished with error",
-		zap.String("Request", "GetRoot"),
+		zap.String("Request", "getRoot"),
 		zap.String("Reason", reason),
 		zap.String("Action", "return empty result"))
 }
@@ -43,7 +44,7 @@ func (c *getActionsCmd) onRequestDefault(logger *zap.Logger, reason string) {
 		Items: []*pb.ActionItem{},
 	}
 	logger.Warn("Process message finished with error",
-		zap.String("Request", "GetActions"),
+		zap.String("Request", "getActions"),
 		zap.Uint64("CardID", c.cardID),
 		zap.String("Reason", reason),
 		zap.String("Action", "return empty result"))
@@ -60,7 +61,7 @@ func (c *executeCmd) onRequestDefault(logger *zap.Logger, reason string) {
 		Payload: &pb.Result_Empty{},
 	}
 	logger.Warn("Process message finished with error",
-		zap.String("Request", "Execute"),
+		zap.String("Request", "execute"),
 		zap.Uint64("CardID", c.cardID),
 		zap.Uint32("ActionID", c.actionID),
 		zap.String("Reason", reason),
@@ -69,9 +70,22 @@ func (c *executeCmd) onRequestDefault(logger *zap.Logger, reason string) {
 
 func (c *executeCmd) executeError(logger *zap.Logger, reason string) {
 	logger.Warn("Failed execute desktop entry",
-		zap.String("Request", "Execute"),
+		zap.String("Request", "execute"),
 		zap.Uint64("CardID", c.cardID),
 		zap.Uint32("ActionID", c.actionID),
 		zap.String("Reason", reason),
 		zap.String("Action", "return empty result"))
+}
+
+type activateCmd struct {
+	action *shortcut.Action
+}
+
+func (c *activateCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "activate"),
+		zap.String("Reason", reason),
+		c.action.ZapField(),
+		zap.String("Action", "do nothing"),
+	)
 }

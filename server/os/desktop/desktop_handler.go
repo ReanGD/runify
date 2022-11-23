@@ -201,4 +201,6 @@ func (h *handler) removeShortcutWithoutCheck(cmd *removeShortcutWithoutCheckCmd)
 }
 
 func (h *handler) stop() {
+	h.shortcutByAction = make(map[shortcut.ActionId]*shortcutData)
+	h.shortcutByHotkey = make(map[shortcut.HotkeyId]*shortcutData)
 }
