@@ -52,8 +52,43 @@ message Result {
 	}
 }
 
+// System messages
+
+enum LogLevel {
+	DEBUG = 0;
+	INFO = 1;
+	WARNING = 2;
+	ERROR = 3;
+}
+
+message WriteLog {
+	LogLevel level = 1;
+	string message = 2;
+}
+
+enum FormStateType {
+	SHOW = 0;
+	HIDE = 1;
+}
+
+message SetFormState {
+	FormStateType state = 1;
+}
+
+message ServiceMsgUI {
+	oneof payload {
+		WriteLog writeLog = 1;
+	}
+}
+
+message ServiceMsgSrv {
+	oneof payload {
+		SetFormState setFormState = 1;
+	}
+}
+
 service Runify {
-	rpc WaitShowWindow(Empty) returns (stream ShowWindow) {}
+	rpc ServiceChannel(stream ServiceMsgUI) returns (stream ServiceMsgSrv) {}
 	rpc GetRoot(Empty) returns (Form) {}
 	rpc GetActions(SelectedCard) returns (Actions) {}
 	rpc ExecuteDefault(SelectedCard) returns (Result) {}
