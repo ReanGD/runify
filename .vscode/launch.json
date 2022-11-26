@@ -3,32 +3,33 @@
     "configurations": [
         {
             "name": "ui (debug)",
-            "cwd": "ui",
+            "type": "dart",
             "request": "launch",
-            "type": "dart"
+            "cwd": "ui",
+            "flutterMode": "debug"
         },
         {
             "name": "ui (profile mode)",
-            "cwd": "ui",
-            "request": "launch",
             "type": "dart",
+            "request": "launch",
+            "cwd": "ui",
             "flutterMode": "profile"
         },
         {
             "name": "ui (release mode)",
-            "cwd": "ui",
-            "request": "launch",
             "type": "dart",
+            "request": "launch",
+            "cwd": "ui",
             "flutterMode": "release"
         },
         {
             "name": "server",
-            "cwd": "server",
-            "args": ["-c", "${workspaceFolder}/ci/cfg/dev.json"],
             "type": "go",
             "request": "launch",
-            "mode": "debug",
-            "program": "${workspaceFolder}/server"
+            "cwd": "server",
+            "program": "${workspaceFolder}/server",
+            "args": ["-c", "${workspaceFolder}/ci/cfg/dev.json"],
+            "mode": "debug"
           }
     ]
 }
