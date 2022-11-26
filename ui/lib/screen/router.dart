@@ -47,9 +47,9 @@ class _Listener extends WindowListener {
 }
 
 class ScreenRouter extends StatelessWidget {
-  final _logger = Logger();
   final _settings = Settings();
   final _runifyPlugin = RunifyNative();
+  late final Logger _logger;
   late final Metrics _metrics;
   late final RunifyClient _grpcClient;
   late final NavigatorState _navigator;
@@ -63,8 +63,9 @@ class ScreenRouter extends StatelessWidget {
     final initFuture =
         _runifyPlugin.initPlugin(_settings.windowOffset, _settings.windowSize);
     _grpcClient = newGrpcClient(_settings);
-    _service = ScreenRouterService(_logger, _grpcClient, this);
-    _service.waitShowWindow(this);
+    _service = ScreenRouterService(_grpcClient, this);
+    _service.serviceChannel(this);
+    _logger = _service.logger;
     _runifyPlugin.addListener(_Listener(this));
     return initFuture;
   }

@@ -1,23 +1,28 @@
+import 'dart:async';
+
 import 'package:runify/system/logger.dart';
 import 'package:runify/screen/router.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
 
 class ScreenRouterService {
-  final Logger logger;
   final RunifyClient grpcClient;
   final ScreenRouter router;
+  final _sender = StreamController<ServiceMsgUI>();
+  late final Logger logger;
 
-  ScreenRouterService(this.logger, this.grpcClient, this.router);
+  ScreenRouterService(this.grpcClient, this.router) {
+    logger = Logger(_sender);
+  }
 
-  Future<void> waitShowWindow(ScreenRouter router) async {
+  Future<void> serviceChannel(ScreenRouter router) async {
     try {
-      final stream = grpcClient.waitShowWindow(Empty());
+      final stream = grpcClient.serviceChannel(_sender.stream);
       await for (var _ in stream) {
         router.showWindow();
       }
     } catch (e) {
-      logger
-          .log('gRPC WaitShowWindow method ended with error: $e. Stop runify.');
+      // ignore: avoid_print
+      print("gRPC WaitShowWindow method ended with error: $e. Stop runify.");
       await router.closeWindow();
     }
   }
