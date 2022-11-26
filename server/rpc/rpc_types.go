@@ -2,8 +2,6 @@ package rpc
 
 import (
 	"sync"
-
-	"github.com/ReanGD/runify/server/pb"
 )
 
 type showUICmd struct {
@@ -11,20 +9,20 @@ type showUICmd struct {
 
 type showUIMultiplier struct {
 	nextID uint32
-	subs   map[uint32]chan *pb.ShowWindow
+	subs   map[uint32]chan struct{}
 	mutex  sync.RWMutex
 }
 
 func newShowUIMultiplier() *showUIMultiplier {
 	return &showUIMultiplier{
 		nextID: 0,
-		subs:   make(map[uint32]chan *pb.ShowWindow),
+		subs:   make(map[uint32]chan struct{}),
 		mutex:  sync.RWMutex{},
 	}
 }
 
-func (m *showUIMultiplier) subscribe() (uint32, <-chan *pb.ShowWindow) {
-	ch := make(chan *pb.ShowWindow, 1)
+func (m *showUIMultiplier) subscribe() (uint32, <-chan struct{}) {
+	ch := make(chan struct{}, 1)
 	m.mutex.Lock()
 	id := m.nextID
 	m.nextID++
@@ -40,7 +38,7 @@ func (m *showUIMultiplier) unsubscribe(id uint32) {
 }
 
 func (m *showUIMultiplier) sendToAll() bool {
-	msg := &pb.ShowWindow{}
+	msg := struct{}{}
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 	for _, ch := range m.subs {

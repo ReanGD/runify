@@ -40,7 +40,9 @@ func newRpcHandler() *rpcHandler {
 	}
 }
 
-func (h *rpcHandler) onInit(cfg *config.Configuration, moduleLogger *zap.Logger, provider module.Provider) error {
+func (h *rpcHandler) onInit(
+	cfg *config.Configuration, provider module.Provider, uiLogger *zap.Logger, moduleLogger *zap.Logger) error {
+
 	h.moduleLogger = moduleLogger
 	h.uiBinaryPath = cfg.System.UIBinaryPath
 
@@ -52,7 +54,9 @@ func (h *rpcHandler) onInit(cfg *config.Configuration, moduleLogger *zap.Logger,
 		return errors.New("failed resolve unit address")
 	}
 	h.grpcServer = grpc.NewServer()
-	h.runifyServer = newRunifyServer(provider, h.showUIMultiplier, h.moduleLogger)
+
+	uiHandler := newUIHandler(uiLogger, moduleLogger)
+	h.runifyServer = newRunifyServer(provider, h.showUIMultiplier, uiHandler, h.moduleLogger)
 
 	return nil
 }

@@ -32,8 +32,8 @@ func (m *Rpc) OnInit(cfg *config.Config, provider module.Provider, rootLogger *z
 
 	go func() {
 		m.Init(rootLogger, ModuleName, cfg.Get().Rpc.ChannelLen)
-
-		ch <- m.handler.onInit(cfg.Get(), m.ModuleLogger, provider)
+		uiLogger := rootLogger.With(zap.String("module", "UI"))
+		ch <- m.handler.onInit(cfg.Get(), provider, uiLogger, m.ModuleLogger)
 	}()
 
 	return ch
