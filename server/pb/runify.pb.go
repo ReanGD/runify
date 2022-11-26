@@ -20,6 +20,104 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type LogLevel int32
+
+const (
+	LogLevel_DEBUG   LogLevel = 0
+	LogLevel_INFO    LogLevel = 1
+	LogLevel_WARNING LogLevel = 2
+	LogLevel_ERROR   LogLevel = 3
+)
+
+// Enum value maps for LogLevel.
+var (
+	LogLevel_name = map[int32]string{
+		0: "DEBUG",
+		1: "INFO",
+		2: "WARNING",
+		3: "ERROR",
+	}
+	LogLevel_value = map[string]int32{
+		"DEBUG":   0,
+		"INFO":    1,
+		"WARNING": 2,
+		"ERROR":   3,
+	}
+)
+
+func (x LogLevel) Enum() *LogLevel {
+	p := new(LogLevel)
+	*p = x
+	return p
+}
+
+func (x LogLevel) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (LogLevel) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_runify_proto_enumTypes[0].Descriptor()
+}
+
+func (LogLevel) Type() protoreflect.EnumType {
+	return &file_proto_runify_proto_enumTypes[0]
+}
+
+func (x LogLevel) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use LogLevel.Descriptor instead.
+func (LogLevel) EnumDescriptor() ([]byte, []int) {
+	return file_proto_runify_proto_rawDescGZIP(), []int{0}
+}
+
+type FormStateType int32
+
+const (
+	FormStateType_SHOW FormStateType = 0
+	FormStateType_HIDE FormStateType = 1
+)
+
+// Enum value maps for FormStateType.
+var (
+	FormStateType_name = map[int32]string{
+		0: "SHOW",
+		1: "HIDE",
+	}
+	FormStateType_value = map[string]int32{
+		"SHOW": 0,
+		"HIDE": 1,
+	}
+)
+
+func (x FormStateType) Enum() *FormStateType {
+	p := new(FormStateType)
+	*p = x
+	return p
+}
+
+func (x FormStateType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (FormStateType) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_runify_proto_enumTypes[1].Descriptor()
+}
+
+func (FormStateType) Type() protoreflect.EnumType {
+	return &file_proto_runify_proto_enumTypes[1]
+}
+
+func (x FormStateType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use FormStateType.Descriptor instead.
+func (FormStateType) EnumDescriptor() ([]byte, []int) {
+	return file_proto_runify_proto_rawDescGZIP(), []int{1}
+}
+
 type Empty struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -560,6 +658,242 @@ func (*Result_Empty) isResult_Payload() {}
 
 func (*Result_Hide) isResult_Payload() {}
 
+type WriteLog struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Level   LogLevel `protobuf:"varint,1,opt,name=level,proto3,enum=runify.LogLevel" json:"level,omitempty"`
+	Message string   `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+}
+
+func (x *WriteLog) Reset() {
+	*x = WriteLog{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_runify_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WriteLog) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WriteLog) ProtoMessage() {}
+
+func (x *WriteLog) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_runify_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WriteLog.ProtoReflect.Descriptor instead.
+func (*WriteLog) Descriptor() ([]byte, []int) {
+	return file_proto_runify_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *WriteLog) GetLevel() LogLevel {
+	if x != nil {
+		return x.Level
+	}
+	return LogLevel_DEBUG
+}
+
+func (x *WriteLog) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type SetFormState struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	State FormStateType `protobuf:"varint,1,opt,name=state,proto3,enum=runify.FormStateType" json:"state,omitempty"`
+}
+
+func (x *SetFormState) Reset() {
+	*x = SetFormState{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_runify_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetFormState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetFormState) ProtoMessage() {}
+
+func (x *SetFormState) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_runify_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetFormState.ProtoReflect.Descriptor instead.
+func (*SetFormState) Descriptor() ([]byte, []int) {
+	return file_proto_runify_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *SetFormState) GetState() FormStateType {
+	if x != nil {
+		return x.State
+	}
+	return FormStateType_SHOW
+}
+
+type ServiceMsgUI struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Types that are assignable to Payload:
+	//
+	//	*ServiceMsgUI_WriteLog
+	Payload isServiceMsgUI_Payload `protobuf_oneof:"payload"`
+}
+
+func (x *ServiceMsgUI) Reset() {
+	*x = ServiceMsgUI{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_runify_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ServiceMsgUI) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServiceMsgUI) ProtoMessage() {}
+
+func (x *ServiceMsgUI) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_runify_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServiceMsgUI.ProtoReflect.Descriptor instead.
+func (*ServiceMsgUI) Descriptor() ([]byte, []int) {
+	return file_proto_runify_proto_rawDescGZIP(), []int{12}
+}
+
+func (m *ServiceMsgUI) GetPayload() isServiceMsgUI_Payload {
+	if m != nil {
+		return m.Payload
+	}
+	return nil
+}
+
+func (x *ServiceMsgUI) GetWriteLog() *WriteLog {
+	if x, ok := x.GetPayload().(*ServiceMsgUI_WriteLog); ok {
+		return x.WriteLog
+	}
+	return nil
+}
+
+type isServiceMsgUI_Payload interface {
+	isServiceMsgUI_Payload()
+}
+
+type ServiceMsgUI_WriteLog struct {
+	WriteLog *WriteLog `protobuf:"bytes,1,opt,name=writeLog,proto3,oneof"`
+}
+
+func (*ServiceMsgUI_WriteLog) isServiceMsgUI_Payload() {}
+
+type ServiceMsgSrv struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Types that are assignable to Payload:
+	//
+	//	*ServiceMsgSrv_SetFormState
+	Payload isServiceMsgSrv_Payload `protobuf_oneof:"payload"`
+}
+
+func (x *ServiceMsgSrv) Reset() {
+	*x = ServiceMsgSrv{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_runify_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ServiceMsgSrv) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServiceMsgSrv) ProtoMessage() {}
+
+func (x *ServiceMsgSrv) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_runify_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServiceMsgSrv.ProtoReflect.Descriptor instead.
+func (*ServiceMsgSrv) Descriptor() ([]byte, []int) {
+	return file_proto_runify_proto_rawDescGZIP(), []int{13}
+}
+
+func (m *ServiceMsgSrv) GetPayload() isServiceMsgSrv_Payload {
+	if m != nil {
+		return m.Payload
+	}
+	return nil
+}
+
+func (x *ServiceMsgSrv) GetSetFormState() *SetFormState {
+	if x, ok := x.GetPayload().(*ServiceMsgSrv_SetFormState); ok {
+		return x.SetFormState
+	}
+	return nil
+}
+
+type isServiceMsgSrv_Payload interface {
+	isServiceMsgSrv_Payload()
+}
+
+type ServiceMsgSrv_SetFormState struct {
+	SetFormState *SetFormState `protobuf:"bytes,1,opt,name=setFormState,proto3,oneof"`
+}
+
+func (*ServiceMsgSrv_SetFormState) isServiceMsgSrv_Payload() {}
+
 var File_proto_runify_proto protoreflect.FileDescriptor
 
 var file_proto_runify_proto_rawDesc = []byte{
@@ -600,25 +934,51 @@ var file_proto_runify_proto_rawDesc = []byte{
 	0x74, 0x79, 0x12, 0x28, 0x0a, 0x04, 0x68, 0x69, 0x64, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b,
 	0x32, 0x12, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x48, 0x69, 0x64, 0x65, 0x57, 0x69,
 	0x6e, 0x64, 0x6f, 0x77, 0x48, 0x00, 0x52, 0x04, 0x68, 0x69, 0x64, 0x65, 0x42, 0x09, 0x0a, 0x07,
-	0x70, 0x61, 0x79, 0x6c, 0x6f, 0x61, 0x64, 0x32, 0x91, 0x02, 0x0a, 0x06, 0x52, 0x75, 0x6e, 0x69,
-	0x66, 0x79, 0x12, 0x37, 0x0a, 0x0e, 0x57, 0x61, 0x69, 0x74, 0x53, 0x68, 0x6f, 0x77, 0x57, 0x69,
-	0x6e, 0x64, 0x6f, 0x77, 0x12, 0x0d, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x45, 0x6d,
-	0x70, 0x74, 0x79, 0x1a, 0x12, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53, 0x68, 0x6f,
-	0x77, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x22, 0x00, 0x30, 0x01, 0x12, 0x28, 0x0a, 0x07, 0x47,
-	0x65, 0x74, 0x52, 0x6f, 0x6f, 0x74, 0x12, 0x0d, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e,
-	0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0c, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x46,
-	0x6f, 0x72, 0x6d, 0x22, 0x00, 0x12, 0x35, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x41, 0x63, 0x74, 0x69,
-	0x6f, 0x6e, 0x73, 0x12, 0x14, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53, 0x65, 0x6c,
-	0x65, 0x63, 0x74, 0x65, 0x64, 0x43, 0x61, 0x72, 0x64, 0x1a, 0x0f, 0x2e, 0x72, 0x75, 0x6e, 0x69,
-	0x66, 0x79, 0x2e, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0x00, 0x12, 0x38, 0x0a, 0x0e,
-	0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x44, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x12, 0x14,
-	0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64,
-	0x43, 0x61, 0x72, 0x64, 0x1a, 0x0e, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x52, 0x65,
-	0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x33, 0x0a, 0x07, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74,
-	0x65, 0x12, 0x16, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53, 0x65, 0x6c, 0x65, 0x63,
-	0x74, 0x65, 0x64, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x1a, 0x0e, 0x2e, 0x72, 0x75, 0x6e, 0x69,
-	0x66, 0x79, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x42, 0x06, 0x5a, 0x04, 0x2e,
-	0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x61, 0x79, 0x6c, 0x6f, 0x61, 0x64, 0x22, 0x4c, 0x0a, 0x08, 0x57, 0x72, 0x69, 0x74, 0x65,
+	0x4c, 0x6f, 0x67, 0x12, 0x26, 0x0a, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0e, 0x32, 0x10, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x4c, 0x6f, 0x67, 0x4c,
+	0x65, 0x76, 0x65, 0x6c, 0x52, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x18, 0x0a, 0x07, 0x6d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x3b, 0x0a, 0x0c, 0x53, 0x65, 0x74, 0x46, 0x6f, 0x72, 0x6d,
+	0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x2b, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0e, 0x32, 0x15, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x46, 0x6f,
+	0x72, 0x6d, 0x53, 0x74, 0x61, 0x74, 0x65, 0x54, 0x79, 0x70, 0x65, 0x52, 0x05, 0x73, 0x74, 0x61,
+	0x74, 0x65, 0x22, 0x49, 0x0a, 0x0c, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x4d, 0x73, 0x67,
+	0x55, 0x49, 0x12, 0x2e, 0x0a, 0x08, 0x77, 0x72, 0x69, 0x74, 0x65, 0x4c, 0x6f, 0x67, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x57, 0x72,
+	0x69, 0x74, 0x65, 0x4c, 0x6f, 0x67, 0x48, 0x00, 0x52, 0x08, 0x77, 0x72, 0x69, 0x74, 0x65, 0x4c,
+	0x6f, 0x67, 0x42, 0x09, 0x0a, 0x07, 0x70, 0x61, 0x79, 0x6c, 0x6f, 0x61, 0x64, 0x22, 0x56, 0x0a,
+	0x0d, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x4d, 0x73, 0x67, 0x53, 0x72, 0x76, 0x12, 0x3a,
+	0x0a, 0x0c, 0x73, 0x65, 0x74, 0x46, 0x6f, 0x72, 0x6d, 0x53, 0x74, 0x61, 0x74, 0x65, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53, 0x65,
+	0x74, 0x46, 0x6f, 0x72, 0x6d, 0x53, 0x74, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x0c, 0x73, 0x65,
+	0x74, 0x46, 0x6f, 0x72, 0x6d, 0x53, 0x74, 0x61, 0x74, 0x65, 0x42, 0x09, 0x0a, 0x07, 0x70, 0x61,
+	0x79, 0x6c, 0x6f, 0x61, 0x64, 0x2a, 0x37, 0x0a, 0x08, 0x4c, 0x6f, 0x67, 0x4c, 0x65, 0x76, 0x65,
+	0x6c, 0x12, 0x09, 0x0a, 0x05, 0x44, 0x45, 0x42, 0x55, 0x47, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04,
+	0x49, 0x4e, 0x46, 0x4f, 0x10, 0x01, 0x12, 0x0b, 0x0a, 0x07, 0x57, 0x41, 0x52, 0x4e, 0x49, 0x4e,
+	0x47, 0x10, 0x02, 0x12, 0x09, 0x0a, 0x05, 0x45, 0x52, 0x52, 0x4f, 0x52, 0x10, 0x03, 0x2a, 0x23,
+	0x0a, 0x0d, 0x46, 0x6f, 0x72, 0x6d, 0x53, 0x74, 0x61, 0x74, 0x65, 0x54, 0x79, 0x70, 0x65, 0x12,
+	0x08, 0x0a, 0x04, 0x53, 0x48, 0x4f, 0x57, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x48, 0x49, 0x44,
+	0x45, 0x10, 0x01, 0x32, 0x9d, 0x02, 0x0a, 0x06, 0x52, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x12, 0x43,
+	0x0a, 0x0e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c,
+	0x12, 0x14, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x65, 0x4d, 0x73, 0x67, 0x55, 0x49, 0x1a, 0x15, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e,
+	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x4d, 0x73, 0x67, 0x53, 0x72, 0x76, 0x22, 0x00, 0x28,
+	0x01, 0x30, 0x01, 0x12, 0x28, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6f, 0x74, 0x12, 0x0d,
+	0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0c, 0x2e,
+	0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x46, 0x6f, 0x72, 0x6d, 0x22, 0x00, 0x12, 0x35, 0x0a,
+	0x0a, 0x47, 0x65, 0x74, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x14, 0x2e, 0x72, 0x75,
+	0x6e, 0x69, 0x66, 0x79, 0x2e, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x43, 0x61, 0x72,
+	0x64, 0x1a, 0x0f, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x41, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x73, 0x22, 0x00, 0x12, 0x38, 0x0a, 0x0e, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x44,
+	0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x12, 0x14, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e,
+	0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x43, 0x61, 0x72, 0x64, 0x1a, 0x0e, 0x2e, 0x72,
+	0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x00, 0x12, 0x33,
+	0x0a, 0x07, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x12, 0x16, 0x2e, 0x72, 0x75, 0x6e, 0x69,
+	0x66, 0x79, 0x2e, 0x53, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x65, 0x64, 0x41, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x1a, 0x0e, 0x2e, 0x72, 0x75, 0x6e, 0x69, 0x66, 0x79, 0x2e, 0x52, 0x65, 0x73, 0x75, 0x6c,
+	0x74, 0x22, 0x00, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -633,40 +993,51 @@ func file_proto_runify_proto_rawDescGZIP() []byte {
 	return file_proto_runify_proto_rawDescData
 }
 
-var file_proto_runify_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_proto_runify_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_proto_runify_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_proto_runify_proto_goTypes = []interface{}{
-	(*Empty)(nil),          // 0: runify.Empty
-	(*CardItem)(nil),       // 1: runify.CardItem
-	(*SelectedCard)(nil),   // 2: runify.SelectedCard
-	(*ActionItem)(nil),     // 3: runify.ActionItem
-	(*Actions)(nil),        // 4: runify.Actions
-	(*SelectedAction)(nil), // 5: runify.SelectedAction
-	(*Form)(nil),           // 6: runify.Form
-	(*ShowWindow)(nil),     // 7: runify.ShowWindow
-	(*HideWindow)(nil),     // 8: runify.HideWindow
-	(*Result)(nil),         // 9: runify.Result
+	(LogLevel)(0),          // 0: runify.LogLevel
+	(FormStateType)(0),     // 1: runify.FormStateType
+	(*Empty)(nil),          // 2: runify.Empty
+	(*CardItem)(nil),       // 3: runify.CardItem
+	(*SelectedCard)(nil),   // 4: runify.SelectedCard
+	(*ActionItem)(nil),     // 5: runify.ActionItem
+	(*Actions)(nil),        // 6: runify.Actions
+	(*SelectedAction)(nil), // 7: runify.SelectedAction
+	(*Form)(nil),           // 8: runify.Form
+	(*ShowWindow)(nil),     // 9: runify.ShowWindow
+	(*HideWindow)(nil),     // 10: runify.HideWindow
+	(*Result)(nil),         // 11: runify.Result
+	(*WriteLog)(nil),       // 12: runify.WriteLog
+	(*SetFormState)(nil),   // 13: runify.SetFormState
+	(*ServiceMsgUI)(nil),   // 14: runify.ServiceMsgUI
+	(*ServiceMsgSrv)(nil),  // 15: runify.ServiceMsgSrv
 }
 var file_proto_runify_proto_depIdxs = []int32{
-	3,  // 0: runify.Actions.items:type_name -> runify.ActionItem
-	1,  // 1: runify.Form.cards:type_name -> runify.CardItem
-	6,  // 2: runify.Result.form:type_name -> runify.Form
-	0,  // 3: runify.Result.empty:type_name -> runify.Empty
-	8,  // 4: runify.Result.hide:type_name -> runify.HideWindow
-	0,  // 5: runify.Runify.WaitShowWindow:input_type -> runify.Empty
-	0,  // 6: runify.Runify.GetRoot:input_type -> runify.Empty
-	2,  // 7: runify.Runify.GetActions:input_type -> runify.SelectedCard
-	2,  // 8: runify.Runify.ExecuteDefault:input_type -> runify.SelectedCard
-	5,  // 9: runify.Runify.Execute:input_type -> runify.SelectedAction
-	7,  // 10: runify.Runify.WaitShowWindow:output_type -> runify.ShowWindow
-	6,  // 11: runify.Runify.GetRoot:output_type -> runify.Form
-	4,  // 12: runify.Runify.GetActions:output_type -> runify.Actions
-	9,  // 13: runify.Runify.ExecuteDefault:output_type -> runify.Result
-	9,  // 14: runify.Runify.Execute:output_type -> runify.Result
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	5,  // 0: runify.Actions.items:type_name -> runify.ActionItem
+	3,  // 1: runify.Form.cards:type_name -> runify.CardItem
+	8,  // 2: runify.Result.form:type_name -> runify.Form
+	2,  // 3: runify.Result.empty:type_name -> runify.Empty
+	10, // 4: runify.Result.hide:type_name -> runify.HideWindow
+	0,  // 5: runify.WriteLog.level:type_name -> runify.LogLevel
+	1,  // 6: runify.SetFormState.state:type_name -> runify.FormStateType
+	12, // 7: runify.ServiceMsgUI.writeLog:type_name -> runify.WriteLog
+	13, // 8: runify.ServiceMsgSrv.setFormState:type_name -> runify.SetFormState
+	14, // 9: runify.Runify.ServiceChannel:input_type -> runify.ServiceMsgUI
+	2,  // 10: runify.Runify.GetRoot:input_type -> runify.Empty
+	4,  // 11: runify.Runify.GetActions:input_type -> runify.SelectedCard
+	4,  // 12: runify.Runify.ExecuteDefault:input_type -> runify.SelectedCard
+	7,  // 13: runify.Runify.Execute:input_type -> runify.SelectedAction
+	15, // 14: runify.Runify.ServiceChannel:output_type -> runify.ServiceMsgSrv
+	8,  // 15: runify.Runify.GetRoot:output_type -> runify.Form
+	6,  // 16: runify.Runify.GetActions:output_type -> runify.Actions
+	11, // 17: runify.Runify.ExecuteDefault:output_type -> runify.Result
+	11, // 18: runify.Runify.Execute:output_type -> runify.Result
+	14, // [14:19] is the sub-list for method output_type
+	9,  // [9:14] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_proto_runify_proto_init() }
@@ -795,24 +1166,79 @@ func file_proto_runify_proto_init() {
 				return nil
 			}
 		}
+		file_proto_runify_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WriteLog); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_runify_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SetFormState); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_runify_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ServiceMsgUI); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_runify_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ServiceMsgSrv); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_proto_runify_proto_msgTypes[9].OneofWrappers = []interface{}{
 		(*Result_Form)(nil),
 		(*Result_Empty)(nil),
 		(*Result_Hide)(nil),
 	}
+	file_proto_runify_proto_msgTypes[12].OneofWrappers = []interface{}{
+		(*ServiceMsgUI_WriteLog)(nil),
+	}
+	file_proto_runify_proto_msgTypes[13].OneofWrappers = []interface{}{
+		(*ServiceMsgSrv_SetFormState)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_proto_runify_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   10,
+			NumEnums:      2,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_proto_runify_proto_goTypes,
 		DependencyIndexes: file_proto_runify_proto_depIdxs,
+		EnumInfos:         file_proto_runify_proto_enumTypes,
 		MessageInfos:      file_proto_runify_proto_msgTypes,
 	}.Build()
 	File_proto_runify_proto = out.File

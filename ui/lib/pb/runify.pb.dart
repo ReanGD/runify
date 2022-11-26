@@ -10,6 +10,10 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'runify.pbenum.dart';
+
+export 'runify.pbenum.dart';
+
 class Empty extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Empty', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
     ..hasRequiredFields = false
@@ -551,5 +555,237 @@ class Result extends $pb.GeneratedMessage {
   void clearHide() => clearField(3);
   @$pb.TagNumber(3)
   HideWindow ensureHide() => $_ensure(2);
+}
+
+class WriteLog extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'WriteLog', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..e<LogLevel>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'level', $pb.PbFieldType.OE, defaultOrMaker: LogLevel.DEBUG, valueOf: LogLevel.valueOf, enumValues: LogLevel.values)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
+    ..hasRequiredFields = false
+  ;
+
+  WriteLog._() : super();
+  factory WriteLog({
+    LogLevel? level,
+    $core.String? message,
+  }) {
+    final _result = create();
+    if (level != null) {
+      _result.level = level;
+    }
+    if (message != null) {
+      _result.message = message;
+    }
+    return _result;
+  }
+  factory WriteLog.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory WriteLog.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  WriteLog clone() => WriteLog()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  WriteLog copyWith(void Function(WriteLog) updates) => super.copyWith((message) => updates(message as WriteLog)) as WriteLog; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static WriteLog create() => WriteLog._();
+  WriteLog createEmptyInstance() => create();
+  static $pb.PbList<WriteLog> createRepeated() => $pb.PbList<WriteLog>();
+  @$core.pragma('dart2js:noInline')
+  static WriteLog getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WriteLog>(create);
+  static WriteLog? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  LogLevel get level => $_getN(0);
+  @$pb.TagNumber(1)
+  set level(LogLevel v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasLevel() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearLevel() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => clearField(2);
+}
+
+class SetFormState extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetFormState', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..e<FormStateType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'state', $pb.PbFieldType.OE, defaultOrMaker: FormStateType.SHOW, valueOf: FormStateType.valueOf, enumValues: FormStateType.values)
+    ..hasRequiredFields = false
+  ;
+
+  SetFormState._() : super();
+  factory SetFormState({
+    FormStateType? state,
+  }) {
+    final _result = create();
+    if (state != null) {
+      _result.state = state;
+    }
+    return _result;
+  }
+  factory SetFormState.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SetFormState.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SetFormState clone() => SetFormState()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SetFormState copyWith(void Function(SetFormState) updates) => super.copyWith((message) => updates(message as SetFormState)) as SetFormState; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SetFormState create() => SetFormState._();
+  SetFormState createEmptyInstance() => create();
+  static $pb.PbList<SetFormState> createRepeated() => $pb.PbList<SetFormState>();
+  @$core.pragma('dart2js:noInline')
+  static SetFormState getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetFormState>(create);
+  static SetFormState? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  FormStateType get state => $_getN(0);
+  @$pb.TagNumber(1)
+  set state(FormStateType v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasState() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearState() => clearField(1);
+}
+
+enum ServiceMsgUI_Payload {
+  writeLog, 
+  notSet
+}
+
+class ServiceMsgUI extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, ServiceMsgUI_Payload> _ServiceMsgUI_PayloadByTag = {
+    1 : ServiceMsgUI_Payload.writeLog,
+    0 : ServiceMsgUI_Payload.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ServiceMsgUI', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..oo(0, [1])
+    ..aOM<WriteLog>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'writeLog', protoName: 'writeLog', subBuilder: WriteLog.create)
+    ..hasRequiredFields = false
+  ;
+
+  ServiceMsgUI._() : super();
+  factory ServiceMsgUI({
+    WriteLog? writeLog,
+  }) {
+    final _result = create();
+    if (writeLog != null) {
+      _result.writeLog = writeLog;
+    }
+    return _result;
+  }
+  factory ServiceMsgUI.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ServiceMsgUI.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ServiceMsgUI clone() => ServiceMsgUI()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ServiceMsgUI copyWith(void Function(ServiceMsgUI) updates) => super.copyWith((message) => updates(message as ServiceMsgUI)) as ServiceMsgUI; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ServiceMsgUI create() => ServiceMsgUI._();
+  ServiceMsgUI createEmptyInstance() => create();
+  static $pb.PbList<ServiceMsgUI> createRepeated() => $pb.PbList<ServiceMsgUI>();
+  @$core.pragma('dart2js:noInline')
+  static ServiceMsgUI getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ServiceMsgUI>(create);
+  static ServiceMsgUI? _defaultInstance;
+
+  ServiceMsgUI_Payload whichPayload() => _ServiceMsgUI_PayloadByTag[$_whichOneof(0)]!;
+  void clearPayload() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  WriteLog get writeLog => $_getN(0);
+  @$pb.TagNumber(1)
+  set writeLog(WriteLog v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasWriteLog() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearWriteLog() => clearField(1);
+  @$pb.TagNumber(1)
+  WriteLog ensureWriteLog() => $_ensure(0);
+}
+
+enum ServiceMsgSrv_Payload {
+  setFormState, 
+  notSet
+}
+
+class ServiceMsgSrv extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, ServiceMsgSrv_Payload> _ServiceMsgSrv_PayloadByTag = {
+    1 : ServiceMsgSrv_Payload.setFormState,
+    0 : ServiceMsgSrv_Payload.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ServiceMsgSrv', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..oo(0, [1])
+    ..aOM<SetFormState>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'setFormState', protoName: 'setFormState', subBuilder: SetFormState.create)
+    ..hasRequiredFields = false
+  ;
+
+  ServiceMsgSrv._() : super();
+  factory ServiceMsgSrv({
+    SetFormState? setFormState,
+  }) {
+    final _result = create();
+    if (setFormState != null) {
+      _result.setFormState = setFormState;
+    }
+    return _result;
+  }
+  factory ServiceMsgSrv.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ServiceMsgSrv.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ServiceMsgSrv clone() => ServiceMsgSrv()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ServiceMsgSrv copyWith(void Function(ServiceMsgSrv) updates) => super.copyWith((message) => updates(message as ServiceMsgSrv)) as ServiceMsgSrv; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ServiceMsgSrv create() => ServiceMsgSrv._();
+  ServiceMsgSrv createEmptyInstance() => create();
+  static $pb.PbList<ServiceMsgSrv> createRepeated() => $pb.PbList<ServiceMsgSrv>();
+  @$core.pragma('dart2js:noInline')
+  static ServiceMsgSrv getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ServiceMsgSrv>(create);
+  static ServiceMsgSrv? _defaultInstance;
+
+  ServiceMsgSrv_Payload whichPayload() => _ServiceMsgSrv_PayloadByTag[$_whichOneof(0)]!;
+  void clearPayload() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  SetFormState get setFormState => $_getN(0);
+  @$pb.TagNumber(1)
+  set setFormState(SetFormState v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasSetFormState() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSetFormState() => clearField(1);
+  @$pb.TagNumber(1)
+  SetFormState ensureSetFormState() => $_ensure(0);
 }
 

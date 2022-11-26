@@ -37,9 +37,6 @@ message Form {
 	repeated CardItem cards = 2;
 }
 
-message ShowWindow {
-}
-
 message HideWindow {
 	string error = 1;
 }

@@ -8,6 +8,30 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+@$core.Deprecated('Use logLevelDescriptor instead')
+const LogLevel$json = const {
+  '1': 'LogLevel',
+  '2': const [
+    const {'1': 'DEBUG', '2': 0},
+    const {'1': 'INFO', '2': 1},
+    const {'1': 'WARNING', '2': 2},
+    const {'1': 'ERROR', '2': 3},
+  ],
+};
+
+/// Descriptor for `LogLevel`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List logLevelDescriptor = $convert.base64Decode('CghMb2dMZXZlbBIJCgVERUJVRxAAEggKBElORk8QARILCgdXQVJOSU5HEAISCQoFRVJST1IQAw==');
+@$core.Deprecated('Use formStateTypeDescriptor instead')
+const FormStateType$json = const {
+  '1': 'FormStateType',
+  '2': const [
+    const {'1': 'SHOW', '2': 0},
+    const {'1': 'HIDE', '2': 1},
+  ],
+};
+
+/// Descriptor for `FormStateType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List formStateTypeDescriptor = $convert.base64Decode('Cg1Gb3JtU3RhdGVUeXBlEggKBFNIT1cQABIICgRISURFEAE=');
 @$core.Deprecated('Use emptyDescriptor instead')
 const Empty$json = const {
   '1': 'Empty',
@@ -112,3 +136,50 @@ const Result$json = const {
 
 /// Descriptor for `Result`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List resultDescriptor = $convert.base64Decode('CgZSZXN1bHQSIgoEZm9ybRgBIAEoCzIMLnJ1bmlmeS5Gb3JtSABSBGZvcm0SJQoFZW1wdHkYAiABKAsyDS5ydW5pZnkuRW1wdHlIAFIFZW1wdHkSKAoEaGlkZRgDIAEoCzISLnJ1bmlmeS5IaWRlV2luZG93SABSBGhpZGVCCQoHcGF5bG9hZA==');
+@$core.Deprecated('Use writeLogDescriptor instead')
+const WriteLog$json = const {
+  '1': 'WriteLog',
+  '2': const [
+    const {'1': 'level', '3': 1, '4': 1, '5': 14, '6': '.runify.LogLevel', '10': 'level'},
+    const {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+  ],
+};
+
+/// Descriptor for `WriteLog`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List writeLogDescriptor = $convert.base64Decode('CghXcml0ZUxvZxImCgVsZXZlbBgBIAEoDjIQLnJ1bmlmeS5Mb2dMZXZlbFIFbGV2ZWwSGAoHbWVzc2FnZRgCIAEoCVIHbWVzc2FnZQ==');
+@$core.Deprecated('Use setFormStateDescriptor instead')
+const SetFormState$json = const {
+  '1': 'SetFormState',
+  '2': const [
+    const {'1': 'state', '3': 1, '4': 1, '5': 14, '6': '.runify.FormStateType', '10': 'state'},
+  ],
+};
+
+/// Descriptor for `SetFormState`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setFormStateDescriptor = $convert.base64Decode('CgxTZXRGb3JtU3RhdGUSKwoFc3RhdGUYASABKA4yFS5ydW5pZnkuRm9ybVN0YXRlVHlwZVIFc3RhdGU=');
+@$core.Deprecated('Use serviceMsgUIDescriptor instead')
+const ServiceMsgUI$json = const {
+  '1': 'ServiceMsgUI',
+  '2': const [
+    const {'1': 'writeLog', '3': 1, '4': 1, '5': 11, '6': '.runify.WriteLog', '9': 0, '10': 'writeLog'},
+  ],
+  '8': const [
+    const {'1': 'payload'},
+  ],
+};
+
+/// Descriptor for `ServiceMsgUI`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List serviceMsgUIDescriptor = $convert.base64Decode('CgxTZXJ2aWNlTXNnVUkSLgoId3JpdGVMb2cYASABKAsyEC5ydW5pZnkuV3JpdGVMb2dIAFIId3JpdGVMb2dCCQoHcGF5bG9hZA==');
+@$core.Deprecated('Use serviceMsgSrvDescriptor instead')
+const ServiceMsgSrv$json = const {
+  '1': 'ServiceMsgSrv',
+  '2': const [
+    const {'1': 'setFormState', '3': 1, '4': 1, '5': 11, '6': '.runify.SetFormState', '9': 0, '10': 'setFormState'},
+  ],
+  '8': const [
+    const {'1': 'payload'},
+  ],
+};
+
+/// Descriptor for `ServiceMsgSrv`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List serviceMsgSrvDescriptor = $convert.base64Decode('Cg1TZXJ2aWNlTXNnU3J2EjoKDHNldEZvcm1TdGF0ZRgBIAEoCzIULnJ1bmlmeS5TZXRGb3JtU3RhdGVIAFIMc2V0Rm9ybVN0YXRlQgkKB3BheWxvYWQ=');
