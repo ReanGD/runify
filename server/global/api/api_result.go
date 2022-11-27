@@ -141,3 +141,39 @@ func (r *ChanErrorCodeResult) SetResult(value global.Error) {
 func (r *ChanErrorCodeResult) GetChannel() <-chan global.Error {
 	return r.ch
 }
+
+type TResult[T any] interface {
+	SetResult(value T)
+}
+
+type FuncTResult[T any] struct {
+	action func(result T)
+}
+
+func NewFuncTResult[T any](action func(result T)) *FuncTResult[T] {
+	return &FuncTResult[T]{
+		action: action,
+	}
+}
+
+func (r *FuncTResult[T]) SetResult(value T) {
+	r.action(value)
+}
+
+type ChanTResult[T any] struct {
+	ch chan T
+}
+
+func NewChanTResult[T any]() *ChanTResult[T] {
+	return &ChanTResult[T]{
+		ch: make(chan T, 1),
+	}
+}
+
+func (r *ChanTResult[T]) SetResult(value T) {
+	r.ch <- value
+}
+
+func (r *ChanTResult[T]) GetChannel() <-chan T {
+	return r.ch
+}
