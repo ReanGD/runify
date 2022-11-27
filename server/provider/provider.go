@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/logger"
@@ -29,7 +30,7 @@ func New() *Provider {
 	}
 }
 
-func (p *Provider) OnInit(cfg *config.Config, desktop module.Desktop, rpc module.Rpc, rootLogger *zap.Logger) <-chan error {
+func (p *Provider) OnInit(cfg *config.Config, desktop api.Desktop, rpc api.Rpc, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {

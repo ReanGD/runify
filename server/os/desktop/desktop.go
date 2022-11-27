@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
@@ -32,7 +33,7 @@ func New() *Desktop {
 }
 
 func (d *Desktop) OnInit(
-	cfg *config.Config, ds module.DisplayServer, provider module.Provider, rootLogger *zap.Logger) <-chan error {
+	cfg *config.Config, ds api.DisplayServer, provider api.Provider, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {
@@ -157,7 +158,7 @@ func (d *Desktop) onRequestDefault(request interface{}, reason string) (bool, er
 	return false, nil
 }
 
-func (d *Desktop) WriteToClipboard(isPrimary bool, data *mime.Data, result module.BoolResult) {
+func (d *Desktop) WriteToClipboard(isPrimary bool, data *mime.Data, result api.BoolResult) {
 	d.AddToChannel(&writeToClipboardCmd{
 		isPrimary: isPrimary,
 		data:      data,
@@ -165,7 +166,7 @@ func (d *Desktop) WriteToClipboard(isPrimary bool, data *mime.Data, result modul
 	})
 }
 
-func (d *Desktop) AddShortcut(action *shortcut.Action, hotkey *shortcut.Hotkey, result module.ErrorCodeResult) {
+func (d *Desktop) AddShortcut(action *shortcut.Action, hotkey *shortcut.Hotkey, result api.ErrorCodeResult) {
 	d.AddToChannel(&addShortcutCmd{
 		action: action,
 		hotkey: hotkey,
@@ -173,7 +174,7 @@ func (d *Desktop) AddShortcut(action *shortcut.Action, hotkey *shortcut.Hotkey, 
 	})
 }
 
-func (d *Desktop) RemoveShortcut(action *shortcut.Action, result module.VoidResult) {
+func (d *Desktop) RemoveShortcut(action *shortcut.Action, result api.VoidResult) {
 	d.AddToChannel(&removeShortcutCmd{
 		action: action,
 		result: result,

@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
-	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/pb"
 	"go.uber.org/zap"
@@ -41,7 +41,7 @@ func newRpcHandler() *rpcHandler {
 }
 
 func (h *rpcHandler) onInit(
-	cfg *config.Configuration, provider module.Provider, uiLogger *zap.Logger, moduleLogger *zap.Logger) error {
+	cfg *config.Configuration, provider api.Provider, uiLogger *zap.Logger, moduleLogger *zap.Logger) error {
 
 	h.moduleLogger = moduleLogger
 	h.uiBinaryPath = cfg.System.UIBinaryPath

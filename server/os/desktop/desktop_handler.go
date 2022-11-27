@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/ReanGD/runify/server/global"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
-	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"go.uber.org/zap"
 )
@@ -17,7 +17,7 @@ type shortcutData struct {
 
 type handler struct {
 	mCtx             *moduleCtx
-	ds               module.DisplayServer
+	ds               api.DisplayServer
 	moduleLogger     *zap.Logger
 	shortcutByAction map[shortcut.ActionId]*shortcutData
 	shortcutByHotkey map[shortcut.HotkeyId]*shortcutData
@@ -43,11 +43,11 @@ func (h *handler) init(mCtx *moduleCtx) error {
 
 func (h *handler) start() {
 	go func() {
-		subsToClipboardRes1 := module.NewChanBoolResult()
+		subsToClipboardRes1 := api.NewChanBoolResult()
 		h.ds.SubscribeToClipboard(true, h.mCtx.primaryCh, subsToClipboardRes1)
-		subsToClipboardRes2 := module.NewChanBoolResult()
+		subsToClipboardRes2 := api.NewChanBoolResult()
 		h.ds.SubscribeToClipboard(false, h.mCtx.clipboardCh, subsToClipboardRes2)
-		subsToHotheysRes := module.NewChanBoolResult()
+		subsToHotheysRes := api.NewChanBoolResult()
 		h.ds.SubscribeToHotkeys(h.mCtx.hotkeyCh, subsToHotheysRes)
 
 		if res := <-subsToClipboardRes1.GetChannel(); !res {
@@ -81,11 +81,11 @@ func (h *handler) writeToClipboard(cmd *writeToClipboardCmd) {
 	h.ds.WriteToClipboard(cmd.isPrimary, cmd.data, cmd.result)
 }
 
-func (h *handler) bindHotkey(shortcutData *shortcutData, cmdResult module.ErrorCodeResult) {
+func (h *handler) bindHotkey(shortcutData *shortcutData, cmdResult api.ErrorCodeResult) {
 	action := shortcutData.action
 	hotkey := shortcutData.hotkey
 
-	bindResult := module.NewChanErrorCodeResult()
+	bindResult := api.NewChanErrorCodeResult()
 	h.ds.BindHotkey(hotkey, bindResult)
 
 	stopCtx := h.mCtx.stopCtx
@@ -108,8 +108,8 @@ func (h *handler) bindHotkey(shortcutData *shortcutData, cmdResult module.ErrorC
 	}()
 }
 
-func (h *handler) unbindHotkey(shortcutData *shortcutData, cmdResult module.VoidResult) {
-	unbindResult := module.NewChanBoolResult()
+func (h *handler) unbindHotkey(shortcutData *shortcutData, cmdResult api.VoidResult) {
+	unbindResult := api.NewChanBoolResult()
 	h.ds.UnbindHotkey(shortcutData.hotkey, unbindResult)
 
 	stopCtx := h.mCtx.stopCtx
@@ -156,7 +156,7 @@ func (h *handler) addShortcut(cmd *addShortcutCmd) {
 			shortcutData.action.ZapField(),
 		)
 
-		h.unbindHotkey(shortcutData, module.NewFuncVoidResult(func() {}))
+		h.unbindHotkey(shortcutData, api.NewFuncVoidResult(func() {}))
 	}
 
 	shortcutData := &shortcutData{

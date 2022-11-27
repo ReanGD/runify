@@ -1,4 +1,4 @@
-package module
+package api
 
 import (
 	"github.com/ReanGD/runify/server/global/mime"

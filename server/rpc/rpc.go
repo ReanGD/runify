@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
@@ -27,7 +28,7 @@ func New() *Rpc {
 	}
 }
 
-func (m *Rpc) OnInit(cfg *config.Config, provider module.Provider, rootLogger *zap.Logger) <-chan error {
+func (m *Rpc) OnInit(cfg *config.Config, provider api.Provider, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {

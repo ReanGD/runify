@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
@@ -152,7 +153,7 @@ func (m *X11) onRequestDefault(request interface{}, reason string) (bool, error)
 	return false, nil
 }
 
-func (m *X11) SubscribeToClipboard(isPrimary bool, ch chan<- *mime.Data, result module.BoolResult) {
+func (m *X11) SubscribeToClipboard(isPrimary bool, ch chan<- *mime.Data, result api.BoolResult) {
 	m.AddToChannel(&subscribeToClipboardCmd{
 		isPrimary: isPrimary,
 		ch:        ch,
@@ -160,7 +161,7 @@ func (m *X11) SubscribeToClipboard(isPrimary bool, ch chan<- *mime.Data, result 
 	})
 }
 
-func (m *X11) WriteToClipboard(isPrimary bool, data *mime.Data, result module.BoolResult) {
+func (m *X11) WriteToClipboard(isPrimary bool, data *mime.Data, result api.BoolResult) {
 	m.AddToChannel(&writeToClipboardCmd{
 		isPrimary: isPrimary,
 		data:      data,
@@ -168,21 +169,21 @@ func (m *X11) WriteToClipboard(isPrimary bool, data *mime.Data, result module.Bo
 	})
 }
 
-func (m *X11) SubscribeToHotkeys(ch chan<- *shortcut.Hotkey, result module.BoolResult) {
+func (m *X11) SubscribeToHotkeys(ch chan<- *shortcut.Hotkey, result api.BoolResult) {
 	m.AddToChannel(&subscribeToHotkeysCmd{
 		ch:     ch,
 		result: result,
 	})
 }
 
-func (m *X11) BindHotkey(hotkey *shortcut.Hotkey, result module.ErrorCodeResult) {
+func (m *X11) BindHotkey(hotkey *shortcut.Hotkey, result api.ErrorCodeResult) {
 	m.AddToChannel(&bindHotkeyCmd{
 		hotkey: hotkey,
 		result: result,
 	})
 }
 
-func (m *X11) UnbindHotkey(hotkey *shortcut.Hotkey, result module.BoolResult) {
+func (m *X11) UnbindHotkey(hotkey *shortcut.Hotkey, result api.BoolResult) {
 	m.AddToChannel(&unbindHotkeyCmd{
 		hotkey: hotkey,
 		result: result,

@@ -5,6 +5,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
@@ -13,8 +14,8 @@ import (
 
 type moduleCtx struct {
 	root         *Desktop
-	ds           module.DisplayServer
-	provider     module.Provider
+	ds           api.DisplayServer
+	provider     api.Provider
 	primaryCh    chan *mime.Data
 	clipboardCh  chan *mime.Data
 	hotkeyCh     chan *shortcut.Hotkey
@@ -26,8 +27,8 @@ type moduleCtx struct {
 func newModuleCtx(
 	root *Desktop,
 	cfg *config.DesktopCfg,
-	ds module.DisplayServer,
-	provider module.Provider,
+	ds api.DisplayServer,
+	provider api.Provider,
 	ErrorCtx *module.ErrorCtx,
 	moduleLogger *zap.Logger) *moduleCtx {
 
@@ -51,7 +52,7 @@ func (c *moduleCtx) setStopCtx(stopCtx context.Context) {
 type writeToClipboardCmd struct {
 	isPrimary bool
 	data      *mime.Data
-	result    module.BoolResult
+	result    api.BoolResult
 }
 
 func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -66,7 +67,7 @@ func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string
 type addShortcutCmd struct {
 	action *shortcut.Action
 	hotkey *shortcut.Hotkey
-	result module.ErrorCodeResult
+	result api.ErrorCodeResult
 }
 
 func (c *addShortcutCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -81,7 +82,7 @@ func (c *addShortcutCmd) onRequestDefault(logger *zap.Logger, reason string) {
 
 type removeShortcutCmd struct {
 	action *shortcut.Action
-	result module.VoidResult
+	result api.VoidResult
 }
 
 func (c *removeShortcutCmd) onRequestDefault(logger *zap.Logger, reason string) {

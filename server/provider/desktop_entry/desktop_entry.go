@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
-	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/pb"
 	"github.com/ReanGD/runify/server/provider/pcommon"
@@ -30,14 +30,14 @@ type entry struct {
 type DesktopEntry struct {
 	providerID   uint64
 	terminal     string
-	desktop      module.Desktop
+	desktop      api.Desktop
 	iconsCache   *iconCache
 	entries      []*entry
 	cache        []*pb.CardItem
 	moduleLogger *zap.Logger
 }
 
-func New(desktop module.Desktop) *DesktopEntry {
+func New(desktop api.Desktop) *DesktopEntry {
 	return &DesktopEntry{
 		providerID:   0,
 		terminal:     "",
@@ -172,10 +172,10 @@ func (p *DesktopEntry) Execute(cardID uint64, actionID uint32) (*pb.Result, erro
 			}, nil
 		}
 	case actionCopyName:
-		result := module.NewFuncBoolResult(func(result bool) {})
+		result := api.NewFuncBoolResult(func(result bool) {})
 		p.desktop.WriteToClipboard(false, mime.NewTextData(entry.props.Name), result)
 	case actionCopyPath:
-		result := module.NewFuncBoolResult(func(result bool) {})
+		result := api.NewFuncBoolResult(func(result bool) {})
 		p.desktop.WriteToClipboard(false, mime.NewTextData(entry.path), result)
 	}
 

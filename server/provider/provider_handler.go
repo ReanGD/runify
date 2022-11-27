@@ -6,7 +6,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global"
-	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/pb"
 	"github.com/ReanGD/runify/server/provider/calculator"
@@ -16,8 +16,8 @@ import (
 
 type providerHandler struct {
 	dataProviders map[uint64]*dataProvider
-	rpc           module.Rpc
-	desktop       module.Desktop
+	rpc           api.Rpc
+	desktop       api.Desktop
 	moduleLogger  *zap.Logger
 }
 
@@ -29,7 +29,7 @@ func newProviderHandler() *providerHandler {
 	}
 }
 
-func (h *providerHandler) onInit(cfg *config.Config, desktop module.Desktop, rpc module.Rpc, moduleLogger *zap.Logger) error {
+func (h *providerHandler) onInit(cfg *config.Config, desktop api.Desktop, rpc api.Rpc, moduleLogger *zap.Logger) error {
 	h.rpc = rpc
 	h.desktop = desktop
 	h.moduleLogger = moduleLogger
@@ -49,7 +49,7 @@ func (h *providerHandler) onInit(cfg *config.Config, desktop module.Desktop, rpc
 	if err != nil {
 		return err
 	}
-	result := module.NewFuncErrorCodeResult(func(result global.Error) {})
+	result := api.NewFuncErrorCodeResult(func(result global.Error) {})
 	h.desktop.AddShortcut(shortcut.NewAction("Show UI"), hotkey, result)
 
 	return nil

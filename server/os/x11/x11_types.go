@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/ReanGD/runify/server/global"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
-	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
@@ -105,7 +105,7 @@ type bindData struct {
 type subscribeToClipboardCmd struct {
 	isPrimary bool
 	ch        chan<- *mime.Data
-	result    module.BoolResult
+	result    api.BoolResult
 }
 
 func (c *subscribeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -120,7 +120,7 @@ func (c *subscribeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason st
 type writeToClipboardCmd struct {
 	isPrimary bool
 	data      *mime.Data
-	result    module.BoolResult
+	result    api.BoolResult
 }
 
 func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -134,7 +134,7 @@ func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string
 
 type subscribeToHotkeysCmd struct {
 	ch     chan<- *shortcut.Hotkey
-	result module.BoolResult
+	result api.BoolResult
 }
 
 func (c *subscribeToHotkeysCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -147,7 +147,7 @@ func (c *subscribeToHotkeysCmd) onRequestDefault(logger *zap.Logger, reason stri
 
 type bindHotkeyCmd struct {
 	hotkey *shortcut.Hotkey
-	result module.ErrorCodeResult
+	result api.ErrorCodeResult
 }
 
 func (c *bindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
@@ -161,7 +161,7 @@ func (c *bindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
 
 type unbindHotkeyCmd struct {
 	hotkey *shortcut.Hotkey
-	result module.BoolResult
+	result api.BoolResult
 }
 
 func (c *unbindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {

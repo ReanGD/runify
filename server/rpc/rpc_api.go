@@ -8,12 +8,12 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/pb"
 )
 
 type runifyServer struct {
-	provider         module.Provider
+	provider         api.Provider
 	showUIMultiplier *showUIMultiplier
 	handler          *uiHandler
 	moduleLogger     *zap.Logger
@@ -22,7 +22,7 @@ type runifyServer struct {
 }
 
 func newRunifyServer(
-	provider module.Provider, showUIMultiplier *showUIMultiplier, handler *uiHandler, moduleLogger *zap.Logger) *runifyServer {
+	provider api.Provider, showUIMultiplier *showUIMultiplier, handler *uiHandler, moduleLogger *zap.Logger) *runifyServer {
 
 	return &runifyServer{
 		provider:         provider,
