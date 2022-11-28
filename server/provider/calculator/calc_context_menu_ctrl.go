@@ -23,23 +23,19 @@ func newCalcContextMenuCtrl(value string, actionExecuter *calcActionExecuter, mo
 	}
 }
 
-func (c *CalcContextMenuCtrl) GetRows() *api.ContextMenuRows {
-	data := api.NewContextMenuRows()
-	data.Create = []*api.ContextMenuRow{
-		api.NewContextMenuRow(menuRowID, "Copy"),
-	}
-
-	return data
+func (c *CalcContextMenuCtrl) GetRows() []*api.ContextMenuRow {
+	return []*api.ContextMenuRow{api.NewContextMenuRow(menuRowID, "Copy")}
 }
 
-func (c *CalcContextMenuCtrl) OnRowActivate(id api.ContextMenuRowID, result api.ErrorResult) {
-	switch id {
+func (c *CalcContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID, result api.ErrorResult) {
+	switch rowID {
 	case menuRowID:
 		c.actionExecuter.copyResult(c.value, result)
 	default:
 		err := errors.New("unknown menu id")
 		c.moduleLogger.Warn("Failed execute menu item",
-			id.ZapField(),
+			rowID.ZapField(),
+			zap.String("Value", c.value),
 			zap.Error(err),
 		)
 		result.SetResult(err)

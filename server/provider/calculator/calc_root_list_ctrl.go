@@ -14,7 +14,7 @@ type CalcRootListCtrl struct {
 	providerID     api.ProviderID
 	executer       *Executer
 	actionExecuter *calcActionExecuter
-	rowsCh         chan *api.RootListRows
+	outCh          chan<- *api.RootListRowsUpdate
 	moduleLogger   *zap.Logger
 }
 
@@ -24,22 +24,23 @@ func newCalcRootListCtrl(providerID api.ProviderID, actionExecuter *calcActionEx
 		providerID:     providerID,
 		executer:       NewExecuter(),
 		actionExecuter: actionExecuter,
-		rowsCh:         make(chan *api.RootListRows, 10),
+		outCh:          nil,
 		moduleLogger:   moduleLogger,
 	}
 }
 
-func (c *CalcRootListCtrl) GetRowsCh() <-chan *api.RootListRows {
-	c.rowsCh <- api.NewRootListRows()
-	return c.rowsCh
+func (c *CalcRootListCtrl) GetRows(out chan<- *api.RootListRowsUpdate) []*api.RootListRow {
+	c.outCh = out
+	return []*api.RootListRow{}
 }
 
 func (c *CalcRootListCtrl) OnFilterChange(text string) {
 	calcResult := c.executer.Execute(text)
 	if calcResult.ParserErr != nil {
 		if len(c.actualValue) == 0 {
-			data := api.NewRootListRows()
-			data.Remove = append(data.Remove, api.NewRootListRowRemove(c.providerID, rootRowID))
+			update := api.NewRootListRowsUpdate()
+			update.Remove = append(update.Remove, api.NewRootListRowGlobalID(c.providerID, rootRowID))
+			c.outCh <- update
 		}
 		return
 	}
@@ -50,7 +51,7 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		return
 	}
 
-	data := api.NewRootListRows()
+	data := api.NewRootListRowsUpdate()
 	rows := []*api.RootListRow{api.NewRootListRow(c.providerID, rootRowID, "", strValue, api.MaxPriority)}
 	if len(c.actualValue) == 0 {
 		data.Change = rows
@@ -58,17 +59,18 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		data.Create = rows
 	}
 	c.actualValue = strValue
+	c.outCh <- data
 }
 
-func (c *CalcRootListCtrl) OnRowActivate(id api.RootListRowID, result api.ErrorResult) {
+func (c *CalcRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ErrorResult) {
 	c.actionExecuter.copyResult(c.actualValue, result)
 }
 
-func (c *CalcRootListCtrl) OnMenuActivate(id api.RootListRowID, result api.ContexMenuCtrlOrErrorResult) {
-	if id != rootRowID {
+func (c *CalcRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ContexMenuCtrlOrErrorResult) {
+	if rowID != rootRowID {
 		err := errors.New("row data not found")
 		c.moduleLogger.Warn("Failed open menu",
-			id.ZapField(),
+			rowID.ZapField(),
 			zap.Error(err),
 		)
 

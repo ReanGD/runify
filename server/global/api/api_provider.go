@@ -1,13 +1,13 @@
 package api
 
 type ContextMenuCtrl interface {
-	GetRows() *ContextMenuRows
-	OnRowActivate(id ContextMenuRowID, result ErrorResult)
+	GetRows() []*ContextMenuRow
+	OnRowActivate(rowID ContextMenuRowID, result ErrorResult)
 }
 
 type RootListCtrl interface {
-	GetRowsCh() <-chan *RootListRows
+	GetRows(out chan<- *RootListRowsUpdate) []*RootListRow
 	OnFilterChange(value string)
-	OnRowActivate(id RootListRowID, result ErrorResult)
-	OnMenuActivate(id RootListRowID, result ContexMenuCtrlOrErrorResult)
+	OnRowActivate(providerID ProviderID, rowID RootListRowID, result ErrorResult)
+	OnMenuActivate(providerID ProviderID, rowID RootListRowID, result ContexMenuCtrlOrErrorResult)
 }

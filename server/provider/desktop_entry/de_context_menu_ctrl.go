@@ -28,19 +28,16 @@ func newDEContextMenuCtrl(id api.RootListRowID, actionExecuter *deActionExecuter
 	}
 }
 
-func (c *DEContextMenuCtrl) GetRows() *api.ContextMenuRows {
-	data := api.NewContextMenuRows()
-	data.Create = []*api.ContextMenuRow{
+func (c *DEContextMenuCtrl) GetRows() []*api.ContextMenuRow {
+	return []*api.ContextMenuRow{
 		api.NewContextMenuRow(api.ContextMenuRowID(actionOpen), "Open"),
 		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyName), "Copy name"),
 		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyPath), "Copy path"),
 	}
-
-	return data
 }
 
-func (c *DEContextMenuCtrl) OnRowActivate(id api.ContextMenuRowID, result api.ErrorResult) {
-	switch uint32(id) {
+func (c *DEContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID, result api.ErrorResult) {
+	switch uint32(rowID) {
 	case actionOpen:
 		c.actionExecuter.open(c.id, result)
 	case actionCopyName:
@@ -50,7 +47,8 @@ func (c *DEContextMenuCtrl) OnRowActivate(id api.ContextMenuRowID, result api.Er
 	default:
 		err := errors.New("unknown menu id")
 		c.moduleLogger.Warn("Failed execute menu item",
-			id.ZapField(),
+			c.id.ZapField(),
+			rowID.ZapField(),
 			zap.Error(err),
 		)
 		result.SetResult(err)

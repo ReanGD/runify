@@ -10,6 +10,7 @@ import (
 type DERootListCtrl struct {
 	model          *deModel
 	actionExecuter *deActionExecuter
+	outCh          chan<- *api.RootListRowsUpdate
 	moduleLogger   *zap.Logger
 }
 
@@ -17,33 +18,30 @@ func newDERootListCtrl(model *deModel, actionExecuter *deActionExecuter, moduleL
 	return &DERootListCtrl{
 		model:          model,
 		actionExecuter: actionExecuter,
+		outCh:          nil,
 		moduleLogger:   moduleLogger,
 	}
 }
 
-func (c *DERootListCtrl) GetRowsCh() <-chan *api.RootListRows {
-	data := api.NewRootListRows()
-	data.Create = c.model.getRows()
-
-	ch := make(chan *api.RootListRows, 1)
-	ch <- data
-	return ch
+func (c *DERootListCtrl) GetRows(out chan<- *api.RootListRowsUpdate) []*api.RootListRow {
+	c.outCh = out
+	return c.model.getRows()
 }
 
 func (c *DERootListCtrl) OnFilterChange(value string) {
 	// pass
 }
 
-func (c *DERootListCtrl) OnRowActivate(id api.RootListRowID, result api.ErrorResult) {
-	c.actionExecuter.open(id, result)
+func (c *DERootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ErrorResult) {
+	c.actionExecuter.open(rowID, result)
 }
 
-func (c *DERootListCtrl) OnMenuActivate(id api.RootListRowID, result api.ContexMenuCtrlOrErrorResult) {
-	_, ok := c.model.getEntry(id)
+func (c *DERootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ContexMenuCtrlOrErrorResult) {
+	_, ok := c.model.getEntry(rowID)
 	if !ok {
 		err := errors.New("row data not found")
 		c.moduleLogger.Warn("Failed open context menu",
-			id.ZapField(),
+			rowID.ZapField(),
 			zap.Error(err),
 		)
 
@@ -52,7 +50,7 @@ func (c *DERootListCtrl) OnMenuActivate(id api.RootListRowID, result api.ContexM
 		})
 	} else {
 		result.SetResult(api.ContextMenuCtrlOrError{
-			Ctrl: newDEContextMenuCtrl(id, c.actionExecuter, c.moduleLogger),
+			Ctrl: newDEContextMenuCtrl(rowID, c.actionExecuter, c.moduleLogger),
 		})
 	}
 }

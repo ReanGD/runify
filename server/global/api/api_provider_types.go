@@ -34,13 +34,13 @@ func (id ContextMenuRowID) ZapFieldPrefix(prefix string) zap.Field {
 
 const MaxPriority uint16 = 0xFFFF
 
-type RootListRowRemove struct {
+type RootListRowGlobalID struct {
 	ProviderID ProviderID
 	ID         RootListRowID
 }
 
-func NewRootListRowRemove(providerID ProviderID, id RootListRowID) *RootListRowRemove {
-	return &RootListRowRemove{
+func NewRootListRowGlobalID(providerID ProviderID, id RootListRowID) RootListRowGlobalID {
+	return RootListRowGlobalID{
 		ProviderID: providerID,
 		ID:         id,
 	}
@@ -64,17 +64,17 @@ func NewRootListRow(providerID ProviderID, id RootListRowID, icon string, value 
 	}
 }
 
-type RootListRows struct {
+type RootListRowsUpdate struct {
 	Create []*RootListRow
 	Change []*RootListRow
-	Remove []*RootListRowRemove
+	Remove []RootListRowGlobalID
 }
 
-func NewRootListRows() *RootListRows {
-	return &RootListRows{
+func NewRootListRowsUpdate() *RootListRowsUpdate {
+	return &RootListRowsUpdate{
 		Create: []*RootListRow{},
 		Change: []*RootListRow{},
-		Remove: []*RootListRowRemove{},
+		Remove: []RootListRowGlobalID{},
 	}
 }
 
@@ -87,16 +87,6 @@ func NewContextMenuRow(id ContextMenuRowID, value string) *ContextMenuRow {
 	return &ContextMenuRow{
 		ID:    id,
 		Value: value,
-	}
-}
-
-type ContextMenuRows struct {
-	Create []*ContextMenuRow
-}
-
-func NewContextMenuRows() *ContextMenuRows {
-	return &ContextMenuRows{
-		Create: []*ContextMenuRow{},
 	}
 }
 
