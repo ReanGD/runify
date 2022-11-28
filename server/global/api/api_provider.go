@@ -1,20 +1,13 @@
 package api
 
-type ItemMenuCtrl interface {
-	GetRows() <-chan ItemMenuRows
-	OnRowActivate(id ItemMenuRowID) VoidResult
+type ContextMenuCtrl interface {
+	GetRows() *ContextMenuRows
+	OnRowActivate(id ContextMenuRowID, result ErrorResult)
 }
 
-type ItemMenuCtrlOrError struct {
-	Ctrl  ItemMenuCtrl
-	Error error
-}
-
-type ItemMenuCtrlOrErrorResult TResult[ItemMenuCtrlOrError]
-
-type RootMenuCtrl interface {
-	GetRowsCh() <-chan RootMenuRows
+type RootListCtrl interface {
+	GetRowsCh() <-chan *RootListRows
 	OnFilterChange(value string)
-	OnRowActivate(id RootMenuRowID) VoidResult
-	OnMenuActivate(id RootMenuRowID) ItemMenuCtrlOrErrorResult
+	OnRowActivate(id RootListRowID, result ErrorResult)
+	OnMenuActivate(id RootListRowID, result ContexMenuCtrlOrErrorResult)
 }

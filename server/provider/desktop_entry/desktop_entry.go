@@ -15,18 +15,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	actionOpen uint32 = iota
-	actionCopyName
-	actionCopyPath
-	actionLast
-)
-
-type entry struct {
-	path  string
-	props *desktop.Entry
-}
-
 type DesktopEntry struct {
 	providerID   uint64
 	terminal     string
