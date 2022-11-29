@@ -39,3 +39,19 @@ func (h *uiHandler) writeLog(msg *pb.WriteLog) error {
 
 	return nil
 }
+
+func (h *uiHandler) filterChanged(formID uint32, msg *pb.FilterData) error {
+	return nil
+}
+
+func (h *uiHandler) rootListRowActivated(formID uint32, msg *pb.RootListRowGlobalID) error {
+	return nil
+}
+
+func (h *uiHandler) rootListMenuActivated(formID uint32, msg *pb.RootListRowGlobalID) error {
+	return nil
+}
+
+func (h *uiHandler) contextMenuRowActivated(formID uint32, msg *pb.ContextMenuRowID) error {
+	return nil
+}

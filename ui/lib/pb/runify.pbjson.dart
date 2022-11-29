@@ -104,13 +104,6 @@ const Form$json = const {
 
 /// Descriptor for `Form`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List formDescriptor = $convert.base64Decode('CgRGb3JtEhYKBmxheW91dBgBIAEoCVIGbGF5b3V0EiYKBWNhcmRzGAIgAygLMhAucnVuaWZ5LkNhcmRJdGVtUgVjYXJkcw==');
-@$core.Deprecated('Use showWindowDescriptor instead')
-const ShowWindow$json = const {
-  '1': 'ShowWindow',
-};
-
-/// Descriptor for `ShowWindow`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List showWindowDescriptor = $convert.base64Decode('CgpTaG93V2luZG93');
 @$core.Deprecated('Use hideWindowDescriptor instead')
 const HideWindow$json = const {
   '1': 'HideWindow',
@@ -183,3 +176,152 @@ const ServiceMsgSrv$json = const {
 
 /// Descriptor for `ServiceMsgSrv`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List serviceMsgSrvDescriptor = $convert.base64Decode('Cg1TZXJ2aWNlTXNnU3J2EjoKDHNldEZvcm1TdGF0ZRgBIAEoCzIULnJ1bmlmeS5TZXRGb3JtU3RhdGVIAFIMc2V0Rm9ybVN0YXRlQgkKB3BheWxvYWQ=');
+@$core.Deprecated('Use rootListRowGlobalIDDescriptor instead')
+const RootListRowGlobalID$json = const {
+  '1': 'RootListRowGlobalID',
+  '2': const [
+    const {'1': 'providerID', '3': 1, '4': 1, '5': 13, '10': 'providerID'},
+    const {'1': 'rowID', '3': 2, '4': 1, '5': 13, '10': 'rowID'},
+  ],
+};
+
+/// Descriptor for `RootListRowGlobalID`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rootListRowGlobalIDDescriptor = $convert.base64Decode('ChNSb290TGlzdFJvd0dsb2JhbElEEh4KCnByb3ZpZGVySUQYASABKA1SCnByb3ZpZGVySUQSFAoFcm93SUQYAiABKA1SBXJvd0lE');
+@$core.Deprecated('Use rootListRowDescriptor instead')
+const RootListRow$json = const {
+  '1': 'RootListRow',
+  '2': const [
+    const {'1': 'providerID', '3': 1, '4': 1, '5': 13, '10': 'providerID'},
+    const {'1': 'rowID', '3': 2, '4': 1, '5': 13, '10': 'rowID'},
+    const {'1': 'priority', '3': 3, '4': 1, '5': 13, '10': 'priority'},
+    const {'1': 'icon', '3': 4, '4': 1, '5': 9, '10': 'icon'},
+    const {'1': 'value', '3': 5, '4': 1, '5': 9, '10': 'value'},
+  ],
+};
+
+/// Descriptor for `RootListRow`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rootListRowDescriptor = $convert.base64Decode('CgtSb290TGlzdFJvdxIeCgpwcm92aWRlcklEGAEgASgNUgpwcm92aWRlcklEEhQKBXJvd0lEGAIgASgNUgVyb3dJRBIaCghwcmlvcml0eRgDIAEoDVIIcHJpb3JpdHkSEgoEaWNvbhgEIAEoCVIEaWNvbhIUCgV2YWx1ZRgFIAEoCVIFdmFsdWU=');
+@$core.Deprecated('Use rootListRowsDescriptor instead')
+const RootListRows$json = const {
+  '1': 'RootListRows',
+  '2': const [
+    const {'1': 'rows', '3': 1, '4': 3, '5': 11, '6': '.runify.RootListRow', '10': 'rows'},
+  ],
+};
+
+/// Descriptor for `RootListRows`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rootListRowsDescriptor = $convert.base64Decode('CgxSb290TGlzdFJvd3MSJwoEcm93cxgBIAMoCzITLnJ1bmlmeS5Sb290TGlzdFJvd1IEcm93cw==');
+@$core.Deprecated('Use rootListRowsUpdateDescriptor instead')
+const RootListRowsUpdate$json = const {
+  '1': 'RootListRowsUpdate',
+  '2': const [
+    const {'1': 'create', '3': 1, '4': 3, '5': 11, '6': '.runify.RootListRows', '10': 'create'},
+    const {'1': 'change', '3': 2, '4': 3, '5': 11, '6': '.runify.RootListRows', '10': 'change'},
+    const {'1': 'Remove', '3': 3, '4': 3, '5': 11, '6': '.runify.RootListRowGlobalID', '10': 'Remove'},
+  ],
+};
+
+/// Descriptor for `RootListRowsUpdate`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rootListRowsUpdateDescriptor = $convert.base64Decode('ChJSb290TGlzdFJvd3NVcGRhdGUSLAoGY3JlYXRlGAEgAygLMhQucnVuaWZ5LlJvb3RMaXN0Um93c1IGY3JlYXRlEiwKBmNoYW5nZRgCIAMoCzIULnJ1bmlmeS5Sb290TGlzdFJvd3NSBmNoYW5nZRIzCgZSZW1vdmUYAyADKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJRFIGUmVtb3Zl');
+@$core.Deprecated('Use rootListFormDescriptor instead')
+const RootListForm$json = const {
+  '1': 'RootListForm',
+  '2': const [
+    const {'1': 'rows', '3': 1, '4': 1, '5': 11, '6': '.runify.RootListRows', '10': 'rows'},
+  ],
+};
+
+/// Descriptor for `RootListForm`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rootListFormDescriptor = $convert.base64Decode('CgxSb290TGlzdEZvcm0SKAoEcm93cxgBIAEoCzIULnJ1bmlmeS5Sb290TGlzdFJvd3NSBHJvd3M=');
+@$core.Deprecated('Use contextMenuRowIDDescriptor instead')
+const ContextMenuRowID$json = const {
+  '1': 'ContextMenuRowID',
+  '2': const [
+    const {'1': 'rowID', '3': 1, '4': 1, '5': 13, '10': 'rowID'},
+  ],
+};
+
+/// Descriptor for `ContextMenuRowID`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List contextMenuRowIDDescriptor = $convert.base64Decode('ChBDb250ZXh0TWVudVJvd0lEEhQKBXJvd0lEGAEgASgNUgVyb3dJRA==');
+@$core.Deprecated('Use contextMenuRowDescriptor instead')
+const ContextMenuRow$json = const {
+  '1': 'ContextMenuRow',
+  '2': const [
+    const {'1': 'rowID', '3': 1, '4': 1, '5': 13, '10': 'rowID'},
+    const {'1': 'value', '3': 2, '4': 1, '5': 9, '10': 'value'},
+  ],
+};
+
+/// Descriptor for `ContextMenuRow`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List contextMenuRowDescriptor = $convert.base64Decode('Cg5Db250ZXh0TWVudVJvdxIUCgVyb3dJRBgBIAEoDVIFcm93SUQSFAoFdmFsdWUYAiABKAlSBXZhbHVl');
+@$core.Deprecated('Use contextMenuRowsDescriptor instead')
+const ContextMenuRows$json = const {
+  '1': 'ContextMenuRows',
+  '2': const [
+    const {'1': 'rows', '3': 1, '4': 3, '5': 11, '6': '.runify.ContextMenuRow', '10': 'rows'},
+  ],
+};
+
+/// Descriptor for `ContextMenuRows`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List contextMenuRowsDescriptor = $convert.base64Decode('Cg9Db250ZXh0TWVudVJvd3MSKgoEcm93cxgBIAMoCzIWLnJ1bmlmeS5Db250ZXh0TWVudVJvd1IEcm93cw==');
+@$core.Deprecated('Use contextMenuFormDescriptor instead')
+const ContextMenuForm$json = const {
+  '1': 'ContextMenuForm',
+  '2': const [
+    const {'1': 'rows', '3': 1, '4': 1, '5': 11, '6': '.runify.ContextMenuRows', '10': 'rows'},
+  ],
+};
+
+/// Descriptor for `ContextMenuForm`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List contextMenuFormDescriptor = $convert.base64Decode('Cg9Db250ZXh0TWVudUZvcm0SKwoEcm93cxgBIAEoCzIXLnJ1bmlmeS5Db250ZXh0TWVudVJvd3NSBHJvd3M=');
+@$core.Deprecated('Use closeFormDescriptor instead')
+const CloseForm$json = const {
+  '1': 'CloseForm',
+};
+
+/// Descriptor for `CloseForm`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List closeFormDescriptor = $convert.base64Decode('CglDbG9zZUZvcm0=');
+@$core.Deprecated('Use filterDataDescriptor instead')
+const FilterData$json = const {
+  '1': 'FilterData',
+  '2': const [
+    const {'1': 'value', '3': 1, '4': 1, '5': 9, '10': 'value'},
+  ],
+};
+
+/// Descriptor for `FilterData`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List filterDataDescriptor = $convert.base64Decode('CgpGaWx0ZXJEYXRhEhQKBXZhbHVlGAEgASgJUgV2YWx1ZQ==');
+@$core.Deprecated('Use formDataMsgUIDescriptor instead')
+const FormDataMsgUI$json = const {
+  '1': 'FormDataMsgUI',
+  '2': const [
+    const {'1': 'formID', '3': 1, '4': 1, '5': 13, '10': 'formID'},
+    const {'1': 'filterChanged', '3': 2, '4': 1, '5': 11, '6': '.runify.FilterData', '9': 0, '10': 'filterChanged'},
+    const {'1': 'rootListRowActivated', '3': 3, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListRowActivated'},
+    const {'1': 'rootListMenuActivated', '3': 4, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListMenuActivated'},
+    const {'1': 'contextMenuRowActivated', '3': 5, '4': 1, '5': 11, '6': '.runify.ContextMenuRowID', '9': 0, '10': 'contextMenuRowActivated'},
+  ],
+  '8': const [
+    const {'1': 'payload'},
+  ],
+};
+
+/// Descriptor for `FormDataMsgUI`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List formDataMsgUIDescriptor = $convert.base64Decode('Cg1Gb3JtRGF0YU1zZ1VJEhYKBmZvcm1JRBgBIAEoDVIGZm9ybUlEEjoKDWZpbHRlckNoYW5nZWQYAiABKAsyEi5ydW5pZnkuRmlsdGVyRGF0YUgAUg1maWx0ZXJDaGFuZ2VkElEKFHJvb3RMaXN0Um93QWN0aXZhdGVkGAMgASgLMhsucnVuaWZ5LlJvb3RMaXN0Um93R2xvYmFsSURIAFIUcm9vdExpc3RSb3dBY3RpdmF0ZWQSUwoVcm9vdExpc3RNZW51QWN0aXZhdGVkGAQgASgLMhsucnVuaWZ5LlJvb3RMaXN0Um93R2xvYmFsSURIAFIVcm9vdExpc3RNZW51QWN0aXZhdGVkElQKF2NvbnRleHRNZW51Um93QWN0aXZhdGVkGAUgASgLMhgucnVuaWZ5LkNvbnRleHRNZW51Um93SURIAFIXY29udGV4dE1lbnVSb3dBY3RpdmF0ZWRCCQoHcGF5bG9hZA==');
+@$core.Deprecated('Use formDataMsgSrvDescriptor instead')
+const FormDataMsgSrv$json = const {
+  '1': 'FormDataMsgSrv',
+  '2': const [
+    const {'1': 'formID', '3': 1, '4': 1, '5': 13, '10': 'formID'},
+    const {'1': 'openRootListForm', '3': 2, '4': 1, '5': 11, '6': '.runify.RootListForm', '9': 0, '10': 'openRootListForm'},
+    const {'1': 'updateRootListForm', '3': 3, '4': 1, '5': 11, '6': '.runify.RootListRowsUpdate', '9': 0, '10': 'updateRootListForm'},
+    const {'1': 'openContextMenuForm', '3': 4, '4': 1, '5': 11, '6': '.runify.ContextMenuForm', '9': 0, '10': 'openContextMenuForm'},
+    const {'1': 'closeForm', '3': 5, '4': 1, '5': 11, '6': '.runify.CloseForm', '9': 0, '10': 'closeForm'},
+  ],
+  '8': const [
+    const {'1': 'payload'},
+  ],
+};
+
+/// Descriptor for `FormDataMsgSrv`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List formDataMsgSrvDescriptor = $convert.base64Decode('Cg5Gb3JtRGF0YU1zZ1NydhIWCgZmb3JtSUQYASABKA1SBmZvcm1JRBJCChBvcGVuUm9vdExpc3RGb3JtGAIgASgLMhQucnVuaWZ5LlJvb3RMaXN0Rm9ybUgAUhBvcGVuUm9vdExpc3RGb3JtEkwKEnVwZGF0ZVJvb3RMaXN0Rm9ybRgDIAEoCzIaLnJ1bmlmeS5Sb290TGlzdFJvd3NVcGRhdGVIAFISdXBkYXRlUm9vdExpc3RGb3JtEksKE29wZW5Db250ZXh0TWVudUZvcm0YBCABKAsyFy5ydW5pZnkuQ29udGV4dE1lbnVGb3JtSABSE29wZW5Db250ZXh0TWVudUZvcm0SMQoJY2xvc2VGb3JtGAUgASgLMhEucnVuaWZ5LkNsb3NlRm9ybUgAUgljbG9zZUZvcm1CCQoHcGF5bG9hZA==');

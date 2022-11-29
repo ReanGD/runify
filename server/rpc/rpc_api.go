@@ -95,6 +95,69 @@ func (s *runifyServer) ServiceChannel(stream pb.Runify_ServiceChannelServer) err
 	return processor.wait()
 }
 
+func (s *runifyServer) FormDataChannel(stream pb.Runify_FormDataChannelServer) error {
+	processor := newStreamProcessor(stream.Context())
+	log := s.moduleLogger.With(zap.String("Method", "FormDataChannel"))
+
+	processor.runRecv(func(doneCh <-chan struct{}) error {
+		for {
+			select {
+			case <-doneCh:
+				return nil
+			default:
+			}
+
+			req, err := stream.Recv()
+			if err == io.EOF {
+				return nil
+			}
+
+			if err != nil {
+				log.Warn("Failed receive grpc message", zap.Error(err))
+				return err
+			}
+
+			switch m := req.Payload.(type) {
+			case *pb.FormDataMsgUI_FilterChanged:
+				if err = s.handler.filterChanged(req.FormID, m.FilterChanged); err != nil {
+					log.Warn("Failed process grpc message", zap.String("MessageType", "FilterChanged"), zap.Error(err))
+					return err
+				}
+			case *pb.FormDataMsgUI_RootListRowActivated:
+				if err = s.handler.rootListRowActivated(req.FormID, m.RootListRowActivated); err != nil {
+					log.Warn("Failed process grpc message", zap.String("MessageType", "RootListRowActivated"), zap.Error(err))
+					return err
+				}
+			case *pb.FormDataMsgUI_RootListMenuActivated:
+				if err = s.handler.rootListMenuActivated(req.FormID, m.RootListMenuActivated); err != nil {
+					log.Warn("Failed process grpc message", zap.String("MessageType", "RootListMenuActivated"), zap.Error(err))
+					return err
+				}
+			case *pb.FormDataMsgUI_ContextMenuRowActivated:
+				if err = s.handler.contextMenuRowActivated(req.FormID, m.ContextMenuRowActivated); err != nil {
+					log.Warn("Failed process grpc message", zap.String("MessageType", "ContextMenuRowActivated"), zap.Error(err))
+					return err
+				}
+			default:
+				err = errors.New("recv unknown message type")
+				log.Warn("Failed process grpc message", zap.String("MessageType", reflect.TypeOf(m).String()), zap.Error(err))
+				return err
+			}
+		}
+	})
+
+	processor.runSend(func(doneCh <-chan struct{}) error {
+		for {
+			select {
+			case <-doneCh:
+				return nil
+			}
+		}
+	})
+
+	return processor.wait()
+}
+
 func (s *runifyServer) GetRoot(context.Context, *pb.Empty) (*pb.Form, error) {
 	data := <-s.provider.GetRoot()
 	return &pb.Form{

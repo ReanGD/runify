@@ -383,35 +383,6 @@ class Form extends $pb.GeneratedMessage {
   $core.List<CardItem> get cards => $_getList(1);
 }
 
-class ShowWindow extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ShowWindow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..hasRequiredFields = false
-  ;
-
-  ShowWindow._() : super();
-  factory ShowWindow() => create();
-  factory ShowWindow.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ShowWindow.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  ShowWindow clone() => ShowWindow()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  ShowWindow copyWith(void Function(ShowWindow) updates) => super.copyWith((message) => updates(message as ShowWindow)) as ShowWindow; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static ShowWindow create() => ShowWindow._();
-  ShowWindow createEmptyInstance() => create();
-  static $pb.PbList<ShowWindow> createRepeated() => $pb.PbList<ShowWindow>();
-  @$core.pragma('dart2js:noInline')
-  static ShowWindow getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ShowWindow>(create);
-  static ShowWindow? _defaultInstance;
-}
-
 class HideWindow extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HideWindow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error')
@@ -787,5 +758,850 @@ class ServiceMsgSrv extends $pb.GeneratedMessage {
   void clearSetFormState() => clearField(1);
   @$pb.TagNumber(1)
   SetFormState ensureSetFormState() => $_ensure(0);
+}
+
+class RootListRowGlobalID extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RootListRowGlobalID', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'providerID', $pb.PbFieldType.OU3, protoName: 'providerID')
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
+    ..hasRequiredFields = false
+  ;
+
+  RootListRowGlobalID._() : super();
+  factory RootListRowGlobalID({
+    $core.int? providerID,
+    $core.int? rowID,
+  }) {
+    final _result = create();
+    if (providerID != null) {
+      _result.providerID = providerID;
+    }
+    if (rowID != null) {
+      _result.rowID = rowID;
+    }
+    return _result;
+  }
+  factory RootListRowGlobalID.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RootListRowGlobalID.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RootListRowGlobalID clone() => RootListRowGlobalID()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RootListRowGlobalID copyWith(void Function(RootListRowGlobalID) updates) => super.copyWith((message) => updates(message as RootListRowGlobalID)) as RootListRowGlobalID; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RootListRowGlobalID create() => RootListRowGlobalID._();
+  RootListRowGlobalID createEmptyInstance() => create();
+  static $pb.PbList<RootListRowGlobalID> createRepeated() => $pb.PbList<RootListRowGlobalID>();
+  @$core.pragma('dart2js:noInline')
+  static RootListRowGlobalID getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RootListRowGlobalID>(create);
+  static RootListRowGlobalID? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get providerID => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set providerID($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasProviderID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearProviderID() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get rowID => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set rowID($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRowID() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRowID() => clearField(2);
+}
+
+class RootListRow extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RootListRow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'providerID', $pb.PbFieldType.OU3, protoName: 'providerID')
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'priority', $pb.PbFieldType.OU3)
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'icon')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'value')
+    ..hasRequiredFields = false
+  ;
+
+  RootListRow._() : super();
+  factory RootListRow({
+    $core.int? providerID,
+    $core.int? rowID,
+    $core.int? priority,
+    $core.String? icon,
+    $core.String? value,
+  }) {
+    final _result = create();
+    if (providerID != null) {
+      _result.providerID = providerID;
+    }
+    if (rowID != null) {
+      _result.rowID = rowID;
+    }
+    if (priority != null) {
+      _result.priority = priority;
+    }
+    if (icon != null) {
+      _result.icon = icon;
+    }
+    if (value != null) {
+      _result.value = value;
+    }
+    return _result;
+  }
+  factory RootListRow.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RootListRow.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RootListRow clone() => RootListRow()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RootListRow copyWith(void Function(RootListRow) updates) => super.copyWith((message) => updates(message as RootListRow)) as RootListRow; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RootListRow create() => RootListRow._();
+  RootListRow createEmptyInstance() => create();
+  static $pb.PbList<RootListRow> createRepeated() => $pb.PbList<RootListRow>();
+  @$core.pragma('dart2js:noInline')
+  static RootListRow getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RootListRow>(create);
+  static RootListRow? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get providerID => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set providerID($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasProviderID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearProviderID() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get rowID => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set rowID($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRowID() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRowID() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get priority => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set priority($core.int v) { $_setUnsignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasPriority() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearPriority() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get icon => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set icon($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasIcon() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearIcon() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get value => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set value($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasValue() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearValue() => clearField(5);
+}
+
+class RootListRows extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RootListRows', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..pc<RootListRow>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rows', $pb.PbFieldType.PM, subBuilder: RootListRow.create)
+    ..hasRequiredFields = false
+  ;
+
+  RootListRows._() : super();
+  factory RootListRows({
+    $core.Iterable<RootListRow>? rows,
+  }) {
+    final _result = create();
+    if (rows != null) {
+      _result.rows.addAll(rows);
+    }
+    return _result;
+  }
+  factory RootListRows.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RootListRows.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RootListRows clone() => RootListRows()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RootListRows copyWith(void Function(RootListRows) updates) => super.copyWith((message) => updates(message as RootListRows)) as RootListRows; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RootListRows create() => RootListRows._();
+  RootListRows createEmptyInstance() => create();
+  static $pb.PbList<RootListRows> createRepeated() => $pb.PbList<RootListRows>();
+  @$core.pragma('dart2js:noInline')
+  static RootListRows getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RootListRows>(create);
+  static RootListRows? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<RootListRow> get rows => $_getList(0);
+}
+
+class RootListRowsUpdate extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RootListRowsUpdate', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..pc<RootListRows>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'create', $pb.PbFieldType.PM, subBuilder: RootListRows.create)
+    ..pc<RootListRows>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'change', $pb.PbFieldType.PM, subBuilder: RootListRows.create)
+    ..pc<RootListRowGlobalID>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Remove', $pb.PbFieldType.PM, protoName: 'Remove', subBuilder: RootListRowGlobalID.create)
+    ..hasRequiredFields = false
+  ;
+
+  RootListRowsUpdate._() : super();
+  factory RootListRowsUpdate({
+    $core.Iterable<RootListRows>? create_1,
+    $core.Iterable<RootListRows>? change,
+    $core.Iterable<RootListRowGlobalID>? remove,
+  }) {
+    final _result = create();
+    if (create_1 != null) {
+      _result.create_1.addAll(create_1);
+    }
+    if (change != null) {
+      _result.change.addAll(change);
+    }
+    if (remove != null) {
+      _result.remove.addAll(remove);
+    }
+    return _result;
+  }
+  factory RootListRowsUpdate.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RootListRowsUpdate.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RootListRowsUpdate clone() => RootListRowsUpdate()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RootListRowsUpdate copyWith(void Function(RootListRowsUpdate) updates) => super.copyWith((message) => updates(message as RootListRowsUpdate)) as RootListRowsUpdate; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RootListRowsUpdate create() => RootListRowsUpdate._();
+  RootListRowsUpdate createEmptyInstance() => create();
+  static $pb.PbList<RootListRowsUpdate> createRepeated() => $pb.PbList<RootListRowsUpdate>();
+  @$core.pragma('dart2js:noInline')
+  static RootListRowsUpdate getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RootListRowsUpdate>(create);
+  static RootListRowsUpdate? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<RootListRows> get create_1 => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.List<RootListRows> get change => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.List<RootListRowGlobalID> get remove => $_getList(2);
+}
+
+class RootListForm extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RootListForm', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..aOM<RootListRows>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rows', subBuilder: RootListRows.create)
+    ..hasRequiredFields = false
+  ;
+
+  RootListForm._() : super();
+  factory RootListForm({
+    RootListRows? rows,
+  }) {
+    final _result = create();
+    if (rows != null) {
+      _result.rows = rows;
+    }
+    return _result;
+  }
+  factory RootListForm.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RootListForm.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RootListForm clone() => RootListForm()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RootListForm copyWith(void Function(RootListForm) updates) => super.copyWith((message) => updates(message as RootListForm)) as RootListForm; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RootListForm create() => RootListForm._();
+  RootListForm createEmptyInstance() => create();
+  static $pb.PbList<RootListForm> createRepeated() => $pb.PbList<RootListForm>();
+  @$core.pragma('dart2js:noInline')
+  static RootListForm getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RootListForm>(create);
+  static RootListForm? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  RootListRows get rows => $_getN(0);
+  @$pb.TagNumber(1)
+  set rows(RootListRows v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRows() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRows() => clearField(1);
+  @$pb.TagNumber(1)
+  RootListRows ensureRows() => $_ensure(0);
+}
+
+class ContextMenuRowID extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ContextMenuRowID', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
+    ..hasRequiredFields = false
+  ;
+
+  ContextMenuRowID._() : super();
+  factory ContextMenuRowID({
+    $core.int? rowID,
+  }) {
+    final _result = create();
+    if (rowID != null) {
+      _result.rowID = rowID;
+    }
+    return _result;
+  }
+  factory ContextMenuRowID.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ContextMenuRowID.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ContextMenuRowID clone() => ContextMenuRowID()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ContextMenuRowID copyWith(void Function(ContextMenuRowID) updates) => super.copyWith((message) => updates(message as ContextMenuRowID)) as ContextMenuRowID; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ContextMenuRowID create() => ContextMenuRowID._();
+  ContextMenuRowID createEmptyInstance() => create();
+  static $pb.PbList<ContextMenuRowID> createRepeated() => $pb.PbList<ContextMenuRowID>();
+  @$core.pragma('dart2js:noInline')
+  static ContextMenuRowID getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ContextMenuRowID>(create);
+  static ContextMenuRowID? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get rowID => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set rowID($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRowID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRowID() => clearField(1);
+}
+
+class ContextMenuRow extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ContextMenuRow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'value')
+    ..hasRequiredFields = false
+  ;
+
+  ContextMenuRow._() : super();
+  factory ContextMenuRow({
+    $core.int? rowID,
+    $core.String? value,
+  }) {
+    final _result = create();
+    if (rowID != null) {
+      _result.rowID = rowID;
+    }
+    if (value != null) {
+      _result.value = value;
+    }
+    return _result;
+  }
+  factory ContextMenuRow.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ContextMenuRow.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ContextMenuRow clone() => ContextMenuRow()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ContextMenuRow copyWith(void Function(ContextMenuRow) updates) => super.copyWith((message) => updates(message as ContextMenuRow)) as ContextMenuRow; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ContextMenuRow create() => ContextMenuRow._();
+  ContextMenuRow createEmptyInstance() => create();
+  static $pb.PbList<ContextMenuRow> createRepeated() => $pb.PbList<ContextMenuRow>();
+  @$core.pragma('dart2js:noInline')
+  static ContextMenuRow getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ContextMenuRow>(create);
+  static ContextMenuRow? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get rowID => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set rowID($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRowID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRowID() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get value => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set value($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasValue() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearValue() => clearField(2);
+}
+
+class ContextMenuRows extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ContextMenuRows', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..pc<ContextMenuRow>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rows', $pb.PbFieldType.PM, subBuilder: ContextMenuRow.create)
+    ..hasRequiredFields = false
+  ;
+
+  ContextMenuRows._() : super();
+  factory ContextMenuRows({
+    $core.Iterable<ContextMenuRow>? rows,
+  }) {
+    final _result = create();
+    if (rows != null) {
+      _result.rows.addAll(rows);
+    }
+    return _result;
+  }
+  factory ContextMenuRows.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ContextMenuRows.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ContextMenuRows clone() => ContextMenuRows()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ContextMenuRows copyWith(void Function(ContextMenuRows) updates) => super.copyWith((message) => updates(message as ContextMenuRows)) as ContextMenuRows; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ContextMenuRows create() => ContextMenuRows._();
+  ContextMenuRows createEmptyInstance() => create();
+  static $pb.PbList<ContextMenuRows> createRepeated() => $pb.PbList<ContextMenuRows>();
+  @$core.pragma('dart2js:noInline')
+  static ContextMenuRows getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ContextMenuRows>(create);
+  static ContextMenuRows? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<ContextMenuRow> get rows => $_getList(0);
+}
+
+class ContextMenuForm extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ContextMenuForm', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..aOM<ContextMenuRows>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rows', subBuilder: ContextMenuRows.create)
+    ..hasRequiredFields = false
+  ;
+
+  ContextMenuForm._() : super();
+  factory ContextMenuForm({
+    ContextMenuRows? rows,
+  }) {
+    final _result = create();
+    if (rows != null) {
+      _result.rows = rows;
+    }
+    return _result;
+  }
+  factory ContextMenuForm.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ContextMenuForm.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ContextMenuForm clone() => ContextMenuForm()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ContextMenuForm copyWith(void Function(ContextMenuForm) updates) => super.copyWith((message) => updates(message as ContextMenuForm)) as ContextMenuForm; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ContextMenuForm create() => ContextMenuForm._();
+  ContextMenuForm createEmptyInstance() => create();
+  static $pb.PbList<ContextMenuForm> createRepeated() => $pb.PbList<ContextMenuForm>();
+  @$core.pragma('dart2js:noInline')
+  static ContextMenuForm getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ContextMenuForm>(create);
+  static ContextMenuForm? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  ContextMenuRows get rows => $_getN(0);
+  @$pb.TagNumber(1)
+  set rows(ContextMenuRows v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRows() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRows() => clearField(1);
+  @$pb.TagNumber(1)
+  ContextMenuRows ensureRows() => $_ensure(0);
+}
+
+class CloseForm extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CloseForm', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  CloseForm._() : super();
+  factory CloseForm() => create();
+  factory CloseForm.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CloseForm.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CloseForm clone() => CloseForm()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CloseForm copyWith(void Function(CloseForm) updates) => super.copyWith((message) => updates(message as CloseForm)) as CloseForm; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CloseForm create() => CloseForm._();
+  CloseForm createEmptyInstance() => create();
+  static $pb.PbList<CloseForm> createRepeated() => $pb.PbList<CloseForm>();
+  @$core.pragma('dart2js:noInline')
+  static CloseForm getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CloseForm>(create);
+  static CloseForm? _defaultInstance;
+}
+
+class FilterData extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FilterData', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'value')
+    ..hasRequiredFields = false
+  ;
+
+  FilterData._() : super();
+  factory FilterData({
+    $core.String? value,
+  }) {
+    final _result = create();
+    if (value != null) {
+      _result.value = value;
+    }
+    return _result;
+  }
+  factory FilterData.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FilterData.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FilterData clone() => FilterData()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FilterData copyWith(void Function(FilterData) updates) => super.copyWith((message) => updates(message as FilterData)) as FilterData; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FilterData create() => FilterData._();
+  FilterData createEmptyInstance() => create();
+  static $pb.PbList<FilterData> createRepeated() => $pb.PbList<FilterData>();
+  @$core.pragma('dart2js:noInline')
+  static FilterData getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FilterData>(create);
+  static FilterData? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get value => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set value($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasValue() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearValue() => clearField(1);
+}
+
+enum FormDataMsgUI_Payload {
+  filterChanged, 
+  rootListRowActivated, 
+  rootListMenuActivated, 
+  contextMenuRowActivated, 
+  notSet
+}
+
+class FormDataMsgUI extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, FormDataMsgUI_Payload> _FormDataMsgUI_PayloadByTag = {
+    2 : FormDataMsgUI_Payload.filterChanged,
+    3 : FormDataMsgUI_Payload.rootListRowActivated,
+    4 : FormDataMsgUI_Payload.rootListMenuActivated,
+    5 : FormDataMsgUI_Payload.contextMenuRowActivated,
+    0 : FormDataMsgUI_Payload.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FormDataMsgUI', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..oo(0, [2, 3, 4, 5])
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formID', $pb.PbFieldType.OU3, protoName: 'formID')
+    ..aOM<FilterData>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'filterChanged', protoName: 'filterChanged', subBuilder: FilterData.create)
+    ..aOM<RootListRowGlobalID>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListRowActivated', protoName: 'rootListRowActivated', subBuilder: RootListRowGlobalID.create)
+    ..aOM<RootListRowGlobalID>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListMenuActivated', protoName: 'rootListMenuActivated', subBuilder: RootListRowGlobalID.create)
+    ..aOM<ContextMenuRowID>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contextMenuRowActivated', protoName: 'contextMenuRowActivated', subBuilder: ContextMenuRowID.create)
+    ..hasRequiredFields = false
+  ;
+
+  FormDataMsgUI._() : super();
+  factory FormDataMsgUI({
+    $core.int? formID,
+    FilterData? filterChanged,
+    RootListRowGlobalID? rootListRowActivated,
+    RootListRowGlobalID? rootListMenuActivated,
+    ContextMenuRowID? contextMenuRowActivated,
+  }) {
+    final _result = create();
+    if (formID != null) {
+      _result.formID = formID;
+    }
+    if (filterChanged != null) {
+      _result.filterChanged = filterChanged;
+    }
+    if (rootListRowActivated != null) {
+      _result.rootListRowActivated = rootListRowActivated;
+    }
+    if (rootListMenuActivated != null) {
+      _result.rootListMenuActivated = rootListMenuActivated;
+    }
+    if (contextMenuRowActivated != null) {
+      _result.contextMenuRowActivated = contextMenuRowActivated;
+    }
+    return _result;
+  }
+  factory FormDataMsgUI.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FormDataMsgUI.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FormDataMsgUI clone() => FormDataMsgUI()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FormDataMsgUI copyWith(void Function(FormDataMsgUI) updates) => super.copyWith((message) => updates(message as FormDataMsgUI)) as FormDataMsgUI; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FormDataMsgUI create() => FormDataMsgUI._();
+  FormDataMsgUI createEmptyInstance() => create();
+  static $pb.PbList<FormDataMsgUI> createRepeated() => $pb.PbList<FormDataMsgUI>();
+  @$core.pragma('dart2js:noInline')
+  static FormDataMsgUI getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FormDataMsgUI>(create);
+  static FormDataMsgUI? _defaultInstance;
+
+  FormDataMsgUI_Payload whichPayload() => _FormDataMsgUI_PayloadByTag[$_whichOneof(0)]!;
+  void clearPayload() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  $core.int get formID => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set formID($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasFormID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearFormID() => clearField(1);
+
+  @$pb.TagNumber(2)
+  FilterData get filterChanged => $_getN(1);
+  @$pb.TagNumber(2)
+  set filterChanged(FilterData v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasFilterChanged() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFilterChanged() => clearField(2);
+  @$pb.TagNumber(2)
+  FilterData ensureFilterChanged() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  RootListRowGlobalID get rootListRowActivated => $_getN(2);
+  @$pb.TagNumber(3)
+  set rootListRowActivated(RootListRowGlobalID v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRootListRowActivated() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRootListRowActivated() => clearField(3);
+  @$pb.TagNumber(3)
+  RootListRowGlobalID ensureRootListRowActivated() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  RootListRowGlobalID get rootListMenuActivated => $_getN(3);
+  @$pb.TagNumber(4)
+  set rootListMenuActivated(RootListRowGlobalID v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasRootListMenuActivated() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearRootListMenuActivated() => clearField(4);
+  @$pb.TagNumber(4)
+  RootListRowGlobalID ensureRootListMenuActivated() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  ContextMenuRowID get contextMenuRowActivated => $_getN(4);
+  @$pb.TagNumber(5)
+  set contextMenuRowActivated(ContextMenuRowID v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasContextMenuRowActivated() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearContextMenuRowActivated() => clearField(5);
+  @$pb.TagNumber(5)
+  ContextMenuRowID ensureContextMenuRowActivated() => $_ensure(4);
+}
+
+enum FormDataMsgSrv_Payload {
+  openRootListForm, 
+  updateRootListForm, 
+  openContextMenuForm, 
+  closeForm, 
+  notSet
+}
+
+class FormDataMsgSrv extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, FormDataMsgSrv_Payload> _FormDataMsgSrv_PayloadByTag = {
+    2 : FormDataMsgSrv_Payload.openRootListForm,
+    3 : FormDataMsgSrv_Payload.updateRootListForm,
+    4 : FormDataMsgSrv_Payload.openContextMenuForm,
+    5 : FormDataMsgSrv_Payload.closeForm,
+    0 : FormDataMsgSrv_Payload.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FormDataMsgSrv', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..oo(0, [2, 3, 4, 5])
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formID', $pb.PbFieldType.OU3, protoName: 'formID')
+    ..aOM<RootListForm>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'openRootListForm', protoName: 'openRootListForm', subBuilder: RootListForm.create)
+    ..aOM<RootListRowsUpdate>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updateRootListForm', protoName: 'updateRootListForm', subBuilder: RootListRowsUpdate.create)
+    ..aOM<ContextMenuForm>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'openContextMenuForm', protoName: 'openContextMenuForm', subBuilder: ContextMenuForm.create)
+    ..aOM<CloseForm>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closeForm', protoName: 'closeForm', subBuilder: CloseForm.create)
+    ..hasRequiredFields = false
+  ;
+
+  FormDataMsgSrv._() : super();
+  factory FormDataMsgSrv({
+    $core.int? formID,
+    RootListForm? openRootListForm,
+    RootListRowsUpdate? updateRootListForm,
+    ContextMenuForm? openContextMenuForm,
+    CloseForm? closeForm,
+  }) {
+    final _result = create();
+    if (formID != null) {
+      _result.formID = formID;
+    }
+    if (openRootListForm != null) {
+      _result.openRootListForm = openRootListForm;
+    }
+    if (updateRootListForm != null) {
+      _result.updateRootListForm = updateRootListForm;
+    }
+    if (openContextMenuForm != null) {
+      _result.openContextMenuForm = openContextMenuForm;
+    }
+    if (closeForm != null) {
+      _result.closeForm = closeForm;
+    }
+    return _result;
+  }
+  factory FormDataMsgSrv.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FormDataMsgSrv.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FormDataMsgSrv clone() => FormDataMsgSrv()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FormDataMsgSrv copyWith(void Function(FormDataMsgSrv) updates) => super.copyWith((message) => updates(message as FormDataMsgSrv)) as FormDataMsgSrv; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FormDataMsgSrv create() => FormDataMsgSrv._();
+  FormDataMsgSrv createEmptyInstance() => create();
+  static $pb.PbList<FormDataMsgSrv> createRepeated() => $pb.PbList<FormDataMsgSrv>();
+  @$core.pragma('dart2js:noInline')
+  static FormDataMsgSrv getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FormDataMsgSrv>(create);
+  static FormDataMsgSrv? _defaultInstance;
+
+  FormDataMsgSrv_Payload whichPayload() => _FormDataMsgSrv_PayloadByTag[$_whichOneof(0)]!;
+  void clearPayload() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  $core.int get formID => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set formID($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasFormID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearFormID() => clearField(1);
+
+  @$pb.TagNumber(2)
+  RootListForm get openRootListForm => $_getN(1);
+  @$pb.TagNumber(2)
+  set openRootListForm(RootListForm v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasOpenRootListForm() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearOpenRootListForm() => clearField(2);
+  @$pb.TagNumber(2)
+  RootListForm ensureOpenRootListForm() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  RootListRowsUpdate get updateRootListForm => $_getN(2);
+  @$pb.TagNumber(3)
+  set updateRootListForm(RootListRowsUpdate v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasUpdateRootListForm() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearUpdateRootListForm() => clearField(3);
+  @$pb.TagNumber(3)
+  RootListRowsUpdate ensureUpdateRootListForm() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  ContextMenuForm get openContextMenuForm => $_getN(3);
+  @$pb.TagNumber(4)
+  set openContextMenuForm(ContextMenuForm v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasOpenContextMenuForm() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearOpenContextMenuForm() => clearField(4);
+  @$pb.TagNumber(4)
+  ContextMenuForm ensureOpenContextMenuForm() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  CloseForm get closeForm => $_getN(4);
+  @$pb.TagNumber(5)
+  set closeForm(CloseForm v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasCloseForm() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearCloseForm() => clearField(5);
+  @$pb.TagNumber(5)
+  CloseForm ensureCloseForm() => $_ensure(4);
 }
 

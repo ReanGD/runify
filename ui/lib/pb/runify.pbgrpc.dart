@@ -19,6 +19,11 @@ class RunifyClient extends $grpc.Client {
           '/runify.Runify/ServiceChannel',
           ($0.ServiceMsgUI value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $0.ServiceMsgSrv.fromBuffer(value));
+  static final _$formDataChannel =
+      $grpc.ClientMethod<$0.FormDataMsgUI, $0.FormDataMsgSrv>(
+          '/runify.Runify/FormDataChannel',
+          ($0.FormDataMsgUI value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $0.FormDataMsgSrv.fromBuffer(value));
   static final _$getRoot = $grpc.ClientMethod<$0.Empty, $0.Form>(
       '/runify.Runify/GetRoot',
       ($0.Empty value) => value.writeToBuffer(),
@@ -46,6 +51,12 @@ class RunifyClient extends $grpc.Client {
       $async.Stream<$0.ServiceMsgUI> request,
       {$grpc.CallOptions? options}) {
     return $createStreamingCall(_$serviceChannel, request, options: options);
+  }
+
+  $grpc.ResponseStream<$0.FormDataMsgSrv> formDataChannel(
+      $async.Stream<$0.FormDataMsgUI> request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(_$formDataChannel, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.Form> getRoot($0.Empty request,
@@ -80,6 +91,13 @@ abstract class RunifyServiceBase extends $grpc.Service {
         true,
         ($core.List<$core.int> value) => $0.ServiceMsgUI.fromBuffer(value),
         ($0.ServiceMsgSrv value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.FormDataMsgUI, $0.FormDataMsgSrv>(
+        'FormDataChannel',
+        formDataChannel,
+        true,
+        true,
+        ($core.List<$core.int> value) => $0.FormDataMsgUI.fromBuffer(value),
+        ($0.FormDataMsgSrv value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.Empty, $0.Form>(
         'GetRoot',
         getRoot_Pre,
@@ -132,6 +150,8 @@ abstract class RunifyServiceBase extends $grpc.Service {
 
   $async.Stream<$0.ServiceMsgSrv> serviceChannel(
       $grpc.ServiceCall call, $async.Stream<$0.ServiceMsgUI> request);
+  $async.Stream<$0.FormDataMsgSrv> formDataChannel(
+      $grpc.ServiceCall call, $async.Stream<$0.FormDataMsgUI> request);
   $async.Future<$0.Form> getRoot($grpc.ServiceCall call, $0.Empty request);
   $async.Future<$0.Actions> getActions(
       $grpc.ServiceCall call, $0.SelectedCard request);

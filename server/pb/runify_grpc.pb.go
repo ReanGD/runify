@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RunifyClient interface {
 	ServiceChannel(ctx context.Context, opts ...grpc.CallOption) (Runify_ServiceChannelClient, error)
+	FormDataChannel(ctx context.Context, opts ...grpc.CallOption) (Runify_FormDataChannelClient, error)
 	GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Form, error)
 	GetActions(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Actions, error)
 	ExecuteDefault(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Result, error)
@@ -62,6 +63,37 @@ func (x *runifyServiceChannelClient) Send(m *ServiceMsgUI) error {
 
 func (x *runifyServiceChannelClient) Recv() (*ServiceMsgSrv, error) {
 	m := new(ServiceMsgSrv)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *runifyClient) FormDataChannel(ctx context.Context, opts ...grpc.CallOption) (Runify_FormDataChannelClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Runify_ServiceDesc.Streams[1], "/runify.Runify/FormDataChannel", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &runifyFormDataChannelClient{stream}
+	return x, nil
+}
+
+type Runify_FormDataChannelClient interface {
+	Send(*FormDataMsgUI) error
+	Recv() (*FormDataMsgSrv, error)
+	grpc.ClientStream
+}
+
+type runifyFormDataChannelClient struct {
+	grpc.ClientStream
+}
+
+func (x *runifyFormDataChannelClient) Send(m *FormDataMsgUI) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *runifyFormDataChannelClient) Recv() (*FormDataMsgSrv, error) {
+	m := new(FormDataMsgSrv)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -109,6 +141,7 @@ func (c *runifyClient) Execute(ctx context.Context, in *SelectedAction, opts ...
 // for forward compatibility
 type RunifyServer interface {
 	ServiceChannel(Runify_ServiceChannelServer) error
+	FormDataChannel(Runify_FormDataChannelServer) error
 	GetRoot(context.Context, *Empty) (*Form, error)
 	GetActions(context.Context, *SelectedCard) (*Actions, error)
 	ExecuteDefault(context.Context, *SelectedCard) (*Result, error)
@@ -122,6 +155,9 @@ type UnimplementedRunifyServer struct {
 
 func (UnimplementedRunifyServer) ServiceChannel(Runify_ServiceChannelServer) error {
 	return status.Errorf(codes.Unimplemented, "method ServiceChannel not implemented")
+}
+func (UnimplementedRunifyServer) FormDataChannel(Runify_FormDataChannelServer) error {
+	return status.Errorf(codes.Unimplemented, "method FormDataChannel not implemented")
 }
 func (UnimplementedRunifyServer) GetRoot(context.Context, *Empty) (*Form, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoot not implemented")
@@ -168,6 +204,32 @@ func (x *runifyServiceChannelServer) Send(m *ServiceMsgSrv) error {
 
 func (x *runifyServiceChannelServer) Recv() (*ServiceMsgUI, error) {
 	m := new(ServiceMsgUI)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _Runify_FormDataChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(RunifyServer).FormDataChannel(&runifyFormDataChannelServer{stream})
+}
+
+type Runify_FormDataChannelServer interface {
+	Send(*FormDataMsgSrv) error
+	Recv() (*FormDataMsgUI, error)
+	grpc.ServerStream
+}
+
+type runifyFormDataChannelServer struct {
+	grpc.ServerStream
+}
+
+func (x *runifyFormDataChannelServer) Send(m *FormDataMsgSrv) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *runifyFormDataChannelServer) Recv() (*FormDataMsgUI, error) {
+	m := new(FormDataMsgUI)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -274,6 +336,12 @@ var Runify_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "ServiceChannel",
 			Handler:       _Runify_ServiceChannel_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "FormDataChannel",
+			Handler:       _Runify_FormDataChannel_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},
