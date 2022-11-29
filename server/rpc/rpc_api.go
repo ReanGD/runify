@@ -33,85 +33,66 @@ func newRunifyServer(
 }
 
 func (s *runifyServer) ServiceChannel(stream pb.Runify_ServiceChannelServer) error {
-	doneCh := stream.Context().Done()
-	recvFinishCh := make(chan struct{})
-	sendFinishCh := make(chan struct{})
-	errorCh := make(chan error, 2)
-	zapMethod := zap.String("Method", "ServiceChannel")
+	processor := newStreamProcessor(stream.Context())
+	log := s.moduleLogger.With(zap.String("Method", "ServiceChannel"))
 
-	go func() {
-		defer close(recvFinishCh)
+	processor.runRecv(func(doneCh <-chan struct{}) error {
 		for {
 			select {
 			case <-doneCh:
-				return
-			case <-sendFinishCh:
-				return
+				return nil
 			default:
 			}
 
 			req, err := stream.Recv()
 			if err == io.EOF {
-				return
+				return nil
 			}
+
 			if err != nil {
-				errorCh <- err
-				s.moduleLogger.Warn("Failed receive grpc message", zapMethod, zap.Error(err))
-				return
+				log.Warn("Failed receive grpc message", zap.Error(err))
+				return err
 			}
 
 			switch m := req.Payload.(type) {
 			case *pb.ServiceMsgUI_WriteLog:
 				if err = s.handler.writeLog(m.WriteLog); err != nil {
-					s.moduleLogger.Warn("Failed process grpc message",
-						zapMethod, zap.String("MessageType", "WriteLog"), zap.Error(err))
-					errorCh <- err
-					return
+					log.Warn("Failed process grpc message", zap.String("MessageType", "WriteLog"), zap.Error(err))
+					return err
 				}
 			default:
 				err = errors.New("recv unknown message type")
-				s.moduleLogger.Warn("Failed process grpc message",
-					zapMethod, zap.String("MessageType", reflect.TypeOf(m).String()), zap.Error(err))
-				errorCh <- err
-				return
+				log.Warn("Failed process grpc message", zap.String("MessageType", reflect.TypeOf(m).String()), zap.Error(err))
+				return err
 			}
 		}
-	}()
+	})
 
 	id, sendMsgCh := s.showUIMultiplier.subscribe()
 	defer s.showUIMultiplier.unsubscribe(id)
 
-loop:
-	for {
-		select {
-		case <-sendMsgCh:
-			msg := &pb.ServiceMsgSrv{
-				Payload: &pb.ServiceMsgSrv_SetFormState{
-					SetFormState: &pb.SetFormState{
-						State: pb.FormStateType_SHOW,
+	processor.runSend(func(doneCh <-chan struct{}) error {
+		for {
+			select {
+			case <-sendMsgCh:
+				msg := &pb.ServiceMsgSrv{
+					Payload: &pb.ServiceMsgSrv_SetFormState{
+						SetFormState: &pb.SetFormState{
+							State: pb.FormStateType_SHOW,
+						},
 					},
-				},
+				}
+				if err := stream.Send(msg); err != nil {
+					log.Warn("Failed send grpc message", zap.String("MessageType", "SetFormState"), zap.Error(err))
+					return err
+				}
+			case <-doneCh:
+				return nil
 			}
-			if err := stream.Send(msg); err != nil {
-				s.moduleLogger.Warn("Failed send grpc message",
-					zapMethod, zap.String("MessageType", "SetFormState"), zap.Error(err))
-				return err
-			}
-		case <-doneCh:
-			break loop
-		case <-recvFinishCh:
-			break loop
 		}
-	}
-	close(sendFinishCh)
+	})
 
-	<-recvFinishCh
-	select {
-	case err := <-errorCh:
-		return err
-	default:
-		return nil
-	}
+	return processor.wait()
 }
 
 func (s *runifyServer) GetRoot(context.Context, *pb.Empty) (*pb.Form, error) {
@@ -127,7 +108,7 @@ func (s *runifyServer) GetActions(ctx context.Context, selectedCard *pb.Selected
 }
 
 func (s *runifyServer) ExecuteDefault(ctx context.Context, selectedCard *pb.SelectedCard) (*pb.Result, error) {
-	data := <-s.provider.Execute(selectedCard.CardID, 0)
+	data := <-s.provider.Execute(selectedCard.CardID, 1)
 	return data, nil
 }
 
