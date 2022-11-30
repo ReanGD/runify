@@ -5,7 +5,30 @@ on:
   push:
 
 jobs:
+  format_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'server/go.mod'
+          check-latest: false
+          cache: true
+          cache-dependency-path: server/go.sum
+
+      - name: Install deps for format code
+        run: make dep_fmt
+        working-directory: server
+
+      - name: Check if the code is formatted
+        run: make fmt_check
+        working-directory: server
+
   build:
+    needs: format_check
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -33,9 +56,6 @@ jobs:
         with:
           packages: ninja-build libgtk-3-dev
           version: 1.0
-
-      - name: Show env
-        run: env
 
       - name: Build UI and server
         run: make release

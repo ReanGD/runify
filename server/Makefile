@@ -2,9 +2,12 @@ export RUNIFY_VERSION := "v0.1.0"
 export GOLANGCILINT_VERSION := "v1.48.0"
 export DIR_SCRIPTS := "../ci/make_scripts"
 
-.PHONY: dep gocc test mod_tidy build release run help
+.PHONY: dep_fmt dep gocc test mod_tidy fmt_check fmt build release run help
 
-dep: ## Get the dependencies
+dep_fmt: ## Get the dependencies for the fmt target
+	@go install mvdan.cc/gofumpt@latest
+
+dep: dep_fmt ## Get the dependencies
 	@$(DIR_SCRIPTS)/install_server_deps.sh ${GOLANGCILINT_VERSION}
 
 gocc: ## Generate the gocc parser
@@ -15,6 +18,12 @@ test: ## Run unittests
 
 mod_tidy: ## Removes unused dependencies from go.sum
 	@go mod tidy -v
+
+fmt_check: ## Check if the code is formatted
+	@$(DIR_SCRIPTS)/fmt_check_server.sh
+
+fmt: ## Format source code
+	@gofumpt -l -w .
 
 build: ## Build the binary file
 	@$(DIR_SCRIPTS)/build_server.sh
