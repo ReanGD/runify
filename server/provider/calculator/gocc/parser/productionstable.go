@@ -22,7 +22,7 @@ type (
 
 var productionsTable = ProdTab{
 	ProdTabEntry{
-		String: `S' : Calc	<<  >>`,
+		String:     `S' : Calc	<<  >>`,
 		Id:         "S'",
 		NTType:     0,
 		Index:      0,
@@ -32,7 +32,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Calc : Expr0Lvl	<<  >>`,
+		String:     `Calc : Expr0Lvl	<<  >>`,
 		Id:         "Calc",
 		NTType:     1,
 		Index:      1,
@@ -42,7 +42,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr0Lvl : Expr0Lvl "+" Expr1Lvl	<< ast.BinaryExpr(C, X[0], X[2], '+') >>`,
+		String:     `Expr0Lvl : Expr0Lvl "+" Expr1Lvl	<< ast.BinaryExpr(C, X[0], X[2], '+') >>`,
 		Id:         "Expr0Lvl",
 		NTType:     2,
 		Index:      2,
@@ -52,7 +52,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr0Lvl : Expr0Lvl "-" Expr1Lvl	<< ast.BinaryExpr(C, X[0], X[2], '-') >>`,
+		String:     `Expr0Lvl : Expr0Lvl "-" Expr1Lvl	<< ast.BinaryExpr(C, X[0], X[2], '-') >>`,
 		Id:         "Expr0Lvl",
 		NTType:     2,
 		Index:      3,
@@ -62,7 +62,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr0Lvl : Expr1Lvl	<<  >>`,
+		String:     `Expr0Lvl : Expr1Lvl	<<  >>`,
 		Id:         "Expr0Lvl",
 		NTType:     2,
 		Index:      4,
@@ -72,7 +72,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr1Lvl : Expr1Lvl "*" Expr2Lvl	<< ast.BinaryExpr(C, X[0], X[2], '*') >>`,
+		String:     `Expr1Lvl : Expr1Lvl "*" Expr2Lvl	<< ast.BinaryExpr(C, X[0], X[2], '*') >>`,
 		Id:         "Expr1Lvl",
 		NTType:     3,
 		Index:      5,
@@ -82,7 +82,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr1Lvl : Expr1Lvl "/" Expr2Lvl	<< ast.BinaryExpr(C, X[0], X[2], '/') >>`,
+		String:     `Expr1Lvl : Expr1Lvl "/" Expr2Lvl	<< ast.BinaryExpr(C, X[0], X[2], '/') >>`,
 		Id:         "Expr1Lvl",
 		NTType:     3,
 		Index:      6,
@@ -92,7 +92,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr1Lvl : Expr2Lvl	<<  >>`,
+		String:     `Expr1Lvl : Expr2Lvl	<<  >>`,
 		Id:         "Expr1Lvl",
 		NTType:     3,
 		Index:      7,
@@ -102,7 +102,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr2Lvl : "+" Expr2Lvl	<< ast.UnaryExpr(C, X[1], '+') >>`,
+		String:     `Expr2Lvl : "+" Expr2Lvl	<< ast.UnaryExpr(C, X[1], '+') >>`,
 		Id:         "Expr2Lvl",
 		NTType:     4,
 		Index:      8,
@@ -112,7 +112,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr2Lvl : "-" Expr2Lvl	<< ast.UnaryExpr(C, X[1], '-') >>`,
+		String:     `Expr2Lvl : "-" Expr2Lvl	<< ast.UnaryExpr(C, X[1], '-') >>`,
 		Id:         "Expr2Lvl",
 		NTType:     4,
 		Index:      9,
@@ -122,7 +122,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr2Lvl : Expr3Lvl	<<  >>`,
+		String:     `Expr2Lvl : Expr3Lvl	<<  >>`,
 		Id:         "Expr2Lvl",
 		NTType:     4,
 		Index:      10,
@@ -132,7 +132,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr3Lvl : Expr3Lvl "^" Number	<< ast.BinaryExpr(C, X[0], X[2], '^') >>`,
+		String:     `Expr3Lvl : Expr3Lvl "^" Number	<< ast.BinaryExpr(C, X[0], X[2], '^') >>`,
 		Id:         "Expr3Lvl",
 		NTType:     5,
 		Index:      11,
@@ -142,7 +142,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr3Lvl : Expr3Lvl "**" Number	<< ast.BinaryExpr(C, X[0], X[2], '^') >>`,
+		String:     `Expr3Lvl : Expr3Lvl "**" Number	<< ast.BinaryExpr(C, X[0], X[2], '^') >>`,
 		Id:         "Expr3Lvl",
 		NTType:     5,
 		Index:      12,
@@ -152,7 +152,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Expr3Lvl : Number	<<  >>`,
+		String:     `Expr3Lvl : Number	<<  >>`,
 		Id:         "Expr3Lvl",
 		NTType:     5,
 		Index:      13,
@@ -162,7 +162,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Number : int	<< ast.NewNumber(C, X[0]) >>`,
+		String:     `Number : int	<< ast.NewNumber(C, X[0]) >>`,
 		Id:         "Number",
 		NTType:     6,
 		Index:      14,
@@ -172,7 +172,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Number : float	<< ast.NewNumber(C, X[0]) >>`,
+		String:     `Number : float	<< ast.NewNumber(C, X[0]) >>`,
 		Id:         "Number",
 		NTType:     6,
 		Index:      15,
@@ -182,7 +182,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Number : Bracket	<<  >>`,
+		String:     `Number : Bracket	<<  >>`,
 		Id:         "Number",
 		NTType:     6,
 		Index:      16,
@@ -192,7 +192,7 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Bracket : "(" Expr0Lvl ")"	<< X[1], nil >>`,
+		String:     `Bracket : "(" Expr0Lvl ")"	<< X[1], nil >>`,
 		Id:         "Bracket",
 		NTType:     7,
 		Index:      17,

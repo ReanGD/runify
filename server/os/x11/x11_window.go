@@ -39,7 +39,8 @@ func (w *window) readProperty(property xproto.Atom, fields ...zap.Field) ([]byte
 }
 
 func (w *window) writeProperty(
-	property xproto.Atom, target xproto.Atom, itemLen byte, data []byte, fields ...zap.Field) bool {
+	property xproto.Atom, target xproto.Atom, itemLen byte, data []byte, fields ...zap.Field,
+) bool {
 	return w.conn.writeProperty(w.id, property, target, itemLen, data, fields...)
 }
 

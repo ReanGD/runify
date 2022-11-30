@@ -5,6 +5,7 @@ package gtk
 // #include <glib-object.h>
 // #include "pixbuf.go.h"
 import "C"
+
 import (
 	"errors"
 	"runtime"

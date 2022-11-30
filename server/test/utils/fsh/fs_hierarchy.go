@@ -128,13 +128,13 @@ func (ci *FSItem) addChildren(items []*FSItem) {
 func (ci *FSItem) create(t *testing.T, rootPath string, parentPath string) {
 	if ci.ItemType == FSItemFile {
 		ci.FullPath = filepath.Join(parentPath, ci.ItemName)
-		require.NoError(t, os.WriteFile(ci.FullPath, []byte(fileDataPrefix+ci.FullPath), 0777))
+		require.NoError(t, os.WriteFile(ci.FullPath, []byte(fileDataPrefix+ci.FullPath), 0o777))
 		return
 	}
 
 	if ci.ItemType == FSItemDir {
 		ci.FullPath = filepath.Join(parentPath, ci.ItemName)
-		require.NoError(t, os.Mkdir(ci.FullPath, 0777))
+		require.NoError(t, os.Mkdir(ci.FullPath, 0o777))
 		for _, child := range ci.children {
 			child.create(t, rootPath, ci.FullPath)
 		}

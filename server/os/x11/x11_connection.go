@@ -44,8 +44,8 @@ func newConnection() *connection {
 }
 
 func (c *connection) init(
-	display string, atoms *atomStorage, eventsCh chan<- interface{}, errorCtx *module.ErrorCtx, moduleLogger *zap.Logger) bool {
-
+	display string, atoms *atomStorage, eventsCh chan<- interface{}, errorCtx *module.ErrorCtx, moduleLogger *zap.Logger,
+) bool {
 	c.atoms = atoms
 	c.eventsCh = eventsCh
 	c.errorCtx = errorCtx
@@ -366,8 +366,8 @@ func (c *connection) subscribeToSelectionChanges(windowID xproto.Window, selecti
 }
 
 func (c *connection) readProperty(
-	windowID xproto.Window, property xproto.Atom, fields ...zap.Field) ([]byte, readPropertyResult) {
-
+	windowID xproto.Window, property xproto.Atom, fields ...zap.Field,
+) ([]byte, readPropertyResult) {
 	deleteProperty := true
 	result := make([]byte, 0, 1024)
 	chunkSize := uint32(1024 * 1024) // 1 MB
@@ -412,8 +412,8 @@ func (c *connection) readProperty(
 }
 
 func (c *connection) writeProperty(
-	windowID xproto.Window, property xproto.Atom, target xproto.Atom, itemLen byte, data []byte, fields ...zap.Field) bool {
-
+	windowID xproto.Window, property xproto.Atom, target xproto.Atom, itemLen byte, data []byte, fields ...zap.Field,
+) bool {
 	format := itemLen * 8
 	dataLen := uint32(len(data) / int(itemLen))
 	err := xproto.ChangePropertyChecked(
@@ -463,11 +463,10 @@ func (c *connection) setSelectionOwner(windowID xproto.Window, selection xproto.
 }
 
 func (c *connection) convertSelection(
-	windowID xproto.Window, selection xproto.Atom, target xproto.Atom, property xproto.Atom, fields ...zap.Field) bool {
-
+	windowID xproto.Window, selection xproto.Atom, target xproto.Atom, property xproto.Atom, fields ...zap.Field,
+) bool {
 	err := xproto.ConvertSelectionChecked(
 		c.impl, windowID, selection, target, property, xproto.TimeCurrentTime).Check()
-
 	if err != nil {
 		c.moduleLogger.Warn("Failed call x11 convert selection",
 			append(fields,

@@ -30,8 +30,8 @@ func newModuleCtx(
 	ds api.DisplayServer,
 	provider api.Provider,
 	ErrorCtx *module.ErrorCtx,
-	moduleLogger *zap.Logger) *moduleCtx {
-
+	moduleLogger *zap.Logger,
+) *moduleCtx {
 	return &moduleCtx{
 		root:         root,
 		ds:           ds,

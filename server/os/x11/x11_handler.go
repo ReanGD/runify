@@ -7,9 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	zapInitX11 = zap.String("Method", "x11.X11::init")
-)
+var zapInitX11 = zap.String("Method", "x11.X11::init")
 
 type x11Handler struct {
 	conn      *connection

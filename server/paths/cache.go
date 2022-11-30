@@ -26,9 +26,7 @@ type cachePaths struct {
 	xdgAppDirs   []string
 }
 
-var (
-	cache = cachePaths{}
-)
+var cache = cachePaths{}
 
 func getXDGDataDirs() []string {
 	var xdgDataDirs []string
@@ -74,7 +72,7 @@ func createDir(dirPath string) (existed bool, err error) {
 	}
 
 	if !existed {
-		if err = os.MkdirAll(dirPath, 0700); err != nil {
+		if err = os.MkdirAll(dirPath, 0o700); err != nil {
 			return existed, fmt.Errorf("Creating dir (%s) ended with error: %s", dirPath, err)
 		}
 	}

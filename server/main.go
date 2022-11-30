@@ -18,8 +18,10 @@ var (
 	buildDateTime string
 )
 
-var cfgSave bool
-var cfgFile string
+var (
+	cfgSave bool
+	cfgFile string
+)
 
 func main() {
 	runify := root.NewRunify()
@@ -40,7 +42,7 @@ func main() {
 		},
 	}
 
-	var versionCmd = &cobra.Command{
+	versionCmd := &cobra.Command{
 		Use:     "version",
 		Short:   "Runify server version info",
 		Long:    `Runify server version info`,

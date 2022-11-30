@@ -24,23 +24,19 @@ const (
 	atomNameClipboardProp atomName = "CLIPBOARD_PROP"
 )
 
-var (
-	zapInitAtomStorage = zap.String("Method", "x11.atomStorage::init")
-)
+var zapInitAtomStorage = zap.String("Method", "x11.atomStorage::init")
 
-var (
-	mimeAtomsMap = []struct {
-		mType mime.Type
-		name  atomName
-	}{
-		{mime.ImagePng, atomNameImagePng},
-		{mime.ImageBmp, atomNameImageBmp},
-		{mime.ImageJpeg, atomNameImageJpeg},
-		{mime.TextPlain, atomNameUTF8String},
-		{mime.TextPlain, atomNameTextPlain},
-		{mime.TextPlain, atomNameTextPlainUtf8},
-	}
-)
+var mimeAtomsMap = []struct {
+	mType mime.Type
+	name  atomName
+}{
+	{mime.ImagePng, atomNameImagePng},
+	{mime.ImageBmp, atomNameImageBmp},
+	{mime.ImageJpeg, atomNameImageJpeg},
+	{mime.TextPlain, atomNameUTF8String},
+	{mime.TextPlain, atomNameTextPlain},
+	{mime.TextPlain, atomNameTextPlainUtf8},
+}
 
 type mimeAtom struct {
 	mType mime.Type

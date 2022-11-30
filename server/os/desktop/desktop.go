@@ -33,7 +33,8 @@ func New() *Desktop {
 }
 
 func (d *Desktop) OnInit(
-	cfg *config.Config, ds api.DisplayServer, provider api.Provider, rootLogger *zap.Logger) <-chan error {
+	cfg *config.Config, ds api.DisplayServer, provider api.Provider, rootLogger *zap.Logger,
+) <-chan error {
 	ch := make(chan error)
 
 	go func() {

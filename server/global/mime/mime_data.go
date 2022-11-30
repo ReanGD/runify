@@ -49,7 +49,7 @@ func (m *Data) Append(data []byte) {
 }
 
 func (m *Data) WriteToFile(path string) error {
-	f, err := os.OpenFile(paths.ExpandUser(path), os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(paths.ExpandUser(path), os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}

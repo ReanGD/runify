@@ -11,9 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	initErr = errors.New("failed to init x11 module")
-)
+var initErr = errors.New("failed to init x11 module")
 
 type atomName string
 
@@ -66,6 +64,7 @@ func (r *readData) setType(mType mime.Type) {
 func (r *readData) setIncrState() {
 	r.state = rdsReadIncr
 }
+
 func (r *readData) finish() {
 	r.state = rdsFinished
 }

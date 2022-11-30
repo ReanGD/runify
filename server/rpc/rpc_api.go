@@ -22,8 +22,8 @@ type runifyServer struct {
 }
 
 func newRunifyServer(
-	provider api.Provider, showUIMultiplier *showUIMultiplier, handler *uiHandler, moduleLogger *zap.Logger) *runifyServer {
-
+	provider api.Provider, showUIMultiplier *showUIMultiplier, handler *uiHandler, moduleLogger *zap.Logger,
+) *runifyServer {
 	return &runifyServer{
 		provider:         provider,
 		showUIMultiplier: showUIMultiplier,

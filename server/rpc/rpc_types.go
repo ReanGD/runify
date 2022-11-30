@@ -5,8 +5,7 @@ import (
 	"sync"
 )
 
-type showUICmd struct {
-}
+type showUICmd struct{}
 
 type showUIMultiplier struct {
 	nextID uint32

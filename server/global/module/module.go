@@ -57,7 +57,6 @@ func (c *Channel) AddToChannel(value interface{}) {
 }
 
 func (c *Channel) MessageWasRead() {
-
 }
 
 func (c *Channel) ClearModuleQueue() {

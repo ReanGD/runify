@@ -41,8 +41,8 @@ func newRpcHandler() *rpcHandler {
 }
 
 func (h *rpcHandler) onInit(
-	cfg *config.Configuration, provider api.Provider, uiLogger *zap.Logger, moduleLogger *zap.Logger) error {
-
+	cfg *config.Configuration, provider api.Provider, uiLogger *zap.Logger, moduleLogger *zap.Logger,
+) error {
 	h.moduleLogger = moduleLogger
 	h.uiBinaryPath = cfg.System.UIBinaryPath
 
@@ -77,7 +77,7 @@ func (h *rpcHandler) onStart(ctx context.Context, wg *sync.WaitGroup) <-chan err
 
 		fi, err := os.Stat(h.unixAddr)
 		if err == nil {
-			os.Chmod(h.unixAddr, fi.Mode()|0777)
+			os.Chmod(h.unixAddr, fi.Mode()|0o777)
 		} else {
 			h.moduleLogger.Info("Couldn't set permission for grps unix socket", zap.String("address", h.unixAddr), zap.Error(err))
 		}
