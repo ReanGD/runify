@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/logger"
 	"github.com/ReanGD/runify/server/pb"
@@ -90,6 +91,8 @@ func (p *dataProvider) safeRequestLoop(ctx context.Context) (resultIsFinish bool
 
 func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
+	case *makeRootListCtrlCmd:
+		r.result <- p.handler.MakeRootListCtrl()
 	case *getRootCmd:
 		if data, err := p.handler.GetRoot(); err != nil {
 			r.onRequestDefault(p.ModuleLogger, err.Error())
@@ -124,6 +127,8 @@ func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 
 func (p *dataProvider) onRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
+	case *makeRootListCtrlCmd:
+		r.onRequestDefault(p.ModuleLogger, reason)
 	case *getRootCmd:
 		r.onRequestDefault(p.ModuleLogger, reason)
 	case *getActionsCmd:
@@ -141,6 +146,12 @@ func (p *dataProvider) onRequestDefault(request interface{}, reason string) (boo
 	}
 
 	return false, nil
+}
+
+func (p *dataProvider) makeRootListCtrl(result chan<- api.RootListCtrl) {
+	p.AddToChannel(&makeRootListCtrlCmd{
+		result: result,
+	})
 }
 
 func (p *dataProvider) getRoot() <-chan []*pb.CardItem {

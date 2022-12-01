@@ -14,14 +14,14 @@ type RLRootListCtrl struct {
 	moduleLogger *zap.Logger
 }
 
-func newRLRootListCtrl(ctrls map[api.ProviderID]api.RootListCtrl, moduleLogger *zap.Logger) *RLRootListCtrl {
+func NewRLRootListCtrl(ctrls map[api.ProviderID]api.RootListCtrl, moduleLogger *zap.Logger) *RLRootListCtrl {
 	return &RLRootListCtrl{
 		ctrls:        ctrls,
 		moduleLogger: moduleLogger,
 	}
 }
 
-func (c *RLRootListCtrl) GetRows(out chan *api.RootListRowsUpdate) []*api.RootListRow {
+func (c *RLRootListCtrl) GetRows(out chan<- *api.RootListRowsUpdate) []*api.RootListRow {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(c.ctrls))
 

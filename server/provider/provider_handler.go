@@ -11,30 +11,34 @@ import (
 	"github.com/ReanGD/runify/server/pb"
 	"github.com/ReanGD/runify/server/provider/calculator"
 	"github.com/ReanGD/runify/server/provider/desktop_entry"
+	"github.com/ReanGD/runify/server/provider/root_list"
 	"go.uber.org/zap"
 )
 
 type providerHandler struct {
-	dataProviders map[uint64]*dataProvider
-	rpc           api.Rpc
-	desktop       api.Desktop
-	moduleLogger  *zap.Logger
+	dataProviders  map[uint64]*dataProvider
+	rpc            api.Rpc
+	desktop        api.Desktop
+	moduleLogger   *zap.Logger
+	rootListLogger *zap.Logger
 }
 
 func newProviderHandler() *providerHandler {
 	return &providerHandler{
-		dataProviders: make(map[uint64]*dataProvider),
-		rpc:           nil,
-		moduleLogger:  nil,
+		dataProviders:  make(map[uint64]*dataProvider),
+		rpc:            nil,
+		moduleLogger:   nil,
+		rootListLogger: nil,
 	}
 }
 
-func (h *providerHandler) onInit(cfg *config.Config, desktop api.Desktop, rpc api.Rpc, moduleLogger *zap.Logger) error {
+func (h *providerHandler) onInit(cfg *config.Config, desktop api.Desktop, rpc api.Rpc, moduleLogger *zap.Logger, rootListLogger *zap.Logger) error {
 	h.rpc = rpc
 	h.desktop = desktop
 	h.moduleLogger = moduleLogger
+	h.rootListLogger = rootListLogger
 	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(desktop))
-	h.dataProviders[calculatorID] = newDataProvider(calculatorID, calculator.New())
+	h.dataProviders[calculatorID] = newDataProvider(calculatorID, calculator.New(desktop))
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
 	for _, dp := range h.dataProviders {
@@ -63,6 +67,22 @@ func (h *providerHandler) onStart(ctx context.Context, wg *sync.WaitGroup) <-cha
 	}
 
 	return errCh
+}
+
+func (h *providerHandler) openRootList() {
+	ch := make(chan api.RootListCtrl, len(h.dataProviders))
+	for _, dp := range h.dataProviders {
+		dp.makeRootListCtrl(ch)
+	}
+
+	ctrls := make(map[api.ProviderID]api.RootListCtrl, len(h.dataProviders))
+	for id := range h.dataProviders {
+		ctrl := <-ch
+		ctrls[api.ProviderID(id)] = ctrl
+	}
+
+	ctrl := root_list.NewRLRootListCtrl(ctrls, h.rootListLogger)
+	h.rpc.OpenRootList(ctrl)
 }
 
 func (h *providerHandler) getRoot(cmd *getRootCmd) {

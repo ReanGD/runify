@@ -123,7 +123,7 @@ func (h *rpcHandler) onStop() {
 	}
 }
 
-func (h *rpcHandler) onShowUI() {
+func (h *rpcHandler) showUI() {
 	if !h.showUIMultiplier.sendToAll() {
 		cmd := exec.Command(h.uiBinaryPath)
 		if err := cmd.Start(); err != nil {
@@ -134,4 +134,7 @@ func (h *rpcHandler) onShowUI() {
 		h.moduleLogger.Debug("Runify UI process started", zap.String("binary", h.uiBinaryPath))
 		go cmd.Wait()
 	}
+}
+
+func (h *rpcHandler) openRootList(ctrl api.RootListCtrl) {
 }

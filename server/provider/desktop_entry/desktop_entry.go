@@ -16,24 +16,28 @@ import (
 )
 
 type DesktopEntry struct {
-	providerID   uint64
-	terminal     string
-	desktop      api.Desktop
-	iconsCache   *iconCache
-	entries      []*entry
-	cache        []*pb.CardItem
-	moduleLogger *zap.Logger
+	providerID     uint64
+	terminal       string
+	desktop        api.Desktop
+	iconsCache     *iconCache
+	entries        []*entry
+	cache          []*pb.CardItem
+	model          *deModel
+	actionExecuter *deActionExecuter
+	moduleLogger   *zap.Logger
 }
 
 func New(desktop api.Desktop) *DesktopEntry {
 	return &DesktopEntry{
-		providerID:   0,
-		terminal:     "",
-		desktop:      desktop,
-		iconsCache:   nil,
-		entries:      []*entry{},
-		cache:        []*pb.CardItem{},
-		moduleLogger: nil,
+		providerID:     0,
+		terminal:       "",
+		desktop:        desktop,
+		iconsCache:     nil,
+		entries:        []*entry{},
+		cache:          []*pb.CardItem{},
+		model:          newDEModel(),
+		actionExecuter: newDEActionExecuter(),
+		moduleLogger:   nil,
 	}
 }
 
@@ -45,12 +49,20 @@ func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, prov
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
 	p.terminal = cfg.Get().System.Terminal
-	var err error
-	p.iconsCache, err = newIconCache(moduleLogger)
-	return err
+	if err := p.model.init(api.ProviderID(providerID), moduleLogger); err != nil {
+		return err
+	}
+	if err := p.actionExecuter.init(cfg, p.desktop, p.model, moduleLogger); err != nil {
+		return err
+	}
+	p.iconsCache = p.model.iconCache
+
+	return nil
 }
 
 func (p *DesktopEntry) OnStart() {
+	p.model.start()
+	p.actionExecuter.start()
 	id := p.providerID
 	entries := p.entries
 	cache := p.cache
@@ -106,6 +118,10 @@ func (p *DesktopEntry) walkXDGDesktopEntries(fn func(fullpath string, props *des
 			fn(fullpath, props)
 		})
 	}
+}
+
+func (p *DesktopEntry) MakeRootListCtrl() api.RootListCtrl {
+	return newDERootListCtrl(p.model, p.actionExecuter, p.moduleLogger)
 }
 
 func (p *DesktopEntry) GetRoot() ([]*pb.CardItem, error) {

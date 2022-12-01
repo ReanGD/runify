@@ -34,6 +34,9 @@ func (e *deActionExecuter) init(cfg *config.Config, desktop api.Desktop, model *
 	return nil
 }
 
+func (e *deActionExecuter) start() {
+}
+
 func (e *deActionExecuter) getEntry(id api.RootListRowID, result api.ErrorResult, logMsg string) (*entry, bool) {
 	entry, ok := e.model.getEntry(id)
 	if !ok {

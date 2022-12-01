@@ -96,9 +96,11 @@ func (m *Rpc) safeRequestLoop(ctx context.Context, errCh <-chan error) (resultIs
 }
 
 func (m *Rpc) onRequest(request interface{}) (bool, error) {
-	switch request.(type) {
+	switch r := request.(type) {
 	case *showUICmd:
-		m.handler.onShowUI()
+		m.handler.showUI()
+	case *openRootListCmd:
+		m.handler.openRootList(r.ctrl)
 
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
@@ -119,6 +121,12 @@ func (m *Rpc) onRequestDefault(request interface{}, reason string) (bool, error)
 			zap.String("Reason", reason),
 			zap.String("Action", "skip request"))
 
+	case *openRootListCmd:
+		m.ModuleLogger.Debug("Message is wrong",
+			zap.String("RequestType", "OpenRootList"),
+			zap.String("Reason", reason),
+			zap.String("Action", "skip request"))
+
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
 			zap.String("Request", fmt.Sprintf("%v", request)),
@@ -133,4 +141,8 @@ func (m *Rpc) onRequestDefault(request interface{}, reason string) (bool, error)
 
 func (m *Rpc) ShowUI() {
 	m.AddToChannel(&showUICmd{})
+}
+
+func (m *Rpc) OpenRootList(ctrl api.RootListCtrl) {
+	m.AddToChannel(&openRootListCmd{ctrl: ctrl})
 }

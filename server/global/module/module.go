@@ -85,14 +85,18 @@ type Module struct {
 func (m *Module) Init(rootLogger *zap.Logger, moduleName string, channelLen uint32) {
 	m.ErrorCtx = newErrorCtx()
 	m.RootLogger = rootLogger
-	m.ModuleLogger = rootLogger.With(zap.String("module", moduleName))
+	m.ModuleLogger = rootLogger.With(zap.String("Module", moduleName))
 	m.Channel.Init(channelLen)
 }
 
 func (m *Module) InitSubmodule(rootLogger *zap.Logger, submoduleName string, channelLen uint32) {
 	m.RootLogger = rootLogger
-	m.ModuleLogger = rootLogger.With(zap.String("module", submoduleName))
+	m.ModuleLogger = m.NewSubmoduleLogger(rootLogger, submoduleName)
 	m.Channel.Init(channelLen)
+}
+
+func (m *Module) NewSubmoduleLogger(rootLogger *zap.Logger, submoduleName string) *zap.Logger {
+	return rootLogger.With(zap.String("SubModule", submoduleName))
 }
 
 func (m *Module) RecoverLog(recoverResult interface{}, request interface{}) string {

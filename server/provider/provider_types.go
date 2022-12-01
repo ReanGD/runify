@@ -2,6 +2,7 @@ package provider
 
 import (
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/pb"
 	"go.uber.org/zap"
@@ -17,9 +18,22 @@ type dataProviderHandler interface {
 	GetName() string
 	OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error
 	OnStart()
+	MakeRootListCtrl() api.RootListCtrl
 	GetRoot() ([]*pb.CardItem, error)
 	GetActions(cardID uint64) ([]*pb.ActionItem, error)
 	Execute(cardID uint64, actionID uint32) (*pb.Result, error)
+}
+
+type makeRootListCtrlCmd struct {
+	result chan<- api.RootListCtrl
+}
+
+func (c *makeRootListCtrlCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	c.result <- nil
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "makeRootListCtrl"),
+		zap.String("Reason", reason),
+		zap.String("Action", "return nil"))
 }
 
 type getRootCmd struct {

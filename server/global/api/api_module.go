@@ -15,6 +15,7 @@ type Provider interface {
 
 type Rpc interface {
 	ShowUI()
+	OpenRootList(ctrl RootListCtrl)
 }
 
 type X11 interface {

@@ -3,9 +3,15 @@ package rpc
 import (
 	"context"
 	"sync"
+
+	"github.com/ReanGD/runify/server/global/api"
 )
 
 type showUICmd struct{}
+
+type openRootListCmd struct {
+	ctrl api.RootListCtrl
+}
 
 type showUIMultiplier struct {
 	nextID uint32
