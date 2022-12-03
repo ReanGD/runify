@@ -10,7 +10,7 @@ import (
 type DERootListCtrl struct {
 	model          *deModel
 	actionExecuter *deActionExecuter
-	outCh          chan<- *api.RootListRowsUpdate
+	sender         api.RootListRowsUpdateSender
 	moduleLogger   *zap.Logger
 }
 
@@ -18,13 +18,13 @@ func newDERootListCtrl(model *deModel, actionExecuter *deActionExecuter, moduleL
 	return &DERootListCtrl{
 		model:          model,
 		actionExecuter: actionExecuter,
-		outCh:          nil,
+		sender:         nil,
 		moduleLogger:   moduleLogger,
 	}
 }
 
-func (c *DERootListCtrl) GetRows(out chan<- *api.RootListRowsUpdate) []*api.RootListRow {
-	c.outCh = out
+func (c *DERootListCtrl) OnOpen(sender api.RootListRowsUpdateSender) []*api.RootListRow {
+	c.sender = sender
 	return c.model.getRows()
 }
 

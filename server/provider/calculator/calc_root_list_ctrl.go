@@ -14,7 +14,7 @@ type CalcRootListCtrl struct {
 	providerID     api.ProviderID
 	executer       *Executer
 	actionExecuter *calcActionExecuter
-	outCh          chan<- *api.RootListRowsUpdate
+	sender         api.RootListRowsUpdateSender
 	moduleLogger   *zap.Logger
 }
 
@@ -24,13 +24,13 @@ func newCalcRootListCtrl(providerID api.ProviderID, actionExecuter *calcActionEx
 		providerID:     providerID,
 		executer:       NewExecuter(),
 		actionExecuter: actionExecuter,
-		outCh:          nil,
+		sender:         nil,
 		moduleLogger:   moduleLogger,
 	}
 }
 
-func (c *CalcRootListCtrl) GetRows(out chan<- *api.RootListRowsUpdate) []*api.RootListRow {
-	c.outCh = out
+func (c *CalcRootListCtrl) OnOpen(sender api.RootListRowsUpdateSender) []*api.RootListRow {
+	c.sender = sender
 	return []*api.RootListRow{}
 }
 
@@ -40,7 +40,7 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		if len(c.actualValue) == 0 {
 			update := api.NewRootListRowsUpdate()
 			update.Remove = append(update.Remove, api.NewRootListRowGlobalID(c.providerID, rootRowID))
-			c.outCh <- update
+			c.sender.Send(update)
 		}
 		return
 	}
@@ -59,7 +59,7 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		data.Create = rows
 	}
 	c.actualValue = strValue
-	c.outCh <- data
+	c.sender.Send(data)
 }
 
 func (c *CalcRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ErrorResult) {

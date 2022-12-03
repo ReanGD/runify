@@ -1,6 +1,9 @@
 package api
 
-import "go.uber.org/zap"
+import (
+	"github.com/ReanGD/runify/server/pb"
+	"go.uber.org/zap"
+)
 
 type ProviderID uint32
 
@@ -62,6 +65,20 @@ func NewRootListRow(providerID ProviderID, id RootListRowID, icon string, value 
 		Value:      value,
 		Priority:   priority,
 	}
+}
+
+func (r *RootListRow) ToProtobuf() *pb.RootListRow {
+	return &pb.RootListRow{
+		ProviderID: uint32(r.ProviderID),
+		RowID:      uint32(r.ID),
+		Icon:       r.Icon,
+		Value:      r.Value,
+		Priority:   uint32(r.Priority),
+	}
+}
+
+type RootListRowsUpdateSender interface {
+	Send(update *RootListRowsUpdate)
 }
 
 type RootListRowsUpdate struct {

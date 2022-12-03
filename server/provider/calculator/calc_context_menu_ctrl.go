@@ -23,7 +23,7 @@ func newCalcContextMenuCtrl(value string, actionExecuter *calcActionExecuter, mo
 	}
 }
 
-func (c *CalcContextMenuCtrl) GetRows() []*api.ContextMenuRow {
+func (c *CalcContextMenuCtrl) OnOpen() []*api.ContextMenuRow {
 	return []*api.ContextMenuRow{api.NewContextMenuRow(menuRowID, "Copy")}
 }
 

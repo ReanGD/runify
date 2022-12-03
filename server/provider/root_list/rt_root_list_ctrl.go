@@ -21,7 +21,7 @@ func NewRLRootListCtrl(ctrls map[api.ProviderID]api.RootListCtrl, moduleLogger *
 	}
 }
 
-func (c *RLRootListCtrl) GetRows(out chan<- *api.RootListRowsUpdate) []*api.RootListRow {
+func (c *RLRootListCtrl) OnOpen(sender api.RootListRowsUpdateSender) []*api.RootListRow {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(c.ctrls))
 
@@ -30,7 +30,7 @@ func (c *RLRootListCtrl) GetRows(out chan<- *api.RootListRowsUpdate) []*api.Root
 	for _, ctrl := range c.ctrls {
 		go func(ctrl api.RootListCtrl) {
 			defer wg.Done()
-			data := ctrl.GetRows(out)
+			data := ctrl.OnOpen(sender)
 			resMutex.Lock()
 			allData = append(allData, data...)
 			resMutex.Unlock()

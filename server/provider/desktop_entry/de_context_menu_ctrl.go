@@ -28,7 +28,7 @@ func newDEContextMenuCtrl(id api.RootListRowID, actionExecuter *deActionExecuter
 	}
 }
 
-func (c *DEContextMenuCtrl) GetRows() []*api.ContextMenuRow {
+func (c *DEContextMenuCtrl) OnOpen() []*api.ContextMenuRow {
 	return []*api.ContextMenuRow{
 		api.NewContextMenuRow(api.ContextMenuRowID(actionOpen), "Open"),
 		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyName), "Copy name"),
