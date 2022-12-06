@@ -99,22 +99,27 @@ message RootListRow {
 	string value = 5;
 }
 
-message RootListRows {
+message RootListOpen {
 	repeated RootListRow rows = 1;
 }
 
-message RootListRowsUpdate {
-	repeated RootListRows create = 1;
-	repeated RootListRows change = 2;
-	repeated RootListRowGlobalID Remove = 3;
+message RootListAddRows {
+	repeated RootListRow rows = 1;
 }
 
-message RootListForm {
-	RootListRows rows = 1;
+message RootListChangeRows {
+	repeated RootListRow rows = 1;
+}
+
+message RootListRemoveRows {
+	repeated RootListRowGlobalID rows = 1;
 }
 
 message ContextMenuRowID {
 	uint32 rowID = 1;
+}
+
+message FormClosed {
 }
 
 message ContextMenuRow {
@@ -122,15 +127,28 @@ message ContextMenuRow {
 	string value = 2;
 }
 
-message ContextMenuRows {
+message ContextMenuOpen {
 	repeated ContextMenuRow rows = 1;
 }
 
-message ContextMenuForm {
-	ContextMenuRows rows = 1;
+enum MessageType {
+	TYPE_ERROR = 0;
 }
 
-message CloseForm {
+message UserMessage {
+	MessageType messageType = 1;
+	string message = 2;
+}
+
+enum FormActionType {
+	CLOSE_ALL = 0;
+	CLOSE_ONE = 1;
+	SHOW_MESSAGE = 2;
+}
+
+message FormAction {
+	FormActionType actionType = 1;
+	UserMessage message = 2;
 }
 
 message FilterData {
@@ -144,16 +162,19 @@ message FormDataMsgUI {
 		RootListRowGlobalID rootListRowActivated = 3;
 		RootListRowGlobalID rootListMenuActivated = 4;
 		ContextMenuRowID contextMenuRowActivated = 5;
+		FormClosed formClosed = 6;
 	}
 }
 
 message FormDataMsgSrv {
 	uint32 formID = 1;
 	oneof payload {
-		RootListForm openRootListForm = 2;
-		RootListRowsUpdate updateRootListForm = 3;
-		ContextMenuForm openContextMenuForm = 4;
-		CloseForm closeForm = 5;
+		RootListOpen rootListOpen = 2;
+		RootListAddRows rootListAddRows = 3;
+		RootListChangeRows rootListChangeRows = 4;
+		RootListRemoveRows rootListRemoveRows = 5;
+		ContextMenuOpen contextMenuOpen = 6;
+		FormAction formAction = 7;
 	}
 }
 

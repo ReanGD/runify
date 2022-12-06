@@ -43,3 +43,33 @@ class FormStateType extends $pb.ProtobufEnum {
   const FormStateType._($core.int v, $core.String n) : super(v, n);
 }
 
+class MessageType extends $pb.ProtobufEnum {
+  static const MessageType TYPE_ERROR = MessageType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_ERROR');
+
+  static const $core.List<MessageType> values = <MessageType> [
+    TYPE_ERROR,
+  ];
+
+  static final $core.Map<$core.int, MessageType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static MessageType? valueOf($core.int value) => _byValue[value];
+
+  const MessageType._($core.int v, $core.String n) : super(v, n);
+}
+
+class FormActionType extends $pb.ProtobufEnum {
+  static const FormActionType CLOSE_ALL = FormActionType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CLOSE_ALL');
+  static const FormActionType CLOSE_ONE = FormActionType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CLOSE_ONE');
+  static const FormActionType SHOW_MESSAGE = FormActionType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SHOW_MESSAGE');
+
+  static const $core.List<FormActionType> values = <FormActionType> [
+    CLOSE_ALL,
+    CLOSE_ONE,
+    SHOW_MESSAGE,
+  ];
+
+  static final $core.Map<$core.int, FormActionType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static FormActionType? valueOf($core.int value) => _byValue[value];
+
+  const FormActionType._($core.int v, $core.String n) : super(v, n);
+}
+
