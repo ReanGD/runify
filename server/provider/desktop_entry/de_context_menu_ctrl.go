@@ -15,6 +15,8 @@ const (
 )
 
 type DEContextMenuCtrl struct {
+	formID         uint32
+	client         api.RpcClient
 	id             api.RootListRowID
 	actionExecuter *deActionExecuter
 	moduleLogger   *zap.Logger
@@ -22,28 +24,32 @@ type DEContextMenuCtrl struct {
 
 func newDEContextMenuCtrl(id api.RootListRowID, actionExecuter *deActionExecuter, moduleLogger *zap.Logger) *DEContextMenuCtrl {
 	return &DEContextMenuCtrl{
+		formID:         0,
+		client:         nil,
 		id:             id,
 		actionExecuter: actionExecuter,
 		moduleLogger:   moduleLogger,
 	}
 }
 
-func (c *DEContextMenuCtrl) OnOpen() []*api.ContextMenuRow {
-	return []*api.ContextMenuRow{
+func (c *DEContextMenuCtrl) OnOpen(formID uint32, client api.RpcClient) {
+	c.formID = formID
+	c.client = client
+	c.client.ContextMenuOpen(c.formID, c,
 		api.NewContextMenuRow(api.ContextMenuRowID(actionOpen), "Open"),
 		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyName), "Copy name"),
 		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyPath), "Copy path"),
-	}
+	)
 }
 
-func (c *DEContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID, result api.ErrorResult) {
+func (c *DEContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID) {
 	switch uint32(rowID) {
 	case actionOpen:
-		c.actionExecuter.open(c.id, result)
+		c.actionExecuter.open(c.client, c.id)
 	case actionCopyName:
-		c.actionExecuter.copyName(c.id, result)
+		c.actionExecuter.copyName(c.client, c.id)
 	case actionCopyPath:
-		c.actionExecuter.copyPath(c.id, result)
+		c.actionExecuter.copyPath(c.client, c.id)
 	default:
 		err := errors.New("unknown menu id")
 		c.moduleLogger.Warn("Failed execute menu item",
@@ -51,6 +57,7 @@ func (c *DEContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID, result api
 			rowID.ZapField(),
 			zap.Error(err),
 		)
-		result.SetResult(err)
+
+		c.client.CloseAll(err)
 	}
 }

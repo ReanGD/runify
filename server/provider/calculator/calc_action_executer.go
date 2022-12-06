@@ -27,16 +27,16 @@ func (e *calcActionExecuter) init(desktop api.Desktop, moduleLogger *zap.Logger)
 	return nil
 }
 
-func (e *calcActionExecuter) copyResult(text string, result api.ErrorResult) {
-	copyResult := api.NewFuncBoolResult(func(ok bool) {
-		var err error
-		if !ok {
-			err = errors.New("clipboard copy failed")
-			e.moduleLogger.Warn("Failed copy result",
-				rootRowID.ZapField(),
-			)
-		}
-		result.SetResult(err)
-	})
+func (e *calcActionExecuter) copyResult(client api.RpcClient, text string) {
+	copyResult := api.NewChanBoolResult()
 	e.desktop.WriteToClipboard(false, mime.NewTextData(text), copyResult)
+	res := <-copyResult.GetChannel()
+	if !res {
+		e.moduleLogger.Warn("Failed copy calculator result",
+			rootRowID.ZapField(),
+		)
+		client.CloseAll(errors.New("Failed copy calculator result"))
+	}
+
+	client.CloseAll(nil)
 }

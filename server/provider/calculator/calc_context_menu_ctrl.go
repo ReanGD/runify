@@ -10,6 +10,8 @@ import (
 const menuRowID = api.ContextMenuRowID(1)
 
 type CalcContextMenuCtrl struct {
+	formID         uint32
+	client         api.RpcClient
 	value          string
 	actionExecuter *calcActionExecuter
 	moduleLogger   *zap.Logger
@@ -17,20 +19,24 @@ type CalcContextMenuCtrl struct {
 
 func newCalcContextMenuCtrl(value string, actionExecuter *calcActionExecuter, moduleLogger *zap.Logger) *CalcContextMenuCtrl {
 	return &CalcContextMenuCtrl{
+		formID:         0,
+		client:         nil,
 		value:          value,
 		actionExecuter: actionExecuter,
 		moduleLogger:   moduleLogger,
 	}
 }
 
-func (c *CalcContextMenuCtrl) OnOpen() []*api.ContextMenuRow {
-	return []*api.ContextMenuRow{api.NewContextMenuRow(menuRowID, "Copy")}
+func (c *CalcContextMenuCtrl) OnOpen(formID uint32, client api.RpcClient) {
+	c.formID = formID
+	c.client = client
+	c.client.ContextMenuOpen(c.formID, c, api.NewContextMenuRow(menuRowID, "Copy"))
 }
 
-func (c *CalcContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID, result api.ErrorResult) {
+func (c *CalcContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID) {
 	switch rowID {
 	case menuRowID:
-		c.actionExecuter.copyResult(c.value, result)
+		c.actionExecuter.copyResult(c.client, c.value)
 	default:
 		err := errors.New("unknown menu id")
 		c.moduleLogger.Warn("Failed execute menu item",
@@ -38,6 +44,6 @@ func (c *CalcContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID, result a
 			zap.String("Value", c.value),
 			zap.Error(err),
 		)
-		result.SetResult(err)
+		c.client.CloseAll(err)
 	}
 }

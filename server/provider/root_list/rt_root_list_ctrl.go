@@ -10,6 +10,7 @@ import (
 )
 
 type RLRootListCtrl struct {
+	client       api.RpcClient
 	ctrls        map[api.ProviderID]api.RootListCtrl
 	moduleLogger *zap.Logger
 }
@@ -21,7 +22,8 @@ func NewRLRootListCtrl(ctrls map[api.ProviderID]api.RootListCtrl, moduleLogger *
 	}
 }
 
-func (c *RLRootListCtrl) OnOpen(sender api.RootListRowsUpdateSender) []*api.RootListRow {
+func (c *RLRootListCtrl) OnOpen(formID uint32, client api.RpcClient) []*api.RootListRow {
+	c.client = client
 	wg := &sync.WaitGroup{}
 	wg.Add(len(c.ctrls))
 
@@ -30,7 +32,7 @@ func (c *RLRootListCtrl) OnOpen(sender api.RootListRowsUpdateSender) []*api.Root
 	for _, ctrl := range c.ctrls {
 		go func(ctrl api.RootListCtrl) {
 			defer wg.Done()
-			data := ctrl.OnOpen(sender)
+			data := ctrl.OnOpen(formID, client)
 			resMutex.Lock()
 			allData = append(allData, data...)
 			resMutex.Unlock()
@@ -47,6 +49,8 @@ func (c *RLRootListCtrl) OnOpen(sender api.RootListRowsUpdateSender) []*api.Root
 		return allData[i].Priority > allData[j].Priority
 	})
 
+	client.RootListOpen(formID, c, allData)
+
 	return allData
 }
 
@@ -56,7 +60,7 @@ func (c *RLRootListCtrl) OnFilterChange(value string) {
 	}
 }
 
-func (c *RLRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ErrorResult) {
+func (c *RLRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID) {
 	ctrl, ok := c.ctrls[providerID]
 	if !ok {
 		err := errors.New("provider not found")
@@ -66,13 +70,13 @@ func (c *RLRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.Root
 			zap.Error(err),
 		)
 
-		result.SetResult(err)
+		c.client.CloseAll(err)
 	} else {
-		ctrl.OnRowActivate(providerID, rowID, result)
+		ctrl.OnRowActivate(providerID, rowID)
 	}
 }
 
-func (c *RLRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ContexMenuCtrlOrErrorResult) {
+func (c *RLRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID) {
 	ctrl, ok := c.ctrls[providerID]
 	if !ok {
 		err := errors.New("provider not found")
@@ -82,10 +86,8 @@ func (c *RLRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.Roo
 			zap.Error(err),
 		)
 
-		result.SetResult(api.ContextMenuCtrlOrError{
-			Error: err,
-		})
+		c.client.CloseAll(err)
 	} else {
-		ctrl.OnMenuActivate(providerID, rowID, result)
+		ctrl.OnMenuActivate(providerID, rowID)
 	}
 }

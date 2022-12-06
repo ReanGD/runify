@@ -11,26 +11,29 @@ const rootRowID = api.RootListRowID(1)
 
 type CalcRootListCtrl struct {
 	actualValue    string
+	formID         uint32
 	providerID     api.ProviderID
 	executer       *Executer
 	actionExecuter *calcActionExecuter
-	sender         api.RootListRowsUpdateSender
+	client         api.RpcClient
 	moduleLogger   *zap.Logger
 }
 
 func newCalcRootListCtrl(providerID api.ProviderID, actionExecuter *calcActionExecuter, moduleLogger *zap.Logger) *CalcRootListCtrl {
 	return &CalcRootListCtrl{
 		actualValue:    "",
+		formID:         0,
 		providerID:     providerID,
 		executer:       NewExecuter(),
 		actionExecuter: actionExecuter,
-		sender:         nil,
+		client:         nil,
 		moduleLogger:   moduleLogger,
 	}
 }
 
-func (c *CalcRootListCtrl) OnOpen(sender api.RootListRowsUpdateSender) []*api.RootListRow {
-	c.sender = sender
+func (c *CalcRootListCtrl) OnOpen(formID uint32, client api.RpcClient) []*api.RootListRow {
+	c.formID = formID
+	c.client = client
 	return []*api.RootListRow{}
 }
 
@@ -38,9 +41,7 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 	calcResult := c.executer.Execute(text)
 	if calcResult.ParserErr != nil {
 		if len(c.actualValue) == 0 {
-			update := api.NewRootListRowsUpdate()
-			update.Remove = append(update.Remove, api.NewRootListRowGlobalID(c.providerID, rootRowID))
-			c.sender.Send(update)
+			c.client.RootListRemoveRows(c.formID, api.NewRootListRowGlobalID(c.providerID, rootRowID))
 		}
 		return
 	}
@@ -51,22 +52,20 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		return
 	}
 
-	data := api.NewRootListRowsUpdate()
-	rows := []*api.RootListRow{api.NewRootListRow(c.providerID, rootRowID, "", strValue, api.MaxPriority)}
-	if len(c.actualValue) == 0 {
-		data.Change = rows
-	} else {
-		data.Create = rows
-	}
 	c.actualValue = strValue
-	c.sender.Send(data)
+	row := api.NewRootListRow(c.providerID, rootRowID, "", strValue, api.MaxPriority)
+	if len(c.actualValue) == 0 {
+		c.client.RootListChangeRows(c.formID, row)
+	} else {
+		c.client.RootListAddRows(c.formID, row)
+	}
 }
 
-func (c *CalcRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ErrorResult) {
-	c.actionExecuter.copyResult(c.actualValue, result)
+func (c *CalcRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID) {
+	c.actionExecuter.copyResult(c.client, c.actualValue)
 }
 
-func (c *CalcRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ContexMenuCtrlOrErrorResult) {
+func (c *CalcRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID) {
 	if rowID != rootRowID {
 		err := errors.New("row data not found")
 		c.moduleLogger.Warn("Failed open menu",
@@ -74,12 +73,9 @@ func (c *CalcRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.R
 			zap.Error(err),
 		)
 
-		result.SetResult(api.ContextMenuCtrlOrError{
-			Error: err,
-		})
+		c.client.CloseAll(err)
 	} else {
-		result.SetResult(api.ContextMenuCtrlOrError{
-			Ctrl: newCalcContextMenuCtrl(c.actualValue, c.actionExecuter, c.moduleLogger),
-		})
+		menuCtrl := newCalcContextMenuCtrl(c.actualValue, c.actionExecuter, c.moduleLogger)
+		menuCtrl.OnOpen(c.formID+1, c.client)
 	}
 }

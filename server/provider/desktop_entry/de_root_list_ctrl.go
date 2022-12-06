@@ -8,23 +8,26 @@ import (
 )
 
 type DERootListCtrl struct {
+	formID         uint32
 	model          *deModel
 	actionExecuter *deActionExecuter
-	sender         api.RootListRowsUpdateSender
+	client         api.RpcClient
 	moduleLogger   *zap.Logger
 }
 
 func newDERootListCtrl(model *deModel, actionExecuter *deActionExecuter, moduleLogger *zap.Logger) *DERootListCtrl {
 	return &DERootListCtrl{
+		formID:         0,
 		model:          model,
 		actionExecuter: actionExecuter,
-		sender:         nil,
+		client:         nil,
 		moduleLogger:   moduleLogger,
 	}
 }
 
-func (c *DERootListCtrl) OnOpen(sender api.RootListRowsUpdateSender) []*api.RootListRow {
-	c.sender = sender
+func (c *DERootListCtrl) OnOpen(formID uint32, client api.RpcClient) []*api.RootListRow {
+	c.formID = formID
+	c.client = client
 	return c.model.getRows()
 }
 
@@ -32,11 +35,11 @@ func (c *DERootListCtrl) OnFilterChange(value string) {
 	// pass
 }
 
-func (c *DERootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ErrorResult) {
-	c.actionExecuter.open(rowID, result)
+func (c *DERootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID) {
+	c.actionExecuter.open(c.client, rowID)
 }
 
-func (c *DERootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID, result api.ContexMenuCtrlOrErrorResult) {
+func (c *DERootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID) {
 	_, ok := c.model.getEntry(rowID)
 	if !ok {
 		err := errors.New("row data not found")
@@ -45,12 +48,9 @@ func (c *DERootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.Roo
 			zap.Error(err),
 		)
 
-		result.SetResult(api.ContextMenuCtrlOrError{
-			Error: err,
-		})
+		c.client.CloseAll(err)
 	} else {
-		result.SetResult(api.ContextMenuCtrlOrError{
-			Ctrl: newDEContextMenuCtrl(rowID, c.actionExecuter, c.moduleLogger),
-		})
+		menuCtrl := newDEContextMenuCtrl(rowID, c.actionExecuter, c.moduleLogger)
+		menuCtrl.OnOpen(c.formID+1, c.client)
 	}
 }

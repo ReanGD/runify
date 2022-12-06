@@ -37,7 +37,7 @@ func (e *deActionExecuter) init(cfg *config.Config, desktop api.Desktop, model *
 func (e *deActionExecuter) start() {
 }
 
-func (e *deActionExecuter) getEntry(id api.RootListRowID, result api.ErrorResult, logMsg string) (*entry, bool) {
+func (e *deActionExecuter) getEntry(id api.RootListRowID, logMsg string) (*entry, error) {
 	entry, ok := e.model.getEntry(id)
 	if !ok {
 		err := errors.New("row data not found")
@@ -46,20 +46,21 @@ func (e *deActionExecuter) getEntry(id api.RootListRowID, result api.ErrorResult
 			zap.Error(err),
 		)
 
-		result.SetResult(err)
+		return nil, err
 	}
 
-	return entry, ok
+	return entry, nil
 }
 
-func (e *deActionExecuter) open(id api.RootListRowID, result api.ErrorResult) {
+func (e *deActionExecuter) open(client api.RpcClient, id api.RootListRowID) {
 	logMsg := "Failed execute desktop entry"
-	entry, ok := e.getEntry(id, result, logMsg)
-	if !ok {
+	entry, err := e.getEntry(id, logMsg)
+	if err != nil {
+		client.CloseAll(err)
 		return
 	}
 
-	err := execCmd(entry.props.Exec, entry.props.Terminal, e.terminal)
+	err = execCmd(entry.props.Exec, entry.props.Terminal, e.terminal)
 	if err != nil {
 		e.moduleLogger.Warn(logMsg,
 			id.ZapField(),
@@ -68,40 +69,51 @@ func (e *deActionExecuter) open(id api.RootListRowID, result api.ErrorResult) {
 		)
 	}
 
-	result.SetResult(err)
+	client.CloseAll(err)
 }
 
-func (e *deActionExecuter) copy(id api.RootListRowID, entry *entry, data *mime.Data, logMsg string, result api.ErrorResult) {
-	copyResult := api.NewFuncBoolResult(func(ok bool) {
-		var err error
-		if !ok {
-			err = errors.New("clipboard copy failed")
-			e.moduleLogger.Warn(logMsg,
-				id.ZapField(),
-				zap.String("EntryPath", entry.path),
-			)
-		}
-		result.SetResult(err)
-	})
+func (e *deActionExecuter) copy(id api.RootListRowID, entry *entry, data *mime.Data, logMsg string) bool {
+	copyResult := api.NewChanBoolResult()
 	e.desktop.WriteToClipboard(false, data, copyResult)
+	res := <-copyResult.GetChannel()
+	if !res {
+		e.moduleLogger.Warn(logMsg,
+			id.ZapField(),
+			zap.String("EntryPath", entry.path),
+		)
+
+		return false
+	}
+
+	return true
 }
 
-func (e *deActionExecuter) copyName(id api.RootListRowID, result api.ErrorResult) {
+func (e *deActionExecuter) copyName(client api.RpcClient, id api.RootListRowID) {
 	logMsg := "Failed copy name of desktop entry"
-	entry, ok := e.getEntry(id, result, logMsg)
-	if !ok {
+	entry, err := e.getEntry(id, logMsg)
+	if err != nil {
+		client.CloseAll(err)
 		return
 	}
 
-	e.copy(id, entry, mime.NewTextData(entry.props.Name), logMsg, result)
+	if e.copy(id, entry, mime.NewTextData(entry.props.Name), logMsg) {
+		client.CloseAll(nil)
+	}
+
+	client.CloseAll(errors.New("Failed copy desktop entry name"))
 }
 
-func (e *deActionExecuter) copyPath(id api.RootListRowID, result api.ErrorResult) {
+func (e *deActionExecuter) copyPath(client api.RpcClient, id api.RootListRowID) {
 	logMsg := "Failed copy path of desktop entry"
-	entry, ok := e.getEntry(id, result, logMsg)
-	if !ok {
+	entry, err := e.getEntry(id, logMsg)
+	if err != nil {
+		client.CloseAll(err)
 		return
 	}
 
-	e.copy(id, entry, mime.NewTextData(entry.path), logMsg, result)
+	if e.copy(id, entry, mime.NewTextData(entry.path), logMsg) {
+		client.CloseAll(nil)
+	}
+
+	client.CloseAll(errors.New("Failed copy desktop entry path"))
 }
