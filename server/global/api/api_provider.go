@@ -6,12 +6,12 @@ import (
 )
 
 type ContextMenuCtrl interface {
-	OnOpen(formID uint32, client RpcClient)
+	OnOpen(formID FormID, client RpcClient) []*ContextMenuRow
 	OnRowActivate(rowID ContextMenuRowID)
 }
 
 type RootListCtrl interface {
-	OnOpen(formID uint32, client RpcClient) []*RootListRow
+	OnOpen(formID FormID, client RpcClient) []*RootListRow
 	OnFilterChange(value string)
 	OnRowActivate(providerID ProviderID, rowID RootListRowID)
 	OnMenuActivate(providerID ProviderID, rowID RootListRowID)

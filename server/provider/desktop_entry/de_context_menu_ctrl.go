@@ -15,7 +15,7 @@ const (
 )
 
 type DEContextMenuCtrl struct {
-	formID         uint32
+	formID         api.FormID
 	client         api.RpcClient
 	id             api.RootListRowID
 	actionExecuter *deActionExecuter
@@ -32,14 +32,15 @@ func newDEContextMenuCtrl(id api.RootListRowID, actionExecuter *deActionExecuter
 	}
 }
 
-func (c *DEContextMenuCtrl) OnOpen(formID uint32, client api.RpcClient) {
+func (c *DEContextMenuCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*api.ContextMenuRow {
 	c.formID = formID
 	c.client = client
-	c.client.ContextMenuOpen(c.formID, c,
+
+	return []*api.ContextMenuRow{
 		api.NewContextMenuRow(api.ContextMenuRowID(actionOpen), "Open"),
 		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyName), "Copy name"),
 		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyPath), "Copy path"),
-	)
+	}
 }
 
 func (c *DEContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID) {

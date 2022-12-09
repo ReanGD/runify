@@ -8,7 +8,7 @@ import (
 )
 
 type DERootListCtrl struct {
-	formID         uint32
+	formID         api.FormID
 	model          *deModel
 	actionExecuter *deActionExecuter
 	client         api.RpcClient
@@ -25,7 +25,7 @@ func newDERootListCtrl(model *deModel, actionExecuter *deActionExecuter, moduleL
 	}
 }
 
-func (c *DERootListCtrl) OnOpen(formID uint32, client api.RpcClient) []*api.RootListRow {
+func (c *DERootListCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*api.RootListRow {
 	c.formID = formID
 	c.client = client
 	return c.model.getRows()
@@ -51,6 +51,6 @@ func (c *DERootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.Roo
 		c.client.CloseAll(err)
 	} else {
 		menuCtrl := newDEContextMenuCtrl(rowID, c.actionExecuter, c.moduleLogger)
-		menuCtrl.OnOpen(c.formID+1, c.client)
+		c.client.AddContextMenu(menuCtrl)
 	}
 }

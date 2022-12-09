@@ -1,12 +1,14 @@
 package api
 
+type FormID uint32
+
 type RpcClient interface {
-	RootListOpen(formID uint32, ctrl RootListCtrl, rows []*RootListRow)
-	RootListAddRows(formID uint32, rows ...*RootListRow)
-	RootListChangeRows(formID uint32, rows ...*RootListRow)
-	RootListRemoveRows(formID uint32, rows ...RootListRowGlobalID)
-	ContextMenuOpen(formID uint32, ctrl ContextMenuCtrl, rows ...*ContextMenuRow)
+	AddRootList(ctrl RootListCtrl)
+	RootListAddRows(formID FormID, rows ...*RootListRow)
+	RootListChangeRows(formID FormID, rows ...*RootListRow)
+	RootListRemoveRows(formID FormID, rows ...RootListRowGlobalID)
+	AddContextMenu(ctrl ContextMenuCtrl)
 	CloseAll(msg error)
-	CloseOne(formID uint32, msg error)
+	CloseOne(formID FormID, msg error)
 	ShowMessage(msg error)
 }

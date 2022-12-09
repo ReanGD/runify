@@ -11,7 +11,7 @@ const rootRowID = api.RootListRowID(1)
 
 type CalcRootListCtrl struct {
 	actualValue    string
-	formID         uint32
+	formID         api.FormID
 	providerID     api.ProviderID
 	executer       *Executer
 	actionExecuter *calcActionExecuter
@@ -31,7 +31,7 @@ func newCalcRootListCtrl(providerID api.ProviderID, actionExecuter *calcActionEx
 	}
 }
 
-func (c *CalcRootListCtrl) OnOpen(formID uint32, client api.RpcClient) []*api.RootListRow {
+func (c *CalcRootListCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*api.RootListRow {
 	c.formID = formID
 	c.client = client
 	return []*api.RootListRow{}
@@ -76,6 +76,6 @@ func (c *CalcRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.R
 		c.client.CloseAll(err)
 	} else {
 		menuCtrl := newCalcContextMenuCtrl(c.actualValue, c.actionExecuter, c.moduleLogger)
-		menuCtrl.OnOpen(c.formID+1, c.client)
+		c.client.AddContextMenu(menuCtrl)
 	}
 }

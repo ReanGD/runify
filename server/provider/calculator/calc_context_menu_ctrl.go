@@ -10,7 +10,7 @@ import (
 const menuRowID = api.ContextMenuRowID(1)
 
 type CalcContextMenuCtrl struct {
-	formID         uint32
+	formID         api.FormID
 	client         api.RpcClient
 	value          string
 	actionExecuter *calcActionExecuter
@@ -27,10 +27,10 @@ func newCalcContextMenuCtrl(value string, actionExecuter *calcActionExecuter, mo
 	}
 }
 
-func (c *CalcContextMenuCtrl) OnOpen(formID uint32, client api.RpcClient) {
+func (c *CalcContextMenuCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*api.ContextMenuRow {
 	c.formID = formID
 	c.client = client
-	c.client.ContextMenuOpen(c.formID, c, api.NewContextMenuRow(menuRowID, "Copy"))
+	return []*api.ContextMenuRow{api.NewContextMenuRow(menuRowID, "Copy")}
 }
 
 func (c *CalcContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID) {

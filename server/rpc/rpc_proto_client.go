@@ -6,73 +6,18 @@ import (
 	"go.uber.org/zap"
 )
 
-type formHandler interface {
-	filterChanged(msg *pb.FilterData) error
-	rootListRowActivated(msg *pb.RootListRowGlobalID) error
-	rootListMenuActivated(msg *pb.RootListRowGlobalID) error
-	contextMenuRowActivated(msg *pb.ContextMenuRowID) error
-}
-
 type protoClient struct {
 	outCh        chan<- *pb.FormDataMsgSrv
-	forms        map[uint32]formHandler
+	forms        *formStorage
 	moduleLogger *zap.Logger
 }
 
 func newProtoClient(outCh chan<- *pb.FormDataMsgSrv, moduleLogger *zap.Logger) *protoClient {
 	return &protoClient{
-		outCh: outCh,
-		forms: make(map[uint32]formHandler),
+		outCh:        outCh,
+		forms:        newFormStorage(moduleLogger),
+		moduleLogger: moduleLogger,
 	}
-}
-
-func (c *protoClient) getHandler(formID uint32, msgName string) (formHandler, bool) {
-	handler, ok := c.forms[formID]
-	if !ok {
-		c.moduleLogger.Debug("Grpc message for unknown form",
-			zap.Uint32("FormID", formID),
-			zap.String("Message", msgName),
-		)
-		return nil, false
-	}
-
-	return handler, true
-}
-
-func (c *protoClient) filterChanged(formID uint32, msg *pb.FilterData) error {
-	if handler, ok := c.getHandler(formID, "FilterChanged"); ok {
-		return handler.filterChanged(msg)
-	}
-
-	return nil
-}
-
-func (c *protoClient) rootListRowActivated(formID uint32, msg *pb.RootListRowGlobalID) error {
-	if handler, ok := c.getHandler(formID, "RootListRowActivated"); ok {
-		return handler.rootListRowActivated(msg)
-	}
-
-	return nil
-}
-
-func (c *protoClient) rootListMenuActivated(formID uint32, msg *pb.RootListRowGlobalID) error {
-	if handler, ok := c.getHandler(formID, "RootListMenuActivated"); ok {
-		return handler.rootListMenuActivated(msg)
-	}
-
-	return nil
-}
-
-func (c *protoClient) contextMenuRowActivated(formID uint32, msg *pb.ContextMenuRowID) error {
-	if handler, ok := c.getHandler(formID, "ContextMenuRowActivated"); ok {
-		return handler.contextMenuRowActivated(msg)
-	}
-
-	return nil
-}
-
-func (c *protoClient) formClosed(formID uint32) {
-	delete(c.forms, formID)
 }
 
 func (c *protoClient) rootListRowsToProtobuf(rows []*api.RootListRow) []*pb.RootListRow {
@@ -84,7 +29,7 @@ func (c *protoClient) rootListRowsToProtobuf(rows []*api.RootListRow) []*pb.Root
 	return pbRows
 }
 
-func (c *protoClient) rootListRowGlobalIDsToProtobuf(rows []*api.RootListRowGlobalID) []*pb.RootListRowGlobalID {
+func (c *protoClient) rootListRowGlobalIDsToProtobuf(rows []api.RootListRowGlobalID) []*pb.RootListRowGlobalID {
 	pbRows := make([]*pb.RootListRowGlobalID, len(rows))
 	for i, row := range rows {
 		pbRows[i] = row.ToProtobuf()
@@ -102,10 +47,11 @@ func (c *protoClient) contextMenuRowsToProtobuf(rows []*api.ContextMenuRow) []*p
 	return pbRows
 }
 
-func (c *protoClient) RootListOpen(formID uint32, ctrl api.RootListCtrl, rows []*api.RootListRow) {
-	c.forms[formID] = newRootListHandler(ctrl, c.moduleLogger.With(zap.Uint32("FormID", formID)))
+func (c *protoClient) AddRootList(ctrl api.RootListCtrl) {
+	formID := c.forms.addRootList(ctrl)
+	rows := ctrl.OnOpen(formID, c)
 	c.outCh <- &pb.FormDataMsgSrv{
-		FormID: formID,
+		FormID: uint32(formID),
 		Payload: &pb.FormDataMsgSrv_RootListOpen{
 			RootListOpen: &pb.RootListOpen{
 				Rows: c.rootListRowsToProtobuf(rows),
@@ -114,9 +60,13 @@ func (c *protoClient) RootListOpen(formID uint32, ctrl api.RootListCtrl, rows []
 	}
 }
 
-func (c *protoClient) RootListAddRows(formID uint32, rows ...*api.RootListRow) {
+func (c *protoClient) RootListAddRows(formID api.FormID, rows ...*api.RootListRow) {
+	if !c.forms.isExists(formID) {
+		return
+	}
+
 	c.outCh <- &pb.FormDataMsgSrv{
-		FormID: formID,
+		FormID: uint32(formID),
 		Payload: &pb.FormDataMsgSrv_RootListAddRows{
 			RootListAddRows: &pb.RootListAddRows{
 				Rows: c.rootListRowsToProtobuf(rows),
@@ -125,9 +75,13 @@ func (c *protoClient) RootListAddRows(formID uint32, rows ...*api.RootListRow) {
 	}
 }
 
-func (c *protoClient) RootListChangeRows(formID uint32, rows ...*api.RootListRow) {
+func (c *protoClient) RootListChangeRows(formID api.FormID, rows ...*api.RootListRow) {
+	if !c.forms.isExists(formID) {
+		return
+	}
+
 	c.outCh <- &pb.FormDataMsgSrv{
-		FormID: formID,
+		FormID: uint32(formID),
 		Payload: &pb.FormDataMsgSrv_RootListChangeRows{
 			RootListChangeRows: &pb.RootListChangeRows{
 				Rows: c.rootListRowsToProtobuf(rows),
@@ -136,9 +90,13 @@ func (c *protoClient) RootListChangeRows(formID uint32, rows ...*api.RootListRow
 	}
 }
 
-func (c *protoClient) RootListRemoveRows(formID uint32, rows ...*api.RootListRowGlobalID) {
+func (c *protoClient) RootListRemoveRows(formID api.FormID, rows ...api.RootListRowGlobalID) {
+	if !c.forms.isExists(formID) {
+		return
+	}
+
 	c.outCh <- &pb.FormDataMsgSrv{
-		FormID: formID,
+		FormID: uint32(formID),
 		Payload: &pb.FormDataMsgSrv_RootListRemoveRows{
 			RootListRemoveRows: &pb.RootListRemoveRows{
 				Rows: c.rootListRowGlobalIDsToProtobuf(rows),
@@ -147,10 +105,11 @@ func (c *protoClient) RootListRemoveRows(formID uint32, rows ...*api.RootListRow
 	}
 }
 
-func (c *protoClient) ContextMenuOpen(formID uint32, ctrl api.ContextMenuCtrl, rows ...*api.ContextMenuRow) {
-	c.forms[formID] = newContextMenuHandler(ctrl, c.moduleLogger.With(zap.Uint32("FormID", formID)))
+func (c *protoClient) AddContextMenu(ctrl api.ContextMenuCtrl) {
+	formID := c.forms.addContextMenu(ctrl)
+	rows := ctrl.OnOpen(formID, c)
 	c.outCh <- &pb.FormDataMsgSrv{
-		FormID: formID,
+		FormID: uint32(formID),
 		Payload: &pb.FormDataMsgSrv_ContextMenuOpen{
 			ContextMenuOpen: &pb.ContextMenuOpen{
 				Rows: c.contextMenuRowsToProtobuf(rows),
@@ -160,7 +119,8 @@ func (c *protoClient) ContextMenuOpen(formID uint32, ctrl api.ContextMenuCtrl, r
 }
 
 func (c *protoClient) CloseAll(msg error) {
-	c.forms = make(map[uint32]formHandler)
+	c.forms.removeAll()
+
 	var pbMsg *pb.UserMessage
 	if msg != nil {
 		pbMsg = &pb.UserMessage{
@@ -180,8 +140,11 @@ func (c *protoClient) CloseAll(msg error) {
 	}
 }
 
-func (c *protoClient) CloseOne(formID uint32, msg error) {
-	delete(c.forms, formID)
+func (c *protoClient) CloseOne(formID api.FormID, msg error) {
+	if !c.forms.remove(formID) {
+		return
+	}
+
 	var pbMsg *pb.UserMessage
 	if msg != nil {
 		pbMsg = &pb.UserMessage{
@@ -191,7 +154,7 @@ func (c *protoClient) CloseOne(formID uint32, msg error) {
 	}
 
 	c.outCh <- &pb.FormDataMsgSrv{
-		FormID: formID,
+		FormID: uint32(formID),
 		Payload: &pb.FormDataMsgSrv_FormAction{
 			FormAction: &pb.FormAction{
 				ActionType: pb.FormActionType_CLOSE_ONE,

@@ -22,7 +22,7 @@ func NewRLRootListCtrl(ctrls map[api.ProviderID]api.RootListCtrl, moduleLogger *
 	}
 }
 
-func (c *RLRootListCtrl) OnOpen(formID uint32, client api.RpcClient) []*api.RootListRow {
+func (c *RLRootListCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*api.RootListRow {
 	c.client = client
 	wg := &sync.WaitGroup{}
 	wg.Add(len(c.ctrls))
@@ -48,8 +48,6 @@ func (c *RLRootListCtrl) OnOpen(formID uint32, client api.RpcClient) []*api.Root
 		}
 		return allData[i].Priority > allData[j].Priority
 	})
-
-	client.RootListOpen(formID, c, allData)
 
 	return allData
 }
