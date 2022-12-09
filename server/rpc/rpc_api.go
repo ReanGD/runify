@@ -138,6 +138,11 @@ func (s *runifyServer) FormDataChannel(stream pb.Runify_FormDataChannelServer) e
 					log.Warn("Failed process grpc message", zap.String("MessageType", "ContextMenuRowActivated"), zap.Error(err))
 					return err
 				}
+			case *pb.FormDataMsgUI_FormClosed:
+				if err = s.handler.formClosed(req.FormID); err != nil {
+					log.Warn("Failed process grpc message", zap.String("MessageType", "FormClosed"), zap.Error(err))
+					return err
+				}
 			default:
 				err = errors.New("recv unknown message type")
 				log.Warn("Failed process grpc message", zap.String("MessageType", reflect.TypeOf(m).String()), zap.Error(err))

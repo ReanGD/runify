@@ -55,3 +55,7 @@ func (h *uiHandler) rootListMenuActivated(formID uint32, msg *pb.RootListRowGlob
 func (h *uiHandler) contextMenuRowActivated(formID uint32, msg *pb.ContextMenuRowID) error {
 	return nil
 }
+
+func (h *uiHandler) formClosed(formID uint32) error {
+	return nil
+}
