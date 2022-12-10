@@ -8,11 +8,14 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/pb"
 )
 
 type runifyServer struct {
+	cfg              *config.Configuration
+	rpc              *Rpc
 	provider         api.Provider
 	showUIMultiplier *showUIMultiplier
 	handler          *uiHandler
@@ -22,9 +25,15 @@ type runifyServer struct {
 }
 
 func newRunifyServer(
-	provider api.Provider, showUIMultiplier *showUIMultiplier, handler *uiHandler, moduleLogger *zap.Logger,
+	cfg *config.Configuration,
+	rpc *Rpc,
+	provider api.Provider,
+	showUIMultiplier *showUIMultiplier,
+	handler *uiHandler,
+	moduleLogger *zap.Logger,
 ) *runifyServer {
 	return &runifyServer{
+		cfg:              cfg,
 		provider:         provider,
 		showUIMultiplier: showUIMultiplier,
 		handler:          handler,
@@ -97,6 +106,10 @@ func (s *runifyServer) ServiceChannel(stream pb.Runify_ServiceChannelServer) err
 
 func (s *runifyServer) FormDataChannel(stream pb.Runify_FormDataChannelServer) error {
 	processor := newStreamProcessor(stream.Context())
+	forms := newFormStorage(s.moduleLogger)
+	outCh := make(chan *pb.FormDataMsgSrv, s.cfg.Rpc.SendMsgChLen)
+	pClient := newProtoClient(outCh, forms)
+	s.rpc.uiClientConnected(pClient)
 	log := s.moduleLogger.With(zap.String("Method", "FormDataChannel"))
 
 	processor.runRecv(func(doneCh <-chan struct{}) error {
@@ -119,27 +132,27 @@ func (s *runifyServer) FormDataChannel(stream pb.Runify_FormDataChannelServer) e
 
 			switch m := req.Payload.(type) {
 			case *pb.FormDataMsgUI_FilterChanged:
-				if err = s.handler.filterChanged(req.FormID, m.FilterChanged); err != nil {
+				if err = forms.filterChanged(api.FormID(req.FormID), m.FilterChanged); err != nil {
 					log.Warn("Failed process grpc message", zap.String("MessageType", "FilterChanged"), zap.Error(err))
 					return err
 				}
 			case *pb.FormDataMsgUI_RootListRowActivated:
-				if err = s.handler.rootListRowActivated(req.FormID, m.RootListRowActivated); err != nil {
+				if err = forms.rootListRowActivated(api.FormID(req.FormID), m.RootListRowActivated); err != nil {
 					log.Warn("Failed process grpc message", zap.String("MessageType", "RootListRowActivated"), zap.Error(err))
 					return err
 				}
 			case *pb.FormDataMsgUI_RootListMenuActivated:
-				if err = s.handler.rootListMenuActivated(req.FormID, m.RootListMenuActivated); err != nil {
+				if err = forms.rootListMenuActivated(api.FormID(req.FormID), m.RootListMenuActivated); err != nil {
 					log.Warn("Failed process grpc message", zap.String("MessageType", "RootListMenuActivated"), zap.Error(err))
 					return err
 				}
 			case *pb.FormDataMsgUI_ContextMenuRowActivated:
-				if err = s.handler.contextMenuRowActivated(req.FormID, m.ContextMenuRowActivated); err != nil {
+				if err = forms.contextMenuRowActivated(api.FormID(req.FormID), m.ContextMenuRowActivated); err != nil {
 					log.Warn("Failed process grpc message", zap.String("MessageType", "ContextMenuRowActivated"), zap.Error(err))
 					return err
 				}
 			case *pb.FormDataMsgUI_FormClosed:
-				if err = s.handler.formClosed(req.FormID); err != nil {
+				if err = forms.formClosed(api.FormID(req.FormID)); err != nil {
 					log.Warn("Failed process grpc message", zap.String("MessageType", "FormClosed"), zap.Error(err))
 					return err
 				}
@@ -154,6 +167,11 @@ func (s *runifyServer) FormDataChannel(stream pb.Runify_FormDataChannelServer) e
 	processor.runSend(func(doneCh <-chan struct{}) error {
 		for {
 			select {
+			case msg := <-outCh:
+				if err := stream.Send(msg); err != nil {
+					log.Info("Failed send grpc message", zap.Error(err))
+					return err
+				}
 			case <-doneCh:
 				return nil
 			}

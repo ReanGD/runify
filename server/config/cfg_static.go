@@ -1,12 +1,14 @@
 package config
 
 type RpcCfg struct {
-	ChannelLen uint32
+	ChannelLen   uint32
+	SendMsgChLen uint32
 }
 
 func newRpcCfg() *RpcCfg {
 	return &RpcCfg{
-		ChannelLen: 100,
+		ChannelLen:   100,
+		SendMsgChLen: 500,
 	}
 }
 

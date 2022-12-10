@@ -9,6 +9,12 @@ import (
 
 type showUICmd struct{}
 
+type uiClientConnectedCmd struct {
+	pClient *protoClient
+}
+
+type uiClientDisconnectedCmd struct{}
+
 type openRootListCmd struct {
 	ctrl api.RootListCtrl
 }

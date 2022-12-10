@@ -3,20 +3,17 @@ package rpc
 import (
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/pb"
-	"go.uber.org/zap"
 )
 
 type protoClient struct {
-	outCh        chan<- *pb.FormDataMsgSrv
-	forms        *formStorage
-	moduleLogger *zap.Logger
+	outCh chan<- *pb.FormDataMsgSrv
+	forms *formStorage
 }
 
-func newProtoClient(outCh chan<- *pb.FormDataMsgSrv, moduleLogger *zap.Logger) *protoClient {
+func newProtoClient(outCh chan<- *pb.FormDataMsgSrv, forms *formStorage) *protoClient {
 	return &protoClient{
-		outCh:        outCh,
-		forms:        newFormStorage(moduleLogger),
-		moduleLogger: moduleLogger,
+		outCh: outCh,
+		forms: forms,
 	}
 }
 

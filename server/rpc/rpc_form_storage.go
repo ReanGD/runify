@@ -121,6 +121,8 @@ func (s *formStorage) contextMenuRowActivated(formID api.FormID, msg *pb.Context
 	return nil
 }
 
-func (s *formStorage) formClosed(formID api.FormID) {
+func (s *formStorage) formClosed(formID api.FormID) error {
 	s.remove(formID)
+
+	return nil
 }

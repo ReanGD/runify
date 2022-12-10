@@ -34,7 +34,7 @@ func (m *Rpc) OnInit(cfg *config.Config, provider api.Provider, rootLogger *zap.
 	go func() {
 		m.Init(rootLogger, ModuleName, cfg.Get().Rpc.ChannelLen)
 		uiLogger := rootLogger.With(zap.String("module", "UI"))
-		ch <- m.handler.onInit(cfg.Get(), provider, uiLogger, m.ModuleLogger)
+		ch <- m.handler.onInit(cfg.Get(), m, provider, uiLogger, m.ModuleLogger)
 	}()
 
 	return ch
@@ -97,6 +97,10 @@ func (m *Rpc) safeRequestLoop(ctx context.Context, errCh <-chan error) (resultIs
 
 func (m *Rpc) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
+	case *uiClientConnectedCmd:
+		m.handler.uiClientConnected(r.pClient)
+	case *uiClientDisconnectedCmd:
+		m.handler.uiClientDisconnected()
 	case *showUICmd:
 		m.handler.showUI()
 	case *openRootListCmd:
@@ -115,6 +119,18 @@ func (m *Rpc) onRequest(request interface{}) (bool, error) {
 
 func (m *Rpc) onRequestDefault(request interface{}, reason string) (bool, error) {
 	switch request.(type) {
+	case *uiClientConnectedCmd:
+		m.ModuleLogger.Debug("Message is wrong",
+			zap.String("RequestType", "UiClientConnected"),
+			zap.String("Reason", reason),
+			zap.String("Action", "skip request"))
+
+	case *uiClientDisconnectedCmd:
+		m.ModuleLogger.Debug("Message is wrong",
+			zap.String("RequestType", "UiClientDisconnected"),
+			zap.String("Reason", reason),
+			zap.String("Action", "skip request"))
+
 	case *showUICmd:
 		m.ModuleLogger.Debug("Message is wrong",
 			zap.String("RequestType", "ShowUI"),
@@ -139,6 +155,16 @@ func (m *Rpc) onRequestDefault(request interface{}, reason string) (bool, error)
 	return false, nil
 }
 
+// Inner functions
+func (m *Rpc) uiClientConnected(pClient *protoClient) {
+	m.AddToChannel(&uiClientConnectedCmd{pClient: pClient})
+}
+
+func (m *Rpc) uiClientDisconnected() {
+	m.AddToChannel(&uiClientDisconnectedCmd{})
+}
+
+// Interface
 func (m *Rpc) ShowUI() {
 	m.AddToChannel(&showUICmd{})
 }

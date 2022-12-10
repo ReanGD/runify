@@ -24,6 +24,8 @@ type rpcHandler struct {
 	showUIMultiplier *showUIMultiplier
 	grpcServer       *grpc.Server
 	runifyServer     *runifyServer
+	pClient          *protoClient
+	waitCtrl         api.RootListCtrl
 
 	moduleLogger *zap.Logger
 }
@@ -37,11 +39,12 @@ func newRpcHandler() *rpcHandler {
 		grpcServer:       nil,
 		runifyServer:     nil,
 		moduleLogger:     nil,
+		pClient:          nil,
 	}
 }
 
 func (h *rpcHandler) onInit(
-	cfg *config.Configuration, provider api.Provider, uiLogger *zap.Logger, moduleLogger *zap.Logger,
+	cfg *config.Configuration, rpc *Rpc, provider api.Provider, uiLogger *zap.Logger, moduleLogger *zap.Logger,
 ) error {
 	h.moduleLogger = moduleLogger
 	h.uiBinaryPath = cfg.System.UIBinaryPath
@@ -56,7 +59,7 @@ func (h *rpcHandler) onInit(
 	h.grpcServer = grpc.NewServer()
 
 	uiHandler := newUIHandler(uiLogger, moduleLogger)
-	h.runifyServer = newRunifyServer(provider, h.showUIMultiplier, uiHandler, h.moduleLogger)
+	h.runifyServer = newRunifyServer(cfg, rpc, provider, h.showUIMultiplier, uiHandler, h.moduleLogger)
 
 	return nil
 }
@@ -136,5 +139,30 @@ func (h *rpcHandler) showUI() {
 	}
 }
 
+func (h *rpcHandler) uiClientConnected(pClient *protoClient) {
+	h.pClient = pClient
+	if h.waitCtrl != nil {
+		h.pClient.AddRootList(h.waitCtrl)
+		h.waitCtrl = nil
+	}
+}
+
+func (h *rpcHandler) uiClientDisconnected() {
+	h.pClient = nil
+}
+
 func (h *rpcHandler) openRootList(ctrl api.RootListCtrl) {
+	if h.pClient != nil {
+		h.pClient.AddRootList(ctrl)
+	}
+
+	cmd := exec.Command(h.uiBinaryPath)
+	if err := cmd.Start(); err != nil {
+		h.moduleLogger.Error("Failed start runify UI process", zap.String("binary", h.uiBinaryPath), zap.Error(err))
+		return
+	}
+
+	h.waitCtrl = ctrl
+	h.moduleLogger.Debug("Runify UI process started", zap.String("binary", h.uiBinaryPath))
+	go cmd.Wait()
 }
