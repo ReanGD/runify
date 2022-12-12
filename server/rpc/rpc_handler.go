@@ -18,34 +18,30 @@ import (
 )
 
 type rpcHandler struct {
-	uiBinaryPath     string
-	unixAddr         string
-	netUnixAddr      *net.UnixAddr
-	showUIMultiplier *showUIMultiplier
-	grpcServer       *grpc.Server
-	runifyServer     *runifyServer
-	pClient          *protoClient
-	waitCtrl         api.RootListCtrl
+	uiBinaryPath string
+	unixAddr     string
+	netUnixAddr  *net.UnixAddr
+	grpcServer   *grpc.Server
+	runifyServer *runifyServer
+	pClient      *protoClient
+	waitCtrl     api.RootListCtrl
 
 	moduleLogger *zap.Logger
 }
 
 func newRpcHandler() *rpcHandler {
 	return &rpcHandler{
-		uiBinaryPath:     "",
-		unixAddr:         "",
-		netUnixAddr:      nil,
-		showUIMultiplier: newShowUIMultiplier(),
-		grpcServer:       nil,
-		runifyServer:     nil,
-		moduleLogger:     nil,
-		pClient:          nil,
+		uiBinaryPath: "",
+		unixAddr:     "",
+		netUnixAddr:  nil,
+		grpcServer:   nil,
+		runifyServer: nil,
+		moduleLogger: nil,
+		pClient:      nil,
 	}
 }
 
-func (h *rpcHandler) onInit(
-	cfg *config.Configuration, rpc *Rpc, provider api.Provider, uiLogger *zap.Logger, moduleLogger *zap.Logger,
-) error {
+func (h *rpcHandler) onInit(cfg *config.Configuration, rpc *Rpc, uiLogger *zap.Logger, moduleLogger *zap.Logger) error {
 	h.moduleLogger = moduleLogger
 	h.uiBinaryPath = cfg.System.UIBinaryPath
 
@@ -57,9 +53,7 @@ func (h *rpcHandler) onInit(
 		return errors.New("failed resolve unit address")
 	}
 	h.grpcServer = grpc.NewServer()
-
-	uiHandler := newUIHandler(uiLogger, moduleLogger)
-	h.runifyServer = newRunifyServer(cfg, rpc, provider, h.showUIMultiplier, uiHandler, h.moduleLogger)
+	h.runifyServer = newRunifyServer(rpc, cfg, uiLogger, moduleLogger)
 
 	return nil
 }
@@ -126,19 +120,6 @@ func (h *rpcHandler) onStop() {
 	}
 }
 
-func (h *rpcHandler) showUI() {
-	if !h.showUIMultiplier.sendToAll() {
-		cmd := exec.Command(h.uiBinaryPath)
-		if err := cmd.Start(); err != nil {
-			h.moduleLogger.Error("Failed start runify UI process", zap.String("binary", h.uiBinaryPath), zap.Error(err))
-			return
-		}
-
-		h.moduleLogger.Debug("Runify UI process started", zap.String("binary", h.uiBinaryPath))
-		go cmd.Wait()
-	}
-}
-
 func (h *rpcHandler) uiClientConnected(pClient *protoClient) {
 	h.pClient = pClient
 	if h.waitCtrl != nil {
@@ -156,13 +137,14 @@ func (h *rpcHandler) openRootList(ctrl api.RootListCtrl) {
 		h.pClient.AddRootList(ctrl)
 	}
 
+	h.waitCtrl = ctrl
 	cmd := exec.Command(h.uiBinaryPath)
 	if err := cmd.Start(); err != nil {
+		h.waitCtrl = nil
 		h.moduleLogger.Error("Failed start runify UI process", zap.String("binary", h.uiBinaryPath), zap.Error(err))
 		return
 	}
 
-	h.waitCtrl = ctrl
 	h.moduleLogger.Debug("Runify UI process started", zap.String("binary", h.uiBinaryPath))
 	go cmd.Wait()
 }

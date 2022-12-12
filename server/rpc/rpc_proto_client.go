@@ -6,11 +6,11 @@ import (
 )
 
 type protoClient struct {
-	outCh chan<- *pb.FormDataMsgSrv
+	outCh chan<- *pb.SrvMessage
 	forms *formStorage
 }
 
-func newProtoClient(outCh chan<- *pb.FormDataMsgSrv, forms *formStorage) *protoClient {
+func newProtoClient(outCh chan<- *pb.SrvMessage, forms *formStorage) *protoClient {
 	return &protoClient{
 		outCh: outCh,
 		forms: forms,
@@ -47,9 +47,9 @@ func (c *protoClient) contextMenuRowsToProtobuf(rows []*api.ContextMenuRow) []*p
 func (c *protoClient) AddRootList(ctrl api.RootListCtrl) {
 	formID := c.forms.addRootList(ctrl)
 	rows := ctrl.OnOpen(formID, c)
-	c.outCh <- &pb.FormDataMsgSrv{
+	c.outCh <- &pb.SrvMessage{
 		FormID: uint32(formID),
-		Payload: &pb.FormDataMsgSrv_RootListOpen{
+		Payload: &pb.SrvMessage_RootListOpen{
 			RootListOpen: &pb.RootListOpen{
 				Rows: c.rootListRowsToProtobuf(rows),
 			},
@@ -62,9 +62,9 @@ func (c *protoClient) RootListAddRows(formID api.FormID, rows ...*api.RootListRo
 		return
 	}
 
-	c.outCh <- &pb.FormDataMsgSrv{
+	c.outCh <- &pb.SrvMessage{
 		FormID: uint32(formID),
-		Payload: &pb.FormDataMsgSrv_RootListAddRows{
+		Payload: &pb.SrvMessage_RootListAddRows{
 			RootListAddRows: &pb.RootListAddRows{
 				Rows: c.rootListRowsToProtobuf(rows),
 			},
@@ -77,9 +77,9 @@ func (c *protoClient) RootListChangeRows(formID api.FormID, rows ...*api.RootLis
 		return
 	}
 
-	c.outCh <- &pb.FormDataMsgSrv{
+	c.outCh <- &pb.SrvMessage{
 		FormID: uint32(formID),
-		Payload: &pb.FormDataMsgSrv_RootListChangeRows{
+		Payload: &pb.SrvMessage_RootListChangeRows{
 			RootListChangeRows: &pb.RootListChangeRows{
 				Rows: c.rootListRowsToProtobuf(rows),
 			},
@@ -92,9 +92,9 @@ func (c *protoClient) RootListRemoveRows(formID api.FormID, rows ...api.RootList
 		return
 	}
 
-	c.outCh <- &pb.FormDataMsgSrv{
+	c.outCh <- &pb.SrvMessage{
 		FormID: uint32(formID),
-		Payload: &pb.FormDataMsgSrv_RootListRemoveRows{
+		Payload: &pb.SrvMessage_RootListRemoveRows{
 			RootListRemoveRows: &pb.RootListRemoveRows{
 				Rows: c.rootListRowGlobalIDsToProtobuf(rows),
 			},
@@ -105,9 +105,9 @@ func (c *protoClient) RootListRemoveRows(formID api.FormID, rows ...api.RootList
 func (c *protoClient) AddContextMenu(ctrl api.ContextMenuCtrl) {
 	formID := c.forms.addContextMenu(ctrl)
 	rows := ctrl.OnOpen(formID, c)
-	c.outCh <- &pb.FormDataMsgSrv{
+	c.outCh <- &pb.SrvMessage{
 		FormID: uint32(formID),
-		Payload: &pb.FormDataMsgSrv_ContextMenuOpen{
+		Payload: &pb.SrvMessage_ContextMenuOpen{
 			ContextMenuOpen: &pb.ContextMenuOpen{
 				Rows: c.contextMenuRowsToProtobuf(rows),
 			},
@@ -126,9 +126,9 @@ func (c *protoClient) CloseAll(msg error) {
 		}
 	}
 
-	c.outCh <- &pb.FormDataMsgSrv{
+	c.outCh <- &pb.SrvMessage{
 		FormID: 0,
-		Payload: &pb.FormDataMsgSrv_FormAction{
+		Payload: &pb.SrvMessage_FormAction{
 			FormAction: &pb.FormAction{
 				ActionType: pb.FormActionType_CLOSE_ALL,
 				Message:    pbMsg,
@@ -150,9 +150,9 @@ func (c *protoClient) CloseOne(formID api.FormID, msg error) {
 		}
 	}
 
-	c.outCh <- &pb.FormDataMsgSrv{
+	c.outCh <- &pb.SrvMessage{
 		FormID: uint32(formID),
-		Payload: &pb.FormDataMsgSrv_FormAction{
+		Payload: &pb.SrvMessage_FormAction{
 			FormAction: &pb.FormAction{
 				ActionType: pb.FormActionType_CLOSE_ONE,
 				Message:    pbMsg,
@@ -162,9 +162,9 @@ func (c *protoClient) CloseOne(formID api.FormID, msg error) {
 }
 
 func (c *protoClient) ShowMessage(msg error) {
-	c.outCh <- &pb.FormDataMsgSrv{
+	c.outCh <- &pb.SrvMessage{
 		FormID: 0,
-		Payload: &pb.FormDataMsgSrv_FormAction{
+		Payload: &pb.SrvMessage_FormAction{
 			FormAction: &pb.FormAction{
 				ActionType: pb.FormActionType_SHOW_MESSAGE,
 				Message: &pb.UserMessage{
