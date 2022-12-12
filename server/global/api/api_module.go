@@ -3,18 +3,13 @@ package api
 import (
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/shortcut"
-	"github.com/ReanGD/runify/server/pb"
 )
 
 type Provider interface {
-	GetRoot() <-chan []*pb.CardItem
-	GetActions(cardID uint64) <-chan *pb.Actions
-	Execute(cardID uint64, actionID uint32) <-chan *pb.Result
 	Activate(action *shortcut.Action)
 }
 
 type Rpc interface {
-	ShowUI()
 	OpenRootList(ctrl RootListCtrl)
 }
 
