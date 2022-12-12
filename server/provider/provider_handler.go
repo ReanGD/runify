@@ -8,7 +8,6 @@ import (
 	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/shortcut"
-	"github.com/ReanGD/runify/server/pb"
 	"github.com/ReanGD/runify/server/provider/calculator"
 	"github.com/ReanGD/runify/server/provider/desktop_entry"
 	"github.com/ReanGD/runify/server/provider/root_list"
@@ -16,7 +15,7 @@ import (
 )
 
 type providerHandler struct {
-	dataProviders  map[uint64]*dataProvider
+	dataProviders  map[api.ProviderID]*dataProvider
 	rpc            api.Rpc
 	desktop        api.Desktop
 	moduleLogger   *zap.Logger
@@ -25,7 +24,7 @@ type providerHandler struct {
 
 func newProviderHandler() *providerHandler {
 	return &providerHandler{
-		dataProviders:  make(map[uint64]*dataProvider),
+		dataProviders:  make(map[api.ProviderID]*dataProvider),
 		rpc:            nil,
 		moduleLogger:   nil,
 		rootListLogger: nil,
@@ -85,42 +84,6 @@ func (h *providerHandler) openRootList() {
 	h.rpc.OpenRootList(ctrl)
 }
 
-func (h *providerHandler) getRoot(cmd *getRootCmd) {
-	chans := make([]<-chan []*pb.CardItem, 0, len(h.dataProviders))
-	for _, dp := range h.dataProviders {
-		chans = append(chans, dp.getRoot())
-	}
-
-	result := []*pb.CardItem{}
-	for _, ch := range chans {
-		result = append(result, <-ch...)
-	}
-
-	cmd.result <- result
-}
-
-func (h *providerHandler) getActions(cmd *getActionsCmd) {
-	providerID := cmd.cardID & providerIDMask
-	provider, ok := h.dataProviders[providerID]
-	if !ok {
-		cmd.onRequestDefault(h.moduleLogger, "Not found provider")
-	} else {
-		data := <-provider.getActions(cmd.cardID)
-		cmd.result <- data
-	}
-}
-
-func (h *providerHandler) execute(cmd *executeCmd) {
-	providerID := cmd.cardID & providerIDMask
-	provider, ok := h.dataProviders[providerID]
-	if !ok {
-		cmd.onRequestDefault(h.moduleLogger, "Not found provider")
-	} else {
-		data := <-provider.execute(cmd.cardID, cmd.actionID)
-		cmd.result <- data
-	}
-}
-
 func (h *providerHandler) activate(cmd *activateCmd) {
-	h.rpc.ShowUI()
+	h.openRootList()
 }

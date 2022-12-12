@@ -1,16 +1,13 @@
 package calculator
 
 import (
-	"errors"
-
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
-	"github.com/ReanGD/runify/server/pb"
 	"go.uber.org/zap"
 )
 
 type Calculator struct {
-	providerID     uint64
+	providerID     api.ProviderID
 	desktop        api.Desktop
 	actionExecuter *calcActionExecuter
 	moduleLogger   *zap.Logger
@@ -29,7 +26,7 @@ func (p *Calculator) GetName() string {
 	return "Calculator"
 }
 
-func (p *Calculator) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID uint64) error {
+func (p *Calculator) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID api.ProviderID) error {
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
 
@@ -40,17 +37,5 @@ func (p *Calculator) OnStart() {
 }
 
 func (p *Calculator) MakeRootListCtrl() api.RootListCtrl {
-	return newCalcRootListCtrl(api.ProviderID(p.providerID), p.actionExecuter, p.moduleLogger)
-}
-
-func (p *Calculator) GetRoot() ([]*pb.CardItem, error) {
-	return []*pb.CardItem{}, nil
-}
-
-func (p *Calculator) GetActions(cardID uint64) ([]*pb.ActionItem, error) {
-	return []*pb.ActionItem{}, nil
-}
-
-func (p *Calculator) Execute(cardID uint64, actionID uint32) (*pb.Result, error) {
-	return nil, errors.New("not found item by cardID")
+	return newCalcRootListCtrl(p.providerID, p.actionExecuter, p.moduleLogger)
 }

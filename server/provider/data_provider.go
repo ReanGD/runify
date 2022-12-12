@@ -11,18 +11,17 @@ import (
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/logger"
-	"github.com/ReanGD/runify/server/pb"
 	"go.uber.org/zap"
 )
 
 type dataProvider struct {
-	providerID uint64
+	providerID api.ProviderID
 	handler    dataProviderHandler
 
 	module.Module
 }
 
-func newDataProvider(providerID uint64, handler dataProviderHandler) *dataProvider {
+func newDataProvider(providerID api.ProviderID, handler dataProviderHandler) *dataProvider {
 	return &dataProvider{
 		providerID: providerID,
 		handler:    handler,
@@ -93,26 +92,6 @@ func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *makeRootListCtrlCmd:
 		r.result <- p.handler.MakeRootListCtrl()
-	case *getRootCmd:
-		if data, err := p.handler.GetRoot(); err != nil {
-			r.onRequestDefault(p.ModuleLogger, err.Error())
-		} else {
-			r.result <- data
-		}
-	case *getActionsCmd:
-		if data, err := p.handler.GetActions(r.cardID); err != nil {
-			r.onRequestDefault(p.ModuleLogger, err.Error())
-		} else {
-			r.result <- &pb.Actions{
-				Items: data,
-			}
-		}
-	case *executeCmd:
-		if data, err := p.handler.Execute(r.cardID, r.actionID); err != nil {
-			r.onRequestDefault(p.ModuleLogger, err.Error())
-		} else {
-			r.result <- data
-		}
 
 	default:
 		p.ModuleLogger.Warn("Unknown message received",
@@ -128,12 +107,6 @@ func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 func (p *dataProvider) onRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *makeRootListCtrlCmd:
-		r.onRequestDefault(p.ModuleLogger, reason)
-	case *getRootCmd:
-		r.onRequestDefault(p.ModuleLogger, reason)
-	case *getActionsCmd:
-		r.onRequestDefault(p.ModuleLogger, reason)
-	case *executeCmd:
 		r.onRequestDefault(p.ModuleLogger, reason)
 
 	default:
@@ -152,34 +125,4 @@ func (p *dataProvider) makeRootListCtrl(result chan<- api.RootListCtrl) {
 	p.AddToChannel(&makeRootListCtrlCmd{
 		result: result,
 	})
-}
-
-func (p *dataProvider) getRoot() <-chan []*pb.CardItem {
-	ch := make(chan []*pb.CardItem, 1)
-	p.AddToChannel(&getRootCmd{
-		result: ch,
-	})
-
-	return ch
-}
-
-func (p *dataProvider) getActions(cardID uint64) <-chan *pb.Actions {
-	ch := make(chan *pb.Actions, 1)
-	p.AddToChannel(&getActionsCmd{
-		cardID: cardID,
-		result: ch,
-	})
-
-	return ch
-}
-
-func (p *dataProvider) execute(cardID uint64, actionID uint32) <-chan *pb.Result {
-	ch := make(chan *pb.Result, 1)
-	p.AddToChannel(&executeCmd{
-		cardID:   cardID,
-		actionID: actionID,
-		result:   ch,
-	})
-
-	return ch
 }

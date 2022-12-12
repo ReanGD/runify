@@ -12,7 +12,6 @@ import (
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/logger"
-	"github.com/ReanGD/runify/server/pb"
 	"go.uber.org/zap"
 )
 
@@ -99,12 +98,6 @@ func (p *Provider) safeRequestLoop(ctx context.Context, errCh <-chan error) (res
 
 func (p *Provider) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
-	case *getRootCmd:
-		p.handler.getRoot(r)
-	case *getActionsCmd:
-		p.handler.getActions(r)
-	case *executeCmd:
-		p.handler.execute(r)
 	case *activateCmd:
 		p.handler.activate(r)
 
@@ -121,12 +114,6 @@ func (p *Provider) onRequest(request interface{}) (bool, error) {
 
 func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
-	case *getRootCmd:
-		r.onRequestDefault(p.ModuleLogger, reason)
-	case *getActionsCmd:
-		r.onRequestDefault(p.ModuleLogger, reason)
-	case *executeCmd:
-		r.onRequestDefault(p.ModuleLogger, reason)
 	case *activateCmd:
 		r.onRequestDefault(p.ModuleLogger, reason)
 
@@ -140,36 +127,6 @@ func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, e
 	}
 
 	return false, nil
-}
-
-func (p *Provider) GetRoot() <-chan []*pb.CardItem {
-	ch := make(chan []*pb.CardItem, 1)
-	p.AddToChannel(&getRootCmd{
-		result: ch,
-	})
-
-	return ch
-}
-
-func (p *Provider) GetActions(cardID uint64) <-chan *pb.Actions {
-	ch := make(chan *pb.Actions, 1)
-	p.AddToChannel(&getActionsCmd{
-		cardID: cardID,
-		result: ch,
-	})
-
-	return ch
-}
-
-func (p *Provider) Execute(cardID uint64, actionID uint32) <-chan *pb.Result {
-	ch := make(chan *pb.Result, 1)
-	p.AddToChannel(&executeCmd{
-		cardID:   cardID,
-		actionID: actionID,
-		result:   ch,
-	})
-
-	return ch
 }
 
 func (p *Provider) Activate(action *shortcut.Action) {
