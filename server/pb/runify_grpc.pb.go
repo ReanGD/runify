@@ -22,12 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RunifyClient interface {
-	ServiceChannel(ctx context.Context, opts ...grpc.CallOption) (Runify_ServiceChannelClient, error)
-	FormDataChannel(ctx context.Context, opts ...grpc.CallOption) (Runify_FormDataChannelClient, error)
-	GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Form, error)
-	GetActions(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Actions, error)
-	ExecuteDefault(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Result, error)
-	Execute(ctx context.Context, in *SelectedAction, opts ...grpc.CallOption) (*Result, error)
+	Connect(ctx context.Context, opts ...grpc.CallOption) (Runify_ConnectClient, error)
 }
 
 type runifyClient struct {
@@ -38,114 +33,42 @@ func NewRunifyClient(cc grpc.ClientConnInterface) RunifyClient {
 	return &runifyClient{cc}
 }
 
-func (c *runifyClient) ServiceChannel(ctx context.Context, opts ...grpc.CallOption) (Runify_ServiceChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Runify_ServiceDesc.Streams[0], "/runify.Runify/ServiceChannel", opts...)
+func (c *runifyClient) Connect(ctx context.Context, opts ...grpc.CallOption) (Runify_ConnectClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Runify_ServiceDesc.Streams[0], "/runify.Runify/Connect", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &runifyServiceChannelClient{stream}
+	x := &runifyConnectClient{stream}
 	return x, nil
 }
 
-type Runify_ServiceChannelClient interface {
-	Send(*ServiceMsgUI) error
-	Recv() (*ServiceMsgSrv, error)
+type Runify_ConnectClient interface {
+	Send(*UIMessage) error
+	Recv() (*SrvMessage, error)
 	grpc.ClientStream
 }
 
-type runifyServiceChannelClient struct {
+type runifyConnectClient struct {
 	grpc.ClientStream
 }
 
-func (x *runifyServiceChannelClient) Send(m *ServiceMsgUI) error {
+func (x *runifyConnectClient) Send(m *UIMessage) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *runifyServiceChannelClient) Recv() (*ServiceMsgSrv, error) {
-	m := new(ServiceMsgSrv)
+func (x *runifyConnectClient) Recv() (*SrvMessage, error) {
+	m := new(SrvMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
-}
-
-func (c *runifyClient) FormDataChannel(ctx context.Context, opts ...grpc.CallOption) (Runify_FormDataChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Runify_ServiceDesc.Streams[1], "/runify.Runify/FormDataChannel", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &runifyFormDataChannelClient{stream}
-	return x, nil
-}
-
-type Runify_FormDataChannelClient interface {
-	Send(*FormDataMsgUI) error
-	Recv() (*FormDataMsgSrv, error)
-	grpc.ClientStream
-}
-
-type runifyFormDataChannelClient struct {
-	grpc.ClientStream
-}
-
-func (x *runifyFormDataChannelClient) Send(m *FormDataMsgUI) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *runifyFormDataChannelClient) Recv() (*FormDataMsgSrv, error) {
-	m := new(FormDataMsgSrv)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *runifyClient) GetRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Form, error) {
-	out := new(Form)
-	err := c.cc.Invoke(ctx, "/runify.Runify/GetRoot", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runifyClient) GetActions(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Actions, error) {
-	out := new(Actions)
-	err := c.cc.Invoke(ctx, "/runify.Runify/GetActions", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runifyClient) ExecuteDefault(ctx context.Context, in *SelectedCard, opts ...grpc.CallOption) (*Result, error) {
-	out := new(Result)
-	err := c.cc.Invoke(ctx, "/runify.Runify/ExecuteDefault", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runifyClient) Execute(ctx context.Context, in *SelectedAction, opts ...grpc.CallOption) (*Result, error) {
-	out := new(Result)
-	err := c.cc.Invoke(ctx, "/runify.Runify/Execute", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 // RunifyServer is the server API for Runify service.
 // All implementations must embed UnimplementedRunifyServer
 // for forward compatibility
 type RunifyServer interface {
-	ServiceChannel(Runify_ServiceChannelServer) error
-	FormDataChannel(Runify_FormDataChannelServer) error
-	GetRoot(context.Context, *Empty) (*Form, error)
-	GetActions(context.Context, *SelectedCard) (*Actions, error)
-	ExecuteDefault(context.Context, *SelectedCard) (*Result, error)
-	Execute(context.Context, *SelectedAction) (*Result, error)
+	Connect(Runify_ConnectServer) error
 	mustEmbedUnimplementedRunifyServer()
 }
 
@@ -153,23 +76,8 @@ type RunifyServer interface {
 type UnimplementedRunifyServer struct {
 }
 
-func (UnimplementedRunifyServer) ServiceChannel(Runify_ServiceChannelServer) error {
-	return status.Errorf(codes.Unimplemented, "method ServiceChannel not implemented")
-}
-func (UnimplementedRunifyServer) FormDataChannel(Runify_FormDataChannelServer) error {
-	return status.Errorf(codes.Unimplemented, "method FormDataChannel not implemented")
-}
-func (UnimplementedRunifyServer) GetRoot(context.Context, *Empty) (*Form, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRoot not implemented")
-}
-func (UnimplementedRunifyServer) GetActions(context.Context, *SelectedCard) (*Actions, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetActions not implemented")
-}
-func (UnimplementedRunifyServer) ExecuteDefault(context.Context, *SelectedCard) (*Result, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExecuteDefault not implemented")
-}
-func (UnimplementedRunifyServer) Execute(context.Context, *SelectedAction) (*Result, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
+func (UnimplementedRunifyServer) Connect(Runify_ConnectServer) error {
+	return status.Errorf(codes.Unimplemented, "method Connect not implemented")
 }
 func (UnimplementedRunifyServer) mustEmbedUnimplementedRunifyServer() {}
 
@@ -184,128 +92,30 @@ func RegisterRunifyServer(s grpc.ServiceRegistrar, srv RunifyServer) {
 	s.RegisterService(&Runify_ServiceDesc, srv)
 }
 
-func _Runify_ServiceChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(RunifyServer).ServiceChannel(&runifyServiceChannelServer{stream})
+func _Runify_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(RunifyServer).Connect(&runifyConnectServer{stream})
 }
 
-type Runify_ServiceChannelServer interface {
-	Send(*ServiceMsgSrv) error
-	Recv() (*ServiceMsgUI, error)
+type Runify_ConnectServer interface {
+	Send(*SrvMessage) error
+	Recv() (*UIMessage, error)
 	grpc.ServerStream
 }
 
-type runifyServiceChannelServer struct {
+type runifyConnectServer struct {
 	grpc.ServerStream
 }
 
-func (x *runifyServiceChannelServer) Send(m *ServiceMsgSrv) error {
+func (x *runifyConnectServer) Send(m *SrvMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *runifyServiceChannelServer) Recv() (*ServiceMsgUI, error) {
-	m := new(ServiceMsgUI)
+func (x *runifyConnectServer) Recv() (*UIMessage, error) {
+	m := new(UIMessage)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
-}
-
-func _Runify_FormDataChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(RunifyServer).FormDataChannel(&runifyFormDataChannelServer{stream})
-}
-
-type Runify_FormDataChannelServer interface {
-	Send(*FormDataMsgSrv) error
-	Recv() (*FormDataMsgUI, error)
-	grpc.ServerStream
-}
-
-type runifyFormDataChannelServer struct {
-	grpc.ServerStream
-}
-
-func (x *runifyFormDataChannelServer) Send(m *FormDataMsgSrv) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *runifyFormDataChannelServer) Recv() (*FormDataMsgUI, error) {
-	m := new(FormDataMsgUI)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func _Runify_GetRoot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunifyServer).GetRoot(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/runify.Runify/GetRoot",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunifyServer).GetRoot(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runify_GetActions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SelectedCard)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunifyServer).GetActions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/runify.Runify/GetActions",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunifyServer).GetActions(ctx, req.(*SelectedCard))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runify_ExecuteDefault_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SelectedCard)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunifyServer).ExecuteDefault(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/runify.Runify/ExecuteDefault",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunifyServer).ExecuteDefault(ctx, req.(*SelectedCard))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runify_Execute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SelectedAction)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunifyServer).Execute(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/runify.Runify/Execute",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunifyServer).Execute(ctx, req.(*SelectedAction))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 // Runify_ServiceDesc is the grpc.ServiceDesc for Runify service.
@@ -314,34 +124,11 @@ func _Runify_Execute_Handler(srv interface{}, ctx context.Context, dec func(inte
 var Runify_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "runify.Runify",
 	HandlerType: (*RunifyServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetRoot",
-			Handler:    _Runify_GetRoot_Handler,
-		},
-		{
-			MethodName: "GetActions",
-			Handler:    _Runify_GetActions_Handler,
-		},
-		{
-			MethodName: "ExecuteDefault",
-			Handler:    _Runify_ExecuteDefault_Handler,
-		},
-		{
-			MethodName: "Execute",
-			Handler:    _Runify_Execute_Handler,
-		},
-	},
+	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "ServiceChannel",
-			Handler:       _Runify_ServiceChannel_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "FormDataChannel",
-			Handler:       _Runify_FormDataChannel_Handler,
+			StreamName:    "Connect",
+			Handler:       _Runify_Connect_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

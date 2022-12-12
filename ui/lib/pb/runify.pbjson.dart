@@ -21,17 +21,6 @@ const LogLevel$json = const {
 
 /// Descriptor for `LogLevel`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List logLevelDescriptor = $convert.base64Decode('CghMb2dMZXZlbBIJCgVERUJVRxAAEggKBElORk8QARILCgdXQVJOSU5HEAISCQoFRVJST1IQAw==');
-@$core.Deprecated('Use formStateTypeDescriptor instead')
-const FormStateType$json = const {
-  '1': 'FormStateType',
-  '2': const [
-    const {'1': 'SHOW', '2': 0},
-    const {'1': 'HIDE', '2': 1},
-  ],
-};
-
-/// Descriptor for `FormStateType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List formStateTypeDescriptor = $convert.base64Decode('Cg1Gb3JtU3RhdGVUeXBlEggKBFNIT1cQABIICgRISURFEAE=');
 @$core.Deprecated('Use messageTypeDescriptor instead')
 const MessageType$json = const {
   '1': 'MessageType',
@@ -54,103 +43,6 @@ const FormActionType$json = const {
 
 /// Descriptor for `FormActionType`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List formActionTypeDescriptor = $convert.base64Decode('Cg5Gb3JtQWN0aW9uVHlwZRINCglDTE9TRV9BTEwQABINCglDTE9TRV9PTkUQARIQCgxTSE9XX01FU1NBR0UQAg==');
-@$core.Deprecated('Use emptyDescriptor instead')
-const Empty$json = const {
-  '1': 'Empty',
-};
-
-/// Descriptor for `Empty`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List emptyDescriptor = $convert.base64Decode('CgVFbXB0eQ==');
-@$core.Deprecated('Use cardItemDescriptor instead')
-const CardItem$json = const {
-  '1': 'CardItem',
-  '2': const [
-    const {'1': 'cardID', '3': 1, '4': 1, '5': 4, '10': 'cardID'},
-    const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
-    const {'1': 'icon', '3': 3, '4': 1, '5': 9, '10': 'icon'},
-  ],
-};
-
-/// Descriptor for `CardItem`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List cardItemDescriptor = $convert.base64Decode('CghDYXJkSXRlbRIWCgZjYXJkSUQYASABKARSBmNhcmRJRBISCgRuYW1lGAIgASgJUgRuYW1lEhIKBGljb24YAyABKAlSBGljb24=');
-@$core.Deprecated('Use selectedCardDescriptor instead')
-const SelectedCard$json = const {
-  '1': 'SelectedCard',
-  '2': const [
-    const {'1': 'cardID', '3': 1, '4': 1, '5': 4, '10': 'cardID'},
-  ],
-};
-
-/// Descriptor for `SelectedCard`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List selectedCardDescriptor = $convert.base64Decode('CgxTZWxlY3RlZENhcmQSFgoGY2FyZElEGAEgASgEUgZjYXJkSUQ=');
-@$core.Deprecated('Use actionItemDescriptor instead')
-const ActionItem$json = const {
-  '1': 'ActionItem',
-  '2': const [
-    const {'1': 'actionID', '3': 1, '4': 1, '5': 13, '10': 'actionID'},
-    const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
-  ],
-};
-
-/// Descriptor for `ActionItem`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List actionItemDescriptor = $convert.base64Decode('CgpBY3Rpb25JdGVtEhoKCGFjdGlvbklEGAEgASgNUghhY3Rpb25JRBISCgRuYW1lGAIgASgJUgRuYW1l');
-@$core.Deprecated('Use actionsDescriptor instead')
-const Actions$json = const {
-  '1': 'Actions',
-  '2': const [
-    const {'1': 'items', '3': 1, '4': 3, '5': 11, '6': '.runify.ActionItem', '10': 'items'},
-  ],
-};
-
-/// Descriptor for `Actions`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List actionsDescriptor = $convert.base64Decode('CgdBY3Rpb25zEigKBWl0ZW1zGAEgAygLMhIucnVuaWZ5LkFjdGlvbkl0ZW1SBWl0ZW1z');
-@$core.Deprecated('Use selectedActionDescriptor instead')
-const SelectedAction$json = const {
-  '1': 'SelectedAction',
-  '2': const [
-    const {'1': 'actionID', '3': 1, '4': 1, '5': 13, '10': 'actionID'},
-    const {'1': 'cardID', '3': 2, '4': 1, '5': 4, '10': 'cardID'},
-  ],
-};
-
-/// Descriptor for `SelectedAction`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List selectedActionDescriptor = $convert.base64Decode('Cg5TZWxlY3RlZEFjdGlvbhIaCghhY3Rpb25JRBgBIAEoDVIIYWN0aW9uSUQSFgoGY2FyZElEGAIgASgEUgZjYXJkSUQ=');
-@$core.Deprecated('Use formDescriptor instead')
-const Form$json = const {
-  '1': 'Form',
-  '2': const [
-    const {'1': 'layout', '3': 1, '4': 1, '5': 9, '10': 'layout'},
-    const {'1': 'cards', '3': 2, '4': 3, '5': 11, '6': '.runify.CardItem', '10': 'cards'},
-  ],
-};
-
-/// Descriptor for `Form`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List formDescriptor = $convert.base64Decode('CgRGb3JtEhYKBmxheW91dBgBIAEoCVIGbGF5b3V0EiYKBWNhcmRzGAIgAygLMhAucnVuaWZ5LkNhcmRJdGVtUgVjYXJkcw==');
-@$core.Deprecated('Use hideWindowDescriptor instead')
-const HideWindow$json = const {
-  '1': 'HideWindow',
-  '2': const [
-    const {'1': 'error', '3': 1, '4': 1, '5': 9, '10': 'error'},
-  ],
-};
-
-/// Descriptor for `HideWindow`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List hideWindowDescriptor = $convert.base64Decode('CgpIaWRlV2luZG93EhQKBWVycm9yGAEgASgJUgVlcnJvcg==');
-@$core.Deprecated('Use resultDescriptor instead')
-const Result$json = const {
-  '1': 'Result',
-  '2': const [
-    const {'1': 'form', '3': 1, '4': 1, '5': 11, '6': '.runify.Form', '9': 0, '10': 'form'},
-    const {'1': 'empty', '3': 2, '4': 1, '5': 11, '6': '.runify.Empty', '9': 0, '10': 'empty'},
-    const {'1': 'hide', '3': 3, '4': 1, '5': 11, '6': '.runify.HideWindow', '9': 0, '10': 'hide'},
-  ],
-  '8': const [
-    const {'1': 'payload'},
-  ],
-};
-
-/// Descriptor for `Result`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List resultDescriptor = $convert.base64Decode('CgZSZXN1bHQSIgoEZm9ybRgBIAEoCzIMLnJ1bmlmeS5Gb3JtSABSBGZvcm0SJQoFZW1wdHkYAiABKAsyDS5ydW5pZnkuRW1wdHlIAFIFZW1wdHkSKAoEaGlkZRgDIAEoCzISLnJ1bmlmeS5IaWRlV2luZG93SABSBGhpZGVCCQoHcGF5bG9hZA==');
 @$core.Deprecated('Use writeLogDescriptor instead')
 const WriteLog$json = const {
   '1': 'WriteLog',
@@ -162,42 +54,6 @@ const WriteLog$json = const {
 
 /// Descriptor for `WriteLog`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List writeLogDescriptor = $convert.base64Decode('CghXcml0ZUxvZxImCgVsZXZlbBgBIAEoDjIQLnJ1bmlmeS5Mb2dMZXZlbFIFbGV2ZWwSGAoHbWVzc2FnZRgCIAEoCVIHbWVzc2FnZQ==');
-@$core.Deprecated('Use setFormStateDescriptor instead')
-const SetFormState$json = const {
-  '1': 'SetFormState',
-  '2': const [
-    const {'1': 'state', '3': 1, '4': 1, '5': 14, '6': '.runify.FormStateType', '10': 'state'},
-  ],
-};
-
-/// Descriptor for `SetFormState`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List setFormStateDescriptor = $convert.base64Decode('CgxTZXRGb3JtU3RhdGUSKwoFc3RhdGUYASABKA4yFS5ydW5pZnkuRm9ybVN0YXRlVHlwZVIFc3RhdGU=');
-@$core.Deprecated('Use serviceMsgUIDescriptor instead')
-const ServiceMsgUI$json = const {
-  '1': 'ServiceMsgUI',
-  '2': const [
-    const {'1': 'writeLog', '3': 1, '4': 1, '5': 11, '6': '.runify.WriteLog', '9': 0, '10': 'writeLog'},
-  ],
-  '8': const [
-    const {'1': 'payload'},
-  ],
-};
-
-/// Descriptor for `ServiceMsgUI`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List serviceMsgUIDescriptor = $convert.base64Decode('CgxTZXJ2aWNlTXNnVUkSLgoId3JpdGVMb2cYASABKAsyEC5ydW5pZnkuV3JpdGVMb2dIAFIId3JpdGVMb2dCCQoHcGF5bG9hZA==');
-@$core.Deprecated('Use serviceMsgSrvDescriptor instead')
-const ServiceMsgSrv$json = const {
-  '1': 'ServiceMsgSrv',
-  '2': const [
-    const {'1': 'setFormState', '3': 1, '4': 1, '5': 11, '6': '.runify.SetFormState', '9': 0, '10': 'setFormState'},
-  ],
-  '8': const [
-    const {'1': 'payload'},
-  ],
-};
-
-/// Descriptor for `ServiceMsgSrv`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List serviceMsgSrvDescriptor = $convert.base64Decode('Cg1TZXJ2aWNlTXNnU3J2EjoKDHNldEZvcm1TdGF0ZRgBIAEoCzIULnJ1bmlmeS5TZXRGb3JtU3RhdGVIAFIMc2V0Rm9ybVN0YXRlQgkKB3BheWxvYWQ=');
 @$core.Deprecated('Use rootListRowGlobalIDDescriptor instead')
 const RootListRowGlobalID$json = const {
   '1': 'RootListRowGlobalID',
@@ -333,27 +189,28 @@ const FilterData$json = const {
 
 /// Descriptor for `FilterData`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List filterDataDescriptor = $convert.base64Decode('CgpGaWx0ZXJEYXRhEhQKBXZhbHVlGAEgASgJUgV2YWx1ZQ==');
-@$core.Deprecated('Use formDataMsgUIDescriptor instead')
-const FormDataMsgUI$json = const {
-  '1': 'FormDataMsgUI',
+@$core.Deprecated('Use uIMessageDescriptor instead')
+const UIMessage$json = const {
+  '1': 'UIMessage',
   '2': const [
     const {'1': 'formID', '3': 1, '4': 1, '5': 13, '10': 'formID'},
-    const {'1': 'filterChanged', '3': 2, '4': 1, '5': 11, '6': '.runify.FilterData', '9': 0, '10': 'filterChanged'},
-    const {'1': 'rootListRowActivated', '3': 3, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListRowActivated'},
-    const {'1': 'rootListMenuActivated', '3': 4, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListMenuActivated'},
-    const {'1': 'contextMenuRowActivated', '3': 5, '4': 1, '5': 11, '6': '.runify.ContextMenuRowID', '9': 0, '10': 'contextMenuRowActivated'},
-    const {'1': 'formClosed', '3': 6, '4': 1, '5': 11, '6': '.runify.FormClosed', '9': 0, '10': 'formClosed'},
+    const {'1': 'writeLog', '3': 2, '4': 1, '5': 11, '6': '.runify.WriteLog', '9': 0, '10': 'writeLog'},
+    const {'1': 'filterChanged', '3': 3, '4': 1, '5': 11, '6': '.runify.FilterData', '9': 0, '10': 'filterChanged'},
+    const {'1': 'rootListRowActivated', '3': 4, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListRowActivated'},
+    const {'1': 'rootListMenuActivated', '3': 5, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListMenuActivated'},
+    const {'1': 'contextMenuRowActivated', '3': 6, '4': 1, '5': 11, '6': '.runify.ContextMenuRowID', '9': 0, '10': 'contextMenuRowActivated'},
+    const {'1': 'formClosed', '3': 7, '4': 1, '5': 11, '6': '.runify.FormClosed', '9': 0, '10': 'formClosed'},
   ],
   '8': const [
     const {'1': 'payload'},
   ],
 };
 
-/// Descriptor for `FormDataMsgUI`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List formDataMsgUIDescriptor = $convert.base64Decode('Cg1Gb3JtRGF0YU1zZ1VJEhYKBmZvcm1JRBgBIAEoDVIGZm9ybUlEEjoKDWZpbHRlckNoYW5nZWQYAiABKAsyEi5ydW5pZnkuRmlsdGVyRGF0YUgAUg1maWx0ZXJDaGFuZ2VkElEKFHJvb3RMaXN0Um93QWN0aXZhdGVkGAMgASgLMhsucnVuaWZ5LlJvb3RMaXN0Um93R2xvYmFsSURIAFIUcm9vdExpc3RSb3dBY3RpdmF0ZWQSUwoVcm9vdExpc3RNZW51QWN0aXZhdGVkGAQgASgLMhsucnVuaWZ5LlJvb3RMaXN0Um93R2xvYmFsSURIAFIVcm9vdExpc3RNZW51QWN0aXZhdGVkElQKF2NvbnRleHRNZW51Um93QWN0aXZhdGVkGAUgASgLMhgucnVuaWZ5LkNvbnRleHRNZW51Um93SURIAFIXY29udGV4dE1lbnVSb3dBY3RpdmF0ZWQSNAoKZm9ybUNsb3NlZBgGIAEoCzISLnJ1bmlmeS5Gb3JtQ2xvc2VkSABSCmZvcm1DbG9zZWRCCQoHcGF5bG9hZA==');
-@$core.Deprecated('Use formDataMsgSrvDescriptor instead')
-const FormDataMsgSrv$json = const {
-  '1': 'FormDataMsgSrv',
+/// Descriptor for `UIMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List uIMessageDescriptor = $convert.base64Decode('CglVSU1lc3NhZ2USFgoGZm9ybUlEGAEgASgNUgZmb3JtSUQSLgoId3JpdGVMb2cYAiABKAsyEC5ydW5pZnkuV3JpdGVMb2dIAFIId3JpdGVMb2cSOgoNZmlsdGVyQ2hhbmdlZBgDIAEoCzISLnJ1bmlmeS5GaWx0ZXJEYXRhSABSDWZpbHRlckNoYW5nZWQSUQoUcm9vdExpc3RSb3dBY3RpdmF0ZWQYBCABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhRyb290TGlzdFJvd0FjdGl2YXRlZBJTChVyb290TGlzdE1lbnVBY3RpdmF0ZWQYBSABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhVyb290TGlzdE1lbnVBY3RpdmF0ZWQSVAoXY29udGV4dE1lbnVSb3dBY3RpdmF0ZWQYBiABKAsyGC5ydW5pZnkuQ29udGV4dE1lbnVSb3dJREgAUhdjb250ZXh0TWVudVJvd0FjdGl2YXRlZBI0Cgpmb3JtQ2xvc2VkGAcgASgLMhIucnVuaWZ5LkZvcm1DbG9zZWRIAFIKZm9ybUNsb3NlZEIJCgdwYXlsb2Fk');
+@$core.Deprecated('Use srvMessageDescriptor instead')
+const SrvMessage$json = const {
+  '1': 'SrvMessage',
   '2': const [
     const {'1': 'formID', '3': 1, '4': 1, '5': 13, '10': 'formID'},
     const {'1': 'rootListOpen', '3': 2, '4': 1, '5': 11, '6': '.runify.RootListOpen', '9': 0, '10': 'rootListOpen'},
@@ -368,5 +225,5 @@ const FormDataMsgSrv$json = const {
   ],
 };
 
-/// Descriptor for `FormDataMsgSrv`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List formDataMsgSrvDescriptor = $convert.base64Decode('Cg5Gb3JtRGF0YU1zZ1NydhIWCgZmb3JtSUQYASABKA1SBmZvcm1JRBI6Cgxyb290TGlzdE9wZW4YAiABKAsyFC5ydW5pZnkuUm9vdExpc3RPcGVuSABSDHJvb3RMaXN0T3BlbhJDCg9yb290TGlzdEFkZFJvd3MYAyABKAsyFy5ydW5pZnkuUm9vdExpc3RBZGRSb3dzSABSD3Jvb3RMaXN0QWRkUm93cxJMChJyb290TGlzdENoYW5nZVJvd3MYBCABKAsyGi5ydW5pZnkuUm9vdExpc3RDaGFuZ2VSb3dzSABSEnJvb3RMaXN0Q2hhbmdlUm93cxJMChJyb290TGlzdFJlbW92ZVJvd3MYBSABKAsyGi5ydW5pZnkuUm9vdExpc3RSZW1vdmVSb3dzSABSEnJvb3RMaXN0UmVtb3ZlUm93cxJDCg9jb250ZXh0TWVudU9wZW4YBiABKAsyFy5ydW5pZnkuQ29udGV4dE1lbnVPcGVuSABSD2NvbnRleHRNZW51T3BlbhI0Cgpmb3JtQWN0aW9uGAcgASgLMhIucnVuaWZ5LkZvcm1BY3Rpb25IAFIKZm9ybUFjdGlvbkIJCgdwYXlsb2Fk');
+/// Descriptor for `SrvMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List srvMessageDescriptor = $convert.base64Decode('CgpTcnZNZXNzYWdlEhYKBmZvcm1JRBgBIAEoDVIGZm9ybUlEEjoKDHJvb3RMaXN0T3BlbhgCIAEoCzIULnJ1bmlmeS5Sb290TGlzdE9wZW5IAFIMcm9vdExpc3RPcGVuEkMKD3Jvb3RMaXN0QWRkUm93cxgDIAEoCzIXLnJ1bmlmeS5Sb290TGlzdEFkZFJvd3NIAFIPcm9vdExpc3RBZGRSb3dzEkwKEnJvb3RMaXN0Q2hhbmdlUm93cxgEIAEoCzIaLnJ1bmlmeS5Sb290TGlzdENoYW5nZVJvd3NIAFIScm9vdExpc3RDaGFuZ2VSb3dzEkwKEnJvb3RMaXN0UmVtb3ZlUm93cxgFIAEoCzIaLnJ1bmlmeS5Sb290TGlzdFJlbW92ZVJvd3NIAFIScm9vdExpc3RSZW1vdmVSb3dzEkMKD2NvbnRleHRNZW51T3BlbhgGIAEoCzIXLnJ1bmlmeS5Db250ZXh0TWVudU9wZW5IAFIPY29udGV4dE1lbnVPcGVuEjQKCmZvcm1BY3Rpb24YByABKAsyEi5ydW5pZnkuRm9ybUFjdGlvbkgAUgpmb3JtQWN0aW9uQgkKB3BheWxvYWQ=');

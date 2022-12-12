@@ -28,21 +28,6 @@ class LogLevel extends $pb.ProtobufEnum {
   const LogLevel._($core.int v, $core.String n) : super(v, n);
 }
 
-class FormStateType extends $pb.ProtobufEnum {
-  static const FormStateType SHOW = FormStateType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SHOW');
-  static const FormStateType HIDE = FormStateType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'HIDE');
-
-  static const $core.List<FormStateType> values = <FormStateType> [
-    SHOW,
-    HIDE,
-  ];
-
-  static final $core.Map<$core.int, FormStateType> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static FormStateType? valueOf($core.int value) => _byValue[value];
-
-  const FormStateType._($core.int v, $core.String n) : super(v, n);
-}
-
 class MessageType extends $pb.ProtobufEnum {
   static const MessageType TYPE_ERROR = MessageType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_ERROR');
 

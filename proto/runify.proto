@@ -4,53 +4,6 @@ package runify;
 
 option go_package = "./pb";
 
-message Empty {
-
-}
-
-message CardItem {
-	uint64 cardID = 1;
-	string name = 2;
-	string icon = 3;
-}
-
-message SelectedCard {
-	uint64 cardID = 1;
-}
-
-message ActionItem {
-	uint32 actionID = 1;
-	string name = 2;
-}
-
-message Actions {
-	repeated ActionItem items = 1;
-}
-
-message SelectedAction {
-	uint32 actionID = 1;
-	uint64 cardID = 2;
-}
-
-message Form {
-	string layout = 1;
-	repeated CardItem cards = 2;
-}
-
-message HideWindow {
-	string error = 1;
-}
-
-message Result {
-	oneof payload {
-		Form form = 1;
-		Empty empty = 2;
-		HideWindow hide = 3;
-	}
-}
-
-// System messages
-
 enum LogLevel {
 	DEBUG = 0;
 	INFO = 1;
@@ -62,29 +15,6 @@ message WriteLog {
 	LogLevel level = 1;
 	string message = 2;
 }
-
-enum FormStateType {
-	SHOW = 0;
-	HIDE = 1;
-}
-
-message SetFormState {
-	FormStateType state = 1;
-}
-
-message ServiceMsgUI {
-	oneof payload {
-		WriteLog writeLog = 1;
-	}
-}
-
-message ServiceMsgSrv {
-	oneof payload {
-		SetFormState setFormState = 1;
-	}
-}
-
-// Form messages
 
 message RootListRowGlobalID {
 	uint32 providerID = 1;
@@ -155,18 +85,19 @@ message FilterData {
 	string value = 1;
 }
 
-message FormDataMsgUI {
+message UIMessage {
 	uint32 formID = 1;
 	oneof payload {
-		FilterData filterChanged = 2;
-		RootListRowGlobalID rootListRowActivated = 3;
-		RootListRowGlobalID rootListMenuActivated = 4;
-		ContextMenuRowID contextMenuRowActivated = 5;
-		FormClosed formClosed = 6;
+		WriteLog writeLog = 2;
+		FilterData filterChanged = 3;
+		RootListRowGlobalID rootListRowActivated = 4;
+		RootListRowGlobalID rootListMenuActivated = 5;
+		ContextMenuRowID contextMenuRowActivated = 6;
+		FormClosed formClosed = 7;
 	}
 }
 
-message FormDataMsgSrv {
+message SrvMessage {
 	uint32 formID = 1;
 	oneof payload {
 		RootListOpen rootListOpen = 2;
@@ -179,10 +110,5 @@ message FormDataMsgSrv {
 }
 
 service Runify {
-	rpc ServiceChannel(stream ServiceMsgUI) returns (stream ServiceMsgSrv) {}
-	rpc FormDataChannel(stream FormDataMsgUI) returns (stream FormDataMsgSrv) {}
-	rpc GetRoot(Empty) returns (Form) {}
-	rpc GetActions(SelectedCard) returns (Actions) {}
-	rpc ExecuteDefault(SelectedCard) returns (Result) {}
-	rpc Execute(SelectedAction) returns (Result) {}
+	rpc Connect(stream UIMessage) returns (stream SrvMessage) {}
 }
