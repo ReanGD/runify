@@ -5,16 +5,38 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/global/api"
+	"go.uber.org/zap"
 )
 
 type uiClientConnectedCmd struct {
 	pClient *protoClient
 }
 
+func (c *uiClientConnectedCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "UIClientConnected"),
+		zap.String("Reason", reason),
+		zap.String("Action", "skip request"))
+}
+
 type uiClientDisconnectedCmd struct{}
+
+func (c *uiClientDisconnectedCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "UIClientDisconnected"),
+		zap.String("Reason", reason),
+		zap.String("Action", "skip request"))
+}
 
 type openRootListCmd struct {
 	ctrl api.RootListCtrl
+}
+
+func (c *openRootListCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "OpenRootList"),
+		zap.String("Reason", reason),
+		zap.String("Action", "skip request"))
 }
 
 type streamProcessor struct {

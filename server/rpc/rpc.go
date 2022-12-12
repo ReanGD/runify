@@ -116,24 +116,13 @@ func (m *Rpc) onRequest(request interface{}) (bool, error) {
 }
 
 func (m *Rpc) onRequestDefault(request interface{}, reason string) (bool, error) {
-	switch request.(type) {
+	switch r := request.(type) {
 	case *uiClientConnectedCmd:
-		m.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "UiClientConnected"),
-			zap.String("Reason", reason),
-			zap.String("Action", "skip request"))
-
+		r.onRequestDefault(m.ModuleLogger, reason)
 	case *uiClientDisconnectedCmd:
-		m.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "UiClientDisconnected"),
-			zap.String("Reason", reason),
-			zap.String("Action", "skip request"))
-
+		r.onRequestDefault(m.ModuleLogger, reason)
 	case *openRootListCmd:
-		m.ModuleLogger.Debug("Message is wrong",
-			zap.String("RequestType", "OpenRootList"),
-			zap.String("Reason", reason),
-			zap.String("Action", "skip request"))
+		r.onRequestDefault(m.ModuleLogger, reason)
 
 	default:
 		m.ModuleLogger.Warn("Unknown message received",
