@@ -2,93 +2,97 @@ import 'dart:async';
 
 import 'package:runify/system/logger.dart';
 import 'package:runify/rpc/rpc_types.dart';
-import 'package:runify/pb/runify.pbgrpc.dart';
-import 'package:runify/system/data_filter.dart';
 import 'package:runify/rpc/rpc_proto_client.dart';
-import 'package:runify/screen/general/gen_type.dart';
-import 'package:runify/screen/general_menu/menu_type.dart';
+import 'package:runify/global/root_list_row.dart';
+import 'package:runify/pb/runify.pbgrpc.dart' as pb;
+import 'package:runify/global/context_menu_row.dart';
 
 class RootListHandler implements FormHandler, RootListRpcClient {
   final ProtoClient _pClient;
-  late final DataFilter<Command> _filter;
+  late final RootListRowFilter _filter;
 
-  RootListHandler(this._pClient, List<RootListRow> rows) {
-    _filter = DataFilter<Command>.value(rows
-        .map(
-          (it) => Command(it.providerID, it.rowID, it.priority, it.value,
-              "Application", it.icon),
-        )
-        .toList());
+  RootListHandler(this._pClient, List<pb.RootListRow> rows) {
+    _filter = RootListRowFilter.value(
+        rows
+            .map(
+              (it) => RootListRow(RootListRowID(it.providerID, it.rowID),
+                  it.priority, it.value, "Application", it.icon),
+            )
+            .toList(),
+        rootListRowComparator);
   }
 
   @override
-  DataFilter<Command> get filter => _filter;
+  RootListRowFilter get filter => _filter;
 
   @override
-  Future<void> onRootListAddRows(List<RootListRow> rows) async {
+  Future<void> onRootListAddRows(List<pb.RootListRow> rows) async {
     // TODO: implement onRootListAddRows
   }
 
   @override
-  Future<void> onRootListChangeRows(List<RootListRow> rows) async {
+  Future<void> onRootListChangeRows(List<pb.RootListRow> rows) async {
     // TODO: implement onRootListChangeRows
   }
 
   @override
-  Future<void> onRootListRemoveRows(List<RootListRowGlobalID> rows) async {
+  Future<void> onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) async {
     // TODO: implement onRootListRemoveRows
   }
 
   @override
-  Future<void> execute(Command cmd) async {
-    _pClient.rootListRowActivated(cmd.providerID, cmd.rowID);
+  Future<void> execute(RootListRowID id) async {
+    _pClient.rootListRowActivated(id.providerID, id.rowID);
   }
 
   @override
-  Future<void> menuActivate(Command cmd) async {
-    _pClient.rootListMenuActivated(cmd.providerID, cmd.rowID);
+  Future<void> menuActivate(RootListRowID id) async {
+    _pClient.rootListMenuActivated(id.providerID, id.rowID);
   }
 }
 
 class ContextMenuHandler implements FormHandler, ContextMenuRpcClient {
   final Logger _logger;
   final ProtoClient _pClient;
-  late final DataFilter<CommandAction> _filter;
+  late final ContextMenuRowFilter _filter;
 
-  ContextMenuHandler(this._pClient, this._logger, List<ContextMenuRow> rows) {
-    _filter = DataFilter<CommandAction>.value(rows
-        .map(
-          (it) => CommandAction(
-            it.rowID,
-            it.value,
-          ),
-        )
-        .toList());
+  ContextMenuHandler(
+      this._pClient, this._logger, List<pb.ContextMenuRow> rows) {
+    _filter = ContextMenuRowFilter.value(
+        rows
+            .map(
+              (it) => ContextMenuRow(
+                it.rowID,
+                it.value,
+              ),
+            )
+            .toList(),
+        contextMenuRowComparator);
   }
 
   @override
-  DataFilter<CommandAction> get filter => _filter;
+  ContextMenuRowFilter get filter => _filter;
 
   @override
-  Future<void> onRootListAddRows(List<RootListRow> rows) async {
+  Future<void> onRootListAddRows(List<pb.RootListRow> rows) async {
     _logger.error(
         "Unexpected grpc message 'RootListAddRows' for context menu handler");
   }
 
   @override
-  Future<void> onRootListChangeRows(List<RootListRow> rows) async {
+  Future<void> onRootListChangeRows(List<pb.RootListRow> rows) async {
     _logger.error(
         "Unexpected grpc message 'RootListChangeRows' for context menu handler");
   }
 
   @override
-  Future<void> onRootListRemoveRows(List<RootListRowGlobalID> rows) async {
+  Future<void> onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) async {
     _logger.error(
         "Unexpected grpc message 'RootListRemoveRows' for context menu handler");
   }
 
   @override
-  Future<void> execute(CommandAction cmd) async {
-    _pClient.contextMenuRowActivated(cmd.id);
+  Future<void> execute(int id) async {
+    _pClient.contextMenuRowActivated(id);
   }
 }
