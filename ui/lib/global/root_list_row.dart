@@ -29,7 +29,7 @@ class RootListRow implements Matcher<RootListRowID> {
 
 int rootListRowComparator(RootListRow a, RootListRow b) {
   if (a.priority != b.priority) {
-    return a.priority.compareTo(b.priority);
+    return b.priority.compareTo(a.priority);
   }
 
   return a.name.compareTo(b.name);

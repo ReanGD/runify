@@ -40,7 +40,7 @@ func (c *CalcRootListCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*ap
 func (c *CalcRootListCtrl) OnFilterChange(text string) {
 	calcResult := c.executer.Execute(text)
 	if calcResult.ParserErr != nil {
-		if len(c.actualValue) == 0 {
+		if len(c.actualValue) != 0 {
 			c.client.RootListRemoveRows(c.formID, api.NewRootListRowGlobalID(c.providerID, rootRowID))
 		}
 		return
@@ -52,13 +52,13 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		return
 	}
 
-	c.actualValue = strValue
-	row := api.NewRootListRow(c.providerID, rootRowID, "", strValue, api.MaxPriority)
+	row := api.NewRootListRow(c.providerID, rootRowID, "", text+" = "+strValue, api.MaxPriority)
 	if len(c.actualValue) == 0 {
 		c.client.RootListChangeRows(c.formID, row)
 	} else {
 		c.client.RootListAddRows(c.formID, row)
 	}
+	c.actualValue = strValue
 }
 
 func (c *CalcRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID) {
