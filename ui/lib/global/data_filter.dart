@@ -7,34 +7,24 @@ abstract class Matcher<Key> {
 
 class DataFilter<Key, T extends Matcher<Key>> with ChangeNotifier {
   String _filter = "";
-  final Comparator<T> _comparator;
   final List<T> _items = [];
   final List<int> _visibleItems = [];
 
-  DataFilter(this._comparator) {
-    _items.clear();
-    _update();
-  }
+  DataFilter();
 
-  DataFilter.future(Future<Iterable<T>> items, this._comparator) {
-    items.then((Iterable<T> data) {
-      _items.addAll(data);
-      _update();
-    });
-  }
-
-  DataFilter.value(Iterable<T> items, this._comparator) {
+  add(Iterable<T> items) {
     _items.addAll(items);
-    _update();
   }
 
-  T operator [](int id) {
-    return _items[id];
+  remove(Iterable<Key> keys) {
+    _items.removeWhere((T item) => item.equal(keys));
   }
 
-  List<int> get visibleItems => _visibleItems;
+  sort(Comparator<T> comparator) {
+    _items.sort(comparator);
+  }
 
-  void _update() {
+  apply() {
     _visibleItems.clear();
     final rfilter = RegExp.escape(_filter.trim()).replaceAll(" ", ".*");
     final RegExp rexp = RegExp(rfilter, caseSensitive: false);
@@ -47,22 +37,17 @@ class DataFilter<Key, T extends Matcher<Key>> with ChangeNotifier {
     notifyListeners();
   }
 
-  upsert(Iterable<T> items) {
-    _items.addAll(items);
-    _items.sort(_comparator);
-    _update();
+  T operator [](int id) {
+    return _items[id];
   }
 
-  remove(Iterable<Key> keys) {
-    _items.removeWhere((T item) => item.equal(keys));
-    _update();
-  }
+  List<int> get visibleItems => _visibleItems;
 
-  applyFilter(String value) {
-    final filter = value.toLowerCase();
-    if (filter != _filter) {
-      _filter = filter;
-      _update();
+  setFilter(String value) {
+    final processedFilter = value.toLowerCase();
+    if (processedFilter != _filter) {
+      _filter = processedFilter;
+      apply();
     }
   }
 }

@@ -2,24 +2,25 @@ import 'dart:async';
 
 import 'package:runify/system/logger.dart';
 import 'package:runify/rpc/rpc_types.dart';
+import 'package:runify/global/cast_list.dart';
 import 'package:runify/rpc/rpc_proto_client.dart';
 import 'package:runify/global/root_list_row.dart';
 import 'package:runify/pb/runify.pbgrpc.dart' as pb;
 import 'package:runify/global/context_menu_row.dart';
+
+RootListRow castRootListRow(pb.RootListRow row) {
+  return RootListRow(RootListRowID(row.providerID, row.rowID), row.priority,
+      row.value, "Application", row.icon);
+}
 
 class RootListHandler implements FormHandler, RootListRpcClient {
   final ProtoClient _pClient;
   late final RootListRowFilter _filter;
 
   RootListHandler(this._pClient, List<pb.RootListRow> rows) {
-    _filter = RootListRowFilter.value(
-        rows
-            .map(
-              (it) => RootListRow(RootListRowID(it.providerID, it.rowID),
-                  it.priority, it.value, "Application", it.icon),
-            )
-            .toList(),
-        rootListRowComparator);
+    _filter = RootListRowFilter();
+    _filter.add(CastList(rows, castRootListRow));
+    _filter.apply();
   }
 
   @override
@@ -27,17 +28,27 @@ class RootListHandler implements FormHandler, RootListRpcClient {
 
   @override
   Future<void> onRootListAddRows(List<pb.RootListRow> rows) async {
-    // TODO: implement onRootListAddRows
+    _filter.add(CastList(rows, castRootListRow));
+    _filter.sort(rootListRowComparator);
+    _filter.apply();
   }
 
   @override
   Future<void> onRootListChangeRows(List<pb.RootListRow> rows) async {
-    // TODO: implement onRootListChangeRows
+    _filter.remove(CastList(rows,
+        (pb.RootListRow row) => RootListRowID(row.providerID, row.rowID)));
+    _filter.add(CastList(rows, castRootListRow));
+    _filter.sort(rootListRowComparator);
+    _filter.apply();
   }
 
   @override
   Future<void> onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) async {
-    // TODO: implement onRootListRemoveRows
+    _filter.remove(CastList(
+        rows,
+        (pb.RootListRowGlobalID row) =>
+            RootListRowID(row.providerID, row.rowID)));
+    _filter.apply();
   }
 
   @override
@@ -58,16 +69,10 @@ class ContextMenuHandler implements FormHandler, ContextMenuRpcClient {
 
   ContextMenuHandler(
       this._pClient, this._logger, List<pb.ContextMenuRow> rows) {
-    _filter = ContextMenuRowFilter.value(
-        rows
-            .map(
-              (it) => ContextMenuRow(
-                it.rowID,
-                it.value,
-              ),
-            )
-            .toList(),
-        contextMenuRowComparator);
+    _filter = ContextMenuRowFilter();
+    _filter.add(CastList(
+        rows, (pb.ContextMenuRow row) => ContextMenuRow(row.rowID, row.value)));
+    _filter.apply();
   }
 
   @override
