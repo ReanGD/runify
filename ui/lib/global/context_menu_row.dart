@@ -25,5 +25,7 @@ typedef ContextMenuRowFilter = DataFilter<int, ContextMenuRow>;
 
 abstract class ContextMenuRpcClient {
   ContextMenuRowFilter get filter;
+
+  Future<void> setFilter(String value);
   Future<void> execute(int id);
 }

@@ -39,6 +39,8 @@ typedef RootListRowFilter = DataFilter<RootListRowID, RootListRow>;
 
 abstract class RootListRpcClient {
   RootListRowFilter get filter;
+
+  Future<void> setFilter(String value);
   Future<void> execute(RootListRowID id);
   Future<void> menuActivate(RootListRowID id);
 }

@@ -52,6 +52,13 @@ class RootListHandler implements FormHandler, RootListRpcClient {
   }
 
   @override
+  Future<void> setFilter(String value) async {
+    _pClient.filterChanged(value);
+    _filter.setFilter(value);
+    _filter.apply();
+  }
+
+  @override
   Future<void> execute(RootListRowID id) async {
     _pClient.rootListRowActivated(id.providerID, id.rowID);
   }
@@ -94,6 +101,12 @@ class ContextMenuHandler implements FormHandler, ContextMenuRpcClient {
   Future<void> onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) async {
     _logger.error(
         "Unexpected grpc message 'RootListRemoveRows' for context menu handler");
+  }
+
+  @override
+  Future<void> setFilter(String value) async {
+    _filter.setFilter(value);
+    _filter.apply();
   }
 
   @override
