@@ -1,16 +1,17 @@
+import 'package:flutter/material.dart';
+
 import 'package:runify/text.dart';
 import 'package:runify/style.dart';
-import 'package:flutter/material.dart';
 import 'package:runify/widgets/hdivider.dart';
 import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
-import 'package:runify/screen/general/gen_controller.dart';
+import 'package:runify/screen/root_list/rl_controller.dart';
 
-class GenView extends StatelessWidget {
-  final GenController controller;
+class RLView extends StatelessWidget {
+  final RLController controller;
 
-  const GenView(this.controller, {super.key});
+  const RLView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

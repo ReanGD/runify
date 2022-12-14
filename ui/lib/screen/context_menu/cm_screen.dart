@@ -1,13 +1,14 @@
-import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
-import 'package:runify/screen/general_menu/menu_view.dart';
+
+import 'package:runify/style.dart';
+import 'package:runify/screen/context_menu/cm_view.dart';
+import 'package:runify/screen/context_menu/cm_controller.dart';
 import 'package:runify/widgets/disable_focus_trap_behavior.dart';
-import 'package:runify/screen/general_menu/menu_controller.dart';
 
-class MenuScreen extends StatelessWidget {
-  final MenuController controller;
+class CMScreen extends StatelessWidget {
+  final CMController controller;
 
-  const MenuScreen(this.controller, {super.key});
+  const CMScreen(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class MenuScreen extends StatelessWidget {
                 child: SizedBox(
                   width: dialogTheme.actionsWidth,
                   height: dialogTheme.actionsHeight,
-                  child: MenuView(controller),
+                  child: CMView(controller),
                 ),
               ),
             ),

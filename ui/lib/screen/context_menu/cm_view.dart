@@ -1,16 +1,17 @@
+import 'package:flutter/material.dart';
+
 import 'package:runify/text.dart';
 import 'package:runify/style.dart';
-import 'package:flutter/material.dart';
 import 'package:runify/widgets/hdivider.dart';
 import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_view.dart';
-import 'package:runify/screen/general_menu/menu_controller.dart';
+import 'package:runify/screen/context_menu/cm_controller.dart';
 
-class MenuView extends StatelessWidget {
-  final MenuController controller;
+class CMView extends StatelessWidget {
+  final CMController controller;
 
-  const MenuView(this.controller, {super.key});
+  const CMView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
