@@ -42,7 +42,7 @@ class ProtoClient {
   void rootListMenuActivated(int providerID, int rowID) {
     final msg = UIMessage(
       formID: _formID,
-      rootListRowActivated:
+      rootListMenuActivated:
           RootListRowGlobalID(providerID: providerID, rowID: rowID),
     );
 

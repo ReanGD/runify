@@ -135,6 +135,7 @@ func (h *rpcHandler) uiClientDisconnected() {
 func (h *rpcHandler) openRootList(ctrl api.RootListCtrl) {
 	if h.pClient != nil {
 		h.pClient.AddRootList(ctrl)
+		return
 	}
 
 	h.waitCtrl = ctrl

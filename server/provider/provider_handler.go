@@ -69,15 +69,17 @@ func (h *providerHandler) onStart(ctx context.Context, wg *sync.WaitGroup) <-cha
 }
 
 func (h *providerHandler) openRootList() {
-	ch := make(chan api.RootListCtrl, len(h.dataProviders))
-	for _, dp := range h.dataProviders {
+	chans := make(map[api.ProviderID]chan api.RootListCtrl, len(h.dataProviders))
+	for id, dp := range h.dataProviders {
+		ch := make(chan api.RootListCtrl, 1)
+		chans[id] = ch
 		dp.makeRootListCtrl(ch)
 	}
 
 	ctrls := make(map[api.ProviderID]api.RootListCtrl, len(h.dataProviders))
-	for id := range h.dataProviders {
+	for id, ch := range chans {
 		ctrl := <-ch
-		ctrls[api.ProviderID(id)] = ctrl
+		ctrls[id] = ctrl
 	}
 
 	ctrl := root_list.NewRLRootListCtrl(ctrls, h.rootListLogger)
