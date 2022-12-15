@@ -121,6 +121,10 @@ func (h *rpcHandler) onStop() {
 }
 
 func (h *rpcHandler) uiClientConnected(pClient *protoClient) {
+	if h.pClient != nil {
+		h.pClient.CloseUI()
+	}
+
 	h.pClient = pClient
 	if h.waitCtrl != nil {
 		h.pClient.AddRootList(h.waitCtrl)

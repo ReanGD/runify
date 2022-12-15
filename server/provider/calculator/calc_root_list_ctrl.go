@@ -73,7 +73,7 @@ func (c *CalcRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.R
 			zap.Error(err),
 		)
 
-		c.client.CloseAll(err)
+		c.client.HideUI(err)
 	} else {
 		menuCtrl := newCalcContextMenuCtrl(c.actualValue, c.actionExecuter, c.moduleLogger)
 		c.client.AddContextMenu(menuCtrl)

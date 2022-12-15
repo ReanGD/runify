@@ -68,7 +68,7 @@ func (c *RLRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.Root
 			zap.Error(err),
 		)
 
-		c.client.CloseAll(err)
+		c.client.HideUI(err)
 	} else {
 		ctrl.OnRowActivate(providerID, rowID)
 	}
@@ -84,7 +84,7 @@ func (c *RLRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.Roo
 			zap.Error(err),
 		)
 
-		c.client.CloseAll(err)
+		c.client.HideUI(err)
 	} else {
 		ctrl.OnMenuActivate(providerID, rowID)
 	}

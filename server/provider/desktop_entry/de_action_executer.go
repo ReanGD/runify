@@ -56,7 +56,7 @@ func (e *deActionExecuter) open(client api.RpcClient, id api.RootListRowID) {
 	logMsg := "Failed execute desktop entry"
 	entry, err := e.getEntry(id, logMsg)
 	if err != nil {
-		client.CloseAll(err)
+		client.HideUI(err)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (e *deActionExecuter) open(client api.RpcClient, id api.RootListRowID) {
 		)
 	}
 
-	client.CloseAll(err)
+	client.HideUI(err)
 }
 
 func (e *deActionExecuter) copy(id api.RootListRowID, entry *entry, data *mime.Data, logMsg string) bool {
@@ -92,28 +92,28 @@ func (e *deActionExecuter) copyName(client api.RpcClient, id api.RootListRowID) 
 	logMsg := "Failed copy name of desktop entry"
 	entry, err := e.getEntry(id, logMsg)
 	if err != nil {
-		client.CloseAll(err)
+		client.HideUI(err)
 		return
 	}
 
 	if e.copy(id, entry, mime.NewTextData(entry.props.Name), logMsg) {
-		client.CloseAll(nil)
+		client.HideUI(nil)
 	}
 
-	client.CloseAll(errors.New("Failed copy desktop entry name"))
+	client.HideUI(errors.New("Failed copy desktop entry name"))
 }
 
 func (e *deActionExecuter) copyPath(client api.RpcClient, id api.RootListRowID) {
 	logMsg := "Failed copy path of desktop entry"
 	entry, err := e.getEntry(id, logMsg)
 	if err != nil {
-		client.CloseAll(err)
+		client.HideUI(err)
 		return
 	}
 
 	if e.copy(id, entry, mime.NewTextData(entry.path), logMsg) {
-		client.CloseAll(nil)
+		client.HideUI(nil)
 	}
 
-	client.CloseAll(errors.New("Failed copy desktop entry path"))
+	client.HideUI(errors.New("Failed copy desktop entry path"))
 }

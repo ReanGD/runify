@@ -48,7 +48,7 @@ func (c *DERootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.Roo
 			zap.Error(err),
 		)
 
-		c.client.CloseAll(err)
+		c.client.HideUI(err)
 	} else {
 		menuCtrl := newDEContextMenuCtrl(rowID, c.actionExecuter, c.moduleLogger)
 		c.client.AddContextMenu(menuCtrl)

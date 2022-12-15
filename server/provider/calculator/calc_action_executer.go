@@ -35,8 +35,8 @@ func (e *calcActionExecuter) copyResult(client api.RpcClient, text string) {
 		e.moduleLogger.Warn("Failed copy calculator result",
 			rootRowID.ZapField(),
 		)
-		client.CloseAll(errors.New("Failed copy calculator result"))
+		client.HideUI(errors.New("Failed copy calculator result"))
 	}
 
-	client.CloseAll(nil)
+	client.HideUI(nil)
 }

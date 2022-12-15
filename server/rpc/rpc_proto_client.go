@@ -115,7 +115,32 @@ func (c *protoClient) AddContextMenu(ctrl api.ContextMenuCtrl) {
 	}
 }
 
-func (c *protoClient) CloseAll(msg error) {
+func (c *protoClient) UserMessage(text string) {
+	c.outCh <- &pb.SrvMessage{
+		FormID: 0,
+		Payload: &pb.SrvMessage_UserMessage{
+			UserMessage: &pb.UserMessage{
+				Message:     text,
+				MessageType: pb.MessageType_TYPE_ERROR,
+			},
+		},
+	}
+}
+
+func (c *protoClient) CloseForm(formID api.FormID) {
+	if !c.forms.remove(formID) {
+		return
+	}
+
+	c.outCh <- &pb.SrvMessage{
+		FormID: uint32(formID),
+		Payload: &pb.SrvMessage_CloseForm{
+			CloseForm: &pb.CloseForm{},
+		},
+	}
+}
+
+func (c *protoClient) HideUI(msg error) {
 	c.forms.removeAll()
 
 	var pbMsg *pb.UserMessage
@@ -128,50 +153,21 @@ func (c *protoClient) CloseAll(msg error) {
 
 	c.outCh <- &pb.SrvMessage{
 		FormID: 0,
-		Payload: &pb.SrvMessage_FormAction{
-			FormAction: &pb.FormAction{
-				ActionType: pb.FormActionType_CLOSE_ALL,
-				Message:    pbMsg,
+		Payload: &pb.SrvMessage_HideUI{
+			HideUI: &pb.HideUI{
+				Message: pbMsg,
 			},
 		},
 	}
 }
 
-func (c *protoClient) CloseOne(formID api.FormID, msg error) {
-	if !c.forms.remove(formID) {
-		return
-	}
+func (c *protoClient) CloseUI() {
+	c.forms.removeAll()
 
-	var pbMsg *pb.UserMessage
-	if msg != nil {
-		pbMsg = &pb.UserMessage{
-			MessageType: pb.MessageType_TYPE_ERROR,
-			Message:     msg.Error(),
-		}
-	}
-
-	c.outCh <- &pb.SrvMessage{
-		FormID: uint32(formID),
-		Payload: &pb.SrvMessage_FormAction{
-			FormAction: &pb.FormAction{
-				ActionType: pb.FormActionType_CLOSE_ONE,
-				Message:    pbMsg,
-			},
-		},
-	}
-}
-
-func (c *protoClient) ShowMessage(msg error) {
 	c.outCh <- &pb.SrvMessage{
 		FormID: 0,
-		Payload: &pb.SrvMessage_FormAction{
-			FormAction: &pb.FormAction{
-				ActionType: pb.FormActionType_SHOW_MESSAGE,
-				Message: &pb.UserMessage{
-					MessageType: pb.MessageType_TYPE_ERROR,
-					Message:     msg.Error(),
-				},
-			},
+		Payload: &pb.SrvMessage_CloseUI{
+			CloseUI: &pb.CloseUI{},
 		},
 	}
 }

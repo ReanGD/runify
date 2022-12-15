@@ -44,6 +44,6 @@ func (c *CalcContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID) {
 			zap.String("Value", c.value),
 			zap.Error(err),
 		)
-		c.client.CloseAll(err)
+		c.client.HideUI(err)
 	}
 }

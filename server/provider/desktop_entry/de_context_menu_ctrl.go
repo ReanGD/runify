@@ -59,6 +59,6 @@ func (c *DEContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID) {
 			zap.Error(err),
 		)
 
-		c.client.CloseAll(err)
+		c.client.HideUI(err)
 	}
 }
