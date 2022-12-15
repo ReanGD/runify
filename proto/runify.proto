@@ -16,6 +16,10 @@ message WriteLog {
 	string message = 2;
 }
 
+message FilterData {
+	string value = 1;
+}
+
 message RootListRowGlobalID {
 	uint32 providerID = 1;
 	uint32 rowID = 2;
@@ -70,19 +74,14 @@ message UserMessage {
 	string message = 2;
 }
 
-enum FormActionType {
-	CLOSE_ALL = 0;
-	CLOSE_ONE = 1;
-	SHOW_MESSAGE = 2;
+message CloseForm {
 }
 
-message FormAction {
-	FormActionType actionType = 1;
-	UserMessage message = 2;
+message HideUI {
+	UserMessage message = 1;
 }
 
-message FilterData {
-	string value = 1;
+message CloseUI {
 }
 
 message UIMessage {
@@ -105,7 +104,10 @@ message SrvMessage {
 		RootListChangeRows rootListChangeRows = 4;
 		RootListRemoveRows rootListRemoveRows = 5;
 		ContextMenuOpen contextMenuOpen = 6;
-		FormAction formAction = 7;
+		UserMessage userMessage = 7;
+		CloseForm closeForm = 8;
+		HideUI hideUI = 9;
+		CloseUI closeUI = 10;
 	}
 }
 
