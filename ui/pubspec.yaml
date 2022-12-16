@@ -28,7 +28,6 @@ dependencies:
     sdk: flutter
 
   grpc: ^3.0.2
-  fixnum: ^1.0.1
   provider: ^6.0.3
   protobuf: ^2.1.0
   cupertino_icons: ^1.0.2

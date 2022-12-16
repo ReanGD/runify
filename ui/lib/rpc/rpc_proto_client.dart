@@ -8,7 +8,7 @@ class ProtoClient {
 
   ProtoClient(this._formID, this._outCh);
 
-  void writeLog(LogLevel level, String message) {
+  writeLog(LogLevel level, String message) {
     final msg = UIMessage(
       formID: _formID,
       writeLog: WriteLog(
@@ -20,7 +20,7 @@ class ProtoClient {
     _outCh.add(msg);
   }
 
-  void filterChanged(String filter) {
+  filterChanged(String filter) {
     final msg = UIMessage(
       formID: _formID,
       filterChanged: FilterData(value: filter),
@@ -29,7 +29,7 @@ class ProtoClient {
     _outCh.add(msg);
   }
 
-  void rootListRowActivated(int providerID, int rowID) {
+  rootListRowActivated(int providerID, int rowID) {
     final msg = UIMessage(
       formID: _formID,
       rootListRowActivated:
@@ -39,7 +39,7 @@ class ProtoClient {
     _outCh.add(msg);
   }
 
-  void rootListMenuActivated(int providerID, int rowID) {
+  rootListMenuActivated(int providerID, int rowID) {
     final msg = UIMessage(
       formID: _formID,
       rootListMenuActivated:
@@ -49,7 +49,7 @@ class ProtoClient {
     _outCh.add(msg);
   }
 
-  void contextMenuRowActivated(int rowID) {
+  contextMenuRowActivated(int rowID) {
     final msg = UIMessage(
       formID: _formID,
       contextMenuRowActivated: ContextMenuRowID(rowID: rowID),
@@ -58,7 +58,7 @@ class ProtoClient {
     _outCh.add(msg);
   }
 
-  void formClosed() {
+  formClosed() {
     final msg = UIMessage(
       formID: _formID,
       formClosed: FormClosed(),

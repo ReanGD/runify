@@ -60,9 +60,19 @@ class GrpcClient {
           case SrvMessage_Payload.contextMenuOpen:
             _handlers.addContextMenu(msg.formID, msg.contextMenuOpen);
             break;
-          case SrvMessage_Payload.formAction:
-            _handlers.onFormAction(msg.formID, msg.formAction);
+          case SrvMessage_Payload.userMessage:
+            _handlers.onUserMessage(msg.userMessage);
             break;
+          case SrvMessage_Payload.closeForm:
+            _handlers.onCloseForm(msg.formID);
+            break;
+          case SrvMessage_Payload.hideUI:
+            _handlers.onHideUI(msg.hideUI);
+            break;
+          case SrvMessage_Payload.closeUI:
+            _handlers.onCloseUI();
+            break;
+
           case SrvMessage_Payload.notSet:
             _exit("notSet");
             break;

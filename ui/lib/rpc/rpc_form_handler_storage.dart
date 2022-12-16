@@ -16,18 +16,18 @@ class FormHandlerStorage {
 
   FormHandlerStorage(this._outCh, this._router, this._logger);
 
-  addRootListForm(int formID, RootListOpen msg) async {
+  Future<void> addRootListForm(int formID, RootListOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
     final handler = RootListHandler(pClient, msg.rows);
     _handlers[formID] = handler;
     await _router.openRootList(handler);
   }
 
-  addContextMenu(int formID, ContextMenuOpen msg) async {
+  Future<void> addContextMenu(int formID, ContextMenuOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
     final handler = ContextMenuHandler(pClient, _logger, msg.rows);
     _handlers[formID] = handler;
-    await _router.openContexMenu(handler);
+    _router.openContexMenu(handler);
   }
 
   FormHandler getForHandle(int formID, String msgName) {
@@ -39,19 +39,32 @@ class FormHandlerStorage {
     return handler!;
   }
 
-  onRootListAddRows(int formID, RootListAddRows msg) async {
+  Future<void> onRootListAddRows(int formID, RootListAddRows msg) async {
     getForHandle(formID, "RootListAddRows").onRootListAddRows(msg.rows);
   }
 
-  onRootListChangeRows(int formID, RootListChangeRows msg) async {
+  Future<void> onRootListChangeRows(int formID, RootListChangeRows msg) async {
     getForHandle(formID, "RootListChangeRows").onRootListChangeRows(msg.rows);
   }
 
-  onRootListRemoveRows(int formID, RootListRemoveRows msg) async {
+  Future<void> onRootListRemoveRows(int formID, RootListRemoveRows msg) async {
     getForHandle(formID, "RootListRemoveRows").onRootListRemoveRows(msg.rows);
   }
 
-  onFormAction(int formID, FormAction msg) async {
+  Future<void> onUserMessage(UserMessage msg) async {
     // TODO: implement onFormAction
+  }
+
+  Future<void> onCloseForm(int formID) async {
+    // TODO: implement onCloseForm
+  }
+
+  Future<void> onHideUI(HideUI msg) async {
+    // TODO: show message
+    return _router.hideWindow();
+  }
+
+  Future<void> onCloseUI() async {
+    return _router.closeWindow();
   }
 }

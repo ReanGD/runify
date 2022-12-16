@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:runify/system/logger.dart';
 import 'package:runify/rpc/rpc_types.dart';
 import 'package:runify/global/cast_list.dart';
@@ -27,14 +25,14 @@ class RootListHandler implements FormHandler, RootListRpcClient {
   RootListRowFilter get filter => _filter;
 
   @override
-  Future<void> onRootListAddRows(List<pb.RootListRow> rows) async {
+  onRootListAddRows(List<pb.RootListRow> rows) {
     _filter.add(CastList(rows, castRootListRow));
     _filter.sort(rootListRowComparator);
     _filter.apply();
   }
 
   @override
-  Future<void> onRootListChangeRows(List<pb.RootListRow> rows) async {
+  onRootListChangeRows(List<pb.RootListRow> rows) {
     _filter.remove(CastList(rows,
         (pb.RootListRow row) => RootListRowID(row.providerID, row.rowID)));
     _filter.add(CastList(rows, castRootListRow));
@@ -43,7 +41,7 @@ class RootListHandler implements FormHandler, RootListRpcClient {
   }
 
   @override
-  Future<void> onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) async {
+  onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) {
     _filter.remove(CastList(
         rows,
         (pb.RootListRowGlobalID row) =>
@@ -52,20 +50,25 @@ class RootListHandler implements FormHandler, RootListRpcClient {
   }
 
   @override
-  Future<void> setFilter(String value) async {
+  setFilter(String value) {
     _pClient.filterChanged(value);
     _filter.setFilter(value);
     _filter.apply();
   }
 
   @override
-  Future<void> execute(RootListRowID id) async {
+  execute(RootListRowID id) {
     _pClient.rootListRowActivated(id.providerID, id.rowID);
   }
 
   @override
-  Future<void> menuActivate(RootListRowID id) async {
+  menuActivate(RootListRowID id) {
     _pClient.rootListMenuActivated(id.providerID, id.rowID);
+  }
+
+  @override
+  formClosed() {
+    _pClient.formClosed();
   }
 }
 
@@ -86,31 +89,36 @@ class ContextMenuHandler implements FormHandler, ContextMenuRpcClient {
   ContextMenuRowFilter get filter => _filter;
 
   @override
-  Future<void> onRootListAddRows(List<pb.RootListRow> rows) async {
+  onRootListAddRows(List<pb.RootListRow> rows) {
     _logger.error(
         "Unexpected grpc message 'RootListAddRows' for context menu handler");
   }
 
   @override
-  Future<void> onRootListChangeRows(List<pb.RootListRow> rows) async {
+  onRootListChangeRows(List<pb.RootListRow> rows) {
     _logger.error(
         "Unexpected grpc message 'RootListChangeRows' for context menu handler");
   }
 
   @override
-  Future<void> onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) async {
+  onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) {
     _logger.error(
         "Unexpected grpc message 'RootListRemoveRows' for context menu handler");
   }
 
   @override
-  Future<void> setFilter(String value) async {
+  setFilter(String value) {
     _filter.setFilter(value);
     _filter.apply();
   }
 
   @override
-  Future<void> execute(int id) async {
+  execute(int id) {
     _pClient.contextMenuRowActivated(id);
+  }
+
+  @override
+  formClosed() {
+    _pClient.formClosed();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:runify/global/router_api.dart';
 import 'package:runify/global/root_list_row.dart';
 import 'package:runify/widgets/data_list_view.dart';
 import 'package:runify/screen/root_list/rl_screen.dart';
@@ -12,12 +13,13 @@ class _ListController extends DataListController {
   }
 }
 
-class RLController {
+class RLController implements Controller {
   final RootListRpcClient _client;
   final listController = _ListController();
 
   RLController(this._client);
 
+  @override
   Widget build() {
     return ChangeNotifierProvider.value(
       value: _client.filter,
@@ -40,5 +42,10 @@ class RLController {
 
   onApplyFilter(String query) {
     _client.setFilter(query);
+  }
+
+  @override
+  onFormClosed() {
+    _client.formClosed();
   }
 }
