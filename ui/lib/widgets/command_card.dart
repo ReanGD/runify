@@ -25,8 +25,45 @@ class CommandCard extends StatelessWidget {
     );
   }
 
+  Widget buildCalc(BuildContext context) {
+    final theme = Theme.of(context);
+    final nameStyle = theme.textTheme.majorText?.copyWith(fontSize: 20);
+
+    final items = name.substring(1).split(" = ");
+    final left = items[0];
+    final right = items[1];
+
+    final row = Flexible(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          Text(
+            left,
+            style: nameStyle,
+          ),
+          Text(
+            right,
+            style: nameStyle,
+          ),
+        ],
+      ),
+    );
+
+    return Padding(
+      padding: theme.cardTheme.commandPadding,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[row],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (name.startsWith("|")) {
+      return buildCalc(context);
+    }
+
     final theme = Theme.of(context);
     final nameStyle = theme.textTheme.majorText;
     final iconSize = TextSizeCalculator.instance

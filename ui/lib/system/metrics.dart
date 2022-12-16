@@ -3,7 +3,7 @@ class Metrics {
 
   Metrics(this.enabled);
 
-  grpcCall(int dtMcs, String name) {
+  void grpcCall(int dtMcs, String name) {
     if (enabled) {
       // TODO: send to server
       // ignore: avoid_print

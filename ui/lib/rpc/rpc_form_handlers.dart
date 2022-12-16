@@ -25,49 +25,52 @@ class RootListHandler implements FormHandler, RootListRpcClient {
   RootListRowFilter get filter => _filter;
 
   @override
-  onRootListAddRows(List<pb.RootListRow> rows) {
+  void onRootListAddRows(List<pb.RootListRow> rows) {
     _filter.add(CastList(rows, castRootListRow));
     _filter.sort(rootListRowComparator);
     _filter.apply();
   }
 
   @override
-  onRootListChangeRows(List<pb.RootListRow> rows) {
-    _filter.remove(CastList(rows,
-        (pb.RootListRow row) => RootListRowID(row.providerID, row.rowID)));
-    _filter.add(CastList(rows, castRootListRow));
+  void onRootListChangeRows(List<pb.RootListRow> rows) {
+    final items = CastList(rows, castRootListRow).toList(growable: false);
+    final keys = items.map((row) => row.id).toSet();
+
+    _filter.remove(keys);
+    _filter.add(items);
     _filter.sort(rootListRowComparator);
     _filter.apply();
   }
 
   @override
-  onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) {
-    _filter.remove(CastList(
+  void onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) {
+    final keys = CastList(
         rows,
         (pb.RootListRowGlobalID row) =>
-            RootListRowID(row.providerID, row.rowID)));
+            RootListRowID(row.providerID, row.rowID)).toSet();
+    _filter.remove(keys);
     _filter.apply();
   }
 
   @override
-  setFilter(String value) {
+  void setFilter(String value) {
     _pClient.filterChanged(value);
     _filter.setFilter(value);
     _filter.apply();
   }
 
   @override
-  execute(RootListRowID id) {
+  void execute(RootListRowID id) {
     _pClient.rootListRowActivated(id.providerID, id.rowID);
   }
 
   @override
-  menuActivate(RootListRowID id) {
+  void menuActivate(RootListRowID id) {
     _pClient.rootListMenuActivated(id.providerID, id.rowID);
   }
 
   @override
-  formClosed() {
+  void formClosed() {
     _pClient.formClosed();
   }
 }
@@ -89,36 +92,36 @@ class ContextMenuHandler implements FormHandler, ContextMenuRpcClient {
   ContextMenuRowFilter get filter => _filter;
 
   @override
-  onRootListAddRows(List<pb.RootListRow> rows) {
+  void onRootListAddRows(List<pb.RootListRow> rows) {
     _logger.error(
         "Unexpected grpc message 'RootListAddRows' for context menu handler");
   }
 
   @override
-  onRootListChangeRows(List<pb.RootListRow> rows) {
+  void onRootListChangeRows(List<pb.RootListRow> rows) {
     _logger.error(
         "Unexpected grpc message 'RootListChangeRows' for context menu handler");
   }
 
   @override
-  onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) {
+  void onRootListRemoveRows(List<pb.RootListRowGlobalID> rows) {
     _logger.error(
         "Unexpected grpc message 'RootListRemoveRows' for context menu handler");
   }
 
   @override
-  setFilter(String value) {
+  void setFilter(String value) {
     _filter.setFilter(value);
     _filter.apply();
   }
 
   @override
-  execute(int id) {
+  void execute(int id) {
     _pClient.contextMenuRowActivated(id);
   }
 
   @override
-  formClosed() {
+  void formClosed() {
     _pClient.formClosed();
   }
 }

@@ -29,19 +29,19 @@ class CMController implements Controller {
 
   get filter => _client.filter;
 
-  onListItemEvent(DataItemEvent event, ContextMenuRow row) {
+  void onListItemEvent(DataItemEvent event, ContextMenuRow row) {
     if (event == DataItemEvent.onChoice) {
       _client.execute(row.id);
       return;
     }
   }
 
-  onApplyFilter(String query) {
+  void onApplyFilter(String query) {
     _client.setFilter(query);
   }
 
   @override
-  onFormClosed() {
+  void onFormClosed() {
     _client.formClosed();
   }
 }

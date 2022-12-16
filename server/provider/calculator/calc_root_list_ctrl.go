@@ -10,6 +10,7 @@ import (
 const rootRowID = api.RootListRowID(1)
 
 type CalcRootListCtrl struct {
+	visible        bool
 	actualValue    string
 	formID         api.FormID
 	providerID     api.ProviderID
@@ -21,6 +22,7 @@ type CalcRootListCtrl struct {
 
 func newCalcRootListCtrl(providerID api.ProviderID, actionExecuter *calcActionExecuter, moduleLogger *zap.Logger) *CalcRootListCtrl {
 	return &CalcRootListCtrl{
+		visible:        false,
 		actualValue:    "",
 		formID:         0,
 		providerID:     providerID,
@@ -40,9 +42,11 @@ func (c *CalcRootListCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*ap
 func (c *CalcRootListCtrl) OnFilterChange(text string) {
 	calcResult := c.executer.Execute(text)
 	if calcResult.ParserErr != nil {
-		if len(c.actualValue) != 0 {
+		if c.visible {
 			c.client.RootListRemoveRows(c.formID, api.NewRootListRowGlobalID(c.providerID, rootRowID))
 		}
+		c.visible = false
+		c.actualValue = ""
 		return
 	}
 
@@ -52,12 +56,14 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		return
 	}
 
-	row := api.NewRootListRow(c.providerID, rootRowID, "", text+" = "+strValue, api.MaxPriority)
-	if len(c.actualValue) == 0 {
+	row := api.NewRootListRow(c.providerID, rootRowID, "", "|"+text+" = "+strValue, api.MaxPriority)
+	if c.visible {
 		c.client.RootListChangeRows(c.formID, row)
 	} else {
 		c.client.RootListAddRows(c.formID, row)
 	}
+
+	c.visible = true
 	c.actualValue = strValue
 }
 

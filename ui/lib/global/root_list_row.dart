@@ -5,6 +5,15 @@ class RootListRowID {
   final int rowID;
 
   RootListRowID(this.providerID, this.rowID);
+
+  @override
+  bool operator ==(other) =>
+      other is RootListRowID &&
+      other.providerID == providerID &&
+      other.rowID == rowID;
+
+  @override
+  int get hashCode => Object.hash(providerID, rowID);
 }
 
 class RootListRow implements Matcher<RootListRowID> {
@@ -17,13 +26,11 @@ class RootListRow implements Matcher<RootListRowID> {
   RootListRow(this.id, this.priority, this.name, this.category, this.icon);
 
   @override
-  bool match(RegExp rexp) {
-    return rexp.hasMatch(name);
-  }
+  RootListRowID get key => id;
 
   @override
-  bool equal(Iterable<RootListRowID> keys) {
-    return keys.any((RootListRowID key) => key == id);
+  bool match(RegExp rexp) {
+    return rexp.hasMatch(name);
   }
 }
 
@@ -40,8 +47,8 @@ typedef RootListRowFilter = DataFilter<RootListRowID, RootListRow>;
 abstract class RootListRpcClient {
   RootListRowFilter get filter;
 
-  setFilter(String value);
-  execute(RootListRowID id);
-  menuActivate(RootListRowID id);
-  formClosed();
+  void setFilter(String value);
+  void execute(RootListRowID id);
+  void menuActivate(RootListRowID id);
+  void formClosed();
 }

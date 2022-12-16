@@ -1,7 +1,7 @@
 import 'package:runify/pb/runify.pbgrpc.dart';
 
 abstract class FormHandler {
-  onRootListAddRows(List<RootListRow> rows);
-  onRootListChangeRows(List<RootListRow> rows);
-  onRootListRemoveRows(List<RootListRowGlobalID> rows);
+  void onRootListAddRows(List<RootListRow> rows);
+  void onRootListChangeRows(List<RootListRow> rows);
+  void onRootListRemoveRows(List<RootListRowGlobalID> rows);
 }

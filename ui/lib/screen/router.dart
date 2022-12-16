@@ -89,7 +89,7 @@ class ScreenRouter extends StatelessWidget {
     }
   }
 
-  _showForm(RLController controller) {
+  void _showForm(RLController controller) {
     // TODO: need only push
     _navigator.pushAndRemoveUntil(
       MaterialPageRoute(
@@ -101,7 +101,7 @@ class ScreenRouter extends StatelessWidget {
     ).then((value) => controller.onFormClosed());
   }
 
-  _showMenu(Controller controller) {
+  void _showMenu(Controller controller) {
     _navigator
         .push(
           RawDialogRoute(

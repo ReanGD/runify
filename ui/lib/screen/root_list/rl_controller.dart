@@ -29,7 +29,7 @@ class RLController implements Controller {
 
   get filter => _client.filter;
 
-  onListItemEvent(DataItemEvent event, RootListRow row) {
+  void onListItemEvent(DataItemEvent event, RootListRow row) {
     if (event == DataItemEvent.onMenu) {
       _client.menuActivate(row.id);
       return;
@@ -40,12 +40,12 @@ class RLController implements Controller {
     }
   }
 
-  onApplyFilter(String query) {
+  void onApplyFilter(String query) {
     _client.setFilter(query);
   }
 
   @override
-  onFormClosed() {
+  void onFormClosed() {
     _client.formClosed();
   }
 }

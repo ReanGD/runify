@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 abstract class Matcher<Key> {
+  Key get key;
   bool match(RegExp rexp);
-  bool equal(Iterable<Key> keys);
 }
 
 class DataFilter<Key, T extends Matcher<Key>> with ChangeNotifier {
@@ -12,19 +12,19 @@ class DataFilter<Key, T extends Matcher<Key>> with ChangeNotifier {
 
   DataFilter();
 
-  add(Iterable<T> items) {
+  void add(Iterable<T> items) {
     _items.addAll(items);
   }
 
-  remove(Iterable<Key> keys) {
-    _items.removeWhere((T item) => item.equal(keys));
+  void remove(Set<Key> keys) {
+    _items.removeWhere((T item) => keys.contains(item.key));
   }
 
-  sort(Comparator<T> comparator) {
+  void sort(Comparator<T> comparator) {
     _items.sort(comparator);
   }
 
-  apply() {
+  void apply() {
     _visibleItems.clear();
     final rfilter = RegExp.escape(_filter.trim()).replaceAll(" ", ".*");
     final RegExp rexp = RegExp(rfilter, caseSensitive: false);
@@ -43,7 +43,7 @@ class DataFilter<Key, T extends Matcher<Key>> with ChangeNotifier {
 
   List<int> get visibleItems => _visibleItems;
 
-  setFilter(String value) {
+  void setFilter(String value) {
     final processedFilter = value.toLowerCase();
     if (processedFilter != _filter) {
       _filter = processedFilter;

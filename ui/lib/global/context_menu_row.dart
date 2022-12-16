@@ -7,13 +7,11 @@ class ContextMenuRow implements Matcher<int> {
   ContextMenuRow(this.id, this.name);
 
   @override
-  bool match(RegExp rexp) {
-    return rexp.hasMatch(name);
-  }
+  int get key => id;
 
   @override
-  bool equal(Iterable<int> keys) {
-    return keys.any((int key) => key == id);
+  bool match(RegExp rexp) {
+    return rexp.hasMatch(name);
   }
 }
 
@@ -26,7 +24,7 @@ typedef ContextMenuRowFilter = DataFilter<int, ContextMenuRow>;
 abstract class ContextMenuRpcClient {
   ContextMenuRowFilter get filter;
 
-  setFilter(String value);
-  execute(int id);
-  formClosed();
+  void setFilter(String value);
+  void execute(int id);
+  void formClosed();
 }
