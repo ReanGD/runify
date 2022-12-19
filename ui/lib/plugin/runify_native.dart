@@ -75,25 +75,11 @@ class RunifyNative {
     }
   }
 
-  // Sets the actual and minimum window sizes,
-  //   turns on callbacks for the listener.
-  // position = {0, 0} - is center of screen
-  // All parameters are in millimeters.
-  Future<void> initPlugin(Offset position, Size size) async {
-    final Map<String, dynamic> arguments = {
-      'x': position.dx,
-      'y': position.dy,
-      'width': size.width,
-      'height': size.height,
-    };
-    await _channel.invokeMethod('initPlugin', arguments);
-
-    while (true) {
-      await Future.delayed(const Duration(milliseconds: 1));
-      final g = await getGeometry();
-      if (g.width > 1) {
-        break;
-      }
+  // Initializes the plugin.
+  Future<void> initPlugin({bool wait = false}) async {
+    await _channel.invokeMethod('initPlugin');
+    if (wait) {
+      await _waitVisibleState(false);
     }
   }
 
@@ -107,16 +93,41 @@ class RunifyNative {
     return await _channel.invokeMethod('isVisible');
   }
 
-  // Shows and gives focus to the window.
-  Future<void> show({bool inactive = false}) async {
+  // Shows and gives focus to the window with initial position and size.
+  //    position = {0, 0} - is center of screen
+  //    position and size values are in millimeters.
+  // If wait is true, the method will wait until the window is visible.
+  Future<void> initialShow(Offset position, Size size,
+      {bool wait = false}) async {
     final Map<String, dynamic> arguments = {
-      'inactive': inactive,
+      'x': position.dx,
+      'y': position.dy,
+      'width': size.width,
+      'height': size.height,
+      'min_width': 480,
+      'min_height': 640,
     };
-    await _channel.invokeMethod('show', arguments);
+
+    await _channel.invokeMethod('initialShow', arguments);
+
+    if (wait) {
+      await _waitVisibleState(true);
+    }
+  }
+
+  // Shows and gives focus to the window.
+  // If wait is true, the method will wait until the window is visible.
+  Future<void> show({bool wait = false}) async {
+    await _channel.invokeMethod('show');
+
+    if (wait) {
+      await _waitVisibleState(true);
+    }
   }
 
   // Hides the window.
-  Future<void> hide() async {
+  // If wait is true, the method will wait until the window is hidden.
+  Future<void> hide({bool wait = false}) async {
     // Before hiding the window,
     // let's wait until we have received all the KeyUp messages.
     for (;
@@ -124,6 +135,17 @@ class RunifyNative {
         await Future.delayed(const Duration(milliseconds: 1))) {}
 
     await _channel.invokeMethod('hide');
+    if (wait) {
+      await _waitVisibleState(false);
+    }
+  }
+
+  Future<void> _waitVisibleState(bool targetState) async {
+    var state = !targetState;
+    while (state != targetState) {
+      await Future.delayed(const Duration(milliseconds: 1));
+      state = await isVisible();
+    }
   }
 
   // Close the window.

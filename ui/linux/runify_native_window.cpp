@@ -67,9 +67,8 @@ RNWindow::~RNWindow() {
   RNWindow::instance = nullptr;
 }
 
-void RNWindow::InitPlugin(const Geometry& g) {
-  SetGeometry(g);
-  SetGeometryHint(480, 640);
+void RNWindow::InitPlugin() {
+  Hide();
 
   auto callback = G_CALLBACK(gSignalCallback);
   m_delete_handler = g_signal_connect(m_gtk_window, "delete_event", callback, nullptr);
@@ -185,14 +184,21 @@ void RNWindow::HandleMethodCall(FlMethodCall* method_call) {
   FlValue* args = fl_method_call_get_args(method_call);
 
   if (strcmp(method, "initPlugin") == 0) {
-    Geometry geometry(args);
-    InitPlugin(geometry);
+    InitPlugin();
     response = flBool(true);
   } else if (strcmp(method, "closePlugin") == 0) {
     ClosePlugin();
     response = flBool(true);
   } else if (strcmp(method, "isVisible") == 0) {
     response = flBool(IsVisible());
+  } else if (strcmp(method, "initialShow") == 0) {
+    Geometry geometry(args);
+    auto min_width = fl_value_get_int(fl_value_lookup_string(args, "min_width"));
+    auto min_height = fl_value_get_int(fl_value_lookup_string(args, "min_height"));
+    SetGeometry(geometry);
+    SetGeometryHint(min_width, min_height);
+    Show();
+    response = flBool(true);
   } else if (strcmp(method, "show") == 0) {
     Show();
     response = flBool(true);

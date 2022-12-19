@@ -10,7 +10,7 @@ public:
     ~RNWindow();
 
 public:
-    void InitPlugin(const Geometry& g);
+    void InitPlugin();
     void ClosePlugin();
     bool IsVisible() const;
     void Show() const;
