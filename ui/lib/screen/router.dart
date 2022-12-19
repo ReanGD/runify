@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:runify/system/logger.dart';
-import 'package:runify/system/metrics.dart';
 import 'package:runify/system/settings.dart';
 import 'package:runify/navigator/navigator.dart';
 import 'package:runify/rpc/rpc_grpc_client.dart';
@@ -48,15 +47,12 @@ class _Listener extends WindowListener {
 class ScreenRouter extends StatelessWidget {
   final _settings = Settings();
   final _runifyPlugin = RunifyNative();
-  late final Metrics _metrics;
   late final Logger _logger;
   late final RunifyNavigator _navigator;
   late final GrpcClient _grpcClient;
   var _isFirstShow = true;
 
-  ScreenRouter({super.key}) {
-    _metrics = Metrics(_settings.metricsEnabled);
-  }
+  ScreenRouter({super.key});
 
   Future<void> init() async {
     final pluginFuture = _runifyPlugin.initPlugin();
