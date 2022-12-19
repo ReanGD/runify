@@ -1,7 +1,30 @@
 import 'package:flutter/material.dart';
 
 import 'package:runify/system/logger.dart';
+import 'package:runify/system/settings.dart';
 import 'package:runify/global/router_api.dart';
+import 'package:runify/global/root_list_row.dart';
+import 'package:runify/plugin/runify_native.dart';
+import 'package:runify/global/context_menu_row.dart';
+import 'package:runify/screen/root_list/rl_controller.dart';
+import 'package:runify/screen/context_menu/cm_controller.dart';
+
+class _Listener extends WindowListener {
+  final RunifyNavigator navigator;
+
+  _Listener(this.navigator);
+
+  @override
+  void onTryClose() {
+    navigator.hideWindow();
+  }
+
+  @override
+  void onFocusChange(bool focused) {}
+
+  @override
+  void onConfigure(int x, int y, int width, int height) {}
+}
 
 class NilController extends Controller {
   @override
@@ -34,10 +57,16 @@ class RouteItem {
 
 class RunifyNavigator {
   final Logger _logger;
+  final Settings _settings;
+  final RunifyNative _runifyPlugin;
   final NavigatorState _navigator;
   final _routes = <RouteItem>[];
+  var _isFirstShow = true;
 
-  RunifyNavigator(this._logger, this._navigator);
+  RunifyNavigator(
+      this._settings, this._runifyPlugin, this._navigator, this._logger) {
+    _runifyPlugin.addListener(_Listener(this));
+  }
 
   void _push(Controller ctrl, Route<dynamic> route) {
     final item = RouteItem(ctrl, route);
@@ -93,21 +122,11 @@ class RunifyNavigator {
     return false;
   }
 
-  bool isLast() {
-    return _routes.length <= 1;
-  }
-
   void pop() {
     if (canPop()) {
       final item = _routes.removeLast();
       item.controller.onFormClosed();
       _navigator.pop();
-    }
-  }
-
-  void popAll() {
-    while (canPop()) {
-      pop();
     }
   }
 
@@ -132,5 +151,44 @@ class RunifyNavigator {
     _routes.remove(item);
     item.controller.onFormClosed();
     _navigator.removeRoute(item.route);
+  }
+
+  Future<void> openRootList(RootListRpcClient client) async {
+    final controller = RLController(client);
+    await showWindow();
+    pushForm(controller);
+  }
+
+  Future<void> openContexMenu(ContextMenuRpcClient client) async {
+    final controller = CMController(client);
+    pushMenu(controller);
+  }
+
+  Future<void> back() async {
+    if (_routes.length <= 1) {
+      await _runifyPlugin.hide(wait: true);
+    }
+    pop();
+  }
+
+  Future<void> showWindow() async {
+    if (_isFirstShow) {
+      _isFirstShow = false;
+      return _runifyPlugin.initialShow(
+          _settings.windowOffset, _settings.windowSize);
+    } else {
+      return _runifyPlugin.show();
+    }
+  }
+
+  Future<void> hideWindow() async {
+    _runifyPlugin.hide(wait: true);
+    while (canPop()) {
+      pop();
+    }
+  }
+
+  Future<void> closeWindow() async {
+    return _runifyPlugin.close();
   }
 }

@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:runify/screen/router.dart';
 import 'package:runify/system/logger.dart';
 import 'package:runify/rpc/rpc_types.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
+import 'package:runify/navigator/navigator.dart';
 import 'package:runify/rpc/rpc_proto_client.dart';
 import 'package:runify/rpc/rpc_form_handlers.dart';
 
@@ -11,23 +11,23 @@ class FormHandlerStorage {
   final _handlers = <int, FormHandler>{};
 
   final Logger _logger;
-  final ScreenRouter _router;
+  final RunifyNavigator _navigator;
   final StreamController<UIMessage> _outCh;
 
-  FormHandlerStorage(this._outCh, this._router, this._logger);
+  FormHandlerStorage(this._outCh, this._navigator, this._logger);
 
   Future<void> addRootListForm(int formID, RootListOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
     final handler = RootListHandler(pClient, msg.rows);
     _handlers[formID] = handler;
-    await _router.openRootList(handler);
+    await _navigator.openRootList(handler);
   }
 
   Future<void> addContextMenu(int formID, ContextMenuOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
     final handler = ContextMenuHandler(pClient, _logger, msg.rows);
     _handlers[formID] = handler;
-    _router.openContexMenu(handler);
+    _navigator.openContexMenu(handler);
   }
 
   FormHandler getForHandle(int formID, String msgName) {
@@ -52,19 +52,20 @@ class FormHandlerStorage {
   }
 
   Future<void> onUserMessage(UserMessage msg) async {
-    // TODO: implement onFormAction
+    // TODO: implement onUserMessage
   }
 
   Future<void> onCloseForm(int formID) async {
-    // TODO: implement onCloseForm
+    // TODO: remove handler
+    _navigator.popForm(formID);
   }
 
   Future<void> onHideUI(HideUI msg) async {
     // TODO: show message
-    return _router.hideWindow();
+    return _navigator.hideWindow();
   }
 
   Future<void> onCloseUI() async {
-    return _router.closeWindow();
+    return _navigator.closeWindow();
   }
 }
