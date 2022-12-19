@@ -20,6 +20,9 @@ class RLController implements Controller {
   RLController(this._client);
 
   @override
+  int get formID => _client.formID;
+
+  @override
   Widget build() {
     return ChangeNotifierProvider.value(
       value: _client.filter,

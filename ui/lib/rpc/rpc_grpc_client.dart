@@ -34,6 +34,8 @@ class GrpcClient {
     _handlers = FormHandlerStorage(_outCh, _router, _logger);
   }
 
+  Logger get logger => _logger;
+
   Future<void> _exit(String error) async {
     // ignore: avoid_print
     print("gRPC stream ended with error: $error. Stop runify.");

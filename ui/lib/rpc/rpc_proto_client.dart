@@ -8,6 +8,8 @@ class ProtoClient {
 
   ProtoClient(this._formID, this._outCh);
 
+  int get formID => _formID;
+
   void writeLog(LogLevel level, String message) {
     final msg = UIMessage(
       formID: _formID,

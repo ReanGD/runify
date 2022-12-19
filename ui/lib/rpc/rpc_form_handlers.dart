@@ -22,6 +22,9 @@ class RootListHandler implements FormHandler, RootListRpcClient {
   }
 
   @override
+  int get formID => _pClient.formID;
+
+  @override
   RootListRowFilter get filter => _filter;
 
   @override
@@ -71,6 +74,7 @@ class RootListHandler implements FormHandler, RootListRpcClient {
 
   @override
   void formClosed() {
+    // TODO: remove from storage
     _pClient.formClosed();
   }
 }
@@ -87,6 +91,9 @@ class ContextMenuHandler implements FormHandler, ContextMenuRpcClient {
         rows, (pb.ContextMenuRow row) => ContextMenuRow(row.rowID, row.value)));
     _filter.apply();
   }
+
+  @override
+  int get formID => _pClient.formID;
 
   @override
   ContextMenuRowFilter get filter => _filter;
@@ -122,6 +129,7 @@ class ContextMenuHandler implements FormHandler, ContextMenuRpcClient {
 
   @override
   void formClosed() {
+    // TODO: remove from storage
     _pClient.formClosed();
   }
 }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:runify/system/logger.dart';
 import 'package:runify/system/metrics.dart';
 import 'package:runify/system/settings.dart';
-import 'package:runify/global/router_api.dart';
+import 'package:runify/navigator/navigator.dart';
 import 'package:runify/rpc/rpc_grpc_client.dart';
 import 'package:runify/global/root_list_row.dart';
 import 'package:runify/plugin/runify_native.dart';
@@ -48,20 +49,22 @@ class ScreenRouter extends StatelessWidget {
   final _settings = Settings();
   final _runifyPlugin = RunifyNative();
   late final Metrics _metrics;
-  late final NavigatorState _navigator;
+  late final Logger _logger;
+  late final RunifyNavigator _navigator;
+  late final GrpcClient _grpcClient;
+  var _isFirstShow = true;
 
   ScreenRouter({super.key}) {
     _metrics = Metrics(_settings.metricsEnabled);
   }
 
   Future<void> init() async {
-    final initFuture =
-        _runifyPlugin.initPlugin(_settings.windowOffset, _settings.windowSize);
-    final grpcClient = GrpcClient(_settings, this);
-    grpcClient.connect();
-    // _logger = _service.logger;
+    final pluginFuture = _runifyPlugin.initPlugin();
     _runifyPlugin.addListener(_Listener(this));
-    return initFuture;
+    _grpcClient = GrpcClient(_settings, this);
+    _logger = _grpcClient.logger;
+
+    return pluginFuture;
   }
 
   Map<Type, Action<Intent>> getActions() {
@@ -76,60 +79,33 @@ class ScreenRouter extends StatelessWidget {
     };
   }
 
-  Future<void> back({bool forceHide = false}) async {
-    bool hide = forceHide;
-    if (_navigator.canPop()) {
-      _navigator.pop();
-    } else {
-      hide = true;
+  Future<void> back() async {
+    if (_navigator.isLast()) {
+      await _runifyPlugin.hide(wait: true);
     }
-
-    if (hide) {
-      return _runifyPlugin.hide();
-    }
-  }
-
-  void _showForm(RLController controller) {
-    // TODO: need only push
-    _navigator.pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return controller.build();
-        },
-      ),
-      (route) => false,
-    ).then((value) => controller.onFormClosed());
-  }
-
-  void _showMenu(Controller controller) {
-    _navigator
-        .push(
-          RawDialogRoute(
-            barrierColor: null,
-            barrierLabel: "Label",
-            pageBuilder:
-                (BuildContext a, Animation<double> b, Animation<double> c) {
-              return controller.build();
-            },
-          ),
-        )
-        .then((value) => controller.onFormClosed());
+    _navigator.pop();
   }
 
   Future<void> openRootList(RootListRpcClient client) async {
     final controller = RLController(client);
-    await _runifyPlugin.show();
-    _showForm(controller);
+    if (_isFirstShow) {
+      _isFirstShow = false;
+      await _runifyPlugin.initialShow(
+          _settings.windowOffset, _settings.windowSize);
+    } else {
+      await _runifyPlugin.show();
+    }
+    _navigator.pushForm(controller);
   }
 
   Future<void> openContexMenu(ContextMenuRpcClient client) async {
     final controller = CMController(client);
-    _showMenu(controller);
+    _navigator.pushMenu(controller);
   }
 
   Future<void> hideWindow() async {
-    // TODO: remove all routes
-    return _runifyPlugin.hide();
+    _runifyPlugin.hide(wait: true);
+    _navigator.popAll();
   }
 
   Future<void> closeWindow() async {
@@ -138,7 +114,11 @@ class ScreenRouter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _navigator = Navigator.of(context);
-    return const Text("Hello");
+    _navigator = RunifyNavigator(_logger, Navigator.of(context));
+    _grpcClient.connect();
+    final theme = Theme.of(context);
+    return Container(
+      color: theme.backgroundColor,
+    );
   }
 }
