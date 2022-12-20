@@ -43,13 +43,3 @@ int rootListRowComparator(RootListRow a, RootListRow b) {
 }
 
 typedef RootListRowFilter = DataFilter<RootListRowID, RootListRow>;
-
-abstract class RootListRpcClient {
-  int get formID;
-  RootListRowFilter get filter;
-
-  void setFilter(String value);
-  void execute(RootListRowID id);
-  void menuActivate(RootListRowID id);
-  void formClosed();
-}

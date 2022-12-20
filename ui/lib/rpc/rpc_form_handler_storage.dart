@@ -5,10 +5,11 @@ import 'package:runify/rpc/rpc_types.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
 import 'package:runify/navigator/navigator.dart';
 import 'package:runify/rpc/rpc_proto_client.dart';
-import 'package:runify/rpc/rpc_form_handlers.dart';
+import 'package:runify/rpc/rpc_root_list_service.dart';
+import 'package:runify/rpc/rpc_context_menu_service.dart';
 
 class FormHandlerStorage {
-  final _handlers = <int, FormHandler>{};
+  final _services = <int, Service>{};
 
   final Logger _logger;
   final RunifyNavigator _navigator;
@@ -18,20 +19,20 @@ class FormHandlerStorage {
 
   Future<void> addRootListForm(int formID, RootListOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
-    final handler = RootListHandler(pClient, msg.rows);
-    _handlers[formID] = handler;
-    await _navigator.openRootList(handler);
+    final service = RLService(pClient, msg.rows);
+    _services[formID] = service;
+    await _navigator.openRootList(service);
   }
 
   Future<void> addContextMenu(int formID, ContextMenuOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
-    final handler = ContextMenuHandler(pClient, _logger, msg.rows);
-    _handlers[formID] = handler;
-    _navigator.openContexMenu(handler);
+    final service = CMService(pClient, _logger, msg.rows);
+    _services[formID] = service;
+    _navigator.openContexMenu(service);
   }
 
-  FormHandler getForHandle(int formID, String msgName) {
-    final handler = _handlers[formID];
+  Service getForHandle(int formID, String msgName) {
+    final handler = _services[formID];
     if (handler == null) {
       _logger
           .debug("Grpc message for unknown form = $formID, message = $msgName");

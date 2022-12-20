@@ -20,12 +20,3 @@ int contextMenuRowComparator(ContextMenuRow a, ContextMenuRow b) {
 }
 
 typedef ContextMenuRowFilter = DataFilter<int, ContextMenuRow>;
-
-abstract class ContextMenuRpcClient {
-  int get formID;
-  ContextMenuRowFilter get filter;
-
-  void setFilter(String value);
-  void execute(int id);
-  void formClosed();
-}

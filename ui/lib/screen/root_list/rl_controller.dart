@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:runify/global/router_api.dart';
 import 'package:runify/global/root_list_row.dart';
 import 'package:runify/widgets/data_list_view.dart';
+import 'package:runify/rpc/rpc_root_list_service.dart';
 import 'package:runify/screen/root_list/rl_screen.dart';
 
 class _ListController extends DataListController {
@@ -13,42 +13,33 @@ class _ListController extends DataListController {
   }
 }
 
-class RLController implements Controller {
-  final RootListRpcClient _client;
+class RLController {
+  final RLService _service;
   final listController = _ListController();
 
-  RLController(this._client);
+  RLController(this._service);
 
-  @override
-  int get formID => _client.formID;
-
-  @override
   Widget build() {
     return ChangeNotifierProvider.value(
-      value: _client.filter,
+      value: _service.filter,
       child: RLScreen(this),
     );
   }
 
-  get filter => _client.filter;
+  get filter => _service.filter;
 
   void onListItemEvent(DataItemEvent event, RootListRow row) {
     if (event == DataItemEvent.onMenu) {
-      _client.menuActivate(row.id);
+      _service.menuActivate(row.id);
       return;
     }
     if (event == DataItemEvent.onChoice) {
-      _client.execute(row.id);
+      _service.execute(row.id);
       return;
     }
   }
 
   void onApplyFilter(String query) {
-    _client.setFilter(query);
-  }
-
-  @override
-  void onFormClosed() {
-    _client.formClosed();
+    _service.setFilter(query);
   }
 }
