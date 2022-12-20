@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"reflect"
+	"sync/atomic"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -18,6 +19,7 @@ type runifyServer struct {
 	cfg          *config.Configuration
 	uiLogger     *zap.Logger
 	moduleLogger *zap.Logger
+	lastClientID uint32
 
 	pb.UnimplementedRunifyServer
 }
@@ -33,6 +35,7 @@ func newRunifyServer(
 		rpc:          rpc,
 		uiLogger:     uiLogger,
 		moduleLogger: moduleLogger,
+		lastClientID: 0,
 	}
 }
 
@@ -66,7 +69,8 @@ func (s *runifyServer) Connect(stream pb.Runify_ConnectServer) error {
 	processor := newStreamProcessor(stream.Context())
 	forms := newFormStorage(s.moduleLogger)
 	outCh := make(chan *pb.SrvMessage, s.cfg.Rpc.SendMsgChLen)
-	pClient := newProtoClient(outCh, forms)
+	id := atomic.AddUint32(&s.lastClientID, 1)
+	pClient := newProtoClient(id, outCh, forms)
 	s.rpc.uiClientConnected(pClient)
 
 	processor.runRecv(func(doneCh <-chan struct{}) error {
@@ -140,5 +144,7 @@ func (s *runifyServer) Connect(stream pb.Runify_ConnectServer) error {
 		}
 	})
 
-	return processor.wait()
+	result := processor.wait()
+	s.rpc.uiClientDisconnected(pClient.id)
+	return result
 }

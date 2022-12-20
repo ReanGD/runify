@@ -6,12 +6,14 @@ import (
 )
 
 type protoClient struct {
+	id    uint32
 	outCh chan<- *pb.SrvMessage
 	forms *formStorage
 }
 
-func newProtoClient(outCh chan<- *pb.SrvMessage, forms *formStorage) *protoClient {
+func newProtoClient(id uint32, outCh chan<- *pb.SrvMessage, forms *formStorage) *protoClient {
 	return &protoClient{
+		id:    id,
 		outCh: outCh,
 		forms: forms,
 	}

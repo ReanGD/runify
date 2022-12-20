@@ -132,8 +132,10 @@ func (h *rpcHandler) uiClientConnected(pClient *protoClient) {
 	}
 }
 
-func (h *rpcHandler) uiClientDisconnected() {
-	h.pClient = nil
+func (h *rpcHandler) uiClientDisconnected(id uint32) {
+	if h.pClient != nil && h.pClient.id == id {
+		h.pClient = nil
+	}
 }
 
 func (h *rpcHandler) openRootList(ctrl api.RootListCtrl) {

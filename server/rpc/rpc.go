@@ -100,7 +100,7 @@ func (m *Rpc) onRequest(request interface{}) (bool, error) {
 	case *uiClientConnectedCmd:
 		m.handler.uiClientConnected(r.pClient)
 	case *uiClientDisconnectedCmd:
-		m.handler.uiClientDisconnected()
+		m.handler.uiClientDisconnected(r.id)
 	case *openRootListCmd:
 		m.handler.openRootList(r.ctrl)
 
@@ -141,8 +141,10 @@ func (m *Rpc) uiClientConnected(pClient *protoClient) {
 	m.AddToChannel(&uiClientConnectedCmd{pClient: pClient})
 }
 
-func (m *Rpc) uiClientDisconnected() {
-	m.AddToChannel(&uiClientDisconnectedCmd{})
+func (m *Rpc) uiClientDisconnected(id uint32) {
+	m.AddToChannel(&uiClientDisconnectedCmd{
+		id: id,
+	})
 }
 
 // Interface functions

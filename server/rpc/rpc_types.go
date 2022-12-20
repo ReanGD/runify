@@ -15,15 +15,19 @@ type uiClientConnectedCmd struct {
 func (c *uiClientConnectedCmd) onRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "UIClientConnected"),
+		zap.Uint32("ClientID", c.pClient.id),
 		zap.String("Reason", reason),
 		zap.String("Action", "skip request"))
 }
 
-type uiClientDisconnectedCmd struct{}
+type uiClientDisconnectedCmd struct {
+	id uint32
+}
 
 func (c *uiClientDisconnectedCmd) onRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "UIClientDisconnected"),
+		zap.Uint32("ClientID", c.id),
 		zap.String("Reason", reason),
 		zap.String("Action", "skip request"))
 }
