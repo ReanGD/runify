@@ -8,7 +8,7 @@ import 'package:runify/system/settings.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
 import 'package:runify/navigator/navigator.dart';
 import 'package:runify/rpc/rpc_proto_client.dart';
-import 'package:runify/rpc/rpc_form_handler_storage.dart';
+import 'package:runify/rpc/rpc_service_storage.dart';
 
 class GrpcClient {
   final _outCh = StreamController<UIMessage>();
@@ -34,7 +34,7 @@ class GrpcClient {
 
   Future<void> start(RunifyNavigator navigator) async {
     try {
-      final storage = FormHandlerStorage(_outCh, navigator, _logger);
+      final storage = ServiceStorage(_outCh, navigator, _logger);
       final msg = await _callConnect(storage);
       // ignore: avoid_print
       print("gRPC call 'connect' ended. $msg. Stop runify UI.");
@@ -47,7 +47,7 @@ class GrpcClient {
     return navigator.closeWindow();
   }
 
-  Future<String> _callConnect(FormHandlerStorage storage) async {
+  Future<String> _callConnect(ServiceStorage storage) async {
     final stream = _grpcClient.connect(_outCh.stream);
     await for (var msg in stream) {
       switch (msg.whichPayload()) {

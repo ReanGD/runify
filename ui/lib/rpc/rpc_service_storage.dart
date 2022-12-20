@@ -8,27 +8,31 @@ import 'package:runify/rpc/rpc_proto_client.dart';
 import 'package:runify/rpc/rpc_root_list_service.dart';
 import 'package:runify/rpc/rpc_context_menu_service.dart';
 
-class FormHandlerStorage {
+class ServiceStorage {
   final _services = <int, Service>{};
 
   final Logger _logger;
   final RunifyNavigator _navigator;
   final StreamController<UIMessage> _outCh;
 
-  FormHandlerStorage(this._outCh, this._navigator, this._logger);
+  ServiceStorage(this._outCh, this._navigator, this._logger);
 
   Future<void> addRootListForm(int formID, RootListOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
-    final service = RLService(pClient, msg.rows);
+    final service = RLService(this, pClient, msg.rows);
     _services[formID] = service;
     await _navigator.openRootList(service);
   }
 
   Future<void> addContextMenu(int formID, ContextMenuOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
-    final service = CMService(pClient, _logger, msg.rows);
+    final service = CMService(this, pClient, _logger, msg.rows);
     _services[formID] = service;
     _navigator.openContexMenu(service);
+  }
+
+  void remove(int formID) {
+    _services.remove(formID);
   }
 
   Service getForHandle(int formID, String msgName) {
@@ -57,7 +61,7 @@ class FormHandlerStorage {
   }
 
   Future<void> onCloseForm(int formID) async {
-    // TODO: remove handler
+    remove(formID);
     _navigator.popForm(formID);
   }
 

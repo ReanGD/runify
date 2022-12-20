@@ -2,15 +2,18 @@ import 'package:runify/system/logger.dart';
 import 'package:runify/rpc/rpc_types.dart';
 import 'package:runify/global/cast_list.dart';
 import 'package:runify/rpc/rpc_proto_client.dart';
-import 'package:runify/global/context_menu_row.dart';
 import 'package:runify/pb/runify.pbgrpc.dart' as pb;
+import 'package:runify/global/context_menu_row.dart';
+import 'package:runify/rpc/rpc_service_storage.dart';
 
 class CMService implements Service {
   final Logger _logger;
   final ProtoClient _pClient;
+  final ServiceStorage _storage;
   late final ContextMenuRowFilter _filter;
 
-  CMService(this._pClient, this._logger, List<pb.ContextMenuRow> rows) {
+  CMService(this._storage, this._pClient, this._logger,
+      List<pb.ContextMenuRow> rows) {
     _filter = ContextMenuRowFilter();
     _filter.add(CastList(
         rows, (pb.ContextMenuRow row) => ContextMenuRow(row.rowID, row.value)));
@@ -48,7 +51,7 @@ class CMService implements Service {
   }
 
   void formClosed() {
-    // TODO: remove from storage
+    _storage.remove(formID);
     _pClient.formClosed();
   }
 }

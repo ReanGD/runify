@@ -3,6 +3,7 @@ import 'package:runify/global/cast_list.dart';
 import 'package:runify/rpc/rpc_proto_client.dart';
 import 'package:runify/global/root_list_row.dart';
 import 'package:runify/pb/runify.pbgrpc.dart' as pb;
+import 'package:runify/rpc/rpc_service_storage.dart';
 
 RootListRow castRootListRow(pb.RootListRow row) {
   return RootListRow(RootListRowID(row.providerID, row.rowID), row.priority,
@@ -11,9 +12,10 @@ RootListRow castRootListRow(pb.RootListRow row) {
 
 class RLService implements Service {
   final ProtoClient _pClient;
+  final ServiceStorage _storage;
   late final RootListRowFilter _filter;
 
-  RLService(this._pClient, List<pb.RootListRow> rows) {
+  RLService(this._storage, this._pClient, List<pb.RootListRow> rows) {
     _filter = RootListRowFilter();
     _filter.add(CastList(rows, castRootListRow));
     _filter.apply();
@@ -65,7 +67,7 @@ class RLService implements Service {
   }
 
   void formClosed() {
-    // TODO: remove from storage
+    _storage.remove(formID);
     _pClient.formClosed();
   }
 }
