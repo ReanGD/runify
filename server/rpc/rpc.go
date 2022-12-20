@@ -97,6 +97,8 @@ func (m *Rpc) safeRequestLoop(ctx context.Context, errCh <-chan error) (resultIs
 
 func (m *Rpc) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
+	case *serverStartedCmd:
+		m.handler.serverStarted()
 	case *uiClientConnectedCmd:
 		m.handler.uiClientConnected(r.pClient)
 	case *uiClientDisconnectedCmd:
@@ -117,6 +119,8 @@ func (m *Rpc) onRequest(request interface{}) (bool, error) {
 
 func (m *Rpc) onRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
+	case *serverStartedCmd:
+		r.onRequestDefault(m.ModuleLogger, reason)
 	case *uiClientConnectedCmd:
 		r.onRequestDefault(m.ModuleLogger, reason)
 	case *uiClientDisconnectedCmd:
@@ -137,6 +141,10 @@ func (m *Rpc) onRequestDefault(request interface{}, reason string) (bool, error)
 }
 
 // Inner functions
+func (m *Rpc) serverStarted() {
+	m.AddToChannel(&serverStartedCmd{})
+}
+
 func (m *Rpc) uiClientConnected(pClient *protoClient) {
 	m.AddToChannel(&uiClientConnectedCmd{pClient: pClient})
 }

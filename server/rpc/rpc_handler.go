@@ -25,6 +25,7 @@ type rpcHandler struct {
 	runifyServer *runifyServer
 	pClient      *protoClient
 	waitCtrl     api.RootListCtrl
+	rpc          *Rpc
 
 	moduleLogger *zap.Logger
 }
@@ -38,12 +39,15 @@ func newRpcHandler() *rpcHandler {
 		runifyServer: nil,
 		moduleLogger: nil,
 		pClient:      nil,
+		waitCtrl:     nil,
+		rpc:          nil,
 	}
 }
 
 func (h *rpcHandler) onInit(cfg *config.Configuration, rpc *Rpc, uiLogger *zap.Logger, moduleLogger *zap.Logger) error {
 	h.moduleLogger = moduleLogger
 	h.uiBinaryPath = cfg.System.UIBinaryPath
+	h.rpc = rpc
 
 	var err error
 	h.unixAddr = cfg.System.RpcAddress
@@ -80,6 +84,7 @@ func (h *rpcHandler) onStart(ctx context.Context, wg *sync.WaitGroup) <-chan err
 		}
 
 		pb.RegisterRunifyServer(h.grpcServer, h.runifyServer)
+		h.rpc.serverStarted()
 		if err = h.grpcServer.Serve(lis); err != nil {
 			h.moduleLogger.Error("Grpc server finished with error", zap.String("address", h.unixAddr), zap.Error(err))
 		} else {
@@ -120,6 +125,26 @@ func (h *rpcHandler) onStop() {
 	}
 }
 
+func (h *rpcHandler) startUI() {
+	cmd := exec.Command(h.uiBinaryPath)
+	if err := cmd.Start(); err != nil {
+		h.waitCtrl = nil
+		h.moduleLogger.Error("Failed start runify UI process", zap.String("binary", h.uiBinaryPath), zap.Error(err))
+		return
+	}
+
+	h.moduleLogger.Debug("Runify UI process started", zap.String("binary", h.uiBinaryPath))
+	go cmd.Wait()
+}
+
+func (h *rpcHandler) serverStarted() {
+	h.moduleLogger.Info("Runify server started")
+
+	if h.pClient == nil {
+		h.startUI()
+	}
+}
+
 func (h *rpcHandler) uiClientConnected(pClient *protoClient) {
 	if h.pClient != nil {
 		h.pClient.CloseUI()
@@ -145,13 +170,5 @@ func (h *rpcHandler) openRootList(ctrl api.RootListCtrl) {
 	}
 
 	h.waitCtrl = ctrl
-	cmd := exec.Command(h.uiBinaryPath)
-	if err := cmd.Start(); err != nil {
-		h.waitCtrl = nil
-		h.moduleLogger.Error("Failed start runify UI process", zap.String("binary", h.uiBinaryPath), zap.Error(err))
-		return
-	}
-
-	h.moduleLogger.Debug("Runify UI process started", zap.String("binary", h.uiBinaryPath))
-	go cmd.Wait()
+	h.startUI()
 }

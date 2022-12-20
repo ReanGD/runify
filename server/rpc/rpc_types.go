@@ -8,6 +8,15 @@ import (
 	"go.uber.org/zap"
 )
 
+type serverStartedCmd struct{}
+
+func (c *serverStartedCmd) onRequestDefault(logger *zap.Logger, reason string) {
+	logger.Warn("Process message finished with error",
+		zap.String("Request", "ServerStarted"),
+		zap.String("Reason", reason),
+		zap.String("Action", "skip request"))
+}
+
 type uiClientConnectedCmd struct {
 	pClient *protoClient
 }
