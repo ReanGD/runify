@@ -6,16 +6,16 @@ import (
 )
 
 type protoClient struct {
-	id    uint32
-	outCh chan<- *pb.SrvMessage
-	forms *formStorage
+	id      uint32
+	outCh   chan<- *pb.SrvMessage
+	storage *formStorage
 }
 
-func newProtoClient(id uint32, outCh chan<- *pb.SrvMessage, forms *formStorage) *protoClient {
+func newProtoClient(id uint32, outCh chan<- *pb.SrvMessage, storage *formStorage) *protoClient {
 	return &protoClient{
-		id:    id,
-		outCh: outCh,
-		forms: forms,
+		id:      id,
+		outCh:   outCh,
+		storage: storage,
 	}
 }
 
@@ -47,7 +47,7 @@ func (c *protoClient) contextMenuRowsToProtobuf(rows []*api.ContextMenuRow) []*p
 }
 
 func (c *protoClient) AddRootList(ctrl api.RootListCtrl) {
-	formID := c.forms.addRootList(ctrl)
+	formID := c.storage.addRootList(ctrl)
 	rows := ctrl.OnOpen(formID, c)
 	c.outCh <- &pb.SrvMessage{
 		FormID: uint32(formID),
@@ -60,7 +60,7 @@ func (c *protoClient) AddRootList(ctrl api.RootListCtrl) {
 }
 
 func (c *protoClient) RootListAddRows(formID api.FormID, rows ...*api.RootListRow) {
-	if !c.forms.isExists(formID) {
+	if !c.storage.isExists(formID) {
 		return
 	}
 
@@ -75,7 +75,7 @@ func (c *protoClient) RootListAddRows(formID api.FormID, rows ...*api.RootListRo
 }
 
 func (c *protoClient) RootListChangeRows(formID api.FormID, rows ...*api.RootListRow) {
-	if !c.forms.isExists(formID) {
+	if !c.storage.isExists(formID) {
 		return
 	}
 
@@ -90,7 +90,7 @@ func (c *protoClient) RootListChangeRows(formID api.FormID, rows ...*api.RootLis
 }
 
 func (c *protoClient) RootListRemoveRows(formID api.FormID, rows ...api.RootListRowGlobalID) {
-	if !c.forms.isExists(formID) {
+	if !c.storage.isExists(formID) {
 		return
 	}
 
@@ -105,7 +105,7 @@ func (c *protoClient) RootListRemoveRows(formID api.FormID, rows ...api.RootList
 }
 
 func (c *protoClient) AddContextMenu(ctrl api.ContextMenuCtrl) {
-	formID := c.forms.addContextMenu(ctrl)
+	formID := c.storage.addContextMenu(ctrl)
 	rows := ctrl.OnOpen(formID, c)
 	c.outCh <- &pb.SrvMessage{
 		FormID: uint32(formID),
@@ -130,7 +130,7 @@ func (c *protoClient) UserMessage(text string) {
 }
 
 func (c *protoClient) CloseForm(formID api.FormID) {
-	if !c.forms.remove(formID) {
+	if !c.storage.remove(formID) {
 		return
 	}
 
@@ -143,7 +143,7 @@ func (c *protoClient) CloseForm(formID api.FormID) {
 }
 
 func (c *protoClient) HideUI(msg error) {
-	c.forms.removeAll()
+	c.storage.removeAll()
 
 	var pbMsg *pb.UserMessage
 	if msg != nil {
@@ -164,7 +164,7 @@ func (c *protoClient) HideUI(msg error) {
 }
 
 func (c *protoClient) CloseUI() {
-	c.forms.removeAll()
+	c.storage.removeAll()
 
 	c.outCh <- &pb.SrvMessage{
 		FormID: 0,

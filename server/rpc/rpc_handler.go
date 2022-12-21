@@ -138,8 +138,6 @@ func (h *rpcHandler) startUI() {
 }
 
 func (h *rpcHandler) serverStarted() {
-	h.moduleLogger.Info("Runify server started")
-
 	if h.pClient == nil {
 		h.startUI()
 	}

@@ -67,7 +67,8 @@ class RLService implements Service {
   }
 
   void formClosed() {
-    _storage.remove(formID);
-    _pClient.formClosed();
+    if (_storage.remove(formID)) {
+      _pClient.formClosed();
+    }
   }
 }

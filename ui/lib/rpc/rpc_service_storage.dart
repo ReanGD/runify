@@ -31,8 +31,8 @@ class ServiceStorage {
     _navigator.openContexMenu(service);
   }
 
-  void remove(int formID) {
-    _services.remove(formID);
+  bool remove(int formID) {
+    return _services.remove(formID) != null;
   }
 
   Service getForHandle(int formID, String msgName) {
@@ -61,8 +61,9 @@ class ServiceStorage {
   }
 
   Future<void> onCloseForm(int formID) async {
-    remove(formID);
-    _navigator.popForm(formID);
+    if (remove(formID)) {
+      _navigator.popForm(formID);
+    }
   }
 
   Future<void> onHideUI(HideUI msg) async {
