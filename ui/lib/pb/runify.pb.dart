@@ -184,16 +184,18 @@ class RootListRowGlobalID extends $pb.GeneratedMessage {
 
 class RootListRow extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RootListRow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'providerID', $pb.PbFieldType.OU3, protoName: 'providerID')
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
-    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'priority', $pb.PbFieldType.OU3)
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'icon')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'value')
+    ..e<RootListRowType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowType', $pb.PbFieldType.OE, protoName: 'rowType', defaultOrMaker: RootListRowType.TYPE_CALC, valueOf: RootListRowType.valueOf, enumValues: RootListRowType.values)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'providerID', $pb.PbFieldType.OU3, protoName: 'providerID')
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'priority', $pb.PbFieldType.OU3)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'icon')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'value')
     ..hasRequiredFields = false
   ;
 
   RootListRow._() : super();
   factory RootListRow({
+    RootListRowType? rowType,
     $core.int? providerID,
     $core.int? rowID,
     $core.int? priority,
@@ -201,6 +203,9 @@ class RootListRow extends $pb.GeneratedMessage {
     $core.String? value,
   }) {
     final _result = create();
+    if (rowType != null) {
+      _result.rowType = rowType;
+    }
     if (providerID != null) {
       _result.providerID = providerID;
     }
@@ -240,49 +245,58 @@ class RootListRow extends $pb.GeneratedMessage {
   static RootListRow? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get providerID => $_getIZ(0);
+  RootListRowType get rowType => $_getN(0);
   @$pb.TagNumber(1)
-  set providerID($core.int v) { $_setUnsignedInt32(0, v); }
+  set rowType(RootListRowType v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasProviderID() => $_has(0);
+  $core.bool hasRowType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearProviderID() => clearField(1);
+  void clearRowType() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.int get rowID => $_getIZ(1);
+  $core.int get providerID => $_getIZ(1);
   @$pb.TagNumber(2)
-  set rowID($core.int v) { $_setUnsignedInt32(1, v); }
+  set providerID($core.int v) { $_setUnsignedInt32(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasRowID() => $_has(1);
+  $core.bool hasProviderID() => $_has(1);
   @$pb.TagNumber(2)
-  void clearRowID() => clearField(2);
+  void clearProviderID() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.int get priority => $_getIZ(2);
+  $core.int get rowID => $_getIZ(2);
   @$pb.TagNumber(3)
-  set priority($core.int v) { $_setUnsignedInt32(2, v); }
+  set rowID($core.int v) { $_setUnsignedInt32(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasPriority() => $_has(2);
+  $core.bool hasRowID() => $_has(2);
   @$pb.TagNumber(3)
-  void clearPriority() => clearField(3);
+  void clearRowID() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.String get icon => $_getSZ(3);
+  $core.int get priority => $_getIZ(3);
   @$pb.TagNumber(4)
-  set icon($core.String v) { $_setString(3, v); }
+  set priority($core.int v) { $_setUnsignedInt32(3, v); }
   @$pb.TagNumber(4)
-  $core.bool hasIcon() => $_has(3);
+  $core.bool hasPriority() => $_has(3);
   @$pb.TagNumber(4)
-  void clearIcon() => clearField(4);
+  void clearPriority() => clearField(4);
 
   @$pb.TagNumber(5)
-  $core.String get value => $_getSZ(4);
+  $core.String get icon => $_getSZ(4);
   @$pb.TagNumber(5)
-  set value($core.String v) { $_setString(4, v); }
+  set icon($core.String v) { $_setString(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasValue() => $_has(4);
+  $core.bool hasIcon() => $_has(4);
   @$pb.TagNumber(5)
-  void clearValue() => clearField(5);
+  void clearIcon() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get value => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set value($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasValue() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearValue() => clearField(6);
 }
 
 class RootListOpen extends $pb.GeneratedMessage {

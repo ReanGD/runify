@@ -21,6 +21,18 @@ const LogLevel$json = const {
 
 /// Descriptor for `LogLevel`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List logLevelDescriptor = $convert.base64Decode('CghMb2dMZXZlbBIJCgVERUJVRxAAEggKBElORk8QARILCgdXQVJOSU5HEAISCQoFRVJST1IQAw==');
+@$core.Deprecated('Use rootListRowTypeDescriptor instead')
+const RootListRowType$json = const {
+  '1': 'RootListRowType',
+  '2': const [
+    const {'1': 'TYPE_CALC', '2': 0},
+    const {'1': 'TYPE_APP', '2': 1},
+    const {'1': 'TYPE_OTHER', '2': 2},
+  ],
+};
+
+/// Descriptor for `RootListRowType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List rootListRowTypeDescriptor = $convert.base64Decode('Cg9Sb290TGlzdFJvd1R5cGUSDQoJVFlQRV9DQUxDEAASDAoIVFlQRV9BUFAQARIOCgpUWVBFX09USEVSEAI=');
 @$core.Deprecated('Use messageTypeDescriptor instead')
 const MessageType$json = const {
   '1': 'MessageType',
@@ -67,16 +79,17 @@ final $typed_data.Uint8List rootListRowGlobalIDDescriptor = $convert.base64Decod
 const RootListRow$json = const {
   '1': 'RootListRow',
   '2': const [
-    const {'1': 'providerID', '3': 1, '4': 1, '5': 13, '10': 'providerID'},
-    const {'1': 'rowID', '3': 2, '4': 1, '5': 13, '10': 'rowID'},
-    const {'1': 'priority', '3': 3, '4': 1, '5': 13, '10': 'priority'},
-    const {'1': 'icon', '3': 4, '4': 1, '5': 9, '10': 'icon'},
-    const {'1': 'value', '3': 5, '4': 1, '5': 9, '10': 'value'},
+    const {'1': 'rowType', '3': 1, '4': 1, '5': 14, '6': '.runify.RootListRowType', '10': 'rowType'},
+    const {'1': 'providerID', '3': 2, '4': 1, '5': 13, '10': 'providerID'},
+    const {'1': 'rowID', '3': 3, '4': 1, '5': 13, '10': 'rowID'},
+    const {'1': 'priority', '3': 4, '4': 1, '5': 13, '10': 'priority'},
+    const {'1': 'icon', '3': 5, '4': 1, '5': 9, '10': 'icon'},
+    const {'1': 'value', '3': 6, '4': 1, '5': 9, '10': 'value'},
   ],
 };
 
 /// Descriptor for `RootListRow`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List rootListRowDescriptor = $convert.base64Decode('CgtSb290TGlzdFJvdxIeCgpwcm92aWRlcklEGAEgASgNUgpwcm92aWRlcklEEhQKBXJvd0lEGAIgASgNUgVyb3dJRBIaCghwcmlvcml0eRgDIAEoDVIIcHJpb3JpdHkSEgoEaWNvbhgEIAEoCVIEaWNvbhIUCgV2YWx1ZRgFIAEoCVIFdmFsdWU=');
+final $typed_data.Uint8List rootListRowDescriptor = $convert.base64Decode('CgtSb290TGlzdFJvdxIxCgdyb3dUeXBlGAEgASgOMhcucnVuaWZ5LlJvb3RMaXN0Um93VHlwZVIHcm93VHlwZRIeCgpwcm92aWRlcklEGAIgASgNUgpwcm92aWRlcklEEhQKBXJvd0lEGAMgASgNUgVyb3dJRBIaCghwcmlvcml0eRgEIAEoDVIIcHJpb3JpdHkSEgoEaWNvbhgFIAEoCVIEaWNvbhIUCgV2YWx1ZRgGIAEoCVIFdmFsdWU=');
 @$core.Deprecated('Use rootListOpenDescriptor instead')
 const RootListOpen$json = const {
   '1': 'RootListOpen',

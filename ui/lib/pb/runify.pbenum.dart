@@ -28,6 +28,23 @@ class LogLevel extends $pb.ProtobufEnum {
   const LogLevel._($core.int v, $core.String n) : super(v, n);
 }
 
+class RootListRowType extends $pb.ProtobufEnum {
+  static const RootListRowType TYPE_CALC = RootListRowType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_CALC');
+  static const RootListRowType TYPE_APP = RootListRowType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_APP');
+  static const RootListRowType TYPE_OTHER = RootListRowType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_OTHER');
+
+  static const $core.List<RootListRowType> values = <RootListRowType> [
+    TYPE_CALC,
+    TYPE_APP,
+    TYPE_OTHER,
+  ];
+
+  static final $core.Map<$core.int, RootListRowType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static RootListRowType? valueOf($core.int value) => _byValue[value];
+
+  const RootListRowType._($core.int v, $core.String n) : super(v, n);
+}
+
 class MessageType extends $pb.ProtobufEnum {
   static const MessageType TYPE_ERROR = MessageType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_ERROR');
 

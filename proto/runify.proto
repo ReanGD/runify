@@ -25,12 +25,19 @@ message RootListRowGlobalID {
 	uint32 rowID = 2;
 }
 
+enum RootListRowType {
+	TYPE_CALC = 0;	// calcualtor, filter disabled
+	TYPE_APP = 1;	// application, filter enabled
+	TYPE_OTHER = 2;	// other, filter enabled
+}
+
 message RootListRow {
-	uint32 providerID = 1;
-	uint32 rowID = 2;
-	uint32 priority = 3;
-	string icon = 4;
-	string value = 5;
+	RootListRowType rowType = 1;
+	uint32 providerID = 2;
+	uint32 rowID = 3;
+	uint32 priority = 4;
+	string icon = 5;
+	string value = 6;
 }
 
 message RootListOpen {
