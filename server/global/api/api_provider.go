@@ -47,7 +47,48 @@ func (id ContextMenuRowID) ZapFieldPrefix(prefix string) zap.Field {
 	return zap.Uint32(prefix+"ContextMenuRowID", uint32(id))
 }
 
-const MaxPriority uint16 = 0xFFFF
+const (
+	RowType_Calculator  RowType = 0
+	RowType_Application RowType = 1
+	RowType_Unknown     RowType = 2
+)
+
+type RowType int16
+
+func (t RowType) ToProtobuf() pb.RootListRowType {
+	switch t {
+	case RowType_Calculator:
+		return pb.RootListRowType_CALCULATOR
+	case RowType_Application:
+		return pb.RootListRowType_APPLICATION
+	default:
+		return pb.RootListRowType_UNKNOWN
+	}
+}
+
+func (t RowType) String() string {
+	switch t {
+	case RowType_Calculator:
+		return "Calculator"
+	case RowType_Application:
+		return "Application"
+	default:
+		return "Unknown"
+	}
+}
+
+func (t RowType) ZapField() zap.Field {
+	return zap.String("RowType", t.String())
+}
+
+func (t RowType) ZapFieldPrefix(prefix string) zap.Field {
+	return zap.String(prefix+"RowType", t.String())
+}
+
+const (
+	MinPriority uint16 = 0
+	MaxPriority uint16 = 0xFFFF
+)
 
 type RootListRowGlobalID struct {
 	ProviderID ProviderID
@@ -69,30 +110,35 @@ func (r *RootListRowGlobalID) ToProtobuf() *pb.RootListRowGlobalID {
 }
 
 type RootListRow struct {
+	rowType    RowType
+	Priority   uint16
 	ProviderID ProviderID
 	ID         RootListRowID
 	Icon       string
 	Value      string
-	Priority   uint16
 }
 
-func NewRootListRow(providerID ProviderID, id RootListRowID, icon string, value string, priority uint16) *RootListRow {
+func NewRootListRow(
+	rowType RowType, priority uint16, providerID ProviderID, id RootListRowID, icon string, value string,
+) *RootListRow {
 	return &RootListRow{
+		rowType:    rowType,
+		Priority:   priority,
 		ProviderID: providerID,
 		ID:         id,
 		Icon:       icon,
 		Value:      value,
-		Priority:   priority,
 	}
 }
 
 func (r *RootListRow) ToProtobuf() *pb.RootListRow {
 	return &pb.RootListRow{
+		RowType:    r.rowType.ToProtobuf(),
 		ProviderID: uint32(r.ProviderID),
 		RowID:      uint32(r.ID),
+		Priority:   uint32(r.Priority),
 		Icon:       r.Icon,
 		Value:      r.Value,
-		Priority:   uint32(r.Priority),
 	}
 }
 

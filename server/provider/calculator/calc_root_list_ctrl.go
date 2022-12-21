@@ -11,7 +11,7 @@ const rootRowID = api.RootListRowID(1)
 
 type CalcRootListCtrl struct {
 	visible        bool
-	actualValue    string
+	lastResult     string
 	formID         api.FormID
 	providerID     api.ProviderID
 	executer       *Executer
@@ -23,7 +23,7 @@ type CalcRootListCtrl struct {
 func newCalcRootListCtrl(providerID api.ProviderID, actionExecuter *calcActionExecuter, moduleLogger *zap.Logger) *CalcRootListCtrl {
 	return &CalcRootListCtrl{
 		visible:        false,
-		actualValue:    "",
+		lastResult:     "",
 		formID:         0,
 		providerID:     providerID,
 		executer:       NewExecuter(),
@@ -46,17 +46,17 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 			c.client.RootListRemoveRows(c.formID, api.NewRootListRowGlobalID(c.providerID, rootRowID))
 		}
 		c.visible = false
-		c.actualValue = ""
+		c.lastResult = ""
 		return
 	}
 
-	value := calcResult.Value.Value()
-	strValue := value.String()
-	if strValue == c.actualValue {
+	result := calcResult.Value.Value()
+	actualResult := result.String()
+	if actualResult == c.lastResult {
 		return
 	}
 
-	row := api.NewRootListRow(c.providerID, rootRowID, "", "|"+text+" = "+strValue, api.MaxPriority)
+	row := api.NewRootListRow(api.RowType_Calculator, api.MaxPriority, c.providerID, rootRowID, "", text+"\n"+actualResult)
 	if c.visible {
 		c.client.RootListChangeRows(c.formID, row)
 	} else {
@@ -64,11 +64,11 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 	}
 
 	c.visible = true
-	c.actualValue = strValue
+	c.lastResult = actualResult
 }
 
 func (c *CalcRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID) {
-	c.actionExecuter.copyResult(c.client, c.actualValue)
+	c.actionExecuter.copyResult(c.client, c.lastResult)
 }
 
 func (c *CalcRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID) {
@@ -81,7 +81,7 @@ func (c *CalcRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.R
 
 		c.client.HideUI(err)
 	} else {
-		menuCtrl := newCalcContextMenuCtrl(c.actualValue, c.actionExecuter, c.moduleLogger)
+		menuCtrl := newCalcContextMenuCtrl(c.lastResult, c.actionExecuter, c.moduleLogger)
 		c.client.AddContextMenu(menuCtrl)
 	}
 }

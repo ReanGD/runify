@@ -67,7 +67,8 @@ func (m *deModel) update() {
 			props: props,
 		}
 
-		dataCache = append(dataCache, api.NewRootListRow(m.providerID, id, props.Icon, props.Name, 0))
+		dataCache = append(dataCache, api.NewRootListRow(
+			api.RowType_Application, api.MinPriority, m.providerID, id, props.Icon, props.Name))
 	})
 
 	m.dataMutex.Lock()
