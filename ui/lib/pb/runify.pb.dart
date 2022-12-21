@@ -184,7 +184,7 @@ class RootListRowGlobalID extends $pb.GeneratedMessage {
 
 class RootListRow extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RootListRow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..e<RootListRowType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowType', $pb.PbFieldType.OE, protoName: 'rowType', defaultOrMaker: RootListRowType.TYPE_CALC, valueOf: RootListRowType.valueOf, enumValues: RootListRowType.values)
+    ..e<RootListRowType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowType', $pb.PbFieldType.OE, protoName: 'rowType', defaultOrMaker: RootListRowType.CALCULATOR, valueOf: RootListRowType.valueOf, enumValues: RootListRowType.values)
     ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'providerID', $pb.PbFieldType.OU3, protoName: 'providerID')
     ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'priority', $pb.PbFieldType.OU3)

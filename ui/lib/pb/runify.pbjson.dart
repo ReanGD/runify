@@ -25,14 +25,14 @@ final $typed_data.Uint8List logLevelDescriptor = $convert.base64Decode('CghMb2dM
 const RootListRowType$json = const {
   '1': 'RootListRowType',
   '2': const [
-    const {'1': 'TYPE_CALC', '2': 0},
-    const {'1': 'TYPE_APP', '2': 1},
-    const {'1': 'TYPE_OTHER', '2': 2},
+    const {'1': 'CALCULATOR', '2': 0},
+    const {'1': 'APPLICATION', '2': 1},
+    const {'1': 'UNKNOWN', '2': 2},
   ],
 };
 
 /// Descriptor for `RootListRowType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List rootListRowTypeDescriptor = $convert.base64Decode('Cg9Sb290TGlzdFJvd1R5cGUSDQoJVFlQRV9DQUxDEAASDAoIVFlQRV9BUFAQARIOCgpUWVBFX09USEVSEAI=');
+final $typed_data.Uint8List rootListRowTypeDescriptor = $convert.base64Decode('Cg9Sb290TGlzdFJvd1R5cGUSDgoKQ0FMQ1VMQVRPUhAAEg8KC0FQUExJQ0FUSU9OEAESCwoHVU5LTk9XThAC');
 @$core.Deprecated('Use messageTypeDescriptor instead')
 const MessageType$json = const {
   '1': 'MessageType',

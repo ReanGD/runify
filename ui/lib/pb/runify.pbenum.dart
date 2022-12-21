@@ -29,14 +29,14 @@ class LogLevel extends $pb.ProtobufEnum {
 }
 
 class RootListRowType extends $pb.ProtobufEnum {
-  static const RootListRowType TYPE_CALC = RootListRowType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_CALC');
-  static const RootListRowType TYPE_APP = RootListRowType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_APP');
-  static const RootListRowType TYPE_OTHER = RootListRowType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_OTHER');
+  static const RootListRowType CALCULATOR = RootListRowType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CALCULATOR');
+  static const RootListRowType APPLICATION = RootListRowType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'APPLICATION');
+  static const RootListRowType UNKNOWN = RootListRowType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'UNKNOWN');
 
   static const $core.List<RootListRowType> values = <RootListRowType> [
-    TYPE_CALC,
-    TYPE_APP,
-    TYPE_OTHER,
+    CALCULATOR,
+    APPLICATION,
+    UNKNOWN,
   ];
 
   static final $core.Map<$core.int, RootListRowType> _byValue = $pb.ProtobufEnum.initByValue(values);

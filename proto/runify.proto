@@ -26,9 +26,9 @@ message RootListRowGlobalID {
 }
 
 enum RootListRowType {
-	TYPE_CALC = 0;	// calcualtor, filter disabled
-	TYPE_APP = 1;	// application, filter enabled
-	TYPE_OTHER = 2;	// other, filter enabled
+	CALCULATOR = 0;		// filter disabled
+	APPLICATION = 1;	// filter enabled
+	UNKNOWN = 2;		// filter enabled
 }
 
 message RootListRow {
