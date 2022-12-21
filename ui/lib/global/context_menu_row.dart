@@ -2,21 +2,21 @@ import 'package:runify/global/data_filter.dart';
 
 class ContextMenuRow implements Matcher<int> {
   final int id;
-  final String name;
+  final String value;
 
-  ContextMenuRow(this.id, this.name);
+  ContextMenuRow(this.id, this.value);
 
   @override
   int get key => id;
 
   @override
   bool match(RegExp rexp) {
-    return rexp.hasMatch(name);
+    return rexp.hasMatch(value);
   }
 }
 
 int contextMenuRowComparator(ContextMenuRow a, ContextMenuRow b) {
-  return a.name.compareTo(b.name);
+  return a.value.compareTo(b.value);
 }
 
 typedef ContextMenuRowFilter = DataFilter<int, ContextMenuRow>;

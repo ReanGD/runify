@@ -6,8 +6,25 @@ import 'package:runify/pb/runify.pbgrpc.dart' as pb;
 import 'package:runify/rpc/rpc_service_storage.dart';
 
 RootListRow castRootListRow(pb.RootListRow row) {
-  return RootListRow(RootListRowID(row.providerID, row.rowID), row.priority,
-      row.value, "Application", row.icon);
+  RootListRowType rowType;
+  switch (row.rowType) {
+    case pb.RootListRowType.CALCULATOR:
+      rowType = RootListRowType.calculator;
+      break;
+    case pb.RootListRowType.APPLICATION:
+      rowType = RootListRowType.application;
+      break;
+    default:
+      rowType = RootListRowType.unknown;
+  }
+
+  return RootListRow(
+    RootListRowID(row.providerID, row.rowID),
+    rowType,
+    row.priority,
+    row.value,
+    row.icon,
+  );
 }
 
 class RLService implements Service {

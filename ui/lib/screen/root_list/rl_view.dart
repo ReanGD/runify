@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:runify/text.dart';
 import 'package:runify/style.dart';
 import 'package:runify/widgets/hdivider.dart';
-import 'package:runify/widgets/command_card.dart';
 import 'package:runify/widgets/search_field.dart';
+import 'package:runify/widgets/data_list_row.dart';
 import 'package:runify/widgets/data_list_view.dart';
 import 'package:runify/screen/root_list/rl_controller.dart';
 
@@ -48,14 +48,7 @@ class RLView extends StatelessWidget {
             onDataItemEvent: (DataItemEvent event, int id) {
               controller.onListItemEvent(event, filter[id]);
             },
-            itemBuilder: (context, int id) {
-              final item = filter[id];
-              return CommandCard(
-                name: item.name,
-                category: item.category,
-                icon: item.icon,
-              );
-            },
+            itemBuilder: (context, int id) => RootListRowWidget(filter[id]),
           ),
         ),
       ],
