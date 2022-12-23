@@ -1,12 +1,12 @@
-package calculator
+package interpreter
 
 import (
 	"fmt"
 
 	"github.com/ReanGD/runify/server/global"
-	"github.com/ReanGD/runify/server/provider/calculator/ast"
-	"github.com/ReanGD/runify/server/provider/calculator/gocc/lexer"
-	"github.com/ReanGD/runify/server/provider/calculator/gocc/parser"
+	"github.com/ReanGD/runify/server/interpreter/ast"
+	"github.com/ReanGD/runify/server/interpreter/gocc/lexer"
+	"github.com/ReanGD/runify/server/interpreter/gocc/parser"
 	"github.com/cockroachdb/apd/v3"
 )
 
@@ -45,39 +45,39 @@ func (r *Result) UserResult() string {
 	return r.CalcErrCode.String()
 }
 
-type Executer struct {
+type Interpreter struct {
 	ctx    *ast.AstContext
 	parser *parser.Parser
 }
 
-func NewExecuter() *Executer {
+func New() *Interpreter {
 	ctx := ast.NewDefaultAstContext()
 	parser := parser.NewParser()
 	parser.Context = ctx
-	return &Executer{
+	return &Interpreter{
 		parser: parser,
 		ctx:    ctx,
 	}
 }
 
-func NewExecuterWithCtx(ctx *ast.AstContext) *Executer {
+func NewWithCtx(ctx *ast.AstContext) *Interpreter {
 	parser := parser.NewParser()
 	parser.Context = ctx
-	return &Executer{
+	return &Interpreter{
 		parser: parser,
 		ctx:    ctx,
 	}
 }
 
-func (e *Executer) GetApdContext() apd.Context {
-	return e.ctx.GetApdContext()
+func (i *Interpreter) GetApdContext() apd.Context {
+	return i.ctx.GetApdContext()
 }
 
-func (e *Executer) Execute(expression string) *Result {
-	e.ctx.Reset()
+func (i *Interpreter) Execute(expression string) *Result {
+	i.ctx.Reset()
 	lexer := lexer.NewLexer([]byte(expression))
-	parserRes, parserErr := e.parser.Parse(lexer)
-	condition, calcErrCode := e.ctx.Error()
+	parserRes, parserErr := i.parser.Parse(lexer)
+	condition, calcErrCode := i.ctx.Error()
 	var value apd.Decimal
 	if parserErr == nil && condition == 0 {
 		if astValue, ok := parserRes.(*ast.Value); ok {

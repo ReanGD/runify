@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	"github.com/ReanGD/runify/server/global/api"
+	"github.com/ReanGD/runify/server/interpreter"
+
 	"go.uber.org/zap"
 )
 
@@ -14,7 +16,7 @@ type CalcRootListCtrl struct {
 	lastResult     string
 	formID         api.FormID
 	providerID     api.ProviderID
-	executer       *Executer
+	interpreter    *interpreter.Interpreter
 	actionExecuter *calcActionExecuter
 	client         api.RpcClient
 	moduleLogger   *zap.Logger
@@ -26,7 +28,7 @@ func newCalcRootListCtrl(providerID api.ProviderID, actionExecuter *calcActionEx
 		lastResult:     "",
 		formID:         0,
 		providerID:     providerID,
-		executer:       NewExecuter(),
+		interpreter:    interpreter.New(),
 		actionExecuter: actionExecuter,
 		client:         nil,
 		moduleLogger:   moduleLogger,
@@ -40,8 +42,8 @@ func (c *CalcRootListCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*ap
 }
 
 func (c *CalcRootListCtrl) OnFilterChange(text string) {
-	calcResult := c.executer.Execute(text)
-	if !calcResult.IsExprValid() {
+	res := c.interpreter.Execute(text)
+	if !res.IsExprValid() {
 		if c.visible {
 			c.client.RootListRemoveRows(c.formID, api.NewRootListRowGlobalID(c.providerID, rootRowID))
 		}
@@ -50,7 +52,7 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		return
 	}
 
-	userResult := calcResult.UserResult()
+	userResult := res.UserResult()
 	if userResult == c.lastResult {
 		return
 	}

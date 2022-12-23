@@ -3,7 +3,7 @@ package ast
 import (
 	"fmt"
 
-	"github.com/ReanGD/runify/server/provider/calculator/gocc/token"
+	"github.com/ReanGD/runify/server/interpreter/gocc/token"
 	"github.com/cockroachdb/apd/v3"
 )
 

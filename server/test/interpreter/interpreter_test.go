@@ -1,35 +1,35 @@
-package calculator_test
+package interpreter_test
 
 import (
 	"strings"
 	"testing"
 
 	"github.com/ReanGD/runify/server/global"
-	"github.com/ReanGD/runify/server/provider/calculator"
+	"github.com/ReanGD/runify/server/interpreter"
 	"github.com/cockroachdb/apd/v3"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
 type CalcSuite struct {
-	executer *calculator.Executer
+	interpreter *interpreter.Interpreter
 
 	suite.Suite
 }
 
 func (s *CalcSuite) SetupSuite() {
-	s.executer = calculator.NewExecuter()
+	s.interpreter = interpreter.New()
 }
 
 func (s *CalcSuite) TearDownSuite() {
-	s.executer = nil
+	s.interpreter = nil
 }
 
 func (s *CalcSuite) runTest(expression string, expectedValue apd.Decimal, expectedCondition apd.Condition) {
 	testName := strings.ReplaceAll(expression, " ", "")
-	executer := s.executer
+	interp := s.interpreter
 	s.T().Run(testName, func(t *testing.T) {
-		actualRes := executer.Execute(expression)
+		actualRes := interp.Execute(expression)
 		require.Equal(t, expectedCondition, actualRes.Condition, expression)
 		require.True(t, actualRes.IsExprValid())
 		require.NoError(t, actualRes.ParserErr, expression)
@@ -46,7 +46,7 @@ func (s *CalcSuite) runTest(expression string, expectedValue apd.Decimal, expect
 
 func (s *CalcSuite) runTestsFromArr(data []testDataStr) {
 	t := s.T()
-	dctx := s.executer.GetApdContext()
+	dctx := s.interpreter.GetApdContext()
 	for _, item := range data {
 		expression := item.expression
 		expectedValue, _, err := dctx.NewFromString(item.result)
@@ -57,7 +57,7 @@ func (s *CalcSuite) runTestsFromArr(data []testDataStr) {
 
 func (s *CalcSuite) TestGenerated() {
 	timer := global.NewTimer()
-	gen := newTestDataGenerator(int64(timer), s.executer.GetApdContext())
+	gen := newTestDataGenerator(int64(timer), s.interpreter.GetApdContext())
 	for i := 0; i != 30_000; i++ {
 		s.runTest(gen.next())
 	}
@@ -111,23 +111,23 @@ func (s *CalcSuite) TestPriority() {
 }
 
 func (s *CalcSuite) TestError() {
-	res := s.executer.Execute("1 + qwe")
+	res := s.interpreter.Execute("1 + qwe")
 	s.False(res.IsExprValid())
 	s.False(res.IsValueValid())
 
-	res = s.executer.Execute("1 +")
+	res = s.interpreter.Execute("1 +")
 	s.False(res.IsExprValid())
 	s.False(res.IsValueValid())
 
-	res = s.executer.Execute("1.2.3")
+	res = s.interpreter.Execute("1.2.3")
 	s.False(res.IsExprValid())
 	s.False(res.IsValueValid())
 
-	res = s.executer.Execute("1/0q")
+	res = s.interpreter.Execute("1/0q")
 	s.False(res.IsExprValid())
 	s.False(res.IsValueValid())
 
-	res = s.executer.Execute("1/0")
+	res = s.interpreter.Execute("1/0")
 	s.True(res.IsExprValid())
 	s.False(res.IsValueValid())
 }

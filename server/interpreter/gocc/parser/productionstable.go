@@ -3,7 +3,7 @@
 package parser
 
 import (
-	"github.com/ReanGD/runify/server/provider/calculator/ast"
+	"github.com/ReanGD/runify/server/interpreter/ast"
 )
 
 type (

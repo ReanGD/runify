@@ -5,7 +5,7 @@ package lexer
 import (
 	"fmt"
 
-	"github.com/ReanGD/runify/server/provider/calculator/gocc/token"
+	"github.com/ReanGD/runify/server/interpreter/gocc/token"
 )
 
 type ActionTable [NumStates]ActionRow

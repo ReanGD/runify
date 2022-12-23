@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	parseError "github.com/ReanGD/runify/server/provider/calculator/gocc/errors"
-	"github.com/ReanGD/runify/server/provider/calculator/gocc/token"
+	parseError "github.com/ReanGD/runify/server/interpreter/gocc/errors"
+	"github.com/ReanGD/runify/server/interpreter/gocc/token"
 )
 
 const (

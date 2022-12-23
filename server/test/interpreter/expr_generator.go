@@ -1,4 +1,4 @@
-package calculator_test
+package interpreter_test
 
 import (
 	"fmt"

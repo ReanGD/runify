@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"unicode/utf8"
 
-	"github.com/ReanGD/runify/server/provider/calculator/gocc/token"
+	"github.com/ReanGD/runify/server/interpreter/gocc/token"
 )
 
 const (
