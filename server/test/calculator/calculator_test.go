@@ -1,7 +1,6 @@
 package calculator_test
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -32,14 +31,15 @@ func (s *CalcSuite) runTest(expression string, expectedValue apd.Decimal, expect
 	s.T().Run(testName, func(t *testing.T) {
 		actualRes := executer.Execute(expression)
 		require.Equal(t, expectedCondition, actualRes.Condition, expression)
+		require.True(t, actualRes.IsExprValid())
+		require.NoError(t, actualRes.ParserErr, expression)
 		if expectedCondition != 0 {
-			require.Error(t, actualRes.ParserErr, expression)
-			require.NotEqual(t, global.Success, actualRes.SystemErrCode, expression)
+			require.False(t, actualRes.IsValueValid(), expression)
+			require.NotEqual(t, global.Success, actualRes.CalcErrCode, expression)
 		} else {
-			require.NoError(t, actualRes.ParserErr, fmt.Errorf("Error in expr: '%s'", expression))
-			require.Equal(t, global.Success, actualRes.SystemErrCode, expression)
-			require.NotNil(t, actualRes.Value, expression)
-			assertEqualDecimal(t, expectedValue, actualRes.Value.Value(), expression)
+			require.True(t, actualRes.IsValueValid(), expression)
+			require.Equal(t, global.Success, actualRes.CalcErrCode, expression)
+			assertEqualDecimal(t, expectedValue, actualRes.Value, expression)
 		}
 	})
 }
@@ -108,6 +108,28 @@ func (s *CalcSuite) TestPriority() {
 		{"(1.1 + 2.2)**2", "10.89"},
 		{"-(1.1 + 2.2)**2", "-10.89"}, // (-(1.1 + 2.2))**2
 	})
+}
+
+func (s *CalcSuite) TestError() {
+	res := s.executer.Execute("1 + qwe")
+	s.False(res.IsExprValid())
+	s.False(res.IsValueValid())
+
+	res = s.executer.Execute("1 +")
+	s.False(res.IsExprValid())
+	s.False(res.IsValueValid())
+
+	res = s.executer.Execute("1.2.3")
+	s.False(res.IsExprValid())
+	s.False(res.IsValueValid())
+
+	res = s.executer.Execute("1/0q")
+	s.False(res.IsExprValid())
+	s.False(res.IsValueValid())
+
+	res = s.executer.Execute("1/0")
+	s.True(res.IsExprValid())
+	s.False(res.IsValueValid())
 }
 
 func TestCalcSuite(t *testing.T) {

@@ -41,7 +41,7 @@ func (c *CalcRootListCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*ap
 
 func (c *CalcRootListCtrl) OnFilterChange(text string) {
 	calcResult := c.executer.Execute(text)
-	if calcResult.ParserErr != nil {
+	if !calcResult.IsExprValid() {
 		if c.visible {
 			c.client.RootListRemoveRows(c.formID, api.NewRootListRowGlobalID(c.providerID, rootRowID))
 		}
@@ -50,13 +50,12 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		return
 	}
 
-	result := calcResult.Value.Value()
-	actualResult := result.String()
-	if actualResult == c.lastResult {
+	userResult := calcResult.UserResult()
+	if userResult == c.lastResult {
 		return
 	}
 
-	row := api.NewRootListRow(api.RowType_Calculator, api.MaxPriority, c.providerID, rootRowID, "", text+"\n"+actualResult)
+	row := api.NewRootListRow(api.RowType_Calculator, api.MaxPriority, c.providerID, rootRowID, "", text+"\n"+userResult)
 	if c.visible {
 		c.client.RootListChangeRows(c.formID, row)
 	} else {
@@ -64,7 +63,7 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 	}
 
 	c.visible = true
-	c.lastResult = actualResult
+	c.lastResult = userResult
 }
 
 func (c *CalcRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID) {

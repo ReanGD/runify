@@ -11,10 +11,38 @@ import (
 )
 
 type Result struct {
-	Value         *ast.Value
-	ParserErr     error
-	SystemErrCode global.Error
-	Condition     apd.Condition
+	Value       apd.Decimal
+	ParserErr   error
+	CalcErrCode global.Error
+	Condition   apd.Condition
+}
+
+func newResult(parserErr error, astCtx *ast.AstContext) *Result {
+	return &Result{
+		Value:     apd.Decimal{},
+		ParserErr: parserErr,
+		Condition: 0,
+	}
+}
+
+func (r *Result) IsExprValid() bool {
+	return r.ParserErr == nil
+}
+
+func (r *Result) IsValueValid() bool {
+	return r.ParserErr == nil && r.Condition == 0
+}
+
+func (r *Result) UserResult() string {
+	if r.ParserErr != nil {
+		return ""
+	}
+
+	if r.Condition == 0 {
+		return r.Value.String()
+	}
+
+	return r.CalcErrCode.String()
 }
 
 type Executer struct {
@@ -45,22 +73,24 @@ func (e *Executer) GetApdContext() apd.Context {
 	return e.ctx.GetApdContext()
 }
 
-func (e *Executer) Execute(expression string) Result {
+func (e *Executer) Execute(expression string) *Result {
 	e.ctx.Reset()
 	lexer := lexer.NewLexer([]byte(expression))
 	parserRes, parserErr := e.parser.Parse(lexer)
-
-	var res Result
-	res.Value = nil
-	res.ParserErr = parserErr
-	res.Condition, res.SystemErrCode = e.ctx.Error()
-
-	if parserErr == nil {
-		var ok bool
-		if res.Value, ok = parserRes.(*ast.Value); !ok {
-			res.ParserErr = fmt.Errorf("invalid result type; expected *ast.Value, got %T", res)
+	condition, calcErrCode := e.ctx.Error()
+	var value apd.Decimal
+	if parserErr == nil && condition == 0 {
+		if astValue, ok := parserRes.(*ast.Value); ok {
+			value = astValue.Value()
+		} else {
+			parserErr = fmt.Errorf("invalid result type; expected *ast.Value, got %T", parserRes)
 		}
 	}
 
-	return res
+	return &Result{
+		Value:       value,
+		ParserErr:   parserErr,
+		CalcErrCode: calcErrCode,
+		Condition:   condition,
+	}
 }

@@ -34,14 +34,16 @@ var BaseAdpContext = apd.Context{
 }
 
 type AstContext struct {
-	dctx apd.Context
-	cond apd.Condition
+	dctx      apd.Context
+	cond      apd.Condition
+	fullTraps apd.Condition
 }
 
 func NewAstContext(dctx apd.Context) *AstContext {
 	return &AstContext{
-		dctx: dctx,
-		cond: apd.Condition(0),
+		dctx:      dctx,
+		cond:      apd.Condition(0),
+		fullTraps: dctx.Traps | TypeMismatch,
 	}
 }
 
@@ -49,16 +51,24 @@ func NewDefaultAstContext() *AstContext {
 	return NewAstContext(BaseAdpContext)
 }
 
-func toAstContext(v interface{}) (*AstContext, error) {
+func toAstContext(v interface{}) (*AstContext, error, bool) {
 	if result, ok := v.(*AstContext); ok {
-		return result, nil
+		return result, nil, result.isValid()
 	}
 
-	return nil, fmt.Errorf("invalid type of parser context; expected *AstContext, got %T", v)
+	return nil, fmt.Errorf("invalid type of parser context; expected *AstContext, got %T", v), false
 }
 
 func (c *AstContext) GetApdContext() apd.Context {
 	return c.dctx
+}
+
+func (c *AstContext) set(cond apd.Condition, err error) {
+	c.cond |= cond
+}
+
+func (c *AstContext) isValid() bool {
+	return (c.cond & c.fullTraps) == 0
 }
 
 func (c *AstContext) Reset() {
@@ -66,8 +76,7 @@ func (c *AstContext) Reset() {
 }
 
 func (c *AstContext) Error() (apd.Condition, global.Error) {
-	cond := c.cond
-	cond &= (c.dctx.Traps | TypeMismatch)
+	cond := c.cond & c.fullTraps
 
 	if cond == 0 {
 		return cond, global.Success
