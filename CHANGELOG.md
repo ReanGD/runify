@@ -1,18 +1,18 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.0] - [Unreleased]
 
 ### Added
 
-- TODO
+- "Calculator plugin" - calculation of simple expressions
 
 ### Changed
 
-- TODO
+- Faster initial launch of the user interface
 
 ### Fixed
 
-- TODO
+- Start directory for new processes is now home directory instead of runify directory
 
 ## [0.1.0] - 2022-10-21
 
