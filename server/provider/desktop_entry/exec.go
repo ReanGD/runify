@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+
+	"github.com/ReanGD/runify/server/paths"
 )
 
 func buildArgs(agrsStr string, needTerminal bool, terminal string) ([]string, error) {
@@ -116,6 +118,7 @@ func execCmd(agrsStr string, needTerminal bool, terminal string) error {
 	// If the parent process does not exit correctly, then all child processes will also be killed
 	// This code cancel this behavior
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pgid: 0}
+	cmd.Dir = paths.GetUserHome()
 
 	if err = cmd.Start(); err != nil {
 		return err
