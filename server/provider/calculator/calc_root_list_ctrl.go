@@ -13,6 +13,7 @@ const rootRowID = api.RootListRowID(1)
 
 type CalcRootListCtrl struct {
 	visible        bool
+	lastExpression string
 	lastResult     string
 	formID         api.FormID
 	providerID     api.ProviderID
@@ -25,6 +26,7 @@ type CalcRootListCtrl struct {
 func newCalcRootListCtrl(providerID api.ProviderID, actionExecuter *calcActionExecuter, moduleLogger *zap.Logger) *CalcRootListCtrl {
 	return &CalcRootListCtrl{
 		visible:        false,
+		lastExpression: "",
 		lastResult:     "",
 		formID:         0,
 		providerID:     providerID,
@@ -41,14 +43,32 @@ func (c *CalcRootListCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*ap
 	return []*api.RootListRow{}
 }
 
+func (c *CalcRootListCtrl) hideRow() {
+	if c.visible {
+		c.client.RootListRemoveRows(c.formID, api.NewRootListRowGlobalID(c.providerID, rootRowID))
+	}
+	c.visible = false
+	c.lastResult = ""
+	c.lastExpression = ""
+}
+
 func (c *CalcRootListCtrl) OnFilterChange(text string) {
+	if text == c.lastExpression {
+		return
+	}
+	if len(text) <= 1 {
+		c.hideRow()
+		return
+	}
+
 	res := c.interpreter.Execute(text)
 	if !res.IsExprValid() {
-		if c.visible {
-			c.client.RootListRemoveRows(c.formID, api.NewRootListRowGlobalID(c.providerID, rootRowID))
+		diff := len(c.lastExpression) - len(text)
+		if diff <= 2 && diff >= -2 {
+			return
 		}
-		c.visible = false
-		c.lastResult = ""
+
+		c.hideRow()
 		return
 	}
 
@@ -65,6 +85,7 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 	}
 
 	c.visible = true
+	c.lastExpression = text
 	c.lastResult = userResult
 }
 
