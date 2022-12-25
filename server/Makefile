@@ -1,4 +1,4 @@
-export RUNIFY_VERSION := "v0.1.0"
+export RUNIFY_VERSION := "v0.2.0"
 export GOLANGCILINT_VERSION := "v1.48.0"
 export DIR_SCRIPTS := "../ci/make_scripts"
 

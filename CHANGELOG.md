@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.2.0] - [Unreleased]
+## [0.3.0] - [Unreleased]
+
+### Added
+
+- TODO
+
+## [0.2.0] - 2022-12-26
 
 ### Added
 
