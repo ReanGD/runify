@@ -1,8 +1,9 @@
-import 'package:runify/global/context_menu_row.dart';
-import 'package:runify/global/root_list_row.dart';
-import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
+
+import 'package:runify/style.dart';
 import 'package:runify/widgets/text_size.dart';
+import 'package:runify/global/root_list_row.dart';
+import 'package:runify/global/context_menu_row.dart';
 
 Widget _getIcon(String? path, double size) {
   if (path == null || path.isEmpty) {
@@ -30,15 +31,22 @@ class RootListRowWidget extends StatelessWidget {
     final iconSize = TextSizeCalculator.instance
         .getCachedHeight(context, "majorText", theme.textTheme.majorText);
 
+    final icon = _getIcon(data.icon, iconSize);
+    final name = Flexible(
+      child: Text(
+        "  ${data.value}",
+        style: theme.textTheme.majorText,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+
     final left = Flexible(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          _getIcon(data.icon, iconSize),
-          Text(
-            "  ${data.value}",
-            style: theme.textTheme.majorText,
-          ),
+          icon,
+          name,
         ],
       ),
     );
@@ -62,23 +70,38 @@ class RootListRowWidget extends StatelessWidget {
 
   Widget buildCalc(BuildContext context) {
     final theme = Theme.of(context);
-    final nameStyle = theme.textTheme.majorText?.copyWith(fontSize: 20);
+    final nameStyle = theme.textTheme.majorText;
 
     final items = data.value.split("\n");
-    final left = Text(
-      items[0],
+
+    final left = Flexible(
+      fit: FlexFit.tight,
+      child: Center(
+        child: Text(
+          items[0],
+          style: nameStyle,
+        ),
+      ),
+    );
+    final center = Text(
+      " = ",
       style: nameStyle,
     );
-    final right = Text(
-      items[1],
-      style: nameStyle,
+    final right = Flexible(
+      fit: FlexFit.tight,
+      child: Center(
+        child: Text(
+          items[1],
+          style: nameStyle,
+        ),
+      ),
     );
 
     return Padding(
       padding: theme.cardTheme.commandPadding,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[left, right],
+        children: <Widget>[left, center, right],
       ),
     );
   }
@@ -104,15 +127,22 @@ class ContextMenuRowWidget extends StatelessWidget {
     final iconSize = TextSizeCalculator.instance
         .getCachedHeight(context, "majorText", theme.textTheme.majorText);
 
+    final icon = _getIcon(null, iconSize);
+    final name = Flexible(
+      child: Text(
+        "  ${data.value}",
+        style: theme.textTheme.majorText,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+
     final left = Flexible(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          _getIcon(null, iconSize),
-          Text(
-            "  ${data.value}",
-            style: theme.textTheme.majorText,
-          ),
+          icon,
+          name,
         ],
       ),
     );
