@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/cockroachdb/apd/v3 v3.1.1
+	github.com/goccy/go-json v0.10.0
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/jezek/xgb v1.0.1
 	github.com/mitchellh/mapstructure v1.5.0
