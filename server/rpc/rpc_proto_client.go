@@ -46,6 +46,24 @@ func (c *protoClient) contextMenuRowsToProtobuf(rows []*api.ContextMenuRow) []*p
 	return pbRows
 }
 
+func (c *protoClient) AddForm(ctrl api.FormCtrl) {
+	formID := c.storage.addForm(ctrl)
+	dataForm := ctrl.OnOpen(formID, c)
+	c.outCh <- &pb.SrvMessage{
+		FormID: uint32(formID),
+		Payload: &pb.SrvMessage_FormOpen{
+			FormOpen: &pb.FormOpen{
+				Markup: &pb.FormMarkup{
+					Json: dataForm.GetMarkup(),
+				},
+				Model: &pb.FormModel{
+					Json: dataForm.GetModel(),
+				},
+			},
+		},
+	}
+}
+
 func (c *protoClient) AddRootList(ctrl api.RootListCtrl) {
 	formID := c.storage.addRootList(ctrl)
 	rows := ctrl.OnOpen(formID, c)

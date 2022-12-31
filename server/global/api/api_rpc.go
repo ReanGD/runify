@@ -3,6 +3,7 @@ package api
 type FormID uint32
 
 type RpcClient interface {
+	AddForm(ctrl FormCtrl)
 	AddRootList(ctrl RootListCtrl)
 	RootListAddRows(formID FormID, rows ...*RootListRow)
 	RootListChangeRows(formID FormID, rows ...*RootListRow)

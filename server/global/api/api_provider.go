@@ -1,13 +1,14 @@
 package api
 
 import (
-	"github.com/ReanGD/runify/server/pb"
 	"go.uber.org/zap"
+
+	"github.com/ReanGD/runify/server/global/widget"
+	"github.com/ReanGD/runify/server/pb"
 )
 
-type ContextMenuCtrl interface {
-	OnOpen(formID FormID, client RpcClient) []*ContextMenuRow
-	OnRowActivate(rowID ContextMenuRowID)
+type FormCtrl interface {
+	OnOpen(formID FormID, client RpcClient) widget.DataForm
 }
 
 type RootListCtrl interface {
@@ -15,6 +16,11 @@ type RootListCtrl interface {
 	OnFilterChange(value string)
 	OnRowActivate(providerID ProviderID, rowID RootListRowID)
 	OnMenuActivate(providerID ProviderID, rowID RootListRowID)
+}
+
+type ContextMenuCtrl interface {
+	OnOpen(formID FormID, client RpcClient) []*ContextMenuRow
+	OnRowActivate(rowID ContextMenuRowID)
 }
 
 type ProviderID uint32

@@ -31,11 +31,21 @@ func newFormStorage(moduleLogger *zap.Logger) *formStorage {
 	}
 }
 
+func (s *formStorage) addForm(ctrl api.FormCtrl) api.FormID {
+	s.m.Lock()
+	s.lastID++
+	id := s.lastID
+	s.forms[s.lastID] = newFormWrapper(ctrl, s.moduleLogger.With(zap.Uint32("FormID", uint32(id))))
+	s.m.Unlock()
+
+	return id
+}
+
 func (s *formStorage) addRootList(ctrl api.RootListCtrl) api.FormID {
 	s.m.Lock()
 	s.lastID++
 	id := s.lastID
-	s.forms[s.lastID] = newRootListHandler(ctrl, s.moduleLogger.With(zap.Uint32("FormID", uint32(id))))
+	s.forms[s.lastID] = newRootListWrapper(ctrl, s.moduleLogger.With(zap.Uint32("FormID", uint32(id))))
 	s.m.Unlock()
 
 	return id
@@ -45,7 +55,7 @@ func (s *formStorage) addContextMenu(ctrl api.ContextMenuCtrl) api.FormID {
 	s.m.Lock()
 	s.lastID++
 	id := s.lastID
-	s.forms[s.lastID] = newContextMenuHandler(ctrl, s.moduleLogger.With(zap.Uint32("FormID", uint32(id))))
+	s.forms[s.lastID] = newContextMenuWrapper(ctrl, s.moduleLogger.With(zap.Uint32("FormID", uint32(id))))
 	s.m.Unlock()
 
 	return id

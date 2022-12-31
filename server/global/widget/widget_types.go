@@ -5,7 +5,6 @@ import (
 )
 
 type Widget interface {
-	check() error
 	buildModel(fields reflect.Value) []*Model
 	MarshalJSON() ([]byte, error)
 }

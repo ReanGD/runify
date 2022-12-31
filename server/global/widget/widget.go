@@ -8,8 +8,34 @@ import (
 	"github.com/goccy/go-json"
 )
 
+type DataForm struct {
+	form  *Form
+	model string
+}
+
+func NewDataForm(form *Form, data any) (*DataForm, error) {
+	model, err := form.buildModel(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DataForm{
+		form:  form,
+		model: string(model),
+	}, nil
+}
+
+func (f *DataForm) GetModel() string {
+	return f.model
+}
+
+func (f *DataForm) GetMarkup() string {
+	return f.form.markup
+}
+
 type Form struct {
-	child Widget
+	child  Widget
+	markup string
 }
 
 func NewForm[TData any](fn func(bind Bind, fields *TData) Widget) (*Form, error) {
@@ -17,20 +43,22 @@ func NewForm[TData any](fn func(bind Bind, fields *TData) Widget) (*Form, error)
 
 	binder := newBinder(reflect.TypeOf(fields), uintptr(unsafe.Pointer(fields)))
 	child := fn(binder.Bind, fields)
-	if err := child.check(); err != nil {
+	markup, err := json.Marshal(child)
+	if err != nil {
 		return nil, err
 	}
 
 	return &Form{
-		child: child,
+		child:  child,
+		markup: string(markup),
 	}, nil
 }
 
-func (f *Form) BuildMarkup() ([]byte, error) {
+func (f *Form) buildMarkup() ([]byte, error) {
 	return json.Marshal(f.child)
 }
 
-func (f *Form) BuildModel(data any) ([]byte, error) {
+func (f *Form) buildModel(data any) ([]byte, error) {
 	fields := reflect.ValueOf(data).Elem()
 	models := f.child.buildModel(fields)
 	return json.Marshal(models)
@@ -45,16 +73,6 @@ func (WidgetTypeColumn) MarshalJSON() ([]byte, error) {
 type Column struct {
 	WidgetTypeColumn `json:"type"`
 	Children         []Widget `json:"children,omitempty"`
-}
-
-func (w *Column) check() error {
-	for _, child := range w.Children {
-		if err := child.check(); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func (w *Column) buildModel(fields reflect.Value) []*Model {
@@ -84,10 +102,6 @@ type Text struct {
 	Data           string `json:"data"`
 }
 
-func (w *Text) check() error {
-	return nil
-}
-
 func (w *Text) buildModel(fields reflect.Value) []*Model {
 	return nil
 }
@@ -111,14 +125,6 @@ type TextField struct {
 	MaxLines            *int       `json:"maxLines,omitempty"`
 }
 
-func (w *TextField) check() error {
-	if w.Bind == nil {
-		return errors.New("bind field for widget TextField is required")
-	}
-
-	return nil
-}
-
 func (w *TextField) buildModel(fields reflect.Value) []*Model {
 	return []*Model{
 		newModel(w.Bind, fields),
@@ -126,6 +132,10 @@ func (w *TextField) buildModel(fields reflect.Value) []*Model {
 }
 
 func (w *TextField) MarshalJSON() ([]byte, error) {
+	if w.Bind != nil {
+		return nil, errors.New("bind field for widget TextField is required")
+	}
+
 	type local *TextField
 	return json.Marshal(local(w))
 }
