@@ -16,6 +16,18 @@ message WriteLog {
 	string message = 2;
 }
 
+message FormMarkup {
+	string json = 1;
+}
+
+message FormModel {
+	string json = 1;
+}
+
+message FormData {
+	string json = 1;
+}
+
 message FilterData {
 	string value = 1;
 }
@@ -38,6 +50,15 @@ message RootListRow {
 	uint32 priority = 4;
 	string icon = 5;
 	string value = 6;
+}
+
+message FormOpen {
+	FormMarkup markup = 1;
+	FormModel model = 2;
+}
+
+message FormSubmit {
+	FormData data = 1;
 }
 
 message RootListOpen {
@@ -99,22 +120,24 @@ message UIMessage {
 		RootListRowGlobalID rootListRowActivated = 4;
 		RootListRowGlobalID rootListMenuActivated = 5;
 		ContextMenuRowID contextMenuRowActivated = 6;
-		FormClosed formClosed = 7;
+		FormSubmit formSubmit = 7;
+		FormClosed formClosed = 8;
 	}
 }
 
 message SrvMessage {
 	uint32 formID = 1;
 	oneof payload {
-		RootListOpen rootListOpen = 2;
-		RootListAddRows rootListAddRows = 3;
-		RootListChangeRows rootListChangeRows = 4;
-		RootListRemoveRows rootListRemoveRows = 5;
-		ContextMenuOpen contextMenuOpen = 6;
-		UserMessage userMessage = 7;
-		CloseForm closeForm = 8;
-		HideUI hideUI = 9;
-		CloseUI closeUI = 10;
+		FormOpen formOpen = 2;
+		RootListOpen rootListOpen = 3;
+		RootListAddRows rootListAddRows = 4;
+		RootListChangeRows rootListChangeRows = 5;
+		RootListRemoveRows rootListRemoveRows = 6;
+		ContextMenuOpen contextMenuOpen = 7;
+		UserMessage userMessage = 8;
+		CloseForm closeForm = 9;
+		HideUI hideUI = 10;
+		CloseUI closeUI = 11;
 	}
 }
 

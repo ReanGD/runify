@@ -54,6 +54,36 @@ const WriteLog$json = const {
 
 /// Descriptor for `WriteLog`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List writeLogDescriptor = $convert.base64Decode('CghXcml0ZUxvZxImCgVsZXZlbBgBIAEoDjIQLnJ1bmlmeS5Mb2dMZXZlbFIFbGV2ZWwSGAoHbWVzc2FnZRgCIAEoCVIHbWVzc2FnZQ==');
+@$core.Deprecated('Use formMarkupDescriptor instead')
+const FormMarkup$json = const {
+  '1': 'FormMarkup',
+  '2': const [
+    const {'1': 'json', '3': 1, '4': 1, '5': 9, '10': 'json'},
+  ],
+};
+
+/// Descriptor for `FormMarkup`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List formMarkupDescriptor = $convert.base64Decode('CgpGb3JtTWFya3VwEhIKBGpzb24YASABKAlSBGpzb24=');
+@$core.Deprecated('Use formModelDescriptor instead')
+const FormModel$json = const {
+  '1': 'FormModel',
+  '2': const [
+    const {'1': 'json', '3': 1, '4': 1, '5': 9, '10': 'json'},
+  ],
+};
+
+/// Descriptor for `FormModel`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List formModelDescriptor = $convert.base64Decode('CglGb3JtTW9kZWwSEgoEanNvbhgBIAEoCVIEanNvbg==');
+@$core.Deprecated('Use formDataDescriptor instead')
+const FormData$json = const {
+  '1': 'FormData',
+  '2': const [
+    const {'1': 'json', '3': 1, '4': 1, '5': 9, '10': 'json'},
+  ],
+};
+
+/// Descriptor for `FormData`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List formDataDescriptor = $convert.base64Decode('CghGb3JtRGF0YRISCgRqc29uGAEgASgJUgRqc29u');
 @$core.Deprecated('Use filterDataDescriptor instead')
 const FilterData$json = const {
   '1': 'FilterData',
@@ -90,6 +120,27 @@ const RootListRow$json = const {
 
 /// Descriptor for `RootListRow`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List rootListRowDescriptor = $convert.base64Decode('CgtSb290TGlzdFJvdxIxCgdyb3dUeXBlGAEgASgOMhcucnVuaWZ5LlJvb3RMaXN0Um93VHlwZVIHcm93VHlwZRIeCgpwcm92aWRlcklEGAIgASgNUgpwcm92aWRlcklEEhQKBXJvd0lEGAMgASgNUgVyb3dJRBIaCghwcmlvcml0eRgEIAEoDVIIcHJpb3JpdHkSEgoEaWNvbhgFIAEoCVIEaWNvbhIUCgV2YWx1ZRgGIAEoCVIFdmFsdWU=');
+@$core.Deprecated('Use formOpenDescriptor instead')
+const FormOpen$json = const {
+  '1': 'FormOpen',
+  '2': const [
+    const {'1': 'markup', '3': 1, '4': 1, '5': 11, '6': '.runify.FormMarkup', '10': 'markup'},
+    const {'1': 'model', '3': 2, '4': 1, '5': 11, '6': '.runify.FormModel', '10': 'model'},
+  ],
+};
+
+/// Descriptor for `FormOpen`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List formOpenDescriptor = $convert.base64Decode('CghGb3JtT3BlbhIqCgZtYXJrdXAYASABKAsyEi5ydW5pZnkuRm9ybU1hcmt1cFIGbWFya3VwEicKBW1vZGVsGAIgASgLMhEucnVuaWZ5LkZvcm1Nb2RlbFIFbW9kZWw=');
+@$core.Deprecated('Use formSubmitDescriptor instead')
+const FormSubmit$json = const {
+  '1': 'FormSubmit',
+  '2': const [
+    const {'1': 'data', '3': 1, '4': 1, '5': 11, '6': '.runify.FormData', '10': 'data'},
+  ],
+};
+
+/// Descriptor for `FormSubmit`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List formSubmitDescriptor = $convert.base64Decode('CgpGb3JtU3VibWl0EiQKBGRhdGEYASABKAsyEC5ydW5pZnkuRm9ybURhdGFSBGRhdGE=');
 @$core.Deprecated('Use rootListOpenDescriptor instead')
 const RootListOpen$json = const {
   '1': 'RootListOpen',
@@ -213,7 +264,8 @@ const UIMessage$json = const {
     const {'1': 'rootListRowActivated', '3': 4, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListRowActivated'},
     const {'1': 'rootListMenuActivated', '3': 5, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListMenuActivated'},
     const {'1': 'contextMenuRowActivated', '3': 6, '4': 1, '5': 11, '6': '.runify.ContextMenuRowID', '9': 0, '10': 'contextMenuRowActivated'},
-    const {'1': 'formClosed', '3': 7, '4': 1, '5': 11, '6': '.runify.FormClosed', '9': 0, '10': 'formClosed'},
+    const {'1': 'formSubmit', '3': 7, '4': 1, '5': 11, '6': '.runify.FormSubmit', '9': 0, '10': 'formSubmit'},
+    const {'1': 'formClosed', '3': 8, '4': 1, '5': 11, '6': '.runify.FormClosed', '9': 0, '10': 'formClosed'},
   ],
   '8': const [
     const {'1': 'payload'},
@@ -221,21 +273,22 @@ const UIMessage$json = const {
 };
 
 /// Descriptor for `UIMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List uIMessageDescriptor = $convert.base64Decode('CglVSU1lc3NhZ2USFgoGZm9ybUlEGAEgASgNUgZmb3JtSUQSLgoId3JpdGVMb2cYAiABKAsyEC5ydW5pZnkuV3JpdGVMb2dIAFIId3JpdGVMb2cSOgoNZmlsdGVyQ2hhbmdlZBgDIAEoCzISLnJ1bmlmeS5GaWx0ZXJEYXRhSABSDWZpbHRlckNoYW5nZWQSUQoUcm9vdExpc3RSb3dBY3RpdmF0ZWQYBCABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhRyb290TGlzdFJvd0FjdGl2YXRlZBJTChVyb290TGlzdE1lbnVBY3RpdmF0ZWQYBSABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhVyb290TGlzdE1lbnVBY3RpdmF0ZWQSVAoXY29udGV4dE1lbnVSb3dBY3RpdmF0ZWQYBiABKAsyGC5ydW5pZnkuQ29udGV4dE1lbnVSb3dJREgAUhdjb250ZXh0TWVudVJvd0FjdGl2YXRlZBI0Cgpmb3JtQ2xvc2VkGAcgASgLMhIucnVuaWZ5LkZvcm1DbG9zZWRIAFIKZm9ybUNsb3NlZEIJCgdwYXlsb2Fk');
+final $typed_data.Uint8List uIMessageDescriptor = $convert.base64Decode('CglVSU1lc3NhZ2USFgoGZm9ybUlEGAEgASgNUgZmb3JtSUQSLgoId3JpdGVMb2cYAiABKAsyEC5ydW5pZnkuV3JpdGVMb2dIAFIId3JpdGVMb2cSOgoNZmlsdGVyQ2hhbmdlZBgDIAEoCzISLnJ1bmlmeS5GaWx0ZXJEYXRhSABSDWZpbHRlckNoYW5nZWQSUQoUcm9vdExpc3RSb3dBY3RpdmF0ZWQYBCABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhRyb290TGlzdFJvd0FjdGl2YXRlZBJTChVyb290TGlzdE1lbnVBY3RpdmF0ZWQYBSABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhVyb290TGlzdE1lbnVBY3RpdmF0ZWQSVAoXY29udGV4dE1lbnVSb3dBY3RpdmF0ZWQYBiABKAsyGC5ydW5pZnkuQ29udGV4dE1lbnVSb3dJREgAUhdjb250ZXh0TWVudVJvd0FjdGl2YXRlZBI0Cgpmb3JtU3VibWl0GAcgASgLMhIucnVuaWZ5LkZvcm1TdWJtaXRIAFIKZm9ybVN1Ym1pdBI0Cgpmb3JtQ2xvc2VkGAggASgLMhIucnVuaWZ5LkZvcm1DbG9zZWRIAFIKZm9ybUNsb3NlZEIJCgdwYXlsb2Fk');
 @$core.Deprecated('Use srvMessageDescriptor instead')
 const SrvMessage$json = const {
   '1': 'SrvMessage',
   '2': const [
     const {'1': 'formID', '3': 1, '4': 1, '5': 13, '10': 'formID'},
-    const {'1': 'rootListOpen', '3': 2, '4': 1, '5': 11, '6': '.runify.RootListOpen', '9': 0, '10': 'rootListOpen'},
-    const {'1': 'rootListAddRows', '3': 3, '4': 1, '5': 11, '6': '.runify.RootListAddRows', '9': 0, '10': 'rootListAddRows'},
-    const {'1': 'rootListChangeRows', '3': 4, '4': 1, '5': 11, '6': '.runify.RootListChangeRows', '9': 0, '10': 'rootListChangeRows'},
-    const {'1': 'rootListRemoveRows', '3': 5, '4': 1, '5': 11, '6': '.runify.RootListRemoveRows', '9': 0, '10': 'rootListRemoveRows'},
-    const {'1': 'contextMenuOpen', '3': 6, '4': 1, '5': 11, '6': '.runify.ContextMenuOpen', '9': 0, '10': 'contextMenuOpen'},
-    const {'1': 'userMessage', '3': 7, '4': 1, '5': 11, '6': '.runify.UserMessage', '9': 0, '10': 'userMessage'},
-    const {'1': 'closeForm', '3': 8, '4': 1, '5': 11, '6': '.runify.CloseForm', '9': 0, '10': 'closeForm'},
-    const {'1': 'hideUI', '3': 9, '4': 1, '5': 11, '6': '.runify.HideUI', '9': 0, '10': 'hideUI'},
-    const {'1': 'closeUI', '3': 10, '4': 1, '5': 11, '6': '.runify.CloseUI', '9': 0, '10': 'closeUI'},
+    const {'1': 'formOpen', '3': 2, '4': 1, '5': 11, '6': '.runify.FormOpen', '9': 0, '10': 'formOpen'},
+    const {'1': 'rootListOpen', '3': 3, '4': 1, '5': 11, '6': '.runify.RootListOpen', '9': 0, '10': 'rootListOpen'},
+    const {'1': 'rootListAddRows', '3': 4, '4': 1, '5': 11, '6': '.runify.RootListAddRows', '9': 0, '10': 'rootListAddRows'},
+    const {'1': 'rootListChangeRows', '3': 5, '4': 1, '5': 11, '6': '.runify.RootListChangeRows', '9': 0, '10': 'rootListChangeRows'},
+    const {'1': 'rootListRemoveRows', '3': 6, '4': 1, '5': 11, '6': '.runify.RootListRemoveRows', '9': 0, '10': 'rootListRemoveRows'},
+    const {'1': 'contextMenuOpen', '3': 7, '4': 1, '5': 11, '6': '.runify.ContextMenuOpen', '9': 0, '10': 'contextMenuOpen'},
+    const {'1': 'userMessage', '3': 8, '4': 1, '5': 11, '6': '.runify.UserMessage', '9': 0, '10': 'userMessage'},
+    const {'1': 'closeForm', '3': 9, '4': 1, '5': 11, '6': '.runify.CloseForm', '9': 0, '10': 'closeForm'},
+    const {'1': 'hideUI', '3': 10, '4': 1, '5': 11, '6': '.runify.HideUI', '9': 0, '10': 'hideUI'},
+    const {'1': 'closeUI', '3': 11, '4': 1, '5': 11, '6': '.runify.CloseUI', '9': 0, '10': 'closeUI'},
   ],
   '8': const [
     const {'1': 'payload'},
@@ -243,4 +296,4 @@ const SrvMessage$json = const {
 };
 
 /// Descriptor for `SrvMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List srvMessageDescriptor = $convert.base64Decode('CgpTcnZNZXNzYWdlEhYKBmZvcm1JRBgBIAEoDVIGZm9ybUlEEjoKDHJvb3RMaXN0T3BlbhgCIAEoCzIULnJ1bmlmeS5Sb290TGlzdE9wZW5IAFIMcm9vdExpc3RPcGVuEkMKD3Jvb3RMaXN0QWRkUm93cxgDIAEoCzIXLnJ1bmlmeS5Sb290TGlzdEFkZFJvd3NIAFIPcm9vdExpc3RBZGRSb3dzEkwKEnJvb3RMaXN0Q2hhbmdlUm93cxgEIAEoCzIaLnJ1bmlmeS5Sb290TGlzdENoYW5nZVJvd3NIAFIScm9vdExpc3RDaGFuZ2VSb3dzEkwKEnJvb3RMaXN0UmVtb3ZlUm93cxgFIAEoCzIaLnJ1bmlmeS5Sb290TGlzdFJlbW92ZVJvd3NIAFIScm9vdExpc3RSZW1vdmVSb3dzEkMKD2NvbnRleHRNZW51T3BlbhgGIAEoCzIXLnJ1bmlmeS5Db250ZXh0TWVudU9wZW5IAFIPY29udGV4dE1lbnVPcGVuEjcKC3VzZXJNZXNzYWdlGAcgASgLMhMucnVuaWZ5LlVzZXJNZXNzYWdlSABSC3VzZXJNZXNzYWdlEjEKCWNsb3NlRm9ybRgIIAEoCzIRLnJ1bmlmeS5DbG9zZUZvcm1IAFIJY2xvc2VGb3JtEigKBmhpZGVVSRgJIAEoCzIOLnJ1bmlmeS5IaWRlVUlIAFIGaGlkZVVJEisKB2Nsb3NlVUkYCiABKAsyDy5ydW5pZnkuQ2xvc2VVSUgAUgdjbG9zZVVJQgkKB3BheWxvYWQ=');
+final $typed_data.Uint8List srvMessageDescriptor = $convert.base64Decode('CgpTcnZNZXNzYWdlEhYKBmZvcm1JRBgBIAEoDVIGZm9ybUlEEi4KCGZvcm1PcGVuGAIgASgLMhAucnVuaWZ5LkZvcm1PcGVuSABSCGZvcm1PcGVuEjoKDHJvb3RMaXN0T3BlbhgDIAEoCzIULnJ1bmlmeS5Sb290TGlzdE9wZW5IAFIMcm9vdExpc3RPcGVuEkMKD3Jvb3RMaXN0QWRkUm93cxgEIAEoCzIXLnJ1bmlmeS5Sb290TGlzdEFkZFJvd3NIAFIPcm9vdExpc3RBZGRSb3dzEkwKEnJvb3RMaXN0Q2hhbmdlUm93cxgFIAEoCzIaLnJ1bmlmeS5Sb290TGlzdENoYW5nZVJvd3NIAFIScm9vdExpc3RDaGFuZ2VSb3dzEkwKEnJvb3RMaXN0UmVtb3ZlUm93cxgGIAEoCzIaLnJ1bmlmeS5Sb290TGlzdFJlbW92ZVJvd3NIAFIScm9vdExpc3RSZW1vdmVSb3dzEkMKD2NvbnRleHRNZW51T3BlbhgHIAEoCzIXLnJ1bmlmeS5Db250ZXh0TWVudU9wZW5IAFIPY29udGV4dE1lbnVPcGVuEjcKC3VzZXJNZXNzYWdlGAggASgLMhMucnVuaWZ5LlVzZXJNZXNzYWdlSABSC3VzZXJNZXNzYWdlEjEKCWNsb3NlRm9ybRgJIAEoCzIRLnJ1bmlmeS5DbG9zZUZvcm1IAFIJY2xvc2VGb3JtEigKBmhpZGVVSRgKIAEoCzIOLnJ1bmlmeS5IaWRlVUlIAFIGaGlkZVVJEisKB2Nsb3NlVUkYCyABKAsyDy5ydW5pZnkuQ2xvc2VVSUgAUgdjbG9zZVVJQgkKB3BheWxvYWQ=');

@@ -74,6 +74,147 @@ class WriteLog extends $pb.GeneratedMessage {
   void clearMessage() => clearField(2);
 }
 
+class FormMarkup extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FormMarkup', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'json')
+    ..hasRequiredFields = false
+  ;
+
+  FormMarkup._() : super();
+  factory FormMarkup({
+    $core.String? json,
+  }) {
+    final _result = create();
+    if (json != null) {
+      _result.json = json;
+    }
+    return _result;
+  }
+  factory FormMarkup.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FormMarkup.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FormMarkup clone() => FormMarkup()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FormMarkup copyWith(void Function(FormMarkup) updates) => super.copyWith((message) => updates(message as FormMarkup)) as FormMarkup; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FormMarkup create() => FormMarkup._();
+  FormMarkup createEmptyInstance() => create();
+  static $pb.PbList<FormMarkup> createRepeated() => $pb.PbList<FormMarkup>();
+  @$core.pragma('dart2js:noInline')
+  static FormMarkup getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FormMarkup>(create);
+  static FormMarkup? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get json => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set json($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasJson() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearJson() => clearField(1);
+}
+
+class FormModel extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FormModel', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'json')
+    ..hasRequiredFields = false
+  ;
+
+  FormModel._() : super();
+  factory FormModel({
+    $core.String? json,
+  }) {
+    final _result = create();
+    if (json != null) {
+      _result.json = json;
+    }
+    return _result;
+  }
+  factory FormModel.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FormModel.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FormModel clone() => FormModel()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FormModel copyWith(void Function(FormModel) updates) => super.copyWith((message) => updates(message as FormModel)) as FormModel; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FormModel create() => FormModel._();
+  FormModel createEmptyInstance() => create();
+  static $pb.PbList<FormModel> createRepeated() => $pb.PbList<FormModel>();
+  @$core.pragma('dart2js:noInline')
+  static FormModel getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FormModel>(create);
+  static FormModel? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get json => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set json($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasJson() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearJson() => clearField(1);
+}
+
+class FormData extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FormData', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'json')
+    ..hasRequiredFields = false
+  ;
+
+  FormData._() : super();
+  factory FormData({
+    $core.String? json,
+  }) {
+    final _result = create();
+    if (json != null) {
+      _result.json = json;
+    }
+    return _result;
+  }
+  factory FormData.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FormData.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FormData clone() => FormData()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FormData copyWith(void Function(FormData) updates) => super.copyWith((message) => updates(message as FormData)) as FormData; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FormData create() => FormData._();
+  FormData createEmptyInstance() => create();
+  static $pb.PbList<FormData> createRepeated() => $pb.PbList<FormData>();
+  @$core.pragma('dart2js:noInline')
+  static FormData getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FormData>(create);
+  static FormData? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get json => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set json($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasJson() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearJson() => clearField(1);
+}
+
 class FilterData extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FilterData', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'value')
@@ -297,6 +438,120 @@ class RootListRow extends $pb.GeneratedMessage {
   $core.bool hasValue() => $_has(5);
   @$pb.TagNumber(6)
   void clearValue() => clearField(6);
+}
+
+class FormOpen extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FormOpen', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..aOM<FormMarkup>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'markup', subBuilder: FormMarkup.create)
+    ..aOM<FormModel>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'model', subBuilder: FormModel.create)
+    ..hasRequiredFields = false
+  ;
+
+  FormOpen._() : super();
+  factory FormOpen({
+    FormMarkup? markup,
+    FormModel? model,
+  }) {
+    final _result = create();
+    if (markup != null) {
+      _result.markup = markup;
+    }
+    if (model != null) {
+      _result.model = model;
+    }
+    return _result;
+  }
+  factory FormOpen.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FormOpen.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FormOpen clone() => FormOpen()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FormOpen copyWith(void Function(FormOpen) updates) => super.copyWith((message) => updates(message as FormOpen)) as FormOpen; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FormOpen create() => FormOpen._();
+  FormOpen createEmptyInstance() => create();
+  static $pb.PbList<FormOpen> createRepeated() => $pb.PbList<FormOpen>();
+  @$core.pragma('dart2js:noInline')
+  static FormOpen getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FormOpen>(create);
+  static FormOpen? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  FormMarkup get markup => $_getN(0);
+  @$pb.TagNumber(1)
+  set markup(FormMarkup v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasMarkup() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearMarkup() => clearField(1);
+  @$pb.TagNumber(1)
+  FormMarkup ensureMarkup() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  FormModel get model => $_getN(1);
+  @$pb.TagNumber(2)
+  set model(FormModel v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasModel() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearModel() => clearField(2);
+  @$pb.TagNumber(2)
+  FormModel ensureModel() => $_ensure(1);
+}
+
+class FormSubmit extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FormSubmit', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..aOM<FormData>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', subBuilder: FormData.create)
+    ..hasRequiredFields = false
+  ;
+
+  FormSubmit._() : super();
+  factory FormSubmit({
+    FormData? data,
+  }) {
+    final _result = create();
+    if (data != null) {
+      _result.data = data;
+    }
+    return _result;
+  }
+  factory FormSubmit.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FormSubmit.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FormSubmit clone() => FormSubmit()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FormSubmit copyWith(void Function(FormSubmit) updates) => super.copyWith((message) => updates(message as FormSubmit)) as FormSubmit; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FormSubmit create() => FormSubmit._();
+  FormSubmit createEmptyInstance() => create();
+  static $pb.PbList<FormSubmit> createRepeated() => $pb.PbList<FormSubmit>();
+  @$core.pragma('dart2js:noInline')
+  static FormSubmit getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FormSubmit>(create);
+  static FormSubmit? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  FormData get data => $_getN(0);
+  @$pb.TagNumber(1)
+  set data(FormData v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasData() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearData() => clearField(1);
+  @$pb.TagNumber(1)
+  FormData ensureData() => $_ensure(0);
 }
 
 class RootListOpen extends $pb.GeneratedMessage {
@@ -815,6 +1070,7 @@ enum UIMessage_Payload {
   rootListRowActivated, 
   rootListMenuActivated, 
   contextMenuRowActivated, 
+  formSubmit, 
   formClosed, 
   notSet
 }
@@ -826,18 +1082,20 @@ class UIMessage extends $pb.GeneratedMessage {
     4 : UIMessage_Payload.rootListRowActivated,
     5 : UIMessage_Payload.rootListMenuActivated,
     6 : UIMessage_Payload.contextMenuRowActivated,
-    7 : UIMessage_Payload.formClosed,
+    7 : UIMessage_Payload.formSubmit,
+    8 : UIMessage_Payload.formClosed,
     0 : UIMessage_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UIMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..oo(0, [2, 3, 4, 5, 6, 7])
+    ..oo(0, [2, 3, 4, 5, 6, 7, 8])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formID', $pb.PbFieldType.OU3, protoName: 'formID')
     ..aOM<WriteLog>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'writeLog', protoName: 'writeLog', subBuilder: WriteLog.create)
     ..aOM<FilterData>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'filterChanged', protoName: 'filterChanged', subBuilder: FilterData.create)
     ..aOM<RootListRowGlobalID>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListRowActivated', protoName: 'rootListRowActivated', subBuilder: RootListRowGlobalID.create)
     ..aOM<RootListRowGlobalID>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListMenuActivated', protoName: 'rootListMenuActivated', subBuilder: RootListRowGlobalID.create)
     ..aOM<ContextMenuRowID>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contextMenuRowActivated', protoName: 'contextMenuRowActivated', subBuilder: ContextMenuRowID.create)
-    ..aOM<FormClosed>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formClosed', protoName: 'formClosed', subBuilder: FormClosed.create)
+    ..aOM<FormSubmit>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formSubmit', protoName: 'formSubmit', subBuilder: FormSubmit.create)
+    ..aOM<FormClosed>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formClosed', protoName: 'formClosed', subBuilder: FormClosed.create)
     ..hasRequiredFields = false
   ;
 
@@ -849,6 +1107,7 @@ class UIMessage extends $pb.GeneratedMessage {
     RootListRowGlobalID? rootListRowActivated,
     RootListRowGlobalID? rootListMenuActivated,
     ContextMenuRowID? contextMenuRowActivated,
+    FormSubmit? formSubmit,
     FormClosed? formClosed,
   }) {
     final _result = create();
@@ -869,6 +1128,9 @@ class UIMessage extends $pb.GeneratedMessage {
     }
     if (contextMenuRowActivated != null) {
       _result.contextMenuRowActivated = contextMenuRowActivated;
+    }
+    if (formSubmit != null) {
+      _result.formSubmit = formSubmit;
     }
     if (formClosed != null) {
       _result.formClosed = formClosed;
@@ -964,18 +1226,30 @@ class UIMessage extends $pb.GeneratedMessage {
   ContextMenuRowID ensureContextMenuRowActivated() => $_ensure(5);
 
   @$pb.TagNumber(7)
-  FormClosed get formClosed => $_getN(6);
+  FormSubmit get formSubmit => $_getN(6);
   @$pb.TagNumber(7)
-  set formClosed(FormClosed v) { setField(7, v); }
+  set formSubmit(FormSubmit v) { setField(7, v); }
   @$pb.TagNumber(7)
-  $core.bool hasFormClosed() => $_has(6);
+  $core.bool hasFormSubmit() => $_has(6);
   @$pb.TagNumber(7)
-  void clearFormClosed() => clearField(7);
+  void clearFormSubmit() => clearField(7);
   @$pb.TagNumber(7)
-  FormClosed ensureFormClosed() => $_ensure(6);
+  FormSubmit ensureFormSubmit() => $_ensure(6);
+
+  @$pb.TagNumber(8)
+  FormClosed get formClosed => $_getN(7);
+  @$pb.TagNumber(8)
+  set formClosed(FormClosed v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasFormClosed() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearFormClosed() => clearField(8);
+  @$pb.TagNumber(8)
+  FormClosed ensureFormClosed() => $_ensure(7);
 }
 
 enum SrvMessage_Payload {
+  formOpen, 
   rootListOpen, 
   rootListAddRows, 
   rootListChangeRows, 
@@ -990,35 +1264,38 @@ enum SrvMessage_Payload {
 
 class SrvMessage extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, SrvMessage_Payload> _SrvMessage_PayloadByTag = {
-    2 : SrvMessage_Payload.rootListOpen,
-    3 : SrvMessage_Payload.rootListAddRows,
-    4 : SrvMessage_Payload.rootListChangeRows,
-    5 : SrvMessage_Payload.rootListRemoveRows,
-    6 : SrvMessage_Payload.contextMenuOpen,
-    7 : SrvMessage_Payload.userMessage,
-    8 : SrvMessage_Payload.closeForm,
-    9 : SrvMessage_Payload.hideUI,
-    10 : SrvMessage_Payload.closeUI,
+    2 : SrvMessage_Payload.formOpen,
+    3 : SrvMessage_Payload.rootListOpen,
+    4 : SrvMessage_Payload.rootListAddRows,
+    5 : SrvMessage_Payload.rootListChangeRows,
+    6 : SrvMessage_Payload.rootListRemoveRows,
+    7 : SrvMessage_Payload.contextMenuOpen,
+    8 : SrvMessage_Payload.userMessage,
+    9 : SrvMessage_Payload.closeForm,
+    10 : SrvMessage_Payload.hideUI,
+    11 : SrvMessage_Payload.closeUI,
     0 : SrvMessage_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SrvMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..oo(0, [2, 3, 4, 5, 6, 7, 8, 9, 10])
+    ..oo(0, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formID', $pb.PbFieldType.OU3, protoName: 'formID')
-    ..aOM<RootListOpen>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListOpen', protoName: 'rootListOpen', subBuilder: RootListOpen.create)
-    ..aOM<RootListAddRows>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListAddRows', protoName: 'rootListAddRows', subBuilder: RootListAddRows.create)
-    ..aOM<RootListChangeRows>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListChangeRows', protoName: 'rootListChangeRows', subBuilder: RootListChangeRows.create)
-    ..aOM<RootListRemoveRows>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListRemoveRows', protoName: 'rootListRemoveRows', subBuilder: RootListRemoveRows.create)
-    ..aOM<ContextMenuOpen>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contextMenuOpen', protoName: 'contextMenuOpen', subBuilder: ContextMenuOpen.create)
-    ..aOM<UserMessage>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userMessage', protoName: 'userMessage', subBuilder: UserMessage.create)
-    ..aOM<CloseForm>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closeForm', protoName: 'closeForm', subBuilder: CloseForm.create)
-    ..aOM<HideUI>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hideUI', protoName: 'hideUI', subBuilder: HideUI.create)
-    ..aOM<CloseUI>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closeUI', protoName: 'closeUI', subBuilder: CloseUI.create)
+    ..aOM<FormOpen>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formOpen', protoName: 'formOpen', subBuilder: FormOpen.create)
+    ..aOM<RootListOpen>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListOpen', protoName: 'rootListOpen', subBuilder: RootListOpen.create)
+    ..aOM<RootListAddRows>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListAddRows', protoName: 'rootListAddRows', subBuilder: RootListAddRows.create)
+    ..aOM<RootListChangeRows>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListChangeRows', protoName: 'rootListChangeRows', subBuilder: RootListChangeRows.create)
+    ..aOM<RootListRemoveRows>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListRemoveRows', protoName: 'rootListRemoveRows', subBuilder: RootListRemoveRows.create)
+    ..aOM<ContextMenuOpen>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contextMenuOpen', protoName: 'contextMenuOpen', subBuilder: ContextMenuOpen.create)
+    ..aOM<UserMessage>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userMessage', protoName: 'userMessage', subBuilder: UserMessage.create)
+    ..aOM<CloseForm>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closeForm', protoName: 'closeForm', subBuilder: CloseForm.create)
+    ..aOM<HideUI>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hideUI', protoName: 'hideUI', subBuilder: HideUI.create)
+    ..aOM<CloseUI>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closeUI', protoName: 'closeUI', subBuilder: CloseUI.create)
     ..hasRequiredFields = false
   ;
 
   SrvMessage._() : super();
   factory SrvMessage({
     $core.int? formID,
+    FormOpen? formOpen,
     RootListOpen? rootListOpen,
     RootListAddRows? rootListAddRows,
     RootListChangeRows? rootListChangeRows,
@@ -1032,6 +1309,9 @@ class SrvMessage extends $pb.GeneratedMessage {
     final _result = create();
     if (formID != null) {
       _result.formID = formID;
+    }
+    if (formOpen != null) {
+      _result.formOpen = formOpen;
     }
     if (rootListOpen != null) {
       _result.rootListOpen = rootListOpen;
@@ -1096,102 +1376,113 @@ class SrvMessage extends $pb.GeneratedMessage {
   void clearFormID() => clearField(1);
 
   @$pb.TagNumber(2)
-  RootListOpen get rootListOpen => $_getN(1);
+  FormOpen get formOpen => $_getN(1);
   @$pb.TagNumber(2)
-  set rootListOpen(RootListOpen v) { setField(2, v); }
+  set formOpen(FormOpen v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasRootListOpen() => $_has(1);
+  $core.bool hasFormOpen() => $_has(1);
   @$pb.TagNumber(2)
-  void clearRootListOpen() => clearField(2);
+  void clearFormOpen() => clearField(2);
   @$pb.TagNumber(2)
-  RootListOpen ensureRootListOpen() => $_ensure(1);
+  FormOpen ensureFormOpen() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  RootListAddRows get rootListAddRows => $_getN(2);
+  RootListOpen get rootListOpen => $_getN(2);
   @$pb.TagNumber(3)
-  set rootListAddRows(RootListAddRows v) { setField(3, v); }
+  set rootListOpen(RootListOpen v) { setField(3, v); }
   @$pb.TagNumber(3)
-  $core.bool hasRootListAddRows() => $_has(2);
+  $core.bool hasRootListOpen() => $_has(2);
   @$pb.TagNumber(3)
-  void clearRootListAddRows() => clearField(3);
+  void clearRootListOpen() => clearField(3);
   @$pb.TagNumber(3)
-  RootListAddRows ensureRootListAddRows() => $_ensure(2);
+  RootListOpen ensureRootListOpen() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  RootListChangeRows get rootListChangeRows => $_getN(3);
+  RootListAddRows get rootListAddRows => $_getN(3);
   @$pb.TagNumber(4)
-  set rootListChangeRows(RootListChangeRows v) { setField(4, v); }
+  set rootListAddRows(RootListAddRows v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasRootListChangeRows() => $_has(3);
+  $core.bool hasRootListAddRows() => $_has(3);
   @$pb.TagNumber(4)
-  void clearRootListChangeRows() => clearField(4);
+  void clearRootListAddRows() => clearField(4);
   @$pb.TagNumber(4)
-  RootListChangeRows ensureRootListChangeRows() => $_ensure(3);
+  RootListAddRows ensureRootListAddRows() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  RootListRemoveRows get rootListRemoveRows => $_getN(4);
+  RootListChangeRows get rootListChangeRows => $_getN(4);
   @$pb.TagNumber(5)
-  set rootListRemoveRows(RootListRemoveRows v) { setField(5, v); }
+  set rootListChangeRows(RootListChangeRows v) { setField(5, v); }
   @$pb.TagNumber(5)
-  $core.bool hasRootListRemoveRows() => $_has(4);
+  $core.bool hasRootListChangeRows() => $_has(4);
   @$pb.TagNumber(5)
-  void clearRootListRemoveRows() => clearField(5);
+  void clearRootListChangeRows() => clearField(5);
   @$pb.TagNumber(5)
-  RootListRemoveRows ensureRootListRemoveRows() => $_ensure(4);
+  RootListChangeRows ensureRootListChangeRows() => $_ensure(4);
 
   @$pb.TagNumber(6)
-  ContextMenuOpen get contextMenuOpen => $_getN(5);
+  RootListRemoveRows get rootListRemoveRows => $_getN(5);
   @$pb.TagNumber(6)
-  set contextMenuOpen(ContextMenuOpen v) { setField(6, v); }
+  set rootListRemoveRows(RootListRemoveRows v) { setField(6, v); }
   @$pb.TagNumber(6)
-  $core.bool hasContextMenuOpen() => $_has(5);
+  $core.bool hasRootListRemoveRows() => $_has(5);
   @$pb.TagNumber(6)
-  void clearContextMenuOpen() => clearField(6);
+  void clearRootListRemoveRows() => clearField(6);
   @$pb.TagNumber(6)
-  ContextMenuOpen ensureContextMenuOpen() => $_ensure(5);
+  RootListRemoveRows ensureRootListRemoveRows() => $_ensure(5);
 
   @$pb.TagNumber(7)
-  UserMessage get userMessage => $_getN(6);
+  ContextMenuOpen get contextMenuOpen => $_getN(6);
   @$pb.TagNumber(7)
-  set userMessage(UserMessage v) { setField(7, v); }
+  set contextMenuOpen(ContextMenuOpen v) { setField(7, v); }
   @$pb.TagNumber(7)
-  $core.bool hasUserMessage() => $_has(6);
+  $core.bool hasContextMenuOpen() => $_has(6);
   @$pb.TagNumber(7)
-  void clearUserMessage() => clearField(7);
+  void clearContextMenuOpen() => clearField(7);
   @$pb.TagNumber(7)
-  UserMessage ensureUserMessage() => $_ensure(6);
+  ContextMenuOpen ensureContextMenuOpen() => $_ensure(6);
 
   @$pb.TagNumber(8)
-  CloseForm get closeForm => $_getN(7);
+  UserMessage get userMessage => $_getN(7);
   @$pb.TagNumber(8)
-  set closeForm(CloseForm v) { setField(8, v); }
+  set userMessage(UserMessage v) { setField(8, v); }
   @$pb.TagNumber(8)
-  $core.bool hasCloseForm() => $_has(7);
+  $core.bool hasUserMessage() => $_has(7);
   @$pb.TagNumber(8)
-  void clearCloseForm() => clearField(8);
+  void clearUserMessage() => clearField(8);
   @$pb.TagNumber(8)
-  CloseForm ensureCloseForm() => $_ensure(7);
+  UserMessage ensureUserMessage() => $_ensure(7);
 
   @$pb.TagNumber(9)
-  HideUI get hideUI => $_getN(8);
+  CloseForm get closeForm => $_getN(8);
   @$pb.TagNumber(9)
-  set hideUI(HideUI v) { setField(9, v); }
+  set closeForm(CloseForm v) { setField(9, v); }
   @$pb.TagNumber(9)
-  $core.bool hasHideUI() => $_has(8);
+  $core.bool hasCloseForm() => $_has(8);
   @$pb.TagNumber(9)
-  void clearHideUI() => clearField(9);
+  void clearCloseForm() => clearField(9);
   @$pb.TagNumber(9)
-  HideUI ensureHideUI() => $_ensure(8);
+  CloseForm ensureCloseForm() => $_ensure(8);
 
   @$pb.TagNumber(10)
-  CloseUI get closeUI => $_getN(9);
+  HideUI get hideUI => $_getN(9);
   @$pb.TagNumber(10)
-  set closeUI(CloseUI v) { setField(10, v); }
+  set hideUI(HideUI v) { setField(10, v); }
   @$pb.TagNumber(10)
-  $core.bool hasCloseUI() => $_has(9);
+  $core.bool hasHideUI() => $_has(9);
   @$pb.TagNumber(10)
-  void clearCloseUI() => clearField(10);
+  void clearHideUI() => clearField(10);
   @$pb.TagNumber(10)
-  CloseUI ensureCloseUI() => $_ensure(9);
+  HideUI ensureHideUI() => $_ensure(9);
+
+  @$pb.TagNumber(11)
+  CloseUI get closeUI => $_getN(10);
+  @$pb.TagNumber(11)
+  set closeUI(CloseUI v) { setField(11, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasCloseUI() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearCloseUI() => clearField(11);
+  @$pb.TagNumber(11)
+  CloseUI ensureCloseUI() => $_ensure(10);
 }
 
