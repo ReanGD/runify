@@ -33,8 +33,8 @@ func newDEModel() *deModel {
 		nextID:       1,
 		nameIndex:    make(map[string]api.RootListRowID),
 		entries:      make(map[api.RootListRowID]*entry),
-		dataCache:    []*api.RootListRow{},
 		dataMutex:    sync.RWMutex{},
+		dataCache:    []*api.RootListRow{},
 		iconCache:    nil,
 		moduleLogger: nil,
 	}

@@ -4,14 +4,16 @@ import (
 	"context"
 	"sync"
 
+	"go.uber.org/zap"
+
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/provider/calculator"
 	"github.com/ReanGD/runify/server/provider/desktop_entry"
+	"github.com/ReanGD/runify/server/provider/links"
 	"github.com/ReanGD/runify/server/provider/root_list"
-	"go.uber.org/zap"
 )
 
 type providerHandler struct {
@@ -38,6 +40,7 @@ func (h *providerHandler) onInit(cfg *config.Config, desktop api.Desktop, rpc ap
 	h.rootListLogger = rootListLogger
 	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(desktop))
 	h.dataProviders[calculatorID] = newDataProvider(calculatorID, calculator.New(desktop))
+	h.dataProviders[linksID] = newDataProvider(linksID, links.New(desktop))
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
 	for _, dp := range h.dataProviders {

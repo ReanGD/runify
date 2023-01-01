@@ -132,7 +132,7 @@ func (w *TextField) buildModel(fields reflect.Value) []*Model {
 }
 
 func (w *TextField) MarshalJSON() ([]byte, error) {
-	if w.Bind != nil {
+	if w.Bind == nil {
 		return nil, errors.New("bind field for widget TextField is required")
 	}
 

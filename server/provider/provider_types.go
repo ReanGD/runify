@@ -10,6 +10,7 @@ import (
 const (
 	desktopEntryID api.ProviderID = 1
 	calculatorID   api.ProviderID = 2
+	linksID        api.ProviderID = 3
 )
 
 type dataProviderHandler interface {
