@@ -214,6 +214,9 @@ class _DataListScroll extends ScrollController {
   }
 
   Future _moveFocus(int moveOffset) async {
+    if (_indexCount <= 0) {
+      return;
+    }
     int index = (_focusedIndex + moveOffset).clamp(0, _indexCount - 1);
     // In listView init or reload case, widget state of list item may not be ready for query.
     // this prevent from over scrolling becoming empty screen or unnecessary scroll bounce.

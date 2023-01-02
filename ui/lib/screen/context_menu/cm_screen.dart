@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:runify/style.dart';
 import 'package:runify/screen/context_menu/cm_view.dart';
 import 'package:runify/screen/context_menu/cm_controller.dart';
-import 'package:runify/widgets/disable_focus_trap_behavior.dart';
 
 class CMScreen extends StatelessWidget {
   final CMController controller;
@@ -29,11 +28,12 @@ class CMScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(defaultRadius),
             side: BorderSide(color: dividerTheme.color ?? theme.dividerColor),
           ),
-          child: DisableFocusTrapBehavior(
-            child: Shortcuts(
-              shortcuts: controller.listController.shortcuts,
-              child: Actions(
-                actions: controller.listController.actions,
+          child: Shortcuts(
+            shortcuts: controller.listController.shortcuts,
+            child: Actions(
+              actions: controller.listController.actions,
+              child: FocusScope(
+                autofocus: true,
                 child: SizedBox(
                   width: dialogTheme.actionsWidth,
                   height: dialogTheme.actionsHeight,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:runify/screen/root_list/rl_view.dart';
 import 'package:runify/screen/root_list/rl_controller.dart';
-import 'package:runify/widgets/disable_focus_trap_behavior.dart';
 
 class RLScreen extends StatelessWidget {
   final RLController controller;
@@ -12,11 +11,12 @@ class RLScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DisableFocusTrapBehavior(
-        child: Shortcuts(
-          shortcuts: controller.listController.shortcuts,
-          child: Actions(
-            actions: controller.listController.actions,
+      body: Shortcuts(
+        shortcuts: controller.listController.shortcuts,
+        child: Actions(
+          actions: controller.listController.actions,
+          child: FocusScope(
+            autofocus: true,
             child: RLView(controller),
           ),
         ),
