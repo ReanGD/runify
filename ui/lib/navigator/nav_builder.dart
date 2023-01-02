@@ -30,15 +30,17 @@ class NavBuilder extends StatelessWidget {
 
   NavBuilder(this._settings, this._grpcClient, this._runifyPlugin, {super.key});
 
-  Map<Type, Action<Intent>> getActions() {
+  Map<Type, Action<Intent>> get actions {
     return <Type, Action<Intent>>{
+      ...WidgetsApp.defaultActions,
       OnBackIntent: _onBackAction,
     };
   }
 
-  Map<LogicalKeySet, Intent> getShortcuts() {
-    return <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.escape): const OnBackIntent(),
+  Map<ShortcutActivator, Intent> get shortcuts {
+    return <ShortcutActivator, Intent>{
+      ...WidgetsApp.defaultShortcuts,
+      const SingleActivator(LogicalKeyboardKey.escape): const OnBackIntent(),
     };
   }
 

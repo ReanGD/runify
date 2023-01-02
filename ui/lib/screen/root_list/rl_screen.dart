@@ -14,9 +14,9 @@ class RLScreen extends StatelessWidget {
     return Scaffold(
       body: DisableFocusTrapBehavior(
         child: Shortcuts(
-          shortcuts: controller.listController.getShortcuts(),
+          shortcuts: controller.listController.shortcuts,
           child: Actions(
-            actions: controller.listController.getActions(),
+            actions: controller.listController.actions,
             child: RLView(controller),
           ),
         ),

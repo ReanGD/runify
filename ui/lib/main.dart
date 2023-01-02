@@ -23,8 +23,8 @@ void main() async {
       ExcludeSemantics(
         child: MaterialApp(
           title: "Runify",
-          shortcuts: builder.getShortcuts(),
-          actions: builder.getActions(),
+          shortcuts: builder.shortcuts,
+          actions: builder.actions,
           debugShowCheckedModeBanner: false,
           theme: getLightTheme(),
           darkTheme: getDarkTheme(),

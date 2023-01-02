@@ -31,9 +31,9 @@ class CMScreen extends StatelessWidget {
           ),
           child: DisableFocusTrapBehavior(
             child: Shortcuts(
-              shortcuts: controller.listController.getShortcuts(),
+              shortcuts: controller.listController.shortcuts,
               child: Actions(
-                actions: controller.listController.getActions(),
+                actions: controller.listController.actions,
                 child: SizedBox(
                   width: dialogTheme.actionsWidth,
                   height: dialogTheme.actionsHeight,

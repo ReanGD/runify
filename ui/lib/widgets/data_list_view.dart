@@ -63,25 +63,27 @@ abstract class DataListController {
 
   List<int> getVisibleItems(BuildContext context);
 
-  Map<Type, Action<Intent>> getActions() {
-    return <Type, Action<Intent>>{
-      OnEventIntent: OnEventAction(this),
-      MoveFocusIntent: MoveFocusAction(this),
+  Map<ShortcutActivator, Intent> get shortcuts {
+    return <ShortcutActivator, Intent>{
+      const SingleActivator(LogicalKeyboardKey.enter):
+          const OnEventIntent(DataItemEvent.onChoice),
+      const SingleActivator(LogicalKeyboardKey.keyM, alt: true):
+          const OnEventIntent(DataItemEvent.onMenu),
+      const SingleActivator(LogicalKeyboardKey.arrowUp):
+          const MoveFocusIntent(-1),
+      const SingleActivator(LogicalKeyboardKey.arrowDown):
+          const MoveFocusIntent(1),
+      const SingleActivator(LogicalKeyboardKey.pageUp):
+          const MoveFocusIntent(-_pageOffset),
+      const SingleActivator(LogicalKeyboardKey.pageDown):
+          const MoveFocusIntent(_pageOffset),
     };
   }
 
-  Map<LogicalKeySet, Intent> getShortcuts() {
-    return <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.enter):
-          const OnEventIntent(DataItemEvent.onChoice),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyX):
-          const OnEventIntent(DataItemEvent.onMenu),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const MoveFocusIntent(-1),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const MoveFocusIntent(1),
-      LogicalKeySet(LogicalKeyboardKey.pageUp):
-          const MoveFocusIntent(-_pageOffset),
-      LogicalKeySet(LogicalKeyboardKey.pageDown):
-          const MoveFocusIntent(_pageOffset),
+  Map<Type, Action<Intent>> get actions {
+    return <Type, Action<Intent>>{
+      OnEventIntent: OnEventAction(this),
+      MoveFocusIntent: MoveFocusAction(this),
     };
   }
 
