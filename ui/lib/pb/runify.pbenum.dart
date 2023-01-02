@@ -31,11 +31,15 @@ class LogLevel extends $pb.ProtobufEnum {
 class RootListRowType extends $pb.ProtobufEnum {
   static const RootListRowType CALCULATOR = RootListRowType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CALCULATOR');
   static const RootListRowType APPLICATION = RootListRowType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'APPLICATION');
-  static const RootListRowType UNKNOWN = RootListRowType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'UNKNOWN');
+  static const RootListRowType COMMAND = RootListRowType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'COMMAND');
+  static const RootListRowType LINK = RootListRowType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'LINK');
+  static const RootListRowType UNKNOWN = RootListRowType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'UNKNOWN');
 
   static const $core.List<RootListRowType> values = <RootListRowType> [
     CALCULATOR,
     APPLICATION,
+    COMMAND,
+    LINK,
     UNKNOWN,
   ];
 

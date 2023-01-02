@@ -38,9 +38,11 @@ message RootListRowGlobalID {
 }
 
 enum RootListRowType {
-	CALCULATOR = 0;		// filter disabled
-	APPLICATION = 1;	// filter enabled
-	UNKNOWN = 2;		// filter enabled
+	CALCULATOR = 0;  // filter disabled
+	APPLICATION = 1; // filter enabled
+	COMMAND = 2;     // filter enabled
+	LINK = 3;        // filter enabled
+	UNKNOWN = 4;     // filter enabled
 }
 
 message RootListRow {

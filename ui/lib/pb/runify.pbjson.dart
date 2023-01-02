@@ -27,12 +27,14 @@ const RootListRowType$json = const {
   '2': const [
     const {'1': 'CALCULATOR', '2': 0},
     const {'1': 'APPLICATION', '2': 1},
-    const {'1': 'UNKNOWN', '2': 2},
+    const {'1': 'COMMAND', '2': 2},
+    const {'1': 'LINK', '2': 3},
+    const {'1': 'UNKNOWN', '2': 4},
   ],
 };
 
 /// Descriptor for `RootListRowType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List rootListRowTypeDescriptor = $convert.base64Decode('Cg9Sb290TGlzdFJvd1R5cGUSDgoKQ0FMQ1VMQVRPUhAAEg8KC0FQUExJQ0FUSU9OEAESCwoHVU5LTk9XThAC');
+final $typed_data.Uint8List rootListRowTypeDescriptor = $convert.base64Decode('Cg9Sb290TGlzdFJvd1R5cGUSDgoKQ0FMQ1VMQVRPUhAAEg8KC0FQUExJQ0FUSU9OEAESCwoHQ09NTUFORBACEggKBExJTksQAxILCgdVTktOT1dOEAQ=');
 @$core.Deprecated('Use messageTypeDescriptor instead')
 const MessageType$json = const {
   '1': 'MessageType',
