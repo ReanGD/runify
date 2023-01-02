@@ -19,6 +19,8 @@ class RootListRowID {
 enum RootListRowType {
   calculator, // filter disabled
   application, // filter enabled
+  command, // filter enabled
+  link, // filter enabled
   unknown, // filter enabled
 }
 
@@ -40,6 +42,10 @@ class RootListRow implements Matcher<RootListRowID> {
         return "";
       case RootListRowType.application:
         return 'App';
+      case RootListRowType.command:
+        return 'Command';
+      case RootListRowType.link:
+        return 'Link';
       default:
         return "";
     }

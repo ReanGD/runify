@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:runify/system/logger.dart';
 import 'package:runify/system/settings.dart';
 import 'package:runify/plugin/runify_native.dart';
+import 'package:runify/rpc/rpc_form_service.dart';
+import 'package:runify/screen/form/fm_controller.dart';
 import 'package:runify/rpc/rpc_root_list_service.dart';
 import 'package:runify/rpc/rpc_context_menu_service.dart';
 import 'package:runify/screen/root_list/rl_controller.dart';
@@ -114,6 +116,16 @@ class RunifyNavigator {
         break;
       }
     }
+  }
+
+  Future<void> openForm(FMService service) async {
+    final ctrl = FMController(service);
+
+    final route = MaterialPageRoute(
+      builder: (context) => ctrl.build(),
+    );
+
+    _push(service.formID, service.formClosed, route);
   }
 
   Future<void> openRootList(RLService service) async {

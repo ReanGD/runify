@@ -51,6 +51,9 @@ class GrpcClient {
     final stream = _grpcClient.connect(_outCh.stream);
     await for (var msg in stream) {
       switch (msg.whichPayload()) {
+        case SrvMessage_Payload.formOpen:
+          storage.addForm(msg.formID, msg.formOpen);
+          break;
         case SrvMessage_Payload.rootListOpen:
           storage.addRootListForm(msg.formID, msg.rootListOpen);
           break;

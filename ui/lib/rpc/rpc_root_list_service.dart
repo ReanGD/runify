@@ -14,6 +14,12 @@ RootListRow castRootListRow(pb.RootListRow row) {
     case pb.RootListRowType.APPLICATION:
       rowType = RootListRowType.application;
       break;
+    case pb.RootListRowType.COMMAND:
+      rowType = RootListRowType.command;
+      break;
+    case pb.RootListRowType.LINK:
+      rowType = RootListRowType.link;
+      break;
     default:
       rowType = RootListRowType.unknown;
   }

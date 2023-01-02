@@ -5,6 +5,7 @@ import 'package:runify/rpc/rpc_types.dart';
 import 'package:runify/pb/runify.pbgrpc.dart';
 import 'package:runify/navigator/navigator.dart';
 import 'package:runify/rpc/rpc_proto_client.dart';
+import 'package:runify/rpc/rpc_form_service.dart';
 import 'package:runify/rpc/rpc_root_list_service.dart';
 import 'package:runify/rpc/rpc_context_menu_service.dart';
 
@@ -16,6 +17,13 @@ class ServiceStorage {
   final StreamController<UIMessage> _outCh;
 
   ServiceStorage(this._outCh, this._navigator, this._logger);
+
+  Future<void> addForm(int formID, FormOpen msg) async {
+    final pClient = ProtoClient(formID, _outCh);
+    final service = FMService(this, pClient, _logger, msg.markup, msg.model);
+    _services[formID] = service;
+    await _navigator.openForm(service);
+  }
 
   Future<void> addRootListForm(int formID, RootListOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
