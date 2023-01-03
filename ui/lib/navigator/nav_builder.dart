@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:runify/system/settings.dart';
+import 'package:runify/global/shortcuts.dart';
 import 'package:runify/rpc/rpc_grpc_client.dart';
 import 'package:runify/navigator/navigator.dart';
 import 'package:runify/plugin/runify_native.dart';
@@ -40,6 +41,7 @@ class NavBuilder extends StatelessWidget {
   Map<ShortcutActivator, Intent> get shortcuts {
     return <ShortcutActivator, Intent>{
       ...WidgetsApp.defaultShortcuts,
+      ...appShortcuts(),
       const SingleActivator(LogicalKeyboardKey.escape): const OnBackIntent(),
     };
   }

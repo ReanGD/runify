@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:runify/style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
+
+import 'package:runify/style.dart';
+import 'package:runify/global/shortcuts.dart';
 
 enum DataItemEvent {
   onTap,
@@ -32,6 +34,17 @@ class OnEventAction extends Action<OnEventIntent> {
   Object? invoke(covariant OnEventIntent intent) {
     controller.onItemEvent(intent.event);
     return null;
+  }
+}
+
+class OnMenuAction extends Action<MenuActivateIntent> {
+  final DataListController controller;
+
+  OnMenuAction(this.controller);
+
+  @override
+  void invoke(MenuActivateIntent intent) {
+    controller.onItemEvent(DataItemEvent.onMenu);
   }
 }
 
@@ -67,8 +80,6 @@ abstract class DataListController {
     return <ShortcutActivator, Intent>{
       const SingleActivator(LogicalKeyboardKey.enter):
           const OnEventIntent(DataItemEvent.onChoice),
-      const SingleActivator(LogicalKeyboardKey.keyM, alt: true):
-          const OnEventIntent(DataItemEvent.onMenu),
       const SingleActivator(LogicalKeyboardKey.arrowUp):
           const MoveFocusIntent(-1),
       const SingleActivator(LogicalKeyboardKey.arrowDown):
@@ -84,6 +95,7 @@ abstract class DataListController {
     return <Type, Action<Intent>>{
       OnEventIntent: OnEventAction(this),
       MoveFocusIntent: MoveFocusAction(this),
+      MenuActivateIntent: OnMenuAction(this),
     };
   }
 
