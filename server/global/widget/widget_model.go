@@ -4,7 +4,7 @@ import "reflect"
 
 type Model struct {
 	Name       string                 `json:"name"`
-	Value      interface{}            `json:"value,omitempty"`
+	Value      interface{}            `json:"value"`
 	Validators map[string]interface{} `json:"validators,omitempty"`
 }
 

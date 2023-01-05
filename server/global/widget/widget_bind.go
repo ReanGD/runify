@@ -34,6 +34,11 @@ func (f *BindField) Required() *BindField {
 	return f
 }
 
+func (f *BindField) ServerSide() *BindField {
+	f.validators["serverSide"] = true
+	return f
+}
+
 func (f *BindField) MarshalJSON() ([]byte, error) {
 	return json.Marshal(f.jsonName)
 }

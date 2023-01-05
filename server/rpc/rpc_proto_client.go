@@ -135,6 +135,23 @@ func (c *protoClient) AddContextMenu(ctrl api.ContextMenuCtrl) {
 	}
 }
 
+func (c *protoClient) FieldCheckResponse(formID api.FormID, requestID uint32, result bool, errorMessage string) {
+	if !c.storage.isExists(formID) {
+		return
+	}
+
+	c.outCh <- &pb.SrvMessage{
+		FormID: uint32(formID),
+		Payload: &pb.SrvMessage_FieldCheckResponse{
+			FieldCheckResponse: &pb.FieldCheckResponse{
+				RequestID: requestID,
+				Result:    result,
+				Error:     errorMessage,
+			},
+		},
+	}
+}
+
 func (c *protoClient) UserMessage(text string) {
 	c.outCh <- &pb.SrvMessage{
 		FormID: 0,

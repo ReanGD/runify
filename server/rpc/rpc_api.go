@@ -91,6 +91,7 @@ func (s *runifyServer) Connect(stream pb.Runify_ConnectServer) error {
 				return err
 			}
 
+			formID := api.FormID(req.FormID)
 			switch m := req.Payload.(type) {
 			case *pb.UIMessage_WriteLog:
 				if err = s.writeUILog(m.WriteLog); err != nil {
@@ -98,27 +99,37 @@ func (s *runifyServer) Connect(stream pb.Runify_ConnectServer) error {
 					return err
 				}
 			case *pb.UIMessage_FilterChanged:
-				if err = forms.filterChanged(api.FormID(req.FormID), m.FilterChanged); err != nil {
+				if err = forms.filterChanged(formID, m.FilterChanged); err != nil {
 					s.logGrpcError("FilterChanged", err)
 					return err
 				}
 			case *pb.UIMessage_RootListRowActivated:
-				if err = forms.rootListRowActivated(api.FormID(req.FormID), m.RootListRowActivated); err != nil {
+				if err = forms.rootListRowActivated(formID, m.RootListRowActivated); err != nil {
 					s.logGrpcError("RootListRowActivated", err)
 					return err
 				}
 			case *pb.UIMessage_RootListMenuActivated:
-				if err = forms.rootListMenuActivated(api.FormID(req.FormID), m.RootListMenuActivated); err != nil {
+				if err = forms.rootListMenuActivated(formID, m.RootListMenuActivated); err != nil {
 					s.logGrpcError("RootListMenuActivated", err)
 					return err
 				}
 			case *pb.UIMessage_ContextMenuRowActivated:
-				if err = forms.contextMenuRowActivated(api.FormID(req.FormID), m.ContextMenuRowActivated); err != nil {
+				if err = forms.contextMenuRowActivated(formID, m.ContextMenuRowActivated); err != nil {
 					s.logGrpcError("ContextMenuRowActivated", err)
 					return err
 				}
+			case *pb.UIMessage_FieldCheckRequest:
+				if err = forms.fieldCheckRequest(formID, m.FieldCheckRequest); err != nil {
+					s.logGrpcError("FieldCheckRequest", err)
+					return err
+				}
+			case *pb.UIMessage_FormSubmit:
+				if err = forms.formSubmit(formID, m.FormSubmit.Data); err != nil {
+					s.logGrpcError("FormSubmit", err)
+					return err
+				}
 			case *pb.UIMessage_FormClosed:
-				if err = forms.formClosed(api.FormID(req.FormID)); err != nil {
+				if err = forms.formClosed(formID); err != nil {
 					s.logGrpcError("FormClosed", err)
 					return err
 				}

@@ -40,6 +40,16 @@ func (w *formWrapper) contextMenuRowActivated(msg *pb.ContextMenuRowID) error {
 	return errors.New("Unexpected grpc message")
 }
 
+func (w *formWrapper) fieldCheckRequest(msg *pb.FieldCheckRequest) error {
+	w.ctrl.OnFieldCheckRequest(msg.RequestID, msg.FieldName, msg.Data.Json)
+	return nil
+}
+
+func (w *formWrapper) formSubmit(msg *pb.FormData) error {
+	w.ctrl.OnSubmit(msg.Json)
+	return nil
+}
+
 type rootListWrapper struct {
 	ctrl         api.RootListCtrl
 	moduleLogger *zap.Logger
@@ -69,6 +79,16 @@ func (w *rootListWrapper) rootListMenuActivated(msg *pb.RootListRowGlobalID) err
 
 func (w *rootListWrapper) contextMenuRowActivated(msg *pb.ContextMenuRowID) error {
 	w.moduleLogger.Error("Unexpected grpc message for root list handler", zap.String("Message", "ContextMenuRowActivated"))
+	return errors.New("Unexpected grpc message")
+}
+
+func (w *rootListWrapper) fieldCheckRequest(msg *pb.FieldCheckRequest) error {
+	w.moduleLogger.Error("Unexpected grpc message for root list handler", zap.String("Message", "FieldCheckRequest"))
+	return errors.New("Unexpected grpc message")
+}
+
+func (w *rootListWrapper) formSubmit(msg *pb.FormData) error {
+	w.moduleLogger.Error("Unexpected grpc message for root list handler", zap.String("Message", "FormSubmit"))
 	return errors.New("Unexpected grpc message")
 }
 
@@ -102,4 +122,14 @@ func (w *contextMenuWrapper) rootListMenuActivated(msg *pb.RootListRowGlobalID) 
 func (w *contextMenuWrapper) contextMenuRowActivated(msg *pb.ContextMenuRowID) error {
 	w.ctrl.OnRowActivate(api.ContextMenuRowID(msg.RowID))
 	return nil
+}
+
+func (w *contextMenuWrapper) fieldCheckRequest(msg *pb.FieldCheckRequest) error {
+	w.moduleLogger.Error("Unexpected grpc message for context menu handler", zap.String("Message", "FieldCheckRequest"))
+	return errors.New("Unexpected grpc message")
+}
+
+func (w *contextMenuWrapper) formSubmit(msg *pb.FormData) error {
+	w.moduleLogger.Error("Unexpected grpc message for context menu handler", zap.String("Message", "FormSubmit"))
+	return errors.New("Unexpected grpc message")
 }

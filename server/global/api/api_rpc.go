@@ -9,6 +9,7 @@ type RpcClient interface {
 	RootListChangeRows(formID FormID, rows ...*RootListRow)
 	RootListRemoveRows(formID FormID, rows ...RootListRowGlobalID)
 	AddContextMenu(ctrl ContextMenuCtrl)
+	FieldCheckResponse(formID FormID, requestID uint32, result bool, msg string)
 	UserMessage(msg string)
 	CloseForm(formID FormID)
 	HideUI(msg error)

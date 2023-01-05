@@ -8,7 +8,9 @@ import (
 )
 
 type FormCtrl interface {
-	OnOpen(formID FormID, client RpcClient) widget.DataForm
+	OnOpen(formID FormID, client RpcClient) *widget.DataForm
+	OnFieldCheckRequest(requestID uint32, fieldName string, jsonBody string)
+	OnSubmit(jsonBody string)
 }
 
 type RootListCtrl interface {
@@ -56,7 +58,9 @@ func (id ContextMenuRowID) ZapFieldPrefix(prefix string) zap.Field {
 const (
 	RowType_Calculator  RowType = 0
 	RowType_Application RowType = 1
-	RowType_Unknown     RowType = 2
+	RowType_Command     RowType = 2
+	RowType_Link        RowType = 3
+	RowType_Unknown     RowType = 4
 )
 
 type RowType int16
@@ -67,6 +71,10 @@ func (t RowType) ToProtobuf() pb.RootListRowType {
 		return pb.RootListRowType_CALCULATOR
 	case RowType_Application:
 		return pb.RootListRowType_APPLICATION
+	case RowType_Command:
+		return pb.RootListRowType_COMMAND
+	case RowType_Link:
+		return pb.RootListRowType_LINK
 	default:
 		return pb.RootListRowType_UNKNOWN
 	}
@@ -78,6 +86,10 @@ func (t RowType) String() string {
 		return "Calculator"
 	case RowType_Application:
 		return "Application"
+	case RowType_Command:
+		return "Command"
+	case RowType_Link:
+		return "Link"
 	default:
 		return "Unknown"
 	}

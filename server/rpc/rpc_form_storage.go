@@ -13,6 +13,8 @@ type formHandler interface {
 	rootListRowActivated(msg *pb.RootListRowGlobalID) error
 	rootListMenuActivated(msg *pb.RootListRowGlobalID) error
 	contextMenuRowActivated(msg *pb.ContextMenuRowID) error
+	fieldCheckRequest(msg *pb.FieldCheckRequest) error
+	formSubmit(msg *pb.FormData) error
 }
 
 type formStorage struct {
@@ -126,6 +128,22 @@ func (s *formStorage) rootListMenuActivated(formID api.FormID, msg *pb.RootListR
 func (s *formStorage) contextMenuRowActivated(formID api.FormID, msg *pb.ContextMenuRowID) error {
 	if handler, ok := s.getForHandle(formID, "ContextMenuRowActivated"); ok {
 		return handler.contextMenuRowActivated(msg)
+	}
+
+	return nil
+}
+
+func (s *formStorage) fieldCheckRequest(formID api.FormID, msg *pb.FieldCheckRequest) error {
+	if handler, ok := s.getForHandle(formID, "FieldCheckRequest"); ok {
+		return handler.fieldCheckRequest(msg)
+	}
+
+	return nil
+}
+
+func (s *formStorage) formSubmit(formID api.FormID, msg *pb.FormData) error {
+	if handler, ok := s.getForHandle(formID, "FormSubmit"); ok {
+		return handler.formSubmit(msg)
 	}
 
 	return nil
