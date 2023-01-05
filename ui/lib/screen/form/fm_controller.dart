@@ -23,7 +23,7 @@ class FMController {
 
   void onSubmit() {
     if (model.valid) {
-      _service.submit(model.value);
+      _service.submit();
     }
   }
 }

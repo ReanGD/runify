@@ -60,6 +60,28 @@ class ProtoClient {
     _outCh.add(msg);
   }
 
+  void fieldCheckRequest(int requestID, String fieldName, String json) {
+    final msg = UIMessage(
+      formID: _formID,
+      fieldCheckRequest: FieldCheckRequest(
+        requestID: requestID,
+        fieldName: fieldName,
+        data: FormData(json: json),
+      ),
+    );
+
+    _outCh.add(msg);
+  }
+
+  void formSubmit(String json) {
+    final msg = UIMessage(
+      formID: _formID,
+      formSubmit: FormSubmit(data: FormData(json: json)),
+    );
+
+    _outCh.add(msg);
+  }
+
   void formClosed() {
     final msg = UIMessage(
       formID: _formID,

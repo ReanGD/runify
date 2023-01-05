@@ -1,4 +1,5 @@
 import 'package:runify/rpc/rpc_types.dart';
+import 'package:runify/system/logger.dart';
 import 'package:runify/global/cast_list.dart';
 import 'package:runify/rpc/rpc_proto_client.dart';
 import 'package:runify/global/root_list_row.dart';
@@ -34,11 +35,13 @@ RootListRow castRootListRow(pb.RootListRow row) {
 }
 
 class RLService implements Service {
+  final Logger _logger;
   final ProtoClient _pClient;
   final ServiceStorage _storage;
   late final RootListRowFilter _filter;
 
-  RLService(this._storage, this._pClient, List<pb.RootListRow> rows) {
+  RLService(
+      this._storage, this._pClient, this._logger, List<pb.RootListRow> rows) {
     _filter = RootListRowFilter();
     _filter.add(CastList(rows, castRootListRow));
     _filter.apply();
@@ -73,6 +76,12 @@ class RLService implements Service {
             RootListRowID(row.providerID, row.rowID)).toSet();
     _filter.remove(keys);
     _filter.apply();
+  }
+
+  @override
+  void onFieldCheckResponse(pb.FieldCheckResponse msg) {
+    _logger.error(
+        "Unexpected grpc message 'FieldCheckResponse' for root list handler");
   }
 
   void setFilter(String value) {

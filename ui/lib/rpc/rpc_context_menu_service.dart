@@ -41,6 +41,12 @@ class CMService implements Service {
         "Unexpected grpc message 'RootListRemoveRows' for context menu handler");
   }
 
+  @override
+  void onFieldCheckResponse(pb.FieldCheckResponse msg) {
+    _logger.error(
+        "Unexpected grpc message 'FieldCheckResponse' for context menu handler");
+  }
+
   void setFilter(String value) {
     _filter.setFilter(value);
     _filter.apply();

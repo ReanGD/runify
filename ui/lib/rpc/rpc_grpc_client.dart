@@ -69,6 +69,9 @@ class GrpcClient {
         case SrvMessage_Payload.contextMenuOpen:
           storage.addContextMenu(msg.formID, msg.contextMenuOpen);
           break;
+        case SrvMessage_Payload.fieldCheckResponse:
+          storage.onFieldCheckResponse(msg.formID, msg.fieldCheckResponse);
+          break;
         case SrvMessage_Payload.userMessage:
           storage.onUserMessage(msg.userMessage);
           break;

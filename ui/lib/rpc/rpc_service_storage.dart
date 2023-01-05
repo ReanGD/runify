@@ -27,7 +27,7 @@ class ServiceStorage {
 
   Future<void> addRootListForm(int formID, RootListOpen msg) async {
     final pClient = ProtoClient(formID, _outCh);
-    final service = RLService(this, pClient, msg.rows);
+    final service = RLService(this, pClient, _logger, msg.rows);
     _services[formID] = service;
     await _navigator.openRootList(service);
   }
@@ -64,6 +64,10 @@ class ServiceStorage {
     getForHandle(formID, "RootListRemoveRows").onRootListRemoveRows(msg.rows);
   }
 
+  Future<void> onFieldCheckResponse(int formID, FieldCheckResponse msg) async {
+    getForHandle(formID, "FieldCheckResponse").onFieldCheckResponse(msg);
+  }
+
   Future<void> onUserMessage(UserMessage msg) async {
     // TODO: implement onUserMessage
   }
@@ -75,7 +79,7 @@ class ServiceStorage {
   }
 
   Future<void> onHideUI(HideUI msg) async {
-    // TODO: show message
+    // TODO: show message if needed
     return _navigator.hideWindow();
   }
 
