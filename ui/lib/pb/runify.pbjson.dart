@@ -133,6 +133,30 @@ const FormOpen$json = const {
 
 /// Descriptor for `FormOpen`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List formOpenDescriptor = $convert.base64Decode('CghGb3JtT3BlbhIqCgZtYXJrdXAYASABKAsyEi5ydW5pZnkuRm9ybU1hcmt1cFIGbWFya3VwEicKBW1vZGVsGAIgASgLMhEucnVuaWZ5LkZvcm1Nb2RlbFIFbW9kZWw=');
+@$core.Deprecated('Use fieldCheckRequestDescriptor instead')
+const FieldCheckRequest$json = const {
+  '1': 'FieldCheckRequest',
+  '2': const [
+    const {'1': 'requestID', '3': 1, '4': 1, '5': 13, '10': 'requestID'},
+    const {'1': 'fieldName', '3': 2, '4': 1, '5': 9, '10': 'fieldName'},
+    const {'1': 'data', '3': 3, '4': 1, '5': 11, '6': '.runify.FormData', '10': 'data'},
+  ],
+};
+
+/// Descriptor for `FieldCheckRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List fieldCheckRequestDescriptor = $convert.base64Decode('ChFGaWVsZENoZWNrUmVxdWVzdBIcCglyZXF1ZXN0SUQYASABKA1SCXJlcXVlc3RJRBIcCglmaWVsZE5hbWUYAiABKAlSCWZpZWxkTmFtZRIkCgRkYXRhGAMgASgLMhAucnVuaWZ5LkZvcm1EYXRhUgRkYXRh');
+@$core.Deprecated('Use fieldCheckResponseDescriptor instead')
+const FieldCheckResponse$json = const {
+  '1': 'FieldCheckResponse',
+  '2': const [
+    const {'1': 'requestID', '3': 1, '4': 1, '5': 13, '10': 'requestID'},
+    const {'1': 'result', '3': 2, '4': 1, '5': 8, '10': 'result'},
+    const {'1': 'error', '3': 3, '4': 1, '5': 9, '10': 'error'},
+  ],
+};
+
+/// Descriptor for `FieldCheckResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List fieldCheckResponseDescriptor = $convert.base64Decode('ChJGaWVsZENoZWNrUmVzcG9uc2USHAoJcmVxdWVzdElEGAEgASgNUglyZXF1ZXN0SUQSFgoGcmVzdWx0GAIgASgIUgZyZXN1bHQSFAoFZXJyb3IYAyABKAlSBWVycm9y');
 @$core.Deprecated('Use formSubmitDescriptor instead')
 const FormSubmit$json = const {
   '1': 'FormSubmit',
@@ -266,8 +290,9 @@ const UIMessage$json = const {
     const {'1': 'rootListRowActivated', '3': 4, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListRowActivated'},
     const {'1': 'rootListMenuActivated', '3': 5, '4': 1, '5': 11, '6': '.runify.RootListRowGlobalID', '9': 0, '10': 'rootListMenuActivated'},
     const {'1': 'contextMenuRowActivated', '3': 6, '4': 1, '5': 11, '6': '.runify.ContextMenuRowID', '9': 0, '10': 'contextMenuRowActivated'},
-    const {'1': 'formSubmit', '3': 7, '4': 1, '5': 11, '6': '.runify.FormSubmit', '9': 0, '10': 'formSubmit'},
-    const {'1': 'formClosed', '3': 8, '4': 1, '5': 11, '6': '.runify.FormClosed', '9': 0, '10': 'formClosed'},
+    const {'1': 'fieldCheckRequest', '3': 7, '4': 1, '5': 11, '6': '.runify.FieldCheckRequest', '9': 0, '10': 'fieldCheckRequest'},
+    const {'1': 'formSubmit', '3': 8, '4': 1, '5': 11, '6': '.runify.FormSubmit', '9': 0, '10': 'formSubmit'},
+    const {'1': 'formClosed', '3': 9, '4': 1, '5': 11, '6': '.runify.FormClosed', '9': 0, '10': 'formClosed'},
   ],
   '8': const [
     const {'1': 'payload'},
@@ -275,7 +300,7 @@ const UIMessage$json = const {
 };
 
 /// Descriptor for `UIMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List uIMessageDescriptor = $convert.base64Decode('CglVSU1lc3NhZ2USFgoGZm9ybUlEGAEgASgNUgZmb3JtSUQSLgoId3JpdGVMb2cYAiABKAsyEC5ydW5pZnkuV3JpdGVMb2dIAFIId3JpdGVMb2cSOgoNZmlsdGVyQ2hhbmdlZBgDIAEoCzISLnJ1bmlmeS5GaWx0ZXJEYXRhSABSDWZpbHRlckNoYW5nZWQSUQoUcm9vdExpc3RSb3dBY3RpdmF0ZWQYBCABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhRyb290TGlzdFJvd0FjdGl2YXRlZBJTChVyb290TGlzdE1lbnVBY3RpdmF0ZWQYBSABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhVyb290TGlzdE1lbnVBY3RpdmF0ZWQSVAoXY29udGV4dE1lbnVSb3dBY3RpdmF0ZWQYBiABKAsyGC5ydW5pZnkuQ29udGV4dE1lbnVSb3dJREgAUhdjb250ZXh0TWVudVJvd0FjdGl2YXRlZBI0Cgpmb3JtU3VibWl0GAcgASgLMhIucnVuaWZ5LkZvcm1TdWJtaXRIAFIKZm9ybVN1Ym1pdBI0Cgpmb3JtQ2xvc2VkGAggASgLMhIucnVuaWZ5LkZvcm1DbG9zZWRIAFIKZm9ybUNsb3NlZEIJCgdwYXlsb2Fk');
+final $typed_data.Uint8List uIMessageDescriptor = $convert.base64Decode('CglVSU1lc3NhZ2USFgoGZm9ybUlEGAEgASgNUgZmb3JtSUQSLgoId3JpdGVMb2cYAiABKAsyEC5ydW5pZnkuV3JpdGVMb2dIAFIId3JpdGVMb2cSOgoNZmlsdGVyQ2hhbmdlZBgDIAEoCzISLnJ1bmlmeS5GaWx0ZXJEYXRhSABSDWZpbHRlckNoYW5nZWQSUQoUcm9vdExpc3RSb3dBY3RpdmF0ZWQYBCABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhRyb290TGlzdFJvd0FjdGl2YXRlZBJTChVyb290TGlzdE1lbnVBY3RpdmF0ZWQYBSABKAsyGy5ydW5pZnkuUm9vdExpc3RSb3dHbG9iYWxJREgAUhVyb290TGlzdE1lbnVBY3RpdmF0ZWQSVAoXY29udGV4dE1lbnVSb3dBY3RpdmF0ZWQYBiABKAsyGC5ydW5pZnkuQ29udGV4dE1lbnVSb3dJREgAUhdjb250ZXh0TWVudVJvd0FjdGl2YXRlZBJJChFmaWVsZENoZWNrUmVxdWVzdBgHIAEoCzIZLnJ1bmlmeS5GaWVsZENoZWNrUmVxdWVzdEgAUhFmaWVsZENoZWNrUmVxdWVzdBI0Cgpmb3JtU3VibWl0GAggASgLMhIucnVuaWZ5LkZvcm1TdWJtaXRIAFIKZm9ybVN1Ym1pdBI0Cgpmb3JtQ2xvc2VkGAkgASgLMhIucnVuaWZ5LkZvcm1DbG9zZWRIAFIKZm9ybUNsb3NlZEIJCgdwYXlsb2Fk');
 @$core.Deprecated('Use srvMessageDescriptor instead')
 const SrvMessage$json = const {
   '1': 'SrvMessage',
@@ -286,11 +311,12 @@ const SrvMessage$json = const {
     const {'1': 'rootListAddRows', '3': 4, '4': 1, '5': 11, '6': '.runify.RootListAddRows', '9': 0, '10': 'rootListAddRows'},
     const {'1': 'rootListChangeRows', '3': 5, '4': 1, '5': 11, '6': '.runify.RootListChangeRows', '9': 0, '10': 'rootListChangeRows'},
     const {'1': 'rootListRemoveRows', '3': 6, '4': 1, '5': 11, '6': '.runify.RootListRemoveRows', '9': 0, '10': 'rootListRemoveRows'},
-    const {'1': 'contextMenuOpen', '3': 7, '4': 1, '5': 11, '6': '.runify.ContextMenuOpen', '9': 0, '10': 'contextMenuOpen'},
-    const {'1': 'userMessage', '3': 8, '4': 1, '5': 11, '6': '.runify.UserMessage', '9': 0, '10': 'userMessage'},
-    const {'1': 'closeForm', '3': 9, '4': 1, '5': 11, '6': '.runify.CloseForm', '9': 0, '10': 'closeForm'},
-    const {'1': 'hideUI', '3': 10, '4': 1, '5': 11, '6': '.runify.HideUI', '9': 0, '10': 'hideUI'},
-    const {'1': 'closeUI', '3': 11, '4': 1, '5': 11, '6': '.runify.CloseUI', '9': 0, '10': 'closeUI'},
+    const {'1': 'fieldCheckResponse', '3': 7, '4': 1, '5': 11, '6': '.runify.FieldCheckResponse', '9': 0, '10': 'fieldCheckResponse'},
+    const {'1': 'contextMenuOpen', '3': 8, '4': 1, '5': 11, '6': '.runify.ContextMenuOpen', '9': 0, '10': 'contextMenuOpen'},
+    const {'1': 'userMessage', '3': 9, '4': 1, '5': 11, '6': '.runify.UserMessage', '9': 0, '10': 'userMessage'},
+    const {'1': 'closeForm', '3': 10, '4': 1, '5': 11, '6': '.runify.CloseForm', '9': 0, '10': 'closeForm'},
+    const {'1': 'hideUI', '3': 11, '4': 1, '5': 11, '6': '.runify.HideUI', '9': 0, '10': 'hideUI'},
+    const {'1': 'closeUI', '3': 12, '4': 1, '5': 11, '6': '.runify.CloseUI', '9': 0, '10': 'closeUI'},
   ],
   '8': const [
     const {'1': 'payload'},
@@ -298,4 +324,4 @@ const SrvMessage$json = const {
 };
 
 /// Descriptor for `SrvMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List srvMessageDescriptor = $convert.base64Decode('CgpTcnZNZXNzYWdlEhYKBmZvcm1JRBgBIAEoDVIGZm9ybUlEEi4KCGZvcm1PcGVuGAIgASgLMhAucnVuaWZ5LkZvcm1PcGVuSABSCGZvcm1PcGVuEjoKDHJvb3RMaXN0T3BlbhgDIAEoCzIULnJ1bmlmeS5Sb290TGlzdE9wZW5IAFIMcm9vdExpc3RPcGVuEkMKD3Jvb3RMaXN0QWRkUm93cxgEIAEoCzIXLnJ1bmlmeS5Sb290TGlzdEFkZFJvd3NIAFIPcm9vdExpc3RBZGRSb3dzEkwKEnJvb3RMaXN0Q2hhbmdlUm93cxgFIAEoCzIaLnJ1bmlmeS5Sb290TGlzdENoYW5nZVJvd3NIAFIScm9vdExpc3RDaGFuZ2VSb3dzEkwKEnJvb3RMaXN0UmVtb3ZlUm93cxgGIAEoCzIaLnJ1bmlmeS5Sb290TGlzdFJlbW92ZVJvd3NIAFIScm9vdExpc3RSZW1vdmVSb3dzEkMKD2NvbnRleHRNZW51T3BlbhgHIAEoCzIXLnJ1bmlmeS5Db250ZXh0TWVudU9wZW5IAFIPY29udGV4dE1lbnVPcGVuEjcKC3VzZXJNZXNzYWdlGAggASgLMhMucnVuaWZ5LlVzZXJNZXNzYWdlSABSC3VzZXJNZXNzYWdlEjEKCWNsb3NlRm9ybRgJIAEoCzIRLnJ1bmlmeS5DbG9zZUZvcm1IAFIJY2xvc2VGb3JtEigKBmhpZGVVSRgKIAEoCzIOLnJ1bmlmeS5IaWRlVUlIAFIGaGlkZVVJEisKB2Nsb3NlVUkYCyABKAsyDy5ydW5pZnkuQ2xvc2VVSUgAUgdjbG9zZVVJQgkKB3BheWxvYWQ=');
+final $typed_data.Uint8List srvMessageDescriptor = $convert.base64Decode('CgpTcnZNZXNzYWdlEhYKBmZvcm1JRBgBIAEoDVIGZm9ybUlEEi4KCGZvcm1PcGVuGAIgASgLMhAucnVuaWZ5LkZvcm1PcGVuSABSCGZvcm1PcGVuEjoKDHJvb3RMaXN0T3BlbhgDIAEoCzIULnJ1bmlmeS5Sb290TGlzdE9wZW5IAFIMcm9vdExpc3RPcGVuEkMKD3Jvb3RMaXN0QWRkUm93cxgEIAEoCzIXLnJ1bmlmeS5Sb290TGlzdEFkZFJvd3NIAFIPcm9vdExpc3RBZGRSb3dzEkwKEnJvb3RMaXN0Q2hhbmdlUm93cxgFIAEoCzIaLnJ1bmlmeS5Sb290TGlzdENoYW5nZVJvd3NIAFIScm9vdExpc3RDaGFuZ2VSb3dzEkwKEnJvb3RMaXN0UmVtb3ZlUm93cxgGIAEoCzIaLnJ1bmlmeS5Sb290TGlzdFJlbW92ZVJvd3NIAFIScm9vdExpc3RSZW1vdmVSb3dzEkwKEmZpZWxkQ2hlY2tSZXNwb25zZRgHIAEoCzIaLnJ1bmlmeS5GaWVsZENoZWNrUmVzcG9uc2VIAFISZmllbGRDaGVja1Jlc3BvbnNlEkMKD2NvbnRleHRNZW51T3BlbhgIIAEoCzIXLnJ1bmlmeS5Db250ZXh0TWVudU9wZW5IAFIPY29udGV4dE1lbnVPcGVuEjcKC3VzZXJNZXNzYWdlGAkgASgLMhMucnVuaWZ5LlVzZXJNZXNzYWdlSABSC3VzZXJNZXNzYWdlEjEKCWNsb3NlRm9ybRgKIAEoCzIRLnJ1bmlmeS5DbG9zZUZvcm1IAFIJY2xvc2VGb3JtEigKBmhpZGVVSRgLIAEoCzIOLnJ1bmlmeS5IaWRlVUlIAFIGaGlkZVVJEisKB2Nsb3NlVUkYDCABKAsyDy5ydW5pZnkuQ2xvc2VVSUgAUgdjbG9zZVVJQgkKB3BheWxvYWQ=');

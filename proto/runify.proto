@@ -59,6 +59,18 @@ message FormOpen {
 	FormModel model = 2;
 }
 
+message FieldCheckRequest {
+	uint32 requestID = 1;
+	string fieldName = 2;
+	FormData data = 3;
+}
+
+message FieldCheckResponse {
+	uint32 requestID = 1;
+	bool result = 2;
+	string error = 3;
+}
+
 message FormSubmit {
 	FormData data = 1;
 }
@@ -122,8 +134,9 @@ message UIMessage {
 		RootListRowGlobalID rootListRowActivated = 4;
 		RootListRowGlobalID rootListMenuActivated = 5;
 		ContextMenuRowID contextMenuRowActivated = 6;
-		FormSubmit formSubmit = 7;
-		FormClosed formClosed = 8;
+		FieldCheckRequest fieldCheckRequest = 7;
+		FormSubmit formSubmit = 8;
+		FormClosed formClosed = 9;
 	}
 }
 
@@ -135,11 +148,12 @@ message SrvMessage {
 		RootListAddRows rootListAddRows = 4;
 		RootListChangeRows rootListChangeRows = 5;
 		RootListRemoveRows rootListRemoveRows = 6;
-		ContextMenuOpen contextMenuOpen = 7;
-		UserMessage userMessage = 8;
-		CloseForm closeForm = 9;
-		HideUI hideUI = 10;
-		CloseUI closeUI = 11;
+		FieldCheckResponse fieldCheckResponse = 7;
+		ContextMenuOpen contextMenuOpen = 8;
+		UserMessage userMessage = 9;
+		CloseForm closeForm = 10;
+		HideUI hideUI = 11;
+		CloseUI closeUI = 12;
 	}
 }
 

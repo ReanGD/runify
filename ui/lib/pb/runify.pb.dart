@@ -505,6 +505,158 @@ class FormOpen extends $pb.GeneratedMessage {
   FormModel ensureModel() => $_ensure(1);
 }
 
+class FieldCheckRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FieldCheckRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'requestID', $pb.PbFieldType.OU3, protoName: 'requestID')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fieldName', protoName: 'fieldName')
+    ..aOM<FormData>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', subBuilder: FormData.create)
+    ..hasRequiredFields = false
+  ;
+
+  FieldCheckRequest._() : super();
+  factory FieldCheckRequest({
+    $core.int? requestID,
+    $core.String? fieldName,
+    FormData? data,
+  }) {
+    final _result = create();
+    if (requestID != null) {
+      _result.requestID = requestID;
+    }
+    if (fieldName != null) {
+      _result.fieldName = fieldName;
+    }
+    if (data != null) {
+      _result.data = data;
+    }
+    return _result;
+  }
+  factory FieldCheckRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FieldCheckRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FieldCheckRequest clone() => FieldCheckRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FieldCheckRequest copyWith(void Function(FieldCheckRequest) updates) => super.copyWith((message) => updates(message as FieldCheckRequest)) as FieldCheckRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FieldCheckRequest create() => FieldCheckRequest._();
+  FieldCheckRequest createEmptyInstance() => create();
+  static $pb.PbList<FieldCheckRequest> createRepeated() => $pb.PbList<FieldCheckRequest>();
+  @$core.pragma('dart2js:noInline')
+  static FieldCheckRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FieldCheckRequest>(create);
+  static FieldCheckRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get requestID => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set requestID($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRequestID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRequestID() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get fieldName => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set fieldName($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasFieldName() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFieldName() => clearField(2);
+
+  @$pb.TagNumber(3)
+  FormData get data => $_getN(2);
+  @$pb.TagNumber(3)
+  set data(FormData v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasData() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearData() => clearField(3);
+  @$pb.TagNumber(3)
+  FormData ensureData() => $_ensure(2);
+}
+
+class FieldCheckResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FieldCheckResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'requestID', $pb.PbFieldType.OU3, protoName: 'requestID')
+    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'result')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error')
+    ..hasRequiredFields = false
+  ;
+
+  FieldCheckResponse._() : super();
+  factory FieldCheckResponse({
+    $core.int? requestID,
+    $core.bool? result,
+    $core.String? error,
+  }) {
+    final _result = create();
+    if (requestID != null) {
+      _result.requestID = requestID;
+    }
+    if (result != null) {
+      _result.result = result;
+    }
+    if (error != null) {
+      _result.error = error;
+    }
+    return _result;
+  }
+  factory FieldCheckResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory FieldCheckResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  FieldCheckResponse clone() => FieldCheckResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  FieldCheckResponse copyWith(void Function(FieldCheckResponse) updates) => super.copyWith((message) => updates(message as FieldCheckResponse)) as FieldCheckResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static FieldCheckResponse create() => FieldCheckResponse._();
+  FieldCheckResponse createEmptyInstance() => create();
+  static $pb.PbList<FieldCheckResponse> createRepeated() => $pb.PbList<FieldCheckResponse>();
+  @$core.pragma('dart2js:noInline')
+  static FieldCheckResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FieldCheckResponse>(create);
+  static FieldCheckResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get requestID => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set requestID($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasRequestID() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRequestID() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get result => $_getBF(1);
+  @$pb.TagNumber(2)
+  set result($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasResult() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearResult() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get error => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set error($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasError() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearError() => clearField(3);
+}
+
 class FormSubmit extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FormSubmit', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
     ..aOM<FormData>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', subBuilder: FormData.create)
@@ -1070,6 +1222,7 @@ enum UIMessage_Payload {
   rootListRowActivated, 
   rootListMenuActivated, 
   contextMenuRowActivated, 
+  fieldCheckRequest, 
   formSubmit, 
   formClosed, 
   notSet
@@ -1082,20 +1235,22 @@ class UIMessage extends $pb.GeneratedMessage {
     4 : UIMessage_Payload.rootListRowActivated,
     5 : UIMessage_Payload.rootListMenuActivated,
     6 : UIMessage_Payload.contextMenuRowActivated,
-    7 : UIMessage_Payload.formSubmit,
-    8 : UIMessage_Payload.formClosed,
+    7 : UIMessage_Payload.fieldCheckRequest,
+    8 : UIMessage_Payload.formSubmit,
+    9 : UIMessage_Payload.formClosed,
     0 : UIMessage_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UIMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..oo(0, [2, 3, 4, 5, 6, 7, 8])
+    ..oo(0, [2, 3, 4, 5, 6, 7, 8, 9])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formID', $pb.PbFieldType.OU3, protoName: 'formID')
     ..aOM<WriteLog>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'writeLog', protoName: 'writeLog', subBuilder: WriteLog.create)
     ..aOM<FilterData>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'filterChanged', protoName: 'filterChanged', subBuilder: FilterData.create)
     ..aOM<RootListRowGlobalID>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListRowActivated', protoName: 'rootListRowActivated', subBuilder: RootListRowGlobalID.create)
     ..aOM<RootListRowGlobalID>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListMenuActivated', protoName: 'rootListMenuActivated', subBuilder: RootListRowGlobalID.create)
     ..aOM<ContextMenuRowID>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contextMenuRowActivated', protoName: 'contextMenuRowActivated', subBuilder: ContextMenuRowID.create)
-    ..aOM<FormSubmit>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formSubmit', protoName: 'formSubmit', subBuilder: FormSubmit.create)
-    ..aOM<FormClosed>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formClosed', protoName: 'formClosed', subBuilder: FormClosed.create)
+    ..aOM<FieldCheckRequest>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fieldCheckRequest', protoName: 'fieldCheckRequest', subBuilder: FieldCheckRequest.create)
+    ..aOM<FormSubmit>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formSubmit', protoName: 'formSubmit', subBuilder: FormSubmit.create)
+    ..aOM<FormClosed>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formClosed', protoName: 'formClosed', subBuilder: FormClosed.create)
     ..hasRequiredFields = false
   ;
 
@@ -1107,6 +1262,7 @@ class UIMessage extends $pb.GeneratedMessage {
     RootListRowGlobalID? rootListRowActivated,
     RootListRowGlobalID? rootListMenuActivated,
     ContextMenuRowID? contextMenuRowActivated,
+    FieldCheckRequest? fieldCheckRequest,
     FormSubmit? formSubmit,
     FormClosed? formClosed,
   }) {
@@ -1128,6 +1284,9 @@ class UIMessage extends $pb.GeneratedMessage {
     }
     if (contextMenuRowActivated != null) {
       _result.contextMenuRowActivated = contextMenuRowActivated;
+    }
+    if (fieldCheckRequest != null) {
+      _result.fieldCheckRequest = fieldCheckRequest;
     }
     if (formSubmit != null) {
       _result.formSubmit = formSubmit;
@@ -1226,26 +1385,37 @@ class UIMessage extends $pb.GeneratedMessage {
   ContextMenuRowID ensureContextMenuRowActivated() => $_ensure(5);
 
   @$pb.TagNumber(7)
-  FormSubmit get formSubmit => $_getN(6);
+  FieldCheckRequest get fieldCheckRequest => $_getN(6);
   @$pb.TagNumber(7)
-  set formSubmit(FormSubmit v) { setField(7, v); }
+  set fieldCheckRequest(FieldCheckRequest v) { setField(7, v); }
   @$pb.TagNumber(7)
-  $core.bool hasFormSubmit() => $_has(6);
+  $core.bool hasFieldCheckRequest() => $_has(6);
   @$pb.TagNumber(7)
-  void clearFormSubmit() => clearField(7);
+  void clearFieldCheckRequest() => clearField(7);
   @$pb.TagNumber(7)
-  FormSubmit ensureFormSubmit() => $_ensure(6);
+  FieldCheckRequest ensureFieldCheckRequest() => $_ensure(6);
 
   @$pb.TagNumber(8)
-  FormClosed get formClosed => $_getN(7);
+  FormSubmit get formSubmit => $_getN(7);
   @$pb.TagNumber(8)
-  set formClosed(FormClosed v) { setField(8, v); }
+  set formSubmit(FormSubmit v) { setField(8, v); }
   @$pb.TagNumber(8)
-  $core.bool hasFormClosed() => $_has(7);
+  $core.bool hasFormSubmit() => $_has(7);
   @$pb.TagNumber(8)
-  void clearFormClosed() => clearField(8);
+  void clearFormSubmit() => clearField(8);
   @$pb.TagNumber(8)
-  FormClosed ensureFormClosed() => $_ensure(7);
+  FormSubmit ensureFormSubmit() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  FormClosed get formClosed => $_getN(8);
+  @$pb.TagNumber(9)
+  set formClosed(FormClosed v) { setField(9, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasFormClosed() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearFormClosed() => clearField(9);
+  @$pb.TagNumber(9)
+  FormClosed ensureFormClosed() => $_ensure(8);
 }
 
 enum SrvMessage_Payload {
@@ -1254,6 +1424,7 @@ enum SrvMessage_Payload {
   rootListAddRows, 
   rootListChangeRows, 
   rootListRemoveRows, 
+  fieldCheckResponse, 
   contextMenuOpen, 
   userMessage, 
   closeForm, 
@@ -1269,26 +1440,28 @@ class SrvMessage extends $pb.GeneratedMessage {
     4 : SrvMessage_Payload.rootListAddRows,
     5 : SrvMessage_Payload.rootListChangeRows,
     6 : SrvMessage_Payload.rootListRemoveRows,
-    7 : SrvMessage_Payload.contextMenuOpen,
-    8 : SrvMessage_Payload.userMessage,
-    9 : SrvMessage_Payload.closeForm,
-    10 : SrvMessage_Payload.hideUI,
-    11 : SrvMessage_Payload.closeUI,
+    7 : SrvMessage_Payload.fieldCheckResponse,
+    8 : SrvMessage_Payload.contextMenuOpen,
+    9 : SrvMessage_Payload.userMessage,
+    10 : SrvMessage_Payload.closeForm,
+    11 : SrvMessage_Payload.hideUI,
+    12 : SrvMessage_Payload.closeUI,
     0 : SrvMessage_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SrvMessage', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..oo(0, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+    ..oo(0, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formID', $pb.PbFieldType.OU3, protoName: 'formID')
     ..aOM<FormOpen>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'formOpen', protoName: 'formOpen', subBuilder: FormOpen.create)
     ..aOM<RootListOpen>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListOpen', protoName: 'rootListOpen', subBuilder: RootListOpen.create)
     ..aOM<RootListAddRows>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListAddRows', protoName: 'rootListAddRows', subBuilder: RootListAddRows.create)
     ..aOM<RootListChangeRows>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListChangeRows', protoName: 'rootListChangeRows', subBuilder: RootListChangeRows.create)
     ..aOM<RootListRemoveRows>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rootListRemoveRows', protoName: 'rootListRemoveRows', subBuilder: RootListRemoveRows.create)
-    ..aOM<ContextMenuOpen>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contextMenuOpen', protoName: 'contextMenuOpen', subBuilder: ContextMenuOpen.create)
-    ..aOM<UserMessage>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userMessage', protoName: 'userMessage', subBuilder: UserMessage.create)
-    ..aOM<CloseForm>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closeForm', protoName: 'closeForm', subBuilder: CloseForm.create)
-    ..aOM<HideUI>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hideUI', protoName: 'hideUI', subBuilder: HideUI.create)
-    ..aOM<CloseUI>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closeUI', protoName: 'closeUI', subBuilder: CloseUI.create)
+    ..aOM<FieldCheckResponse>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fieldCheckResponse', protoName: 'fieldCheckResponse', subBuilder: FieldCheckResponse.create)
+    ..aOM<ContextMenuOpen>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contextMenuOpen', protoName: 'contextMenuOpen', subBuilder: ContextMenuOpen.create)
+    ..aOM<UserMessage>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userMessage', protoName: 'userMessage', subBuilder: UserMessage.create)
+    ..aOM<CloseForm>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closeForm', protoName: 'closeForm', subBuilder: CloseForm.create)
+    ..aOM<HideUI>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hideUI', protoName: 'hideUI', subBuilder: HideUI.create)
+    ..aOM<CloseUI>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closeUI', protoName: 'closeUI', subBuilder: CloseUI.create)
     ..hasRequiredFields = false
   ;
 
@@ -1300,6 +1473,7 @@ class SrvMessage extends $pb.GeneratedMessage {
     RootListAddRows? rootListAddRows,
     RootListChangeRows? rootListChangeRows,
     RootListRemoveRows? rootListRemoveRows,
+    FieldCheckResponse? fieldCheckResponse,
     ContextMenuOpen? contextMenuOpen,
     UserMessage? userMessage,
     CloseForm? closeForm,
@@ -1324,6 +1498,9 @@ class SrvMessage extends $pb.GeneratedMessage {
     }
     if (rootListRemoveRows != null) {
       _result.rootListRemoveRows = rootListRemoveRows;
+    }
+    if (fieldCheckResponse != null) {
+      _result.fieldCheckResponse = fieldCheckResponse;
     }
     if (contextMenuOpen != null) {
       _result.contextMenuOpen = contextMenuOpen;
@@ -1431,58 +1608,69 @@ class SrvMessage extends $pb.GeneratedMessage {
   RootListRemoveRows ensureRootListRemoveRows() => $_ensure(5);
 
   @$pb.TagNumber(7)
-  ContextMenuOpen get contextMenuOpen => $_getN(6);
+  FieldCheckResponse get fieldCheckResponse => $_getN(6);
   @$pb.TagNumber(7)
-  set contextMenuOpen(ContextMenuOpen v) { setField(7, v); }
+  set fieldCheckResponse(FieldCheckResponse v) { setField(7, v); }
   @$pb.TagNumber(7)
-  $core.bool hasContextMenuOpen() => $_has(6);
+  $core.bool hasFieldCheckResponse() => $_has(6);
   @$pb.TagNumber(7)
-  void clearContextMenuOpen() => clearField(7);
+  void clearFieldCheckResponse() => clearField(7);
   @$pb.TagNumber(7)
-  ContextMenuOpen ensureContextMenuOpen() => $_ensure(6);
+  FieldCheckResponse ensureFieldCheckResponse() => $_ensure(6);
 
   @$pb.TagNumber(8)
-  UserMessage get userMessage => $_getN(7);
+  ContextMenuOpen get contextMenuOpen => $_getN(7);
   @$pb.TagNumber(8)
-  set userMessage(UserMessage v) { setField(8, v); }
+  set contextMenuOpen(ContextMenuOpen v) { setField(8, v); }
   @$pb.TagNumber(8)
-  $core.bool hasUserMessage() => $_has(7);
+  $core.bool hasContextMenuOpen() => $_has(7);
   @$pb.TagNumber(8)
-  void clearUserMessage() => clearField(8);
+  void clearContextMenuOpen() => clearField(8);
   @$pb.TagNumber(8)
-  UserMessage ensureUserMessage() => $_ensure(7);
+  ContextMenuOpen ensureContextMenuOpen() => $_ensure(7);
 
   @$pb.TagNumber(9)
-  CloseForm get closeForm => $_getN(8);
+  UserMessage get userMessage => $_getN(8);
   @$pb.TagNumber(9)
-  set closeForm(CloseForm v) { setField(9, v); }
+  set userMessage(UserMessage v) { setField(9, v); }
   @$pb.TagNumber(9)
-  $core.bool hasCloseForm() => $_has(8);
+  $core.bool hasUserMessage() => $_has(8);
   @$pb.TagNumber(9)
-  void clearCloseForm() => clearField(9);
+  void clearUserMessage() => clearField(9);
   @$pb.TagNumber(9)
-  CloseForm ensureCloseForm() => $_ensure(8);
+  UserMessage ensureUserMessage() => $_ensure(8);
 
   @$pb.TagNumber(10)
-  HideUI get hideUI => $_getN(9);
+  CloseForm get closeForm => $_getN(9);
   @$pb.TagNumber(10)
-  set hideUI(HideUI v) { setField(10, v); }
+  set closeForm(CloseForm v) { setField(10, v); }
   @$pb.TagNumber(10)
-  $core.bool hasHideUI() => $_has(9);
+  $core.bool hasCloseForm() => $_has(9);
   @$pb.TagNumber(10)
-  void clearHideUI() => clearField(10);
+  void clearCloseForm() => clearField(10);
   @$pb.TagNumber(10)
-  HideUI ensureHideUI() => $_ensure(9);
+  CloseForm ensureCloseForm() => $_ensure(9);
 
   @$pb.TagNumber(11)
-  CloseUI get closeUI => $_getN(10);
+  HideUI get hideUI => $_getN(10);
   @$pb.TagNumber(11)
-  set closeUI(CloseUI v) { setField(11, v); }
+  set hideUI(HideUI v) { setField(11, v); }
   @$pb.TagNumber(11)
-  $core.bool hasCloseUI() => $_has(10);
+  $core.bool hasHideUI() => $_has(10);
   @$pb.TagNumber(11)
-  void clearCloseUI() => clearField(11);
+  void clearHideUI() => clearField(11);
   @$pb.TagNumber(11)
-  CloseUI ensureCloseUI() => $_ensure(10);
+  HideUI ensureHideUI() => $_ensure(10);
+
+  @$pb.TagNumber(12)
+  CloseUI get closeUI => $_getN(11);
+  @$pb.TagNumber(12)
+  set closeUI(CloseUI v) { setField(12, v); }
+  @$pb.TagNumber(12)
+  $core.bool hasCloseUI() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearCloseUI() => clearField(12);
+  @$pb.TagNumber(12)
+  CloseUI ensureCloseUI() => $_ensure(11);
 }
 
