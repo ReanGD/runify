@@ -9,6 +9,17 @@ import 'package:runify/rpc/rpc_proto_client.dart';
 import 'package:runify/pb/runify.pbgrpc.dart' as pb;
 import 'package:runify/rpc/rpc_service_storage.dart';
 
+class _AsyncValidator extends AsyncValidator<dynamic> {
+  final AsyncValidatorFunction _func;
+
+  _AsyncValidator(this._func);
+
+  @override
+  Future<Map<String, dynamic>?> validate(
+          AbstractControl<dynamic> control) async =>
+      _func(control);
+}
+
 class FMService implements Service {
   var nextRequestID = 0;
   final Logger _logger;
@@ -54,8 +65,8 @@ class FMService implements Service {
 
       final name = item["name"];
       final validatorsJson = item["validators"];
-      final List<ValidatorFunction> validators = [];
-      final List<AsyncValidatorFunction> asyncValidators = [];
+      final List<Validator<dynamic>> validators = [];
+      final List<AsyncValidator<dynamic>> asyncValidators = [];
       if (validatorsJson != null) {
         final items = validatorsJson as Map<String, dynamic>;
         for (var item in items.entries) {
@@ -70,7 +81,8 @@ class FMService implements Service {
               validators.add(Validators.required);
               break;
             case "serverSide":
-              asyncValidators.add((value) => _asyncValidator(name, value));
+              asyncValidators.add(
+                  _AsyncValidator((value) => _asyncValidator(name, value)));
               break;
           }
         }

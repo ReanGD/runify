@@ -54,7 +54,7 @@ class NavBuilder extends StatelessWidget {
     _grpcClient.start(navigator);
     final theme = Theme.of(context);
     return Container(
-      color: theme.backgroundColor,
+      color: theme.colorScheme.background,
     );
   }
 }

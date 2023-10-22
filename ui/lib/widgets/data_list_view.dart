@@ -169,9 +169,8 @@ class _DataListScroll extends ScrollController {
   RevealedOffset _offsetToRevealInViewport(
       BuildContext object, double alignment) {
     final renderBox = object.findRenderObject()!;
-    assert(Scrollable.of(object) != null);
     final RenderAbstractViewport viewport =
-        RenderAbstractViewport.of(renderBox)!;
+        RenderAbstractViewport.of(renderBox);
     return viewport.getOffsetToReveal(renderBox, alignment);
   }
 
@@ -347,7 +346,7 @@ class _DataListItemState extends State<_DataListItem>
       final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
       final ThemeData theme = Theme.of(context);
       _highlight = InkHighlight(
-        controller: Material.of(context)!,
+        controller: Material.of(context),
         referenceBox: referenceBox,
         color: theme.hoverColor,
         onRemoved: handleInkRemoval,

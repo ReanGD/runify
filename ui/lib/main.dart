@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'package:runify/style.dart';
@@ -17,9 +15,9 @@ void main() async {
   final builder = NavBuilder(settings, grpcClient, runifyPlugin);
   await pluginFuture;
 
-  // instance.scheduleAttachRootWidget()
-  Timer.run(() {
-    instance.attachRootWidget(
+  // ignore: invalid_use_of_protected_member
+  instance.scheduleAttachRootWidget(
+    instance.wrapWithDefaultView(
       ExcludeSemantics(
         child: MaterialApp(
           title: "Runify",
@@ -32,8 +30,8 @@ void main() async {
           home: builder,
         ),
       ),
-    );
-  });
+    ),
+  );
 
   instance.scheduleWarmUpFrame();
 }
