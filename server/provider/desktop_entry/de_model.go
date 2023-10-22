@@ -93,14 +93,14 @@ func (m *deModel) walkXDGDesktopEntries(fn func(fullpath string, props *desktop.
 
 			f, err := os.Open(fullpath)
 			if err != nil {
-				m.moduleLogger.Info("Error open desktop entry file", zap.String("path", fullpath), zap.Error(err))
+				m.moduleLogger.Info("Failed open desktop entry file", zap.String("path", fullpath), zap.Error(err))
 				return
 			}
 
 			props, err := desktop.New(f)
 			f.Close()
 			if err != nil {
-				m.moduleLogger.Info("Error parse desktop entry file", zap.String("path", fullpath), zap.Error(err))
+				m.moduleLogger.Info("Failed parse desktop entry file", zap.String("path", fullpath), zap.Error(err))
 				return
 			}
 

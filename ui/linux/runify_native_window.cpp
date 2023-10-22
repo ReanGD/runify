@@ -1,5 +1,9 @@
 #include "runify_native_window.h"
 
+#if defined(GDK_WINDOWING_X11)
+#include <gdk/gdkx.h>
+#endif
+
 
 struct Geometry {
   float x;
@@ -103,7 +107,11 @@ bool RNWindow::IsVisible() const {
 
 void RNWindow::Show() const {
   gtk_widget_show(GTK_WIDGET(m_gtk_window));
+#if defined(GDK_WINDOWING_X11)
+  gtk_window_present_with_time(m_gtk_window, gdk_x11_get_server_time(m_gdk_window));
+#else
   gtk_window_present(m_gtk_window);
+#endif
 }
 
 void RNWindow::Hide() const {
@@ -115,7 +123,11 @@ bool RNWindow::IsFocused() const {
 }
 
 void RNWindow::Focus() const {
+#if defined(GDK_WINDOWING_X11)
+  gtk_window_present_with_time(m_gtk_window, gdk_x11_get_server_time(m_gdk_window));
+#else
   gtk_window_present(m_gtk_window);
+#endif
 }
 
 void RNWindow::SetOpacity(double opacity) const {
