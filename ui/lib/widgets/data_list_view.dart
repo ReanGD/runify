@@ -114,8 +114,8 @@ class _DataListScroll extends ScrollController {
   _OnDataItemIndexEvent? _onItemIndexEvent;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
-  _DataListScroll({double initialScrollOffset = 0.0})
-      : super(initialScrollOffset: initialScrollOffset, keepScrollOffset: true);
+  _DataListScroll()
+      : super(keepScrollOffset: true);
 
   Future onItemIndexEvent(DataItemEvent event, {int? index}) async {
     return _onItemIndexEvent?.call(event, index ?? _focusedIndex);
@@ -270,12 +270,10 @@ class _DataListItem extends StatefulWidget {
   final _DataListScroll dataScroll;
 
   const _DataListItem(
-      {Key? key,
-      required this.id,
+      {required this.id,
       required this.index,
       required this.dataScroll,
-      required this.child})
-      : super(key: key);
+      required this.child});
 
   @override
   State<_DataListItem> createState() => _DataListItemState();
