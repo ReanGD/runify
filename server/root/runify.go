@@ -11,6 +11,7 @@ import (
 	"github.com/ReanGD/runify/server/logger"
 	"github.com/ReanGD/runify/server/os/desktop"
 	"github.com/ReanGD/runify/server/os/x11"
+	"github.com/ReanGD/runify/server/os/xdg/de"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/provider"
 	"github.com/ReanGD/runify/server/rpc"
@@ -26,6 +27,7 @@ type Runify struct {
 	logger   *logger.Logger
 	rpc      *rpc.Rpc
 	ds       *x11.X11
+	de       *de.XDGDesktopEntry
 	desktop  *desktop.Desktop
 	provider *provider.Provider
 
@@ -51,6 +53,7 @@ func (r *Runify) create(buildCfg *config.BuildCfg) error {
 	r.logger = nil
 	r.rpc = rpc.New()
 	r.ds = x11.New()
+	r.de = de.New()
 	r.desktop = desktop.New()
 	r.provider = provider.New()
 	r.runifyLogger = nil
@@ -86,6 +89,7 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	}{
 		{rpc.ModuleName, r.rpc.OnInit(r.cfg, rootLogger)},
 		{x11.ModuleName, r.ds.OnInit(r.cfg, rootLogger)},
+		{de.ModuleName, r.de.OnInit(r.cfg, rootLogger)},
 		{desktop.ModuleName, r.desktop.OnInit(r.cfg, r.ds, r.provider, rootLogger)},
 		{provider.ModuleName, r.provider.OnInit(r.cfg, r.desktop, r.rpc, rootLogger)},
 	} {
@@ -110,6 +114,7 @@ func (r *Runify) start() {
 	cfgCh := r.cfg.OnStart(ctx, wg, r.logger.GetRoot())
 	rpcCh := r.rpc.OnStart(ctx, wg)
 	dsCh := r.ds.OnStart(ctx, wg)
+	deCh := r.de.OnStart(ctx, wg)
 	desktopCh := r.desktop.OnStart(ctx, wg)
 	providerCh := r.provider.OnStart(ctx, wg)
 
@@ -124,6 +129,8 @@ func (r *Runify) start() {
 		name = rpc.ModuleName
 	case err = <-dsCh:
 		name = x11.ModuleName
+	case err = <-deCh:
+		name = de.ModuleName
 	case err = <-desktopCh:
 		name = desktop.ModuleName
 	case err = <-providerCh:

@@ -52,19 +52,31 @@ func newDesktopCfg() *DesktopCfg {
 	}
 }
 
+type XDGDesktopEntryCfg struct {
+	ModuleChLen uint32
+}
+
+func newXDGDesktopEntryCfg() *XDGDesktopEntryCfg {
+	return &XDGDesktopEntryCfg{
+		ModuleChLen: 100,
+	}
+}
+
 // Static configuration
 type CfgStatic struct {
-	Rpc      *RpcCfg
-	Provider *ProviderCfg
-	DsX11    *DsX11Cfg
-	Desktop  *DesktopCfg
+	Rpc             *RpcCfg
+	Provider        *ProviderCfg
+	DsX11           *DsX11Cfg
+	Desktop         *DesktopCfg
+	XDGDesktopEntry *XDGDesktopEntryCfg
 }
 
 func newCfgStatic() *CfgStatic {
 	return &CfgStatic{
-		Rpc:      newRpcCfg(),
-		Provider: newProviderCfg(),
-		DsX11:    newDsX11Cfg(),
-		Desktop:  newDesktopCfg(),
+		Rpc:             newRpcCfg(),
+		Provider:        newProviderCfg(),
+		DsX11:           newDsX11Cfg(),
+		Desktop:         newDesktopCfg(),
+		XDGDesktopEntry: newXDGDesktopEntryCfg(),
 	}
 }

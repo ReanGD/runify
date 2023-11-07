@@ -1,4 +1,4 @@
-package desktop_entry
+package de
 
 import (
 	"context"
@@ -17,19 +17,19 @@ import (
 
 const ModuleName = "xdg_desktop_entry"
 
-type DesktopEntries struct {
+type XDGDesktopEntry struct {
 	handler *handler
 
 	module.Module
 }
 
-func New() *DesktopEntries {
-	return &DesktopEntries{
+func New() *XDGDesktopEntry {
+	return &XDGDesktopEntry{
 		handler: newHandler(),
 	}
 }
 
-func (d *DesktopEntries) OnInit(
+func (d *XDGDesktopEntry) OnInit(
 	cfg *config.Config, rootLogger *zap.Logger,
 ) <-chan error {
 	ch := make(chan error)
@@ -43,7 +43,7 @@ func (d *DesktopEntries) OnInit(
 	return ch
 }
 
-func (d *DesktopEntries) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
+func (d *XDGDesktopEntry) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 	wg.Add(1)
 	ch := make(chan error, 1)
 	go func() {
@@ -63,7 +63,7 @@ func (d *DesktopEntries) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan
 	return ch
 }
 
-func (d *DesktopEntries) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultErr error) {
+func (d *XDGDesktopEntry) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultErr error) {
 	var request interface{}
 	defer func() {
 		if recoverResult := recover(); recoverResult != nil {
@@ -100,7 +100,7 @@ func (d *DesktopEntries) safeRequestLoop(ctx context.Context) (resultIsFinish bo
 	}
 }
 
-func (d *DesktopEntries) onRequest(request interface{}) (bool, error) {
+func (d *XDGDesktopEntry) onRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *updateCmd:
 		d.handler.update()
@@ -118,7 +118,7 @@ func (d *DesktopEntries) onRequest(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (d *DesktopEntries) onRequestDefault(request interface{}, reason string) (bool, error) {
+func (d *XDGDesktopEntry) onRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *updateCmd:
 		r.onRequestDefault(d.ModuleLogger, reason)
@@ -137,11 +137,11 @@ func (d *DesktopEntries) onRequestDefault(request interface{}, reason string) (b
 	return false, nil
 }
 
-func (d *DesktopEntries) Update() {
+func (d *XDGDesktopEntry) Update() {
 	d.AddToChannel(&updateCmd{})
 }
 
-func (d *DesktopEntries) Subscribe(ch chan<- types.DesktopEntries, result api.BoolResult) {
+func (d *XDGDesktopEntry) Subscribe(ch chan<- types.DesktopEntries, result api.BoolResult) {
 	d.AddToChannel(&subscribeCmd{
 		ch:     ch,
 		result: result,

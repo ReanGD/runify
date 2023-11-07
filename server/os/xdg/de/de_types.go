@@ -1,4 +1,4 @@
-package desktop_entry
+package de
 
 import (
 	"github.com/ReanGD/runify/server/global/api"

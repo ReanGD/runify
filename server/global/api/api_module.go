@@ -22,7 +22,7 @@ type DisplayServer interface {
 	UnbindHotkey(hotkey *shortcut.Hotkey, result BoolResult)
 }
 
-type DesktopEntries interface {
+type XDGDesktopEntry interface {
 	Update()
 	Subscribe(ch chan<- types.DesktopEntries, result BoolResult)
 }
