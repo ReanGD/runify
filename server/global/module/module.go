@@ -1,6 +1,7 @@
 package module
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -74,6 +75,18 @@ func (c *Channel) IsOverflow() bool {
 	return atomic.LoadInt32(&c.queueOverflow) == 1
 }
 
+type HandledChannel struct {
+	ch      reflect.Value
+	handler func(interface{}) (bool, error)
+}
+
+func NewHandledChannel[T any](ch <-chan T, handler func(interface{}) (bool, error)) *HandledChannel {
+	return &HandledChannel{
+		ch:      reflect.ValueOf(ch),
+		handler: handler,
+	}
+}
+
 type Module struct {
 	ErrorCtx     *ErrorCtx
 	RootLogger   *zap.Logger
@@ -125,4 +138,69 @@ func (m *Module) RecoverLog(recoverResult interface{}, request interface{}) stri
 	}
 
 	return "panic during message processing: " + err.Error()
+}
+
+func (m *Module) SafeRequestLoop(
+	ctx context.Context,
+	onRequest func(request interface{}) (bool, error),
+	onRequestDefault func(request interface{}, reason string) (bool, error),
+	hChannels []*HandledChannel,
+) (resultIsFinish bool, resultErr error) {
+	var request interface{}
+	defer func() {
+		if recoverResult := recover(); recoverResult != nil {
+			if request != nil {
+				reason := m.RecoverLog(recoverResult, request)
+				resultIsFinish, resultErr = onRequestDefault(request, reason)
+			} else {
+				_ = m.RecoverLog(recoverResult, "unknown request")
+			}
+		}
+	}()
+
+	done := ctx.Done()
+	messageCh := m.GetReadChannel()
+	cntCh := len(hChannels) + 2
+	doneChIdx := cntCh - 1
+	messageChIdx := cntCh - 2
+
+	cases := make([]reflect.SelectCase, cntCh)
+	for i, hc := range hChannels {
+		cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: hc.ch}
+	}
+
+	cases[messageChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(messageCh)}
+	cases[doneChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(done)}
+
+	for {
+		request = nil
+		chosen, recv, recvOk := reflect.Select(cases)
+		if chosen == doneChIdx {
+			resultIsFinish = true
+			resultErr = nil
+			return
+		}
+
+		if !recvOk {
+			resultIsFinish = true
+			resultErr = errors.New("channel closed")
+			m.ModuleLogger.Error("Error during message processing",
+				zap.String("Request", "unknown"),
+				zap.String("RequestType", "unknown"),
+				zap.Error(resultErr),
+				logger.LogicalError)
+		}
+
+		if chosen == messageChIdx {
+			request = recv.Interface()
+			m.MessageWasRead()
+			if resultIsFinish, resultErr = onRequest(request); resultIsFinish {
+				return
+			}
+		} else {
+			if resultIsFinish, resultErr = hChannels[chosen].handler(recv.Interface()); resultIsFinish {
+				return
+			}
+		}
+	}
 }
