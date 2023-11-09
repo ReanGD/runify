@@ -49,8 +49,10 @@ func (p *Provider) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error
 		errCh := p.handler.onStart(ctx, wg)
 		p.ModuleLogger.Info("Start")
 
+		hChErr := module.NewHandledChannel(errCh, p.onError)
 		for {
-			if isFinish, err := p.safeRequestLoop(ctx, errCh); isFinish {
+			if isFinish, err := p.SafeRequestLoop(
+				ctx, p.onRequest, p.onRequestDefault, []*module.HandledChannel{hChErr}); isFinish {
 				ch <- err
 				wg.Done()
 				return
@@ -61,39 +63,8 @@ func (p *Provider) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error
 	return ch
 }
 
-func (p *Provider) safeRequestLoop(ctx context.Context, errCh <-chan error) (resultIsFinish bool, resultErr error) {
-	var request interface{}
-	defer func() {
-		if recoverResult := recover(); recoverResult != nil {
-			if request != nil {
-				reason := p.RecoverLog(recoverResult, request)
-				resultIsFinish, resultErr = p.onRequestDefault(request, reason)
-			} else {
-				_ = p.RecoverLog(recoverResult, "unknown request")
-			}
-		}
-	}()
-
-	messageCh := p.GetReadChannel()
-	done := ctx.Done()
-
-	for {
-		request = nil
-		select {
-		case <-done:
-			resultIsFinish = true
-			resultErr = nil
-			return
-		case resultErr = <-errCh:
-			resultIsFinish = true
-			return
-		case request = <-messageCh:
-			p.MessageWasRead()
-			if resultIsFinish, resultErr = p.onRequest(request); resultIsFinish {
-				return
-			}
-		}
-	}
+func (p *Provider) onError(request interface{}) (bool, error) {
+	return true, request.(error)
 }
 
 func (p *Provider) onRequest(request interface{}) (bool, error) {
