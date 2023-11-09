@@ -47,8 +47,10 @@ func (m *Rpc) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 		errCh := m.handler.onStart(ctx, wg)
 		m.ModuleLogger.Info("Start")
 
+		hChErr := module.NewHandledChannel(errCh, m.onError)
 		for {
-			if isFinish, err := m.safeRequestLoop(ctx, errCh); isFinish {
+			if isFinish, err := m.SafeRequestLoop(
+				ctx, m.onRequest, m.onRequestDefault, []*module.HandledChannel{hChErr}); isFinish {
 				m.handler.onStop()
 				ch <- err
 				wg.Done()
@@ -60,39 +62,8 @@ func (m *Rpc) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 	return ch
 }
 
-func (m *Rpc) safeRequestLoop(ctx context.Context, errCh <-chan error) (resultIsFinish bool, resultErr error) {
-	var request interface{}
-	defer func() {
-		if recoverResult := recover(); recoverResult != nil {
-			if request != nil {
-				reason := m.RecoverLog(recoverResult, request)
-				resultIsFinish, resultErr = m.onRequestDefault(request, reason)
-			} else {
-				_ = m.RecoverLog(recoverResult, "unknown request")
-			}
-		}
-	}()
-
-	messageCh := m.GetReadChannel()
-	done := ctx.Done()
-
-	for {
-		request = nil
-		select {
-		case <-done:
-			resultIsFinish = true
-			resultErr = nil
-			return
-		case resultErr = <-errCh:
-			resultIsFinish = true
-			return
-		case request = <-messageCh:
-			m.MessageWasRead()
-			if resultIsFinish, resultErr = m.onRequest(request); resultIsFinish {
-				return
-			}
-		}
-	}
+func (m *Rpc) onError(request interface{}) (bool, error) {
+	return true, request.(error)
 }
 
 func (m *Rpc) onRequest(request interface{}) (bool, error) {
