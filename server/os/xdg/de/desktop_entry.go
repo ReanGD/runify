@@ -50,8 +50,10 @@ func (d *XDGDesktopEntry) OnStart(ctx context.Context, wg *sync.WaitGroup) <-cha
 		d.handler.update()
 		d.ModuleLogger.Info("Start")
 
+		hChErr := module.NewHandledChannel(d.ErrorCtx.GetChannel(), d.onError)
 		for {
-			if isFinish, err := d.safeRequestLoop(ctx); isFinish {
+			if isFinish, err := d.SafeRequestLoop(
+				ctx, d.onRequest, d.onRequestDefault, []*module.HandledChannel{hChErr}); isFinish {
 				d.handler.stop()
 				ch <- err
 				wg.Done()
@@ -63,41 +65,8 @@ func (d *XDGDesktopEntry) OnStart(ctx context.Context, wg *sync.WaitGroup) <-cha
 	return ch
 }
 
-func (d *XDGDesktopEntry) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultErr error) {
-	var request interface{}
-	defer func() {
-		if recoverResult := recover(); recoverResult != nil {
-			if request != nil {
-				reason := d.RecoverLog(recoverResult, request)
-				resultIsFinish, resultErr = d.onRequestDefault(request, reason)
-			} else {
-				_ = d.RecoverLog(recoverResult, "unknown request")
-			}
-		}
-	}()
-
-	done := ctx.Done()
-	errorCh := d.ErrorCtx.GetChannel()
-	messageCh := d.GetReadChannel()
-
-	for {
-		request = nil
-		select {
-		case <-done:
-			resultIsFinish = true
-			resultErr = nil
-			return
-		case err := <-errorCh:
-			resultIsFinish = true
-			resultErr = err
-			return
-		case request = <-messageCh:
-			d.MessageWasRead()
-			if resultIsFinish, resultErr = d.onRequest(request); resultIsFinish {
-				return
-			}
-		}
-	}
+func (d *XDGDesktopEntry) onError(request interface{}) (bool, error) {
+	return true, request.(error)
 }
 
 func (d *XDGDesktopEntry) onRequest(request interface{}) (bool, error) {
