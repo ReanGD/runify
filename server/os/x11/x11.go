@@ -51,8 +51,11 @@ func (m *X11) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 		m.handler.start()
 		m.ModuleLogger.Info("Start")
 
+		hChErr := module.NewHandledChannel(m.ErrorCtx.GetChannel(), m.onError)
+		hChX11Events := module.NewHandledChannel(m.x11EventsCh, m.onX11Events)
 		for {
-			if isFinish, err := m.safeRequestLoop(ctx); isFinish {
+			if isFinish, err := m.SafeRequestLoop(
+				ctx, m.onRequest, m.onRequestDefault, []*module.HandledChannel{hChErr, hChX11Events}); isFinish {
 				m.handler.stop()
 				ch <- err
 				wg.Done()
@@ -64,44 +67,14 @@ func (m *X11) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 	return ch
 }
 
-func (m *X11) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultErr error) {
-	var request interface{}
-	defer func() {
-		if recoverResult := recover(); recoverResult != nil {
-			if request != nil {
-				reason := m.RecoverLog(recoverResult, request)
-				resultIsFinish, resultErr = m.onRequestDefault(request, reason)
-			} else {
-				_ = m.RecoverLog(recoverResult, "unknown request")
-			}
-		}
-	}()
+func (m *X11) onError(request interface{}) (bool, error) {
+	return true, request.(error)
+}
 
-	done := ctx.Done()
-	errorCh := m.ErrorCtx.GetChannel()
-	x11EventsCh := m.x11EventsCh
-	messageCh := m.GetReadChannel()
+func (m *X11) onX11Events(event interface{}) (bool, error) {
+	m.handler.onX11Event(event)
 
-	for {
-		request = nil
-		select {
-		case <-done:
-			resultIsFinish = true
-			resultErr = nil
-			return
-		case err := <-errorCh:
-			resultIsFinish = true
-			resultErr = err
-			return
-		case event := <-x11EventsCh:
-			m.handler.onX11Event(event)
-		case request = <-messageCh:
-			m.MessageWasRead()
-			if resultIsFinish, resultErr = m.onRequest(request); resultIsFinish {
-				return
-			}
-		}
-	}
+	return false, nil
 }
 
 func (m *X11) onRequest(request interface{}) (bool, error) {
