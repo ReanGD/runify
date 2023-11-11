@@ -55,8 +55,15 @@ func (d *Desktop) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error 
 		d.handler.start()
 		d.ModuleLogger.Info("Start")
 
+		hChErr := module.NewHandledChannel(d.ErrorCtx.GetChannel(), d.onError)
+		primaryCh := module.NewHandledChannel(d.mCtx.primaryCh, d.onPrimary)
+		clipboardCh := module.NewHandledChannel(d.mCtx.clipboardCh, d.onClipboard)
+		hotkeyCh := module.NewHandledChannel(d.mCtx.hotkeyCh, d.onHotkey)
+
+		hChs := []*module.HandledChannel{hChErr, primaryCh, clipboardCh, hotkeyCh}
 		for {
-			if isFinish, err := d.safeRequestLoop(ctx); isFinish {
+			if isFinish, err := d.SafeRequestLoop(
+				ctx, d.onRequest, d.onRequestDefault, hChs); isFinish {
 				d.handler.stop()
 				ch <- err
 				wg.Done()
@@ -68,50 +75,26 @@ func (d *Desktop) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error 
 	return ch
 }
 
-func (d *Desktop) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultErr error) {
-	var request interface{}
-	defer func() {
-		if recoverResult := recover(); recoverResult != nil {
-			if request != nil {
-				reason := d.RecoverLog(recoverResult, request)
-				resultIsFinish, resultErr = d.onRequestDefault(request, reason)
-			} else {
-				_ = d.RecoverLog(recoverResult, "unknown request")
-			}
-		}
-	}()
+func (d *Desktop) onError(request interface{}) (bool, error) {
+	return true, request.(error)
+}
 
-	done := ctx.Done()
-	errorCh := d.ErrorCtx.GetChannel()
-	messageCh := d.GetReadChannel()
-	primaryCh := d.mCtx.primaryCh
-	clipboardCh := d.mCtx.clipboardCh
-	hotkeyCh := d.mCtx.hotkeyCh
+func (d *Desktop) onPrimary(request interface{}) (bool, error) {
+	d.handler.onClipboardMsg(true, request.(*mime.Data))
 
-	for {
-		request = nil
-		select {
-		case <-done:
-			resultIsFinish = true
-			resultErr = nil
-			return
-		case err := <-errorCh:
-			resultIsFinish = true
-			resultErr = err
-			return
-		case msg := <-primaryCh:
-			d.handler.onClipboardMsg(true, msg)
-		case msg := <-clipboardCh:
-			d.handler.onClipboardMsg(false, msg)
-		case msg := <-hotkeyCh:
-			d.handler.onHotkeyMsg(msg)
-		case request = <-messageCh:
-			d.MessageWasRead()
-			if resultIsFinish, resultErr = d.onRequest(request); resultIsFinish {
-				return
-			}
-		}
-	}
+	return false, nil
+}
+
+func (d *Desktop) onClipboard(request interface{}) (bool, error) {
+	d.handler.onClipboardMsg(false, request.(*mime.Data))
+
+	return false, nil
+}
+
+func (d *Desktop) onHotkey(request interface{}) (bool, error) {
+	d.handler.onHotkeyMsg(request.(*shortcut.Hotkey))
+
+	return false, nil
 }
 
 func (d *Desktop) onRequest(request interface{}) (bool, error) {
