@@ -46,7 +46,8 @@ func (p *dataProvider) onStart(ctx context.Context, wg *sync.WaitGroup, errCh ch
 		p.handler.OnStart()
 
 		for {
-			if isFinish, err := p.safeRequestLoop(ctx); isFinish {
+			if isFinish, err := p.SafeRequestLoop(
+				ctx, p.onRequest, p.onRequestDefault, []*module.HandledChannel{}); isFinish {
 				if err != nil {
 					errCh <- err
 				}
@@ -55,37 +56,6 @@ func (p *dataProvider) onStart(ctx context.Context, wg *sync.WaitGroup, errCh ch
 			}
 		}
 	}()
-}
-
-func (p *dataProvider) safeRequestLoop(ctx context.Context) (resultIsFinish bool, resultErr error) {
-	var request interface{}
-	defer func() {
-		if recoverResult := recover(); recoverResult != nil {
-			if request != nil {
-				reason := p.RecoverLog(recoverResult, request)
-				resultIsFinish, resultErr = p.onRequestDefault(request, reason)
-			} else {
-				_ = p.RecoverLog(recoverResult, "unknown request")
-			}
-		}
-	}()
-
-	messageCh := p.GetReadChannel()
-	done := ctx.Done()
-	for {
-		request = nil
-		select {
-		case <-done:
-			resultIsFinish = true
-			resultErr = nil
-			return
-		case request = <-messageCh:
-			p.MessageWasRead()
-			if resultIsFinish, resultErr = p.onRequest(request); resultIsFinish {
-				return
-			}
-		}
-	}
 }
 
 func (p *dataProvider) onRequest(request interface{}) (bool, error) {
