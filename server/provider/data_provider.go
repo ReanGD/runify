@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"sync"
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/types"
 	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
@@ -40,22 +40,12 @@ func (p *dataProvider) onInit(cfg *config.Config, rootProviderLogger *zap.Logger
 	return ch
 }
 
-func (p *dataProvider) onStart(ctx context.Context, wg *sync.WaitGroup, errCh chan<- error) {
-	wg.Add(1)
-	go func() {
-		p.handler.OnStart()
+func (p *dataProvider) OnStart(ctx context.Context) []*types.HandledChannel {
+	p.handler.OnStart()
+	return []*types.HandledChannel{}
+}
 
-		for {
-			if isFinish, err := p.SafeRequestLoop(
-				ctx, p.onRequest, p.onRequestDefault, []*module.HandledChannel{}); isFinish {
-				if err != nil {
-					errCh <- err
-				}
-				wg.Done()
-				return
-			}
-		}
-	}()
+func (p *dataProvider) OnFinish() {
 }
 
 func (p *dataProvider) onRequest(request interface{}) (bool, error) {

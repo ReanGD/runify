@@ -10,6 +10,7 @@ import (
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/types"
 	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
@@ -17,6 +18,7 @@ import (
 const ModuleName = "rpc"
 
 type Rpc struct {
+	wg      *sync.WaitGroup
 	handler *rpcHandler
 
 	module.Module
@@ -24,6 +26,7 @@ type Rpc struct {
 
 func New() *Rpc {
 	return &Rpc{
+		wg:      &sync.WaitGroup{},
 		handler: newRpcHandler(),
 	}
 }
@@ -32,7 +35,7 @@ func (m *Rpc) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {
-		m.Init(rootLogger, ModuleName, cfg.Get().Rpc.ChannelLen)
+		m.Init(m, rootLogger, ModuleName, cfg.Get().Rpc.ChannelLen)
 		uiLogger := rootLogger.With(zap.String("module", "UI"))
 		ch <- m.handler.onInit(cfg.Get(), m, uiLogger, m.ModuleLogger)
 	}()
@@ -40,33 +43,24 @@ func (m *Rpc) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
 	return ch
 }
 
-func (m *Rpc) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
-	wg.Add(1)
-	ch := make(chan error, 1)
-	go func() {
-		errCh := m.handler.onStart(ctx, wg)
-		m.ModuleLogger.Info("Start")
+func (m *Rpc) OnStart(ctx context.Context) []*types.HandledChannel {
+	errCh := m.handler.onStart(ctx, m.wg)
 
-		hChErr := module.NewHandledChannel(errCh, m.onError)
-		for {
-			if isFinish, err := m.SafeRequestLoop(
-				ctx, m.onRequest, m.onRequestDefault, []*module.HandledChannel{hChErr}); isFinish {
-				m.handler.onStop()
-				ch <- err
-				wg.Done()
-				return
-			}
-		}
-	}()
+	hChErr := types.NewHandledChannel(errCh, m.onError)
 
-	return ch
+	return []*types.HandledChannel{hChErr}
+}
+
+func (m *Rpc) OnFinish() {
+	m.handler.onStop()
+	m.wg.Wait()
 }
 
 func (m *Rpc) onError(request interface{}) (bool, error) {
 	return true, request.(error)
 }
 
-func (m *Rpc) onRequest(request interface{}) (bool, error) {
+func (m *Rpc) OnRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *serverStartedCmd:
 		m.handler.serverStarted()
@@ -88,7 +82,7 @@ func (m *Rpc) onRequest(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (m *Rpc) onRequestDefault(request interface{}, reason string) (bool, error) {
+func (m *Rpc) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *serverStartedCmd:
 		r.onRequestDefault(m.ModuleLogger, reason)

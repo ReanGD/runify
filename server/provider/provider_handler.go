@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
@@ -20,6 +21,9 @@ type providerHandler struct {
 	dataProviders  map[api.ProviderID]*dataProvider
 	rpc            api.Rpc
 	desktop        api.Desktop
+	errCh          chan error
+	wg             *sync.WaitGroup
+	doneErrWaitCh  chan struct{}
 	moduleLogger   *zap.Logger
 	rootListLogger *zap.Logger
 }
@@ -28,9 +32,17 @@ func newProviderHandler() *providerHandler {
 	return &providerHandler{
 		dataProviders:  make(map[api.ProviderID]*dataProvider),
 		rpc:            nil,
+		desktop:        nil,
+		errCh:          make(chan error, 1),
+		wg:             &sync.WaitGroup{},
+		doneErrWaitCh:  make(chan struct{}),
 		moduleLogger:   nil,
 		rootListLogger: nil,
 	}
+}
+
+func (h *providerHandler) getErrCh() <-chan error {
+	return h.errCh
 }
 
 func (h *providerHandler) onInit(cfg *config.Config, desktop api.Desktop, rpc api.Rpc, moduleLogger *zap.Logger, rootListLogger *zap.Logger) error {
@@ -61,14 +73,36 @@ func (h *providerHandler) onInit(cfg *config.Config, desktop api.Desktop, rpc ap
 	return nil
 }
 
-func (h *providerHandler) onStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
-	errCh := make(chan error, 1)
+func (h *providerHandler) onStart(ctx context.Context) {
+	cases := make([]reflect.SelectCase, len(h.dataProviders)+1)
 
-	for _, dp := range h.dataProviders {
-		dp.onStart(ctx, wg, errCh)
+	for i, dp := range h.dataProviders {
+		ch := dp.Start(ctx, h.wg)
+		cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ch)}
 	}
 
-	return errCh
+	cases[len(h.dataProviders)] = reflect.SelectCase{
+		Dir:  reflect.SelectRecv,
+		Chan: reflect.ValueOf(h.doneErrWaitCh),
+	}
+
+	go func() {
+		h.wg.Add(1)
+		defer h.wg.Done()
+
+		_, recv, recvOk := reflect.Select(cases)
+		if !recvOk {
+			h.errCh <- recv.Interface().(error)
+		}
+	}()
+}
+
+func (h *providerHandler) onFinish() {
+	if h.doneErrWaitCh != nil {
+		close(h.doneErrWaitCh)
+		h.doneErrWaitCh = nil
+	}
+	h.wg.Wait()
 }
 
 func (h *providerHandler) openRootList() {

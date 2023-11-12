@@ -64,7 +64,7 @@ func (c *Config) OnInit(cfgFilePath string) {
 	}
 }
 
-func (c *Config) OnStart(ctx context.Context, wg *sync.WaitGroup, rootLogger *zap.Logger) <-chan error {
+func (c *Config) Start(ctx context.Context, wg *sync.WaitGroup, rootLogger *zap.Logger) <-chan error {
 	wg.Add(1)
 	ch := make(chan error)
 	c.moduleLogger = rootLogger.With(logModule)

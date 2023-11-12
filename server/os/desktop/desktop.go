@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"sync"
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
+	"github.com/ReanGD/runify/server/global/types"
 	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
@@ -39,7 +39,7 @@ func (d *Desktop) OnInit(
 
 	go func() {
 		desktopCfg := cfg.Get().Desktop
-		d.Init(rootLogger, ModuleName, desktopCfg.ModuleChLen)
+		d.Init(d, rootLogger, ModuleName, desktopCfg.ModuleChLen)
 		d.mCtx = newModuleCtx(d, desktopCfg, ds, provider, d.ErrorCtx, d.ModuleLogger)
 		ch <- d.handler.init(d.mCtx)
 	}()
@@ -47,32 +47,20 @@ func (d *Desktop) OnInit(
 	return ch
 }
 
-func (d *Desktop) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
-	wg.Add(1)
-	ch := make(chan error, 1)
-	go func() {
-		d.mCtx.setStopCtx(ctx)
-		d.handler.start()
-		d.ModuleLogger.Info("Start")
+func (d *Desktop) OnStart(ctx context.Context) []*types.HandledChannel {
+	d.mCtx.setStopCtx(ctx)
+	d.handler.start()
 
-		hChErr := module.NewHandledChannel(d.ErrorCtx.GetChannel(), d.onError)
-		primaryCh := module.NewHandledChannel(d.mCtx.primaryCh, d.onPrimary)
-		clipboardCh := module.NewHandledChannel(d.mCtx.clipboardCh, d.onClipboard)
-		hotkeyCh := module.NewHandledChannel(d.mCtx.hotkeyCh, d.onHotkey)
+	hChErr := types.NewHandledChannel(d.ErrorCtx.GetChannel(), d.onError)
+	primaryCh := types.NewHandledChannel(d.mCtx.primaryCh, d.onPrimary)
+	clipboardCh := types.NewHandledChannel(d.mCtx.clipboardCh, d.onClipboard)
+	hotkeyCh := types.NewHandledChannel(d.mCtx.hotkeyCh, d.onHotkey)
 
-		hChs := []*module.HandledChannel{hChErr, primaryCh, clipboardCh, hotkeyCh}
-		for {
-			if isFinish, err := d.SafeRequestLoop(
-				ctx, d.onRequest, d.onRequestDefault, hChs); isFinish {
-				d.handler.stop()
-				ch <- err
-				wg.Done()
-				return
-			}
-		}
-	}()
+	return []*types.HandledChannel{hChErr, primaryCh, clipboardCh, hotkeyCh}
+}
 
-	return ch
+func (d *Desktop) OnFinish() {
+	d.handler.stop()
 }
 
 func (d *Desktop) onError(request interface{}) (bool, error) {
@@ -97,7 +85,7 @@ func (d *Desktop) onHotkey(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (d *Desktop) onRequest(request interface{}) (bool, error) {
+func (d *Desktop) OnRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *writeToClipboardCmd:
 		d.handler.writeToClipboard(r)
@@ -119,7 +107,7 @@ func (d *Desktop) onRequest(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (d *Desktop) onRequestDefault(request interface{}, reason string) (bool, error) {
+func (d *Desktop) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *writeToClipboardCmd:
 		r.onRequestDefault(d.ModuleLogger, reason)

@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"sync"
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
+	"github.com/ReanGD/runify/server/global/types"
 	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
@@ -36,7 +36,7 @@ func (m *X11) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
 
 	go func() {
 		x11Cfg := cfg.Get().DsX11
-		m.Init(rootLogger, ModuleName, x11Cfg.ModuleChLen)
+		m.Init(m, rootLogger, ModuleName, x11Cfg.ModuleChLen)
 		m.x11EventsCh = make(chan interface{}, x11Cfg.X11EventChLen)
 		ch <- m.handler.init(m.x11EventsCh, m.ErrorCtx, m.ModuleLogger)
 	}()
@@ -44,27 +44,17 @@ func (m *X11) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
 	return ch
 }
 
-func (m *X11) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
-	wg.Add(1)
-	ch := make(chan error, 1)
-	go func() {
-		m.handler.start()
-		m.ModuleLogger.Info("Start")
+func (m *X11) OnStart(ctx context.Context) []*types.HandledChannel {
+	m.handler.start()
 
-		hChErr := module.NewHandledChannel(m.ErrorCtx.GetChannel(), m.onError)
-		hChX11Events := module.NewHandledChannel(m.x11EventsCh, m.onX11Events)
-		for {
-			if isFinish, err := m.SafeRequestLoop(
-				ctx, m.onRequest, m.onRequestDefault, []*module.HandledChannel{hChErr, hChX11Events}); isFinish {
-				m.handler.stop()
-				ch <- err
-				wg.Done()
-				return
-			}
-		}
-	}()
+	hChErr := types.NewHandledChannel(m.ErrorCtx.GetChannel(), m.onError)
+	hChX11Events := types.NewHandledChannel(m.x11EventsCh, m.onX11Events)
 
-	return ch
+	return []*types.HandledChannel{hChErr, hChX11Events}
+}
+
+func (m *X11) OnFinish() {
+	m.handler.stop()
 }
 
 func (m *X11) onError(request interface{}) (bool, error) {
@@ -77,7 +67,7 @@ func (m *X11) onX11Events(event interface{}) (bool, error) {
 	return false, nil
 }
 
-func (m *X11) onRequest(request interface{}) (bool, error) {
+func (m *X11) OnRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *subscribeToClipboardCmd:
 		m.handler.subscribeToClipboard(r)
@@ -101,7 +91,7 @@ func (m *X11) onRequest(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (m *X11) onRequestDefault(request interface{}, reason string) (bool, error) {
+func (m *X11) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *subscribeToClipboardCmd:
 		r.onRequestDefault(m.ModuleLogger, reason)

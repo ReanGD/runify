@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"sync"
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
+	"github.com/ReanGD/runify/server/global/types"
 	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
@@ -34,7 +34,7 @@ func (p *Provider) OnInit(cfg *config.Config, desktop api.Desktop, rpc api.Rpc, 
 
 	go func() {
 		channelLen := cfg.Get().Provider.ChannelLen
-		p.Init(rootLogger, ModuleName, channelLen)
+		p.Init(p, rootLogger, ModuleName, channelLen)
 
 		ch <- p.handler.onInit(cfg, desktop, rpc, p.ModuleLogger, p.NewSubmoduleLogger(p.ModuleLogger, "RootList"))
 	}()
@@ -42,32 +42,22 @@ func (p *Provider) OnInit(cfg *config.Config, desktop api.Desktop, rpc api.Rpc, 
 	return ch
 }
 
-func (p *Provider) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
-	wg.Add(1)
-	ch := make(chan error, 1)
-	go func() {
-		errCh := p.handler.onStart(ctx, wg)
-		p.ModuleLogger.Info("Start")
+func (p *Provider) OnStart(ctx context.Context) []*types.HandledChannel {
+	p.handler.onStart(ctx)
 
-		hChErr := module.NewHandledChannel(errCh, p.onError)
-		for {
-			if isFinish, err := p.SafeRequestLoop(
-				ctx, p.onRequest, p.onRequestDefault, []*module.HandledChannel{hChErr}); isFinish {
-				ch <- err
-				wg.Done()
-				return
-			}
-		}
-	}()
+	hChErr := types.NewHandledChannel(p.handler.getErrCh(), p.onError)
+	return []*types.HandledChannel{hChErr}
+}
 
-	return ch
+func (p *Provider) OnFinish() {
+	p.handler.onFinish()
 }
 
 func (p *Provider) onError(request interface{}) (bool, error) {
 	return true, request.(error)
 }
 
-func (p *Provider) onRequest(request interface{}) (bool, error) {
+func (p *Provider) OnRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *activateCmd:
 		p.handler.activate(r)
@@ -83,7 +73,7 @@ func (p *Provider) onRequest(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (p *Provider) onRequestDefault(request interface{}, reason string) (bool, error) {
+func (p *Provider) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *activateCmd:
 		r.onRequestDefault(p.ModuleLogger, reason)

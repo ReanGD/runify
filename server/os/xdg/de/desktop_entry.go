@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"sync"
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
@@ -36,40 +35,29 @@ func (d *XDGDesktopEntry) OnInit(
 
 	go func() {
 		deCfg := cfg.Get().XDGDesktopEntry
-		d.Init(rootLogger, ModuleName, deCfg.ModuleChLen)
+		d.Init(d, rootLogger, ModuleName, deCfg.ModuleChLen)
 		ch <- d.handler.init(d.ModuleLogger)
 	}()
 
 	return ch
 }
 
-func (d *XDGDesktopEntry) OnStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
-	wg.Add(1)
-	ch := make(chan error, 1)
-	go func() {
-		d.handler.update()
-		d.ModuleLogger.Info("Start")
+func (d *XDGDesktopEntry) OnStart(ctx context.Context) []*types.HandledChannel {
+	d.handler.update()
 
-		hChErr := module.NewHandledChannel(d.ErrorCtx.GetChannel(), d.onError)
-		for {
-			if isFinish, err := d.SafeRequestLoop(
-				ctx, d.onRequest, d.onRequestDefault, []*module.HandledChannel{hChErr}); isFinish {
-				d.handler.stop()
-				ch <- err
-				wg.Done()
-				return
-			}
-		}
-	}()
+	hChErr := types.NewHandledChannel(d.ErrorCtx.GetChannel(), d.onError)
+	return []*types.HandledChannel{hChErr}
+}
 
-	return ch
+func (d *XDGDesktopEntry) OnFinish() {
+	d.handler.stop()
 }
 
 func (d *XDGDesktopEntry) onError(request interface{}) (bool, error) {
 	return true, request.(error)
 }
 
-func (d *XDGDesktopEntry) onRequest(request interface{}) (bool, error) {
+func (d *XDGDesktopEntry) OnRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *updateCmd:
 		d.handler.update()
@@ -87,7 +75,7 @@ func (d *XDGDesktopEntry) onRequest(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (d *XDGDesktopEntry) onRequestDefault(request interface{}, reason string) (bool, error) {
+func (d *XDGDesktopEntry) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *updateCmd:
 		r.onRequestDefault(d.ModuleLogger, reason)
