@@ -1,10 +1,19 @@
 package api
 
 import (
+	"context"
+
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/global/types"
 )
+
+type ModuleImpl interface {
+	OnRequest(request interface{}) (bool, error)
+	OnRequestDefault(request interface{}, reason string) (bool, error)
+	OnStart(ctx context.Context) []*types.HandledChannel
+	OnFinish()
+}
 
 type Provider interface {
 	Activate(action *shortcut.Action)

@@ -111,12 +111,12 @@ func (r *Runify) start() {
 	wg := &sync.WaitGroup{}
 	ctx, cancel := context.WithCancel(context.Background())
 
-	cfgCh := r.cfg.OnStart(ctx, wg, r.logger.GetRoot())
-	rpcCh := r.rpc.OnStart(ctx, wg)
-	dsCh := r.ds.OnStart(ctx, wg)
-	deCh := r.de.OnStart(ctx, wg)
-	desktopCh := r.desktop.OnStart(ctx, wg)
-	providerCh := r.provider.OnStart(ctx, wg)
+	cfgCh := r.cfg.Start(ctx, wg, r.logger.GetRoot())
+	rpcCh := r.rpc.Start(ctx, wg)
+	dsCh := r.ds.Start(ctx, wg)
+	deCh := r.de.Start(ctx, wg)
+	desktopCh := r.desktop.Start(ctx, wg)
+	providerCh := r.provider.Start(ctx, wg)
 
 	r.runifyLogger.Info("Start")
 

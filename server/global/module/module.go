@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sync"
 	"sync/atomic"
 
+	"github.com/ReanGD/runify/server/global/api"
+	"github.com/ReanGD/runify/server/global/types"
 	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
@@ -75,19 +78,8 @@ func (c *Channel) IsOverflow() bool {
 	return atomic.LoadInt32(&c.queueOverflow) == 1
 }
 
-type HandledChannel struct {
-	ch      reflect.Value
-	handler func(interface{}) (bool, error)
-}
-
-func NewHandledChannel[T any](ch <-chan T, handler func(interface{}) (bool, error)) *HandledChannel {
-	return &HandledChannel{
-		ch:      reflect.ValueOf(ch),
-		handler: handler,
-	}
-}
-
 type Module struct {
+	impl         api.ModuleImpl
 	ErrorCtx     *ErrorCtx
 	RootLogger   *zap.Logger
 	ModuleLogger *zap.Logger
@@ -95,7 +87,8 @@ type Module struct {
 	Channel
 }
 
-func (m *Module) Init(rootLogger *zap.Logger, moduleName string, channelLen uint32) {
+func (m *Module) Init(impl api.ModuleImpl, rootLogger *zap.Logger, moduleName string, channelLen uint32) {
+	m.impl = impl
 	m.ErrorCtx = newErrorCtx()
 	m.RootLogger = rootLogger
 	m.ModuleLogger = rootLogger.With(zap.String("Module", moduleName))
@@ -112,7 +105,7 @@ func (m *Module) NewSubmoduleLogger(rootLogger *zap.Logger, submoduleName string
 	return rootLogger.With(zap.String("SubModule", submoduleName))
 }
 
-func (m *Module) RecoverLog(recoverResult interface{}, request interface{}) string {
+func (m *Module) recoverLog(recoverResult interface{}, request interface{}) string {
 	var err error
 	switch val := recoverResult.(type) {
 	case string:
@@ -140,24 +133,20 @@ func (m *Module) RecoverLog(recoverResult interface{}, request interface{}) stri
 	return "panic during message processing: " + err.Error()
 }
 
-func (m *Module) SafeRequestLoop(
-	ctx context.Context,
-	onRequest func(request interface{}) (bool, error),
-	onRequestDefault func(request interface{}, reason string) (bool, error),
-	hChannels []*HandledChannel,
-) (resultIsFinish bool, resultErr error) {
+func (m *Module) safeRequestLoop(ctx context.Context, hChannels []*types.HandledChannel) (resultIsFinish bool, resultErr error) {
 	var request interface{}
 	defer func() {
 		if recoverResult := recover(); recoverResult != nil {
 			if request != nil {
-				reason := m.RecoverLog(recoverResult, request)
-				resultIsFinish, resultErr = onRequestDefault(request, reason)
+				reason := m.recoverLog(recoverResult, request)
+				resultIsFinish, resultErr = m.impl.OnRequestDefault(request, reason)
 			} else {
-				_ = m.RecoverLog(recoverResult, "unknown request")
+				_ = m.recoverLog(recoverResult, "unknown request")
 			}
 		}
 	}()
 
+	onRequest := m.impl.OnRequest
 	done := ctx.Done()
 	messageCh := m.GetReadChannel()
 	cntCh := len(hChannels) + 2
@@ -166,7 +155,7 @@ func (m *Module) SafeRequestLoop(
 
 	cases := make([]reflect.SelectCase, cntCh)
 	for i, hc := range hChannels {
-		cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: hc.ch}
+		cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: hc.Channel()}
 	}
 
 	cases[messageChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(messageCh)}
@@ -198,9 +187,29 @@ func (m *Module) SafeRequestLoop(
 				return
 			}
 		} else {
-			if resultIsFinish, resultErr = hChannels[chosen].handler(recv.Interface()); resultIsFinish {
+			if resultIsFinish, resultErr = hChannels[chosen].Handle(recv.Interface()); resultIsFinish {
 				return
 			}
 		}
 	}
+}
+
+func (m *Module) Start(ctx context.Context, wg *sync.WaitGroup) <-chan error {
+	wg.Add(1)
+	ch := make(chan error, 1)
+	go func() {
+		defer wg.Done()
+		m.ModuleLogger.Info("Start")
+		hChs := m.impl.OnStart(ctx)
+
+		for {
+			if isFinish, err := m.safeRequestLoop(ctx, hChs); isFinish {
+				m.impl.OnFinish()
+				ch <- err
+				return
+			}
+		}
+	}()
+
+	return ch
 }
