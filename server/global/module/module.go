@@ -214,3 +214,20 @@ func (m *Module) Start(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 
 	return ch
 }
+
+func (m *Module) OnRequestUnknownMsg(request interface{}) (bool, error) {
+	m.ModuleLogger.Warn("Unknown message received",
+		zap.String("Request", fmt.Sprintf("%v", request)),
+		zap.Stringer("RequestType", reflect.TypeOf(request)),
+		logger.LogicalError)
+	return true, errors.New("unknown message received")
+}
+
+func (m *Module) OnRequestDefaultUnknownMsg(request interface{}, reason string) (bool, error) {
+	m.ModuleLogger.Warn("Unknown message received",
+		zap.String("Request", fmt.Sprintf("%v", request)),
+		zap.String("Reason", reason),
+		zap.Stringer("RequestType", reflect.TypeOf(request)),
+		logger.LogicalError)
+	return true, errors.New("unknown message received")
+}
