@@ -95,7 +95,8 @@ func (m *Module) Init(impl api.ModuleImpl, rootLogger *zap.Logger, moduleName st
 	m.Channel.Init(channelLen)
 }
 
-func (m *Module) InitSubmodule(rootLogger *zap.Logger, submoduleName string, channelLen uint32) {
+func (m *Module) InitSubmodule(impl api.ModuleImpl, rootLogger *zap.Logger, submoduleName string, channelLen uint32) {
+	m.impl = impl
 	m.RootLogger = rootLogger
 	m.ModuleLogger = m.NewSubmoduleLogger(rootLogger, submoduleName)
 	m.Channel.Init(channelLen)

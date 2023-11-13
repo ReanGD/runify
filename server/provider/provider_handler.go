@@ -76,12 +76,14 @@ func (h *providerHandler) onInit(cfg *config.Config, desktop api.Desktop, rpc ap
 func (h *providerHandler) onStart(ctx context.Context) {
 	cases := make([]reflect.SelectCase, len(h.dataProviders)+1)
 
-	for i, dp := range h.dataProviders {
+	caseNum := 0
+	for _, dp := range h.dataProviders {
 		ch := dp.Start(ctx, h.wg)
-		cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ch)}
+		cases[caseNum] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ch)}
+		caseNum++
 	}
 
-	cases[len(h.dataProviders)] = reflect.SelectCase{
+	cases[caseNum] = reflect.SelectCase{
 		Dir:  reflect.SelectRecv,
 		Chan: reflect.ValueOf(h.doneErrWaitCh),
 	}

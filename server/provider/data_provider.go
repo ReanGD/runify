@@ -32,7 +32,7 @@ func (p *dataProvider) onInit(cfg *config.Config, rootProviderLogger *zap.Logger
 	ch := make(chan error)
 	go func() {
 		channelLen := cfg.Get().Provider.SubModuleChannelLen
-		p.InitSubmodule(rootProviderLogger, p.handler.GetName(), channelLen)
+		p.InitSubmodule(p, rootProviderLogger, p.handler.GetName(), channelLen)
 
 		ch <- p.handler.OnInit(cfg, p.ModuleLogger, p.providerID)
 	}()
@@ -48,7 +48,7 @@ func (p *dataProvider) OnStart(ctx context.Context) []*types.HandledChannel {
 func (p *dataProvider) OnFinish() {
 }
 
-func (p *dataProvider) onRequest(request interface{}) (bool, error) {
+func (p *dataProvider) OnRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *makeRootListCtrlCmd:
 		r.result <- p.handler.MakeRootListCtrl()
@@ -64,7 +64,7 @@ func (p *dataProvider) onRequest(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (p *dataProvider) onRequestDefault(request interface{}, reason string) (bool, error) {
+func (p *dataProvider) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *makeRootListCtrlCmd:
 		r.onRequestDefault(p.ModuleLogger, reason)
