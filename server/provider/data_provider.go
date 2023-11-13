@@ -37,11 +37,18 @@ func (p *dataProvider) onInit(cfg *config.Config, rootProviderLogger *zap.Logger
 }
 
 func (p *dataProvider) OnStart(ctx context.Context) []*types.HandledChannel {
-	p.handler.OnStart()
-	return []*types.HandledChannel{}
+	hChs := []*types.HandledChannel{
+		types.NewHandledChannel(p.ErrorCtx.GetChannel(), p.onError),
+	}
+
+	return append(hChs, p.handler.OnStart(p.ErrorCtx)...)
 }
 
 func (p *dataProvider) OnFinish() {
+}
+
+func (p *dataProvider) onError(request interface{}) (bool, error) {
+	return true, request.(error)
 }
 
 func (p *dataProvider) OnRequest(request interface{}) (bool, error) {

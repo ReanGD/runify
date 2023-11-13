@@ -38,9 +38,8 @@ func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, prov
 	return nil
 }
 
-func (p *DesktopEntry) OnStart() {
-	p.model.start()
-	p.actionExecuter.start()
+func (p *DesktopEntry) OnStart(errorCtx *module.ErrorCtx) []*types.HandledChannel {
+	return []*types.HandledChannel{}
 }
 
 func (p *DesktopEntry) MakeRootListCtrl() api.RootListCtrl {

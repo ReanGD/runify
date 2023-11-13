@@ -3,6 +3,8 @@ package calculator
 import (
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
+	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/types"
 	"go.uber.org/zap"
 )
 
@@ -33,7 +35,8 @@ func (p *Calculator) OnInit(cfg *config.Config, moduleLogger *zap.Logger, provid
 	return p.actionExecuter.init(p.desktop, moduleLogger)
 }
 
-func (p *Calculator) OnStart() {
+func (p *Calculator) OnStart(errorCtx *module.ErrorCtx) []*types.HandledChannel {
+	return []*types.HandledChannel{}
 }
 
 func (p *Calculator) MakeRootListCtrl() api.RootListCtrl {

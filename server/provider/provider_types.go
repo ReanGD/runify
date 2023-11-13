@@ -3,7 +3,9 @@ package provider
 import (
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
+	"github.com/ReanGD/runify/server/global/types"
 	"go.uber.org/zap"
 )
 
@@ -16,7 +18,7 @@ const (
 type dataProviderHandler interface {
 	GetName() string
 	OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID api.ProviderID) error
-	OnStart()
+	OnStart(errorCtx *module.ErrorCtx) []*types.HandledChannel
 	MakeRootListCtrl() api.RootListCtrl
 }
 

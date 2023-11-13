@@ -5,6 +5,8 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
+	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/types"
 )
 
 type Links struct {
@@ -39,8 +41,10 @@ func (p *Links) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID 
 	return p.actionExecuter.init(p.desktop, moduleLogger)
 }
 
-func (p *Links) OnStart() {
+func (p *Links) OnStart(errorCtx *module.ErrorCtx) []*types.HandledChannel {
 	p.model.start()
+
+	return []*types.HandledChannel{}
 }
 
 func (p *Links) MakeRootListCtrl() api.RootListCtrl {
