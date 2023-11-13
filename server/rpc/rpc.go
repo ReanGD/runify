@@ -2,16 +2,12 @@ package rpc
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"reflect"
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/types"
-	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
 
@@ -72,11 +68,7 @@ func (m *Rpc) OnRequest(request interface{}) (bool, error) {
 		m.handler.openRootList(r.ctrl)
 
 	default:
-		m.ModuleLogger.Warn("Unknown message received",
-			zap.String("Request", fmt.Sprintf("%v", request)),
-			zap.Stringer("RequestType", reflect.TypeOf(request)),
-			logger.LogicalError)
-		return true, errors.New("unknown message received")
+		return m.OnRequestUnknownMsg(request)
 	}
 
 	return false, nil
@@ -94,12 +86,7 @@ func (m *Rpc) OnRequestDefault(request interface{}, reason string) (bool, error)
 		r.onRequestDefault(m.ModuleLogger, reason)
 
 	default:
-		m.ModuleLogger.Warn("Unknown message received",
-			zap.String("Request", fmt.Sprintf("%v", request)),
-			zap.String("Reason", reason),
-			zap.Stringer("RequestType", reflect.TypeOf(request)),
-			logger.LogicalError)
-		return true, errors.New("unknown message received")
+		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil

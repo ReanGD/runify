@@ -2,9 +2,6 @@ package desktop
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"reflect"
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
@@ -12,7 +9,6 @@ import (
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/global/types"
-	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
 
@@ -97,11 +93,7 @@ func (d *Desktop) OnRequest(request interface{}) (bool, error) {
 		d.handler.removeShortcutWithoutCheck(r)
 
 	default:
-		d.ModuleLogger.Warn("Unknown message received",
-			zap.String("Request", fmt.Sprintf("%v", request)),
-			zap.Stringer("RequestType", reflect.TypeOf(request)),
-			logger.LogicalError)
-		return true, errors.New("unknown message received")
+		return d.OnRequestUnknownMsg(request)
 	}
 
 	return false, nil
@@ -119,12 +111,7 @@ func (d *Desktop) OnRequestDefault(request interface{}, reason string) (bool, er
 		r.onRequestDefault(d.ModuleLogger, reason)
 
 	default:
-		d.ModuleLogger.Warn("Unknown message received",
-			zap.String("Request", fmt.Sprintf("%v", request)),
-			zap.String("Reason", reason),
-			zap.Stringer("RequestType", reflect.TypeOf(request)),
-			logger.LogicalError)
-		return true, errors.New("unknown message received")
+		return d.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil

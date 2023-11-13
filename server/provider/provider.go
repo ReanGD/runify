@@ -2,16 +2,12 @@ package provider
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"reflect"
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/global/types"
-	"github.com/ReanGD/runify/server/logger"
 	"go.uber.org/zap"
 )
 
@@ -63,11 +59,7 @@ func (p *Provider) OnRequest(request interface{}) (bool, error) {
 		p.handler.activate(r)
 
 	default:
-		p.ModuleLogger.Warn("Unknown message received",
-			zap.String("Request", fmt.Sprintf("%v", request)),
-			zap.Stringer("RequestType", reflect.TypeOf(request)),
-			logger.LogicalError)
-		return true, errors.New("unknown message received")
+		return p.OnRequestUnknownMsg(request)
 	}
 
 	return false, nil
@@ -79,12 +71,7 @@ func (p *Provider) OnRequestDefault(request interface{}, reason string) (bool, e
 		r.onRequestDefault(p.ModuleLogger, reason)
 
 	default:
-		p.ModuleLogger.Warn("Unknown message received",
-			zap.String("Request", fmt.Sprintf("%v", request)),
-			zap.String("Reason", reason),
-			zap.Stringer("RequestType", reflect.TypeOf(request)),
-			logger.LogicalError)
-		return true, errors.New("unknown message received")
+		return p.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil
