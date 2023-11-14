@@ -13,6 +13,7 @@ import (
 type DesktopEntry struct {
 	desktop        api.Desktop
 	de             api.XDGDesktopEntry
+	cfg            *config.Config
 	model          *deModel
 	actionExecuter *deActionExecuter
 	moduleLogger   *zap.Logger
@@ -22,6 +23,7 @@ func New(desktop api.Desktop, de api.XDGDesktopEntry) *DesktopEntry {
 	return &DesktopEntry{
 		desktop:        desktop,
 		de:             de,
+		cfg:            nil,
 		model:          newDEModel(),
 		actionExecuter: newDEActionExecuter(),
 		moduleLogger:   nil,
@@ -33,6 +35,7 @@ func (p *DesktopEntry) GetName() string {
 }
 
 func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID api.ProviderID) error {
+	p.cfg = cfg
 	p.moduleLogger = moduleLogger
 	if err := p.model.init(providerID, moduleLogger); err != nil {
 		return err
@@ -45,7 +48,7 @@ func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, prov
 }
 
 func (p *DesktopEntry) OnStart(errorCtx *module.ErrorCtx) []*types.HandledChannel {
-	desktopEntriesCh := make(chan types.DesktopEntries, 10)
+	desktopEntriesCh := make(chan types.DesktopEntries, p.cfg.Get().Provider.DesktopEntry.DesktopEntriesChLen)
 	subsToDesktopEntriesRes := api.NewChanBoolResult()
 	p.de.Subscribe(desktopEntriesCh, subsToDesktopEntriesRes)
 
@@ -53,9 +56,6 @@ func (p *DesktopEntry) OnStart(errorCtx *module.ErrorCtx) []*types.HandledChanne
 		errorCtx.SendError(errors.New("subscribe to XDGDesktopEntry failed"))
 		return []*types.HandledChannel{}
 	}
-
-	p.model.start()
-	p.actionExecuter.start()
 
 	return []*types.HandledChannel{
 		types.NewHandledChannel(desktopEntriesCh, p.model.onDesktopEntries),

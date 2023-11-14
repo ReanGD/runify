@@ -1,29 +1,21 @@
 package desktop_entry
 
 import (
-	"os"
-	"path/filepath"
+	"fmt"
 	"sync"
 
 	"github.com/ReanGD/runify/server/global/api"
-	"github.com/ReanGD/runify/server/paths"
-	"github.com/rkoesters/xdg/desktop"
+	"github.com/ReanGD/runify/server/global/types"
 	"go.uber.org/zap"
 )
-
-type entry struct {
-	path  string
-	props *desktop.Entry
-}
 
 type deModel struct {
 	providerID   api.ProviderID
 	nextID       api.RootListRowID
 	nameIndex    map[string]api.RootListRowID
-	entries      map[api.RootListRowID]*entry
+	entriesIndex map[api.RootListRowID]*types.DesktopEntry
 	dataMutex    sync.RWMutex
 	dataCache    []*api.RootListRow
-	iconCache    *iconCache
 	moduleLogger *zap.Logger
 }
 
@@ -32,10 +24,9 @@ func newDEModel() *deModel {
 		providerID:   0,
 		nextID:       1,
 		nameIndex:    make(map[string]api.RootListRowID),
-		entries:      make(map[api.RootListRowID]*entry),
+		entriesIndex: make(map[api.RootListRowID]*types.DesktopEntry),
 		dataMutex:    sync.RWMutex{},
 		dataCache:    []*api.RootListRow{},
-		iconCache:    nil,
 		moduleLogger: nil,
 	}
 }
@@ -43,75 +34,39 @@ func newDEModel() *deModel {
 func (m *deModel) init(providerID api.ProviderID, moduleLogger *zap.Logger) error {
 	m.providerID = providerID
 	m.moduleLogger = moduleLogger
-	var err error
-	m.iconCache, err = newIconCache(moduleLogger)
-	return err
+
+	return nil
 }
 
-func (m *deModel) start() {
-	m.update()
-}
-
-func (m *deModel) update() {
-	entries := make(map[api.RootListRowID]*entry)
+func (m *deModel) onDesktopEntries(request interface{}) (bool, error) {
+	entries, ok := request.(types.DesktopEntries)
+	if !ok {
+		return true, fmt.Errorf("invalid request type, expected types.DesktopEntries, but got %T", request)
+	}
+	entriesIndex := make(map[api.RootListRowID]*types.DesktopEntry)
 	dataCache := make([]*api.RootListRow, 0, len(m.dataCache))
-	m.walkXDGDesktopEntries(func(path string, props *desktop.Entry) {
-		id, ok := m.nameIndex[props.Name]
+
+	for _, entry := range entries {
+		name := entry.Name()
+		id, ok := m.nameIndex[name]
 		if !ok {
 			id = m.nextID
 			m.nextID++
+			m.nameIndex[name] = id
 		}
 
-		entries[id] = &entry{
-			path:  path,
-			props: props,
-		}
+		entriesIndex[id] = entry
 
 		dataCache = append(dataCache, api.NewRootListRow(
-			api.RowType_Application, api.MinPriority, m.providerID, id, props.Icon, props.Name))
-	})
+			api.RowType_Application, api.MinPriority, m.providerID, id, entry.IconPath(), name))
+	}
 
 	m.dataMutex.Lock()
-	m.entries = entries
+	m.entriesIndex = entriesIndex
 	m.dataCache = dataCache
 	m.dataMutex.Unlock()
-}
 
-func (m *deModel) walkXDGDesktopEntries(fn func(fullpath string, props *desktop.Entry)) {
-	exists := make(map[string]struct{})
-	for _, dirname := range paths.GetXDGAppDirs() {
-		paths.Walk(dirname, m.moduleLogger, func(fullpath string, mode paths.PathMode) {
-			if mode != paths.ModeRegFile || filepath.Ext(fullpath) != ".desktop" {
-				return
-			}
-
-			_, filename := filepath.Split(fullpath)
-			if _, ok := exists[filename]; ok {
-				return
-			}
-			exists[filename] = struct{}{}
-
-			f, err := os.Open(fullpath)
-			if err != nil {
-				m.moduleLogger.Info("Failed open desktop entry file", zap.String("path", fullpath), zap.Error(err))
-				return
-			}
-
-			props, err := desktop.New(f)
-			f.Close()
-			if err != nil {
-				m.moduleLogger.Info("Failed parse desktop entry file", zap.String("path", fullpath), zap.Error(err))
-				return
-			}
-
-			if props.NoDisplay || props.Hidden {
-				return
-			}
-			props.Icon = m.iconCache.getNonSvgIconPath(props.Icon, 48)
-
-			fn(fullpath, props)
-		})
-	}
+	return false, nil
 }
 
 func (m *deModel) getRows() []*api.RootListRow {
@@ -120,9 +75,9 @@ func (m *deModel) getRows() []*api.RootListRow {
 	return m.dataCache
 }
 
-func (m *deModel) getEntry(id api.RootListRowID) (*entry, bool) {
+func (m *deModel) getEntry(id api.RootListRowID) (*types.DesktopEntry, bool) {
 	m.dataMutex.RLock()
 	defer m.dataMutex.RUnlock()
-	res, ok := m.entries[id]
+	res, ok := m.entriesIndex[id]
 	return res, ok
 }

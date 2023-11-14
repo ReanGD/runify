@@ -6,6 +6,7 @@ import (
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
+	"github.com/ReanGD/runify/server/global/types"
 	"go.uber.org/zap"
 )
 
@@ -34,10 +35,7 @@ func (e *deActionExecuter) init(cfg *config.Config, desktop api.Desktop, model *
 	return nil
 }
 
-func (e *deActionExecuter) start() {
-}
-
-func (e *deActionExecuter) getEntry(id api.RootListRowID, logMsg string) (*entry, error) {
+func (e *deActionExecuter) getEntry(id api.RootListRowID, logMsg string) (*types.DesktopEntry, error) {
 	entry, ok := e.model.getEntry(id)
 	if !ok {
 		err := errors.New("row data not found")
@@ -60,11 +58,11 @@ func (e *deActionExecuter) open(client api.RpcClient, id api.RootListRowID) {
 		return
 	}
 
-	err = execCmd(entry.props.Exec, entry.props.Terminal, e.terminal)
+	err = execCmd(entry.Exec(), entry.InTerminal(), e.terminal)
 	if err != nil {
 		e.moduleLogger.Warn(logMsg,
 			id.ZapField(),
-			zap.String("EntryPath", entry.path),
+			zap.String("EntryPath", entry.FilePath()),
 			zap.Error(err),
 		)
 	}
@@ -72,14 +70,14 @@ func (e *deActionExecuter) open(client api.RpcClient, id api.RootListRowID) {
 	client.HideUI(err)
 }
 
-func (e *deActionExecuter) copy(id api.RootListRowID, entry *entry, data *mime.Data, logMsg string) bool {
+func (e *deActionExecuter) copy(id api.RootListRowID, entry *types.DesktopEntry, data *mime.Data, logMsg string) bool {
 	copyResult := api.NewChanBoolResult()
 	e.desktop.WriteToClipboard(false, data, copyResult)
 	res := <-copyResult.GetChannel()
 	if !res {
 		e.moduleLogger.Warn(logMsg,
 			id.ZapField(),
-			zap.String("EntryPath", entry.path),
+			zap.String("EntryPath", entry.FilePath()),
 		)
 
 		return false
@@ -96,7 +94,7 @@ func (e *deActionExecuter) copyName(client api.RpcClient, id api.RootListRowID) 
 		return
 	}
 
-	if e.copy(id, entry, mime.NewTextData(entry.props.Name), logMsg) {
+	if e.copy(id, entry, mime.NewTextData(entry.Name()), logMsg) {
 		client.HideUI(nil)
 	}
 
@@ -111,7 +109,7 @@ func (e *deActionExecuter) copyPath(client api.RpcClient, id api.RootListRowID) 
 		return
 	}
 
-	if e.copy(id, entry, mime.NewTextData(entry.path), logMsg) {
+	if e.copy(id, entry, mime.NewTextData(entry.FilePath()), logMsg) {
 		client.HideUI(nil)
 	}
 

@@ -12,15 +12,27 @@ func newRpcCfg() *RpcCfg {
 	}
 }
 
+type ProviderDesktopEntryCfg struct {
+	DesktopEntriesChLen uint32
+}
+
+func newProviderDesktopEntryCfg() *ProviderDesktopEntryCfg {
+	return &ProviderDesktopEntryCfg{
+		DesktopEntriesChLen: 10,
+	}
+}
+
 type ProviderCfg struct {
 	ChannelLen          uint32
 	SubModuleChannelLen uint32
+	DesktopEntry        *ProviderDesktopEntryCfg
 }
 
 func newProviderCfg() *ProviderCfg {
 	return &ProviderCfg{
 		ChannelLen:          100,
 		SubModuleChannelLen: 100,
+		DesktopEntry:        newProviderDesktopEntryCfg(),
 	}
 }
 

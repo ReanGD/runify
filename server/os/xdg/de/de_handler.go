@@ -110,6 +110,8 @@ func (h *handler) walkXDGDesktopEntries(fn func(entry *types.DesktopEntry)) {
 				filePath,
 				h.iconCache.getNonSvgIconPath(props.Icon, 48),
 				props.Name,
+				props.Exec,
+				props.Terminal,
 			))
 		})
 	}

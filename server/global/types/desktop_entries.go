@@ -1,21 +1,28 @@
 package types
 
 type DesktopEntry struct {
-	// The path to the desktop entry file.
+	// The path to the desktop entry file
 	filePath string
 
-	// The path to the icon file.
+	// The path to the icon file
 	iconPath string
 
-	// The real name of the desktop entry.
+	// The real name of the desktop entry
 	name string
+
+	// Program to execute
+	exec string
+
+	// Whether the program should be run in a terminal window
+	inTerminal bool
 }
 
-func NewDesktopEntry(filePath, iconPath, name string) *DesktopEntry {
+func NewDesktopEntry(filePath, iconPath, name, exec string, inTerminal bool) *DesktopEntry {
 	return &DesktopEntry{
 		filePath: filePath,
 		iconPath: iconPath,
 		name:     name,
+		exec:     exec,
 	}
 }
 
@@ -31,11 +38,21 @@ func (e *DesktopEntry) Name() string {
 	return e.name
 }
 
+func (e *DesktopEntry) Exec() string {
+	return e.exec
+}
+
+func (e *DesktopEntry) InTerminal() bool {
+	return e.inTerminal
+}
+
 func (e *DesktopEntry) IsEqual(other *DesktopEntry) bool {
 	return other != nil &&
 		e.filePath == other.filePath &&
 		e.iconPath == other.iconPath &&
-		e.name == other.name
+		e.name == other.name &&
+		e.exec == other.exec &&
+		e.inTerminal == other.inTerminal
 }
 
 type DesktopEntries []*DesktopEntry
