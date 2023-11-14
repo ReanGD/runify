@@ -25,14 +25,20 @@ func New() *Provider {
 	}
 }
 
-func (p *Provider) OnInit(cfg *config.Config, desktop api.Desktop, rpc api.Rpc, rootLogger *zap.Logger) <-chan error {
+func (p *Provider) OnInit(
+	cfg *config.Config,
+	desktop api.Desktop,
+	de api.XDGDesktopEntry,
+	rpc api.Rpc,
+	rootLogger *zap.Logger,
+) <-chan error {
 	ch := make(chan error)
 
 	go func() {
 		channelLen := cfg.Get().Provider.ChannelLen
 		p.Init(p, rootLogger, ModuleName, channelLen)
 
-		ch <- p.handler.onInit(cfg, desktop, rpc, p.ModuleLogger, p.NewSubmoduleLogger(p.ModuleLogger, "RootList"))
+		ch <- p.handler.onInit(cfg, desktop, de, rpc, p.ModuleLogger, p.NewSubmoduleLogger(p.ModuleLogger, "RootList"))
 	}()
 
 	return ch

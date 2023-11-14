@@ -45,12 +45,19 @@ func (h *providerHandler) getErrCh() <-chan error {
 	return h.errCh
 }
 
-func (h *providerHandler) onInit(cfg *config.Config, desktop api.Desktop, rpc api.Rpc, moduleLogger *zap.Logger, rootListLogger *zap.Logger) error {
+func (h *providerHandler) onInit(
+	cfg *config.Config,
+	desktop api.Desktop,
+	de api.XDGDesktopEntry,
+	rpc api.Rpc,
+	moduleLogger *zap.Logger,
+	rootListLogger *zap.Logger,
+) error {
 	h.rpc = rpc
 	h.desktop = desktop
 	h.moduleLogger = moduleLogger
 	h.rootListLogger = rootListLogger
-	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(desktop))
+	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(desktop, de))
 	h.dataProviders[calculatorID] = newDataProvider(calculatorID, calculator.New(desktop))
 	h.dataProviders[linksID] = newDataProvider(linksID, links.New(desktop))
 

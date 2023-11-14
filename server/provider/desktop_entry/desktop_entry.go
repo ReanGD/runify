@@ -1,21 +1,27 @@
 package desktop_entry
 
 import (
+	"errors"
+
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
+	"github.com/ReanGD/runify/server/global/module"
+	"github.com/ReanGD/runify/server/global/types"
 	"go.uber.org/zap"
 )
 
 type DesktopEntry struct {
 	desktop        api.Desktop
+	de             api.XDGDesktopEntry
 	model          *deModel
 	actionExecuter *deActionExecuter
 	moduleLogger   *zap.Logger
 }
 
-func New(desktop api.Desktop) *DesktopEntry {
+func New(desktop api.Desktop, de api.XDGDesktopEntry) *DesktopEntry {
 	return &DesktopEntry{
 		desktop:        desktop,
+		de:             de,
 		model:          newDEModel(),
 		actionExecuter: newDEActionExecuter(),
 		moduleLogger:   nil,
@@ -39,7 +45,21 @@ func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, prov
 }
 
 func (p *DesktopEntry) OnStart(errorCtx *module.ErrorCtx) []*types.HandledChannel {
-	return []*types.HandledChannel{}
+	desktopEntriesCh := make(chan types.DesktopEntries, 10)
+	subsToDesktopEntriesRes := api.NewChanBoolResult()
+	p.de.Subscribe(desktopEntriesCh, subsToDesktopEntriesRes)
+
+	if res := <-subsToDesktopEntriesRes.GetChannel(); !res {
+		errorCtx.SendError(errors.New("subscribe to XDGDesktopEntry failed"))
+		return []*types.HandledChannel{}
+	}
+
+	p.model.start()
+	p.actionExecuter.start()
+
+	return []*types.HandledChannel{
+		types.NewHandledChannel(desktopEntriesCh, p.model.onDesktopEntries),
+	}
 }
 
 func (p *DesktopEntry) MakeRootListCtrl() api.RootListCtrl {
