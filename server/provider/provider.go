@@ -19,10 +19,10 @@ type Provider struct {
 	module.Module
 }
 
-func New() *Provider {
+func New() (*Provider, string) {
 	return &Provider{
 		handler: newProviderHandler(),
-	}
+	}, ModuleName
 }
 
 func (p *Provider) OnInit(
@@ -36,7 +36,7 @@ func (p *Provider) OnInit(
 
 	go func() {
 		channelLen := cfg.Get().Provider.ChannelLen
-		p.Init(p, rootLogger, ModuleName, channelLen)
+		p.Init(rootLogger, channelLen)
 
 		ch <- p.handler.onInit(cfg, desktop, de, rpc, p.ModuleLogger, p.NewSubmoduleLogger(p.ModuleLogger, "RootList"))
 	}()

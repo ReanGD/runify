@@ -83,28 +83,37 @@ type Module struct {
 	ErrorCtx     *ErrorCtx
 	RootLogger   *zap.Logger
 	ModuleLogger *zap.Logger
+	name         string
 
 	Channel
 }
 
-func (m *Module) Init(impl api.ModuleImpl, rootLogger *zap.Logger, moduleName string, channelLen uint32) {
+func (m *Module) Create(impl api.ModuleImpl, name string) {
 	m.impl = impl
 	m.ErrorCtx = newErrorCtx()
+	m.RootLogger = nil
+	m.ModuleLogger = nil
+	m.name = name
+}
+
+func (m *Module) Init(rootLogger *zap.Logger, channelLen uint32) {
 	m.RootLogger = rootLogger
-	m.ModuleLogger = rootLogger.With(zap.String("Module", moduleName))
+	m.ModuleLogger = rootLogger.With(zap.String("Module", m.name))
 	m.Channel.Init(channelLen)
 }
 
-func (m *Module) InitSubmodule(impl api.ModuleImpl, rootLogger *zap.Logger, submoduleName string, channelLen uint32) {
-	m.impl = impl
-	m.ErrorCtx = newErrorCtx()
+func (m *Module) InitSubmodule(rootLogger *zap.Logger, channelLen uint32) {
 	m.RootLogger = rootLogger
-	m.ModuleLogger = m.NewSubmoduleLogger(rootLogger, submoduleName)
+	m.ModuleLogger = m.NewSubmoduleLogger(rootLogger, m.name)
 	m.Channel.Init(channelLen)
 }
 
 func (m *Module) NewSubmoduleLogger(rootLogger *zap.Logger, submoduleName string) *zap.Logger {
 	return rootLogger.With(zap.String("SubModule", submoduleName))
+}
+
+func (m *Module) GetName() string {
+	return m.name
 }
 
 func (m *Module) recoverLog(recoverResult interface{}, request interface{}) string {

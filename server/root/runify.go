@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
+	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/logger"
 	"github.com/ReanGD/runify/server/os/desktop"
 	"github.com/ReanGD/runify/server/os/x11"
@@ -21,6 +22,24 @@ import (
 
 var logModule = zap.String("module", "runify")
 
+type moduleFull interface {
+	Create(impl api.ModuleImpl, name string)
+
+	api.ModuleImpl
+}
+
+type moduleItem struct {
+	item moduleFull
+	name string
+}
+
+func newModuleItem(item moduleFull, name string) *moduleItem {
+	return &moduleItem{
+		item: item,
+		name: name,
+	}
+}
+
 type Runify struct {
 	appID    uuid.UUID
 	cfg      *config.Config
@@ -30,6 +49,7 @@ type Runify struct {
 	de       *de.XDGDesktopEntry
 	desktop  *desktop.Desktop
 	provider *provider.Provider
+	items    []*moduleItem
 
 	runifyLogger *zap.Logger
 }
@@ -51,12 +71,27 @@ func (r *Runify) create(buildCfg *config.BuildCfg) error {
 
 	r.cfg = config.New(buildCfg)
 	r.logger = nil
-	r.rpc = rpc.New()
-	r.ds = x11.New()
-	r.de = de.New()
-	r.desktop = desktop.New()
-	r.provider = provider.New()
 	r.runifyLogger = nil
+
+	var name string
+	items := []*moduleItem{}
+
+	r.rpc, name = rpc.New()
+	items = append(items, newModuleItem(r.rpc, name))
+
+	r.ds, name = x11.New()
+	items = append(items, newModuleItem(r.ds, name))
+
+	r.de, name = de.New()
+	items = append(items, newModuleItem(r.de, name))
+
+	r.desktop, name = desktop.New()
+	items = append(items, newModuleItem(r.desktop, name))
+
+	r.provider, name = provider.New()
+	items = append(items, newModuleItem(r.provider, name))
+
+	r.items = items
 
 	return nil
 }
@@ -82,6 +117,11 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	rootLogger := r.logger.GetRoot()
 	r.runifyLogger = rootLogger.With(logModule)
 	r.cfg.AddVersionToLog(rootLogger)
+
+	for _, it := range r.items {
+		m := it.item
+		m.Create(m, it.name)
+	}
 
 	for _, it := range []struct {
 		moduleName string

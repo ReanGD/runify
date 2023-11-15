@@ -17,18 +17,18 @@ type dataProvider struct {
 	module.Module
 }
 
-func newDataProvider(providerID api.ProviderID, handler dataProviderHandler) *dataProvider {
+func newDataProvider(providerID api.ProviderID, handler dataProviderHandler) (*dataProvider, string) {
 	return &dataProvider{
 		providerID: providerID,
 		handler:    handler,
-	}
+	}, handler.GetName()
 }
 
 func (p *dataProvider) onInit(cfg *config.Config, rootProviderLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 	go func() {
 		channelLen := cfg.Get().Provider.SubModuleChannelLen
-		p.InitSubmodule(p, rootProviderLogger, p.handler.GetName(), channelLen)
+		p.InitSubmodule(rootProviderLogger, channelLen)
 
 		ch <- p.handler.OnInit(cfg, p.ModuleLogger, p.providerID)
 	}()

@@ -57,12 +57,16 @@ func (h *providerHandler) onInit(
 	h.desktop = desktop
 	h.moduleLogger = moduleLogger
 	h.rootListLogger = rootListLogger
-	h.dataProviders[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(desktop, de))
-	h.dataProviders[calculatorID] = newDataProvider(calculatorID, calculator.New(desktop))
-	h.dataProviders[linksID] = newDataProvider(linksID, links.New(desktop))
+
+	names := make(map[api.ProviderID]string)
+
+	h.dataProviders[desktopEntryID], names[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(desktop, de))
+	h.dataProviders[calculatorID], names[calculatorID] = newDataProvider(calculatorID, calculator.New(desktop))
+	h.dataProviders[linksID], names[linksID] = newDataProvider(linksID, links.New(desktop))
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
-	for _, dp := range h.dataProviders {
+	for id, dp := range h.dataProviders {
+		dp.Create(dp, names[id])
 		dpChans = append(dpChans, dp.onInit(cfg, moduleLogger))
 	}
 	for _, dpChan := range dpChans {

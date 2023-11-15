@@ -17,14 +17,15 @@ const ModuleName = "x11"
 type X11 struct {
 	handler     *x11Handler
 	x11EventsCh chan interface{}
+
 	module.Module
 }
 
-func New() *X11 {
+func New() (*X11, string) {
 	return &X11{
 		handler:     newX11Handler(),
 		x11EventsCh: nil,
-	}
+	}, ModuleName
 }
 
 func (m *X11) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
@@ -32,7 +33,7 @@ func (m *X11) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
 
 	go func() {
 		x11Cfg := cfg.Get().DsX11
-		m.Init(m, rootLogger, ModuleName, x11Cfg.ModuleChLen)
+		m.Init(rootLogger, x11Cfg.ModuleChLen)
 		m.x11EventsCh = make(chan interface{}, x11Cfg.X11EventChLen)
 		ch <- m.handler.init(m.x11EventsCh, m.ErrorCtx, m.ModuleLogger)
 	}()

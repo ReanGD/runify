@@ -18,10 +18,10 @@ type XDGDesktopEntry struct {
 	module.Module
 }
 
-func New() *XDGDesktopEntry {
+func New() (*XDGDesktopEntry, string) {
 	return &XDGDesktopEntry{
 		handler: newHandler(),
-	}
+	}, ModuleName
 }
 
 func (d *XDGDesktopEntry) OnInit(
@@ -31,7 +31,7 @@ func (d *XDGDesktopEntry) OnInit(
 
 	go func() {
 		deCfg := cfg.Get().XDGDesktopEntry
-		d.Init(d, rootLogger, ModuleName, deCfg.ModuleChLen)
+		d.Init(rootLogger, deCfg.ModuleChLen)
 		ch <- d.handler.init(d.ModuleLogger)
 	}()
 

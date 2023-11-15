@@ -21,11 +21,11 @@ type Desktop struct {
 	module.Module
 }
 
-func New() *Desktop {
+func New() (*Desktop, string) {
 	return &Desktop{
 		handler: newHandler(),
 		mCtx:    nil,
-	}
+	}, ModuleName
 }
 
 func (d *Desktop) OnInit(
@@ -35,7 +35,7 @@ func (d *Desktop) OnInit(
 
 	go func() {
 		desktopCfg := cfg.Get().Desktop
-		d.Init(d, rootLogger, ModuleName, desktopCfg.ModuleChLen)
+		d.Init(rootLogger, desktopCfg.ModuleChLen)
 		d.mCtx = newModuleCtx(d, desktopCfg, ds, provider, d.ErrorCtx, d.ModuleLogger)
 		ch <- d.handler.init(d.mCtx)
 	}()

@@ -20,18 +20,18 @@ type Rpc struct {
 	module.Module
 }
 
-func New() *Rpc {
+func New() (*Rpc, string) {
 	return &Rpc{
 		wg:      &sync.WaitGroup{},
 		handler: newRpcHandler(),
-	}
+	}, ModuleName
 }
 
 func (m *Rpc) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
 	ch := make(chan error)
 
 	go func() {
-		m.Init(m, rootLogger, ModuleName, cfg.Get().Rpc.ChannelLen)
+		m.Init(rootLogger, cfg.Get().Rpc.ChannelLen)
 		uiLogger := rootLogger.With(zap.String("module", "UI"))
 		ch <- m.handler.onInit(cfg.Get(), m, uiLogger, m.ModuleLogger)
 	}()
