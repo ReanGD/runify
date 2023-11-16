@@ -7,7 +7,6 @@ import (
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/types"
-	"go.uber.org/zap"
 )
 
 const ModuleName = "xdg_desktop_entry"
@@ -24,15 +23,13 @@ func New() (*XDGDesktopEntry, string) {
 	}, ModuleName
 }
 
-func (d *XDGDesktopEntry) OnInit(
-	cfg *config.Config, rootLogger *zap.Logger,
-) <-chan error {
+func (d *XDGDesktopEntry) OnInit(cfg *config.Config) <-chan error {
 	ch := make(chan error)
 
 	go func() {
 		deCfg := cfg.Get().XDGDesktopEntry
-		d.Init(rootLogger, deCfg.ModuleChLen)
-		ch <- d.handler.init(d.ModuleLogger)
+		d.Init(deCfg.ModuleChLen)
+		ch <- d.handler.init(d.GetModuleLogger())
 	}()
 
 	return ch
@@ -70,9 +67,9 @@ func (d *XDGDesktopEntry) OnRequest(request interface{}) (bool, error) {
 func (d *XDGDesktopEntry) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *updateCmd:
-		r.onRequestDefault(d.ModuleLogger, reason)
+		r.onRequestDefault(d.GetModuleLogger(), reason)
 	case *subscribeCmd:
-		r.onRequestDefault(d.ModuleLogger, reason)
+		r.onRequestDefault(d.GetModuleLogger(), reason)
 
 	default:
 		return d.OnRequestDefaultUnknownMsg(request, reason)

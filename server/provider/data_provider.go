@@ -7,7 +7,6 @@ import (
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/types"
-	"go.uber.org/zap"
 )
 
 type dataProvider struct {
@@ -24,13 +23,13 @@ func newDataProvider(providerID api.ProviderID, handler dataProviderHandler) (*d
 	}, handler.GetName()
 }
 
-func (p *dataProvider) onInit(cfg *config.Config, rootProviderLogger *zap.Logger) <-chan error {
+func (p *dataProvider) onInit(cfg *config.Config) <-chan error {
 	ch := make(chan error)
 	go func() {
 		channelLen := cfg.Get().Provider.SubModuleChannelLen
-		p.InitSubmodule(rootProviderLogger, channelLen)
+		p.InitSubmodule(channelLen)
 
-		ch <- p.handler.OnInit(cfg, p.ModuleLogger, p.providerID)
+		ch <- p.handler.OnInit(cfg, p.GetModuleLogger(), p.providerID)
 	}()
 
 	return ch
@@ -66,7 +65,7 @@ func (p *dataProvider) OnRequest(request interface{}) (bool, error) {
 func (p *dataProvider) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *makeRootListCtrlCmd:
-		r.onRequestDefault(p.ModuleLogger, reason)
+		r.onRequestDefault(p.GetModuleLogger(), reason)
 
 	default:
 		return p.OnRequestDefaultUnknownMsg(request, reason)

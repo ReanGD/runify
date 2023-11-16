@@ -27,13 +27,13 @@ func New() (*Rpc, string) {
 	}, ModuleName
 }
 
-func (m *Rpc) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
+func (m *Rpc) OnInit(cfg *config.Config) <-chan error {
 	ch := make(chan error)
 
 	go func() {
-		m.Init(rootLogger, cfg.Get().Rpc.ChannelLen)
-		uiLogger := rootLogger.With(zap.String("module", "UI"))
-		ch <- m.handler.onInit(cfg.Get(), m, uiLogger, m.ModuleLogger)
+		m.Init(cfg.Get().Rpc.ChannelLen)
+		uiLogger := m.GetRootLogger().With(zap.String("module", "UI"))
+		ch <- m.handler.onInit(cfg.Get(), m, uiLogger, m.GetModuleLogger())
 	}()
 
 	return ch
@@ -77,13 +77,13 @@ func (m *Rpc) OnRequest(request interface{}) (bool, error) {
 func (m *Rpc) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *serverStartedCmd:
-		r.onRequestDefault(m.ModuleLogger, reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 	case *uiClientConnectedCmd:
-		r.onRequestDefault(m.ModuleLogger, reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 	case *uiClientDisconnectedCmd:
-		r.onRequestDefault(m.ModuleLogger, reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 	case *openRootListCmd:
-		r.onRequestDefault(m.ModuleLogger, reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
 		return m.OnRequestDefaultUnknownMsg(request, reason)

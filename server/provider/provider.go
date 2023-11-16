@@ -8,7 +8,6 @@ import (
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/global/types"
-	"go.uber.org/zap"
 )
 
 const ModuleName = "provider"
@@ -30,15 +29,14 @@ func (p *Provider) OnInit(
 	desktop api.Desktop,
 	de api.XDGDesktopEntry,
 	rpc api.Rpc,
-	rootLogger *zap.Logger,
 ) <-chan error {
 	ch := make(chan error)
 
 	go func() {
 		channelLen := cfg.Get().Provider.ChannelLen
-		p.Init(rootLogger, channelLen)
+		p.Init(channelLen)
 
-		ch <- p.handler.onInit(cfg, desktop, de, rpc, p.ModuleLogger, p.NewSubmoduleLogger(p.ModuleLogger, "RootList"))
+		ch <- p.handler.onInit(cfg, desktop, de, rpc, p.GetModuleLogger(), p.NewSubmoduleLogger("RootList"))
 	}()
 
 	return ch
@@ -74,7 +72,7 @@ func (p *Provider) OnRequest(request interface{}) (bool, error) {
 func (p *Provider) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *activateCmd:
-		r.onRequestDefault(p.ModuleLogger, reason)
+		r.onRequestDefault(p.GetModuleLogger(), reason)
 
 	default:
 		return p.OnRequestDefaultUnknownMsg(request, reason)

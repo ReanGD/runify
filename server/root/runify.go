@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sync"
 
 	"github.com/ReanGD/runify/server/config"
@@ -23,7 +24,8 @@ import (
 var logModule = zap.String("module", "runify")
 
 type moduleFull interface {
-	Create(impl api.ModuleImpl, name string)
+	Create(impl api.ModuleImpl, name string, rootLogger *zap.Logger)
+	Start(ctx context.Context, wg *sync.WaitGroup) <-chan error
 
 	api.ModuleImpl
 }
@@ -120,18 +122,18 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 
 	for _, it := range r.items {
 		m := it.item
-		m.Create(m, it.name)
+		m.Create(m, it.name, rootLogger)
 	}
 
 	for _, it := range []struct {
 		moduleName string
 		initCh     <-chan error
 	}{
-		{rpc.ModuleName, r.rpc.OnInit(r.cfg, rootLogger)},
-		{x11.ModuleName, r.ds.OnInit(r.cfg, rootLogger)},
-		{de.ModuleName, r.de.OnInit(r.cfg, rootLogger)},
-		{desktop.ModuleName, r.desktop.OnInit(r.cfg, r.ds, r.provider, rootLogger)},
-		{provider.ModuleName, r.provider.OnInit(r.cfg, r.desktop, r.de, r.rpc, rootLogger)},
+		{rpc.ModuleName, r.rpc.OnInit(r.cfg)},
+		{x11.ModuleName, r.ds.OnInit(r.cfg)},
+		{de.ModuleName, r.de.OnInit(r.cfg)},
+		{desktop.ModuleName, r.desktop.OnInit(r.cfg, r.ds, r.provider)},
+		{provider.ModuleName, r.provider.OnInit(r.cfg, r.desktop, r.de, r.rpc)},
 	} {
 		err := <-it.initCh
 		if err != nil {
@@ -151,35 +153,39 @@ func (r *Runify) start() {
 	wg := &sync.WaitGroup{}
 	ctx, cancel := context.WithCancel(context.Background())
 
-	cfgCh := r.cfg.Start(ctx, wg, r.logger.GetRoot())
-	rpcCh := r.rpc.Start(ctx, wg)
-	dsCh := r.ds.Start(ctx, wg)
-	deCh := r.de.Start(ctx, wg)
-	desktopCh := r.desktop.Start(ctx, wg)
-	providerCh := r.provider.Start(ctx, wg)
+	cases := make([]reflect.SelectCase, len(r.items)+1)
+	for i, it := range r.items {
+		m := it.item
+		errCh := reflect.ValueOf(m.Start(ctx, wg))
+		cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: errCh}
+	}
+
+	cfgIndex := len(r.items)
+	errCh := reflect.ValueOf(r.cfg.Start(ctx, wg, r.logger.GetRoot()))
+	cases[cfgIndex] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: errCh}
 
 	r.runifyLogger.Info("Start")
 
-	var err error
-	var name string
-	select {
-	case err = <-cfgCh:
-		name = config.ModuleName
-	case err = <-rpcCh:
-		name = rpc.ModuleName
-	case err = <-dsCh:
-		name = x11.ModuleName
-	case err = <-deCh:
-		name = de.ModuleName
-	case err = <-desktopCh:
-		name = desktop.ModuleName
-	case err = <-providerCh:
-		name = provider.ModuleName
-	}
+	chosen, recv, recvOk := reflect.Select(cases)
 
-	r.runifyLogger.Error("Module finished with error. Start to cancel the work of the other modules",
-		zap.String("module", name),
-		zap.Error(err))
+	moduleName := config.ModuleName
+	if chosen != cfgIndex {
+		moduleName = r.items[chosen].name
+	}
+	action := zap.String("action", "Start to cancel the work of the other modules")
+
+	if recvOk {
+		r.runifyLogger.Error("Module finished without error",
+			zap.String("module", moduleName),
+			action)
+	} else {
+		err := recv.Interface().(error)
+
+		r.runifyLogger.Error("Module finished with error",
+			zap.String("module", moduleName),
+			action,
+			zap.Error(err))
+	}
 
 	cancel()
 	wg.Wait()

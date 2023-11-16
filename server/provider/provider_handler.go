@@ -66,8 +66,8 @@ func (h *providerHandler) onInit(
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
 	for id, dp := range h.dataProviders {
-		dp.Create(dp, names[id])
-		dpChans = append(dpChans, dp.onInit(cfg, moduleLogger))
+		dp.Create(dp, names[id], moduleLogger)
+		dpChans = append(dpChans, dp.onInit(cfg))
 	}
 	for _, dpChan := range dpChans {
 		if err := <-dpChan; err != nil {

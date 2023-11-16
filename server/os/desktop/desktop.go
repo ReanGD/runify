@@ -9,7 +9,6 @@ import (
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/global/types"
-	"go.uber.org/zap"
 )
 
 const ModuleName = "desktop"
@@ -28,15 +27,13 @@ func New() (*Desktop, string) {
 	}, ModuleName
 }
 
-func (d *Desktop) OnInit(
-	cfg *config.Config, ds api.DisplayServer, provider api.Provider, rootLogger *zap.Logger,
-) <-chan error {
+func (d *Desktop) OnInit(cfg *config.Config, ds api.DisplayServer, provider api.Provider) <-chan error {
 	ch := make(chan error)
 
 	go func() {
 		desktopCfg := cfg.Get().Desktop
-		d.Init(rootLogger, desktopCfg.ModuleChLen)
-		d.mCtx = newModuleCtx(d, desktopCfg, ds, provider, d.ErrorCtx, d.ModuleLogger)
+		d.Init(desktopCfg.ModuleChLen)
+		d.mCtx = newModuleCtx(d, desktopCfg, ds, provider, d.ErrorCtx, d.GetModuleLogger())
 		ch <- d.handler.init(d.mCtx)
 	}()
 
@@ -102,13 +99,13 @@ func (d *Desktop) OnRequest(request interface{}) (bool, error) {
 func (d *Desktop) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *writeToClipboardCmd:
-		r.onRequestDefault(d.ModuleLogger, reason)
+		r.onRequestDefault(d.GetModuleLogger(), reason)
 	case *addShortcutCmd:
-		r.onRequestDefault(d.ModuleLogger, reason)
+		r.onRequestDefault(d.GetModuleLogger(), reason)
 	case *removeShortcutCmd:
-		r.onRequestDefault(d.ModuleLogger, reason)
+		r.onRequestDefault(d.GetModuleLogger(), reason)
 	case *removeShortcutWithoutCheckCmd:
-		r.onRequestDefault(d.ModuleLogger, reason)
+		r.onRequestDefault(d.GetModuleLogger(), reason)
 
 	default:
 		return d.OnRequestDefaultUnknownMsg(request, reason)

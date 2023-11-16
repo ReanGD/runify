@@ -9,7 +9,6 @@ import (
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/global/types"
-	"go.uber.org/zap"
 )
 
 const ModuleName = "x11"
@@ -28,14 +27,14 @@ func New() (*X11, string) {
 	}, ModuleName
 }
 
-func (m *X11) OnInit(cfg *config.Config, rootLogger *zap.Logger) <-chan error {
+func (m *X11) OnInit(cfg *config.Config) <-chan error {
 	ch := make(chan error)
 
 	go func() {
 		x11Cfg := cfg.Get().DsX11
-		m.Init(rootLogger, x11Cfg.ModuleChLen)
+		m.Init(x11Cfg.ModuleChLen)
 		m.x11EventsCh = make(chan interface{}, x11Cfg.X11EventChLen)
-		ch <- m.handler.init(m.x11EventsCh, m.ErrorCtx, m.ModuleLogger)
+		ch <- m.handler.init(m.x11EventsCh, m.ErrorCtx, m.GetModuleLogger())
 	}()
 
 	return ch
@@ -87,15 +86,15 @@ func (m *X11) OnRequest(request interface{}) (bool, error) {
 func (m *X11) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *subscribeToClipboardCmd:
-		r.onRequestDefault(m.ModuleLogger, reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 	case *writeToClipboardCmd:
-		r.onRequestDefault(m.ModuleLogger, reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 	case *subscribeToHotkeysCmd:
-		r.onRequestDefault(m.ModuleLogger, reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 	case *bindHotkeyCmd:
-		r.onRequestDefault(m.ModuleLogger, reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 	case *unbindHotkeyCmd:
-		r.onRequestDefault(m.ModuleLogger, reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
 		return m.OnRequestDefaultUnknownMsg(request, reason)

@@ -81,39 +81,45 @@ func (c *Channel) IsOverflow() bool {
 type Module struct {
 	impl         api.ModuleImpl
 	ErrorCtx     *ErrorCtx
-	RootLogger   *zap.Logger
-	ModuleLogger *zap.Logger
+	rootLogger   *zap.Logger
+	moduleLogger *zap.Logger
 	name         string
 
 	Channel
 }
 
-func (m *Module) Create(impl api.ModuleImpl, name string) {
+func (m *Module) Create(impl api.ModuleImpl, name string, rootLogger *zap.Logger) {
 	m.impl = impl
 	m.ErrorCtx = newErrorCtx()
-	m.RootLogger = nil
-	m.ModuleLogger = nil
+	m.rootLogger = rootLogger
+	m.moduleLogger = nil
 	m.name = name
 }
 
-func (m *Module) Init(rootLogger *zap.Logger, channelLen uint32) {
-	m.RootLogger = rootLogger
-	m.ModuleLogger = rootLogger.With(zap.String("Module", m.name))
+func (m *Module) Init(channelLen uint32) {
+	m.moduleLogger = m.rootLogger.With(zap.String("Module", m.name))
 	m.Channel.Init(channelLen)
 }
 
-func (m *Module) InitSubmodule(rootLogger *zap.Logger, channelLen uint32) {
-	m.RootLogger = rootLogger
-	m.ModuleLogger = m.NewSubmoduleLogger(rootLogger, m.name)
+func (m *Module) InitSubmodule(channelLen uint32) {
+	m.moduleLogger = m.NewSubmoduleLogger(m.name)
 	m.Channel.Init(channelLen)
 }
 
-func (m *Module) NewSubmoduleLogger(rootLogger *zap.Logger, submoduleName string) *zap.Logger {
-	return rootLogger.With(zap.String("SubModule", submoduleName))
+func (m *Module) NewSubmoduleLogger(submoduleName string) *zap.Logger {
+	return m.rootLogger.With(zap.String("SubModule", submoduleName))
 }
 
 func (m *Module) GetName() string {
 	return m.name
+}
+
+func (m *Module) GetRootLogger() *zap.Logger {
+	return m.rootLogger
+}
+
+func (m *Module) GetModuleLogger() *zap.Logger {
+	return m.moduleLogger
 }
 
 func (m *Module) recoverLog(recoverResult interface{}, request interface{}) string {
@@ -128,13 +134,13 @@ func (m *Module) recoverLog(recoverResult interface{}, request interface{}) stri
 	}
 
 	if request != nil {
-		m.ModuleLogger.Error("Panic during message processing",
+		m.moduleLogger.Error("Panic during message processing",
 			zap.String("Request", fmt.Sprintf("%v", request)),
 			zap.Stringer("RequestType", reflect.TypeOf(request)),
 			zap.Error(err),
 			logger.LogicalError)
 	} else {
-		m.ModuleLogger.Error("Panic during message processing",
+		m.moduleLogger.Error("Panic during message processing",
 			zap.String("Request", "unknown"),
 			zap.String("RequestType", "unknown"),
 			zap.Error(err),
@@ -184,7 +190,7 @@ func (m *Module) safeRequestLoop(ctx context.Context, hChannels []*types.Handled
 		if !recvOk {
 			resultIsFinish = true
 			resultErr = errors.New("channel closed")
-			m.ModuleLogger.Error("Error during message processing",
+			m.moduleLogger.Error("Error during message processing",
 				zap.String("Request", "unknown"),
 				zap.String("RequestType", "unknown"),
 				zap.Error(resultErr),
@@ -210,7 +216,7 @@ func (m *Module) Start(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 	ch := make(chan error, 1)
 	go func() {
 		defer wg.Done()
-		m.ModuleLogger.Info("Start")
+		m.moduleLogger.Info("Start")
 		hChs := m.impl.OnStart(ctx)
 
 		for {
@@ -226,7 +232,7 @@ func (m *Module) Start(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 }
 
 func (m *Module) OnRequestUnknownMsg(request interface{}) (bool, error) {
-	m.ModuleLogger.Warn("Unknown message received",
+	m.moduleLogger.Warn("Unknown message received",
 		zap.String("Request", fmt.Sprintf("%v", request)),
 		zap.Stringer("RequestType", reflect.TypeOf(request)),
 		logger.LogicalError)
@@ -234,7 +240,7 @@ func (m *Module) OnRequestUnknownMsg(request interface{}) (bool, error) {
 }
 
 func (m *Module) OnRequestDefaultUnknownMsg(request interface{}, reason string) (bool, error) {
-	m.ModuleLogger.Warn("Unknown message received",
+	m.moduleLogger.Warn("Unknown message received",
 		zap.String("Request", fmt.Sprintf("%v", request)),
 		zap.String("Reason", reason),
 		zap.Stringer("RequestType", reflect.TypeOf(request)),
