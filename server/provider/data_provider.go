@@ -35,18 +35,12 @@ func (p *dataProvider) onInit() <-chan error {
 }
 
 func (p *dataProvider) OnStart(ctx context.Context) []*types.HandledChannel {
-	hChs := []*types.HandledChannel{
-		types.NewHandledChannel(p.ErrorCtx.GetChannel(), p.onError),
-	}
+	hChs := []*types.HandledChannel{}
 
 	return append(hChs, p.handler.OnStart(p.ErrorCtx)...)
 }
 
 func (p *dataProvider) OnFinish() {
-}
-
-func (p *dataProvider) onError(request interface{}) (bool, error) {
-	return true, request.(error)
 }
 
 func (p *dataProvider) OnRequest(request interface{}) (bool, error) {

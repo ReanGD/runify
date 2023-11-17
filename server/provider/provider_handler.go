@@ -10,6 +10,7 @@ import (
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global"
 	"github.com/ReanGD/runify/server/global/api"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/provider/calculator"
 	"github.com/ReanGD/runify/server/provider/desktop_entry"
@@ -21,7 +22,6 @@ type providerHandler struct {
 	dataProviders  map[api.ProviderID]*dataProvider
 	rpc            api.Rpc
 	desktop        api.Desktop
-	errCh          chan error
 	wg             *sync.WaitGroup
 	doneErrWaitCh  chan struct{}
 	moduleLogger   *zap.Logger
@@ -33,16 +33,11 @@ func newProviderHandler() *providerHandler {
 		dataProviders:  make(map[api.ProviderID]*dataProvider),
 		rpc:            nil,
 		desktop:        nil,
-		errCh:          make(chan error, 1),
 		wg:             &sync.WaitGroup{},
 		doneErrWaitCh:  make(chan struct{}),
 		moduleLogger:   nil,
 		rootListLogger: nil,
 	}
-}
-
-func (h *providerHandler) getErrCh() <-chan error {
-	return h.errCh
 }
 
 func (h *providerHandler) onInit(
@@ -84,7 +79,7 @@ func (h *providerHandler) onInit(
 	return nil
 }
 
-func (h *providerHandler) onStart(ctx context.Context) {
+func (h *providerHandler) onStart(ctx context.Context, errorCtx *module.ErrorCtx) {
 	cases := make([]reflect.SelectCase, len(h.dataProviders)+1)
 
 	caseNum := 0
@@ -103,9 +98,8 @@ func (h *providerHandler) onStart(ctx context.Context) {
 		h.wg.Add(1)
 		defer h.wg.Done()
 
-		_, recv, recvOk := reflect.Select(cases)
-		if !recvOk {
-			h.errCh <- recv.Interface().(error)
+		if _, recv, recvOk := reflect.Select(cases); !recvOk {
+			errorCtx.SendError(recv.Interface().(error))
 		}
 	}()
 }

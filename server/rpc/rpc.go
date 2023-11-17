@@ -40,20 +40,14 @@ func (m *Rpc) OnInit() <-chan error {
 }
 
 func (m *Rpc) OnStart(ctx context.Context) []*types.HandledChannel {
-	errCh := m.handler.onStart(ctx, m.wg)
+	m.handler.onStart(ctx, m.wg, m.ErrorCtx)
 
-	hChErr := types.NewHandledChannel(errCh, m.onError)
-
-	return []*types.HandledChannel{hChErr}
+	return []*types.HandledChannel{}
 }
 
 func (m *Rpc) OnFinish() {
 	m.handler.onStop()
 	m.wg.Wait()
-}
-
-func (m *Rpc) onError(request interface{}) (bool, error) {
-	return true, request.(error)
 }
 
 func (m *Rpc) OnRequest(request interface{}) (bool, error) {

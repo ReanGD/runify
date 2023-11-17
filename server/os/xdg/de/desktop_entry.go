@@ -36,16 +36,11 @@ func (d *XDGDesktopEntry) OnInit() <-chan error {
 func (d *XDGDesktopEntry) OnStart(ctx context.Context) []*types.HandledChannel {
 	d.handler.update()
 
-	hChErr := types.NewHandledChannel(d.ErrorCtx.GetChannel(), d.onError)
-	return []*types.HandledChannel{hChErr}
+	return []*types.HandledChannel{}
 }
 
 func (d *XDGDesktopEntry) OnFinish() {
 	d.handler.stop()
-}
-
-func (d *XDGDesktopEntry) onError(request interface{}) (bool, error) {
-	return true, request.(error)
 }
 
 func (d *XDGDesktopEntry) OnRequest(request interface{}) (bool, error) {

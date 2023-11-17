@@ -43,20 +43,15 @@ func (d *Desktop) OnStart(ctx context.Context) []*types.HandledChannel {
 	d.mCtx.setStopCtx(ctx)
 	d.handler.start()
 
-	hChErr := types.NewHandledChannel(d.ErrorCtx.GetChannel(), d.onError)
-	primaryCh := types.NewHandledChannel(d.mCtx.primaryCh, d.onPrimary)
-	clipboardCh := types.NewHandledChannel(d.mCtx.clipboardCh, d.onClipboard)
-	hotkeyCh := types.NewHandledChannel(d.mCtx.hotkeyCh, d.onHotkey)
-
-	return []*types.HandledChannel{hChErr, primaryCh, clipboardCh, hotkeyCh}
+	return []*types.HandledChannel{
+		types.NewHandledChannel(d.mCtx.primaryCh, d.onPrimary),
+		types.NewHandledChannel(d.mCtx.clipboardCh, d.onClipboard),
+		types.NewHandledChannel(d.mCtx.hotkeyCh, d.onHotkey),
+	}
 }
 
 func (d *Desktop) OnFinish() {
 	d.handler.stop()
-}
-
-func (d *Desktop) onError(request interface{}) (bool, error) {
-	return true, request.(error)
 }
 
 func (d *Desktop) onPrimary(request interface{}) (bool, error) {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/paths"
 	"github.com/ReanGD/runify/server/pb"
 	"go.uber.org/zap"
@@ -62,14 +63,13 @@ func (h *rpcHandler) onInit(cfg *config.Configuration, rpc *Rpc, uiLogger *zap.L
 	return nil
 }
 
-func (h *rpcHandler) onStart(ctx context.Context, wg *sync.WaitGroup) <-chan error {
-	errCh := make(chan error, 1)
+func (h *rpcHandler) onStart(ctx context.Context, wg *sync.WaitGroup, errCtx *module.ErrorCtx) {
 	go func() {
 		wg.Add(1)
 		lis, err := net.ListenUnix("unix", h.netUnixAddr)
 		if err != nil {
 			h.moduleLogger.Error("Can't start listener for grps unix socket", zap.String("address", h.unixAddr), zap.Error(err))
-			errCh <- errors.New("failed listen unix address")
+			errCtx.SendError(errors.New("failed listen unix address"))
 			return
 		}
 
@@ -92,10 +92,8 @@ func (h *rpcHandler) onStart(ctx context.Context, wg *sync.WaitGroup) <-chan err
 		}
 		wg.Done()
 		h.grpcServer = nil
-		errCh <- err
+		errCtx.SendError(err)
 	}()
-
-	return errCh
 }
 
 func (h *rpcHandler) resolveUnixAddr(unixAddr string) (*net.UnixAddr, error) {

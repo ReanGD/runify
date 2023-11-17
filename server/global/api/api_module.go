@@ -9,10 +9,11 @@ import (
 )
 
 type ModuleImpl interface {
-	OnRequest(request interface{}) (bool, error)
-	OnRequestDefault(request interface{}, reason string) (bool, error)
 	OnStart(ctx context.Context) []*types.HandledChannel
 	OnFinish()
+	OnError(err error) (bool, error)
+	OnRequest(request interface{}) (bool, error)
+	OnRequestDefault(request interface{}, reason string) (bool, error)
 }
 
 type Provider interface {

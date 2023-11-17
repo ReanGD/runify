@@ -37,18 +37,13 @@ func (p *Provider) OnInit(desktop api.Desktop, de api.XDGDesktopEntry, rpc api.R
 }
 
 func (p *Provider) OnStart(ctx context.Context) []*types.HandledChannel {
-	p.handler.onStart(ctx)
+	p.handler.onStart(ctx, p.ErrorCtx)
 
-	hChErr := types.NewHandledChannel(p.handler.getErrCh(), p.onError)
-	return []*types.HandledChannel{hChErr}
+	return []*types.HandledChannel{}
 }
 
 func (p *Provider) OnFinish() {
 	p.handler.onFinish()
-}
-
-func (p *Provider) onError(request interface{}) (bool, error) {
-	return true, request.(error)
 }
 
 func (p *Provider) OnRequest(request interface{}) (bool, error) {

@@ -173,9 +173,10 @@ func (m *Module) safeRequestLoop(ctx context.Context, hChannels []*types.Handled
 	onRequest := m.impl.OnRequest
 	done := ctx.Done()
 	messageCh := m.GetReadChannel()
-	cntCh := len(hChannels) + 2
+	cntCh := len(hChannels) + 3
 	doneChIdx := cntCh - 1
-	messageChIdx := cntCh - 2
+	errChIdx := cntCh - 2
+	messageChIdx := cntCh - 3
 
 	cases := make([]reflect.SelectCase, cntCh)
 	for i, hc := range hChannels {
@@ -183,6 +184,7 @@ func (m *Module) safeRequestLoop(ctx context.Context, hChannels []*types.Handled
 	}
 
 	cases[messageChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(messageCh)}
+	cases[errChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(m.ErrorCtx.GetChannel())}
 	cases[doneChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(done)}
 
 	for {
@@ -208,6 +210,10 @@ func (m *Module) safeRequestLoop(ctx context.Context, hChannels []*types.Handled
 			request = recv.Interface()
 			m.MessageWasRead()
 			if resultIsFinish, resultErr = onRequest(request); resultIsFinish {
+				return
+			}
+		} else if chosen == errChIdx {
+			if resultIsFinish, resultErr = m.impl.OnError(recv.Interface().(error)); resultIsFinish {
 				return
 			}
 		} else {
@@ -236,6 +242,10 @@ func (m *Module) Start(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 	}()
 
 	return ch
+}
+
+func (m *Module) OnError(err error) (bool, error) {
+	return true, err
 }
 
 func (m *Module) OnRequestUnknownMsg(request interface{}) (bool, error) {

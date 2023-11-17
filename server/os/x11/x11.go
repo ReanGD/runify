@@ -42,18 +42,13 @@ func (m *X11) OnInit() <-chan error {
 func (m *X11) OnStart(ctx context.Context) []*types.HandledChannel {
 	m.handler.start()
 
-	hChErr := types.NewHandledChannel(m.ErrorCtx.GetChannel(), m.onError)
-	hChX11Events := types.NewHandledChannel(m.x11EventsCh, m.onX11Events)
-
-	return []*types.HandledChannel{hChErr, hChX11Events}
+	return []*types.HandledChannel{
+		types.NewHandledChannel(m.x11EventsCh, m.onX11Events),
+	}
 }
 
 func (m *X11) OnFinish() {
 	m.handler.stop()
-}
-
-func (m *X11) onError(request interface{}) (bool, error) {
-	return true, request.(error)
 }
 
 func (m *X11) onX11Events(event interface{}) (bool, error) {
