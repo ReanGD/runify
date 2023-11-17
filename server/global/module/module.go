@@ -8,6 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/types"
 	"github.com/ReanGD/runify/server/logger"
@@ -79,8 +80,9 @@ func (c *Channel) IsOverflow() bool {
 }
 
 type Module struct {
-	impl         api.ModuleImpl
 	ErrorCtx     *ErrorCtx
+	impl         api.ModuleImpl
+	cfg          *config.Configuration
 	rootLogger   *zap.Logger
 	moduleLogger *zap.Logger
 	name         string
@@ -88,9 +90,10 @@ type Module struct {
 	Channel
 }
 
-func (m *Module) Create(impl api.ModuleImpl, name string, rootLogger *zap.Logger) {
-	m.impl = impl
+func (m *Module) Create(impl api.ModuleImpl, name string, cfg *config.Configuration, rootLogger *zap.Logger) {
 	m.ErrorCtx = newErrorCtx()
+	m.impl = impl
+	m.cfg = cfg
 	m.rootLogger = rootLogger
 	m.moduleLogger = nil
 	m.name = name
@@ -112,6 +115,10 @@ func (m *Module) NewSubmoduleLogger(submoduleName string) *zap.Logger {
 
 func (m *Module) GetName() string {
 	return m.name
+}
+
+func (m *Module) GetConfig() *config.Configuration {
+	return m.cfg
 }
 
 func (m *Module) GetRootLogger() *zap.Logger {

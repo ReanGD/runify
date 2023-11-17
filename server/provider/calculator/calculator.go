@@ -28,7 +28,7 @@ func (p *Calculator) GetName() string {
 	return "Calculator"
 }
 
-func (p *Calculator) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID api.ProviderID) error {
+func (p *Calculator) OnInit(cfg *config.Configuration, moduleLogger *zap.Logger, providerID api.ProviderID) error {
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
 

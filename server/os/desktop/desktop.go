@@ -3,7 +3,6 @@ package desktop
 import (
 	"context"
 
-	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
@@ -27,13 +26,13 @@ func New() (*Desktop, string) {
 	}, ModuleName
 }
 
-func (d *Desktop) OnInit(cfg *config.Config, ds api.DisplayServer, provider api.Provider) <-chan error {
+func (d *Desktop) OnInit(ds api.DisplayServer, provider api.Provider) <-chan error {
 	ch := make(chan error)
 
 	go func() {
-		desktopCfg := cfg.Get().Desktop
-		d.Init(desktopCfg.ModuleChLen)
-		d.mCtx = newModuleCtx(d, desktopCfg, ds, provider, d.ErrorCtx, d.GetModuleLogger())
+		cfg := d.GetConfig().Desktop
+		d.Init(cfg.ModuleChLen)
+		d.mCtx = newModuleCtx(d, cfg, ds, provider, d.ErrorCtx, d.GetModuleLogger())
 		ch <- d.handler.init(d.mCtx)
 	}()
 

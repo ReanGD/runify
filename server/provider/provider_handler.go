@@ -46,7 +46,7 @@ func (h *providerHandler) getErrCh() <-chan error {
 }
 
 func (h *providerHandler) onInit(
-	cfg *config.Config,
+	cfg *config.Configuration,
 	desktop api.Desktop,
 	de api.XDGDesktopEntry,
 	rpc api.Rpc,
@@ -66,15 +66,15 @@ func (h *providerHandler) onInit(
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
 	for id, dp := range h.dataProviders {
-		dp.Create(dp, names[id], moduleLogger)
-		dpChans = append(dpChans, dp.onInit(cfg))
+		dp.Create(dp, names[id], cfg, moduleLogger)
+		dpChans = append(dpChans, dp.onInit())
 	}
 	for _, dpChan := range dpChans {
 		if err := <-dpChan; err != nil {
 			return err
 		}
 	}
-	hotkey, err := shortcut.NewHotkey(cfg.Get().Shortcuts.Root)
+	hotkey, err := shortcut.NewHotkey(cfg.Shortcuts.Root)
 	if err != nil {
 		return err
 	}

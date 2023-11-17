@@ -17,7 +17,7 @@ const (
 
 type dataProviderHandler interface {
 	GetName() string
-	OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID api.ProviderID) error
+	OnInit(cfg *config.Configuration, moduleLogger *zap.Logger, providerID api.ProviderID) error
 	OnStart(errorCtx *module.ErrorCtx) []*types.HandledChannel
 	MakeRootListCtrl() api.RootListCtrl
 }

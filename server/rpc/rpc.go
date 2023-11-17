@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/types"
@@ -27,13 +26,14 @@ func New() (*Rpc, string) {
 	}, ModuleName
 }
 
-func (m *Rpc) OnInit(cfg *config.Config) <-chan error {
+func (m *Rpc) OnInit() <-chan error {
 	ch := make(chan error)
 
 	go func() {
-		m.Init(cfg.Get().Rpc.ChannelLen)
+		cfg := m.GetConfig()
+		m.Init(cfg.Rpc.ChannelLen)
 		uiLogger := m.GetRootLogger().With(zap.String("module", "UI"))
-		ch <- m.handler.onInit(cfg.Get(), m, uiLogger, m.GetModuleLogger())
+		ch <- m.handler.onInit(cfg, m, uiLogger, m.GetModuleLogger())
 	}()
 
 	return ch

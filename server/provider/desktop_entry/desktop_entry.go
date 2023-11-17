@@ -13,7 +13,7 @@ import (
 type DesktopEntry struct {
 	desktop        api.Desktop
 	de             api.XDGDesktopEntry
-	cfg            *config.Config
+	cfg            *config.Configuration
 	model          *deModel
 	actionExecuter *deActionExecuter
 	moduleLogger   *zap.Logger
@@ -34,7 +34,7 @@ func (p *DesktopEntry) GetName() string {
 	return "DesktopEntry"
 }
 
-func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID api.ProviderID) error {
+func (p *DesktopEntry) OnInit(cfg *config.Configuration, moduleLogger *zap.Logger, providerID api.ProviderID) error {
 	p.cfg = cfg
 	p.moduleLogger = moduleLogger
 	if err := p.model.init(providerID, moduleLogger); err != nil {
@@ -48,7 +48,7 @@ func (p *DesktopEntry) OnInit(cfg *config.Config, moduleLogger *zap.Logger, prov
 }
 
 func (p *DesktopEntry) OnStart(errorCtx *module.ErrorCtx) []*types.HandledChannel {
-	desktopEntriesCh := make(chan types.DesktopEntries, p.cfg.Get().Provider.DesktopEntry.DesktopEntriesChLen)
+	desktopEntriesCh := make(chan types.DesktopEntries, p.cfg.Provider.DesktopEntry.DesktopEntriesChLen)
 	subsToDesktopEntriesRes := api.NewChanBoolResult()
 	p.de.Subscribe(desktopEntriesCh, subsToDesktopEntriesRes)
 

@@ -3,7 +3,6 @@ package x11
 import (
 	"context"
 
-	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/module"
@@ -27,13 +26,13 @@ func New() (*X11, string) {
 	}, ModuleName
 }
 
-func (m *X11) OnInit(cfg *config.Config) <-chan error {
+func (m *X11) OnInit() <-chan error {
 	ch := make(chan error)
 
 	go func() {
-		x11Cfg := cfg.Get().DsX11
-		m.Init(x11Cfg.ModuleChLen)
-		m.x11EventsCh = make(chan interface{}, x11Cfg.X11EventChLen)
+		cfg := m.GetConfig().DsX11
+		m.Init(cfg.ModuleChLen)
+		m.x11EventsCh = make(chan interface{}, cfg.X11EventChLen)
 		ch <- m.handler.init(m.x11EventsCh, m.ErrorCtx, m.GetModuleLogger())
 	}()
 

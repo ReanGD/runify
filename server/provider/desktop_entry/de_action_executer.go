@@ -26,8 +26,8 @@ func newDEActionExecuter() *deActionExecuter {
 	}
 }
 
-func (e *deActionExecuter) init(cfg *config.Config, desktop api.Desktop, model *deModel, moduleLogger *zap.Logger) error {
-	e.terminal = cfg.Get().System.Terminal
+func (e *deActionExecuter) init(cfg *config.Configuration, desktop api.Desktop, model *deModel, moduleLogger *zap.Logger) error {
+	e.terminal = cfg.System.Terminal
 	e.desktop = desktop
 	e.model = model
 	e.moduleLogger = moduleLogger

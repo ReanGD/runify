@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 
-	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/types"
@@ -23,11 +22,11 @@ func newDataProvider(providerID api.ProviderID, handler dataProviderHandler) (*d
 	}, handler.GetName()
 }
 
-func (p *dataProvider) onInit(cfg *config.Config) <-chan error {
+func (p *dataProvider) onInit() <-chan error {
 	ch := make(chan error)
 	go func() {
-		channelLen := cfg.Get().Provider.SubModuleChannelLen
-		p.InitSubmodule(channelLen)
+		cfg := p.GetConfig()
+		p.InitSubmodule(cfg.Provider.SubModuleChannelLen)
 
 		ch <- p.handler.OnInit(cfg, p.GetModuleLogger(), p.providerID)
 	}()

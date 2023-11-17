@@ -31,7 +31,7 @@ func (p *Links) GetName() string {
 	return "Bookmark"
 }
 
-func (p *Links) OnInit(cfg *config.Config, moduleLogger *zap.Logger, providerID api.ProviderID) error {
+func (p *Links) OnInit(cfg *config.Configuration, moduleLogger *zap.Logger, providerID api.ProviderID) error {
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
 	if err := p.model.init(providerID, moduleLogger); err != nil {

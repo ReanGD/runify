@@ -24,7 +24,7 @@ import (
 var logModule = zap.String("module", "runify")
 
 type moduleFull interface {
-	Create(impl api.ModuleImpl, name string, rootLogger *zap.Logger)
+	Create(impl api.ModuleImpl, name string, cfg *config.Configuration, rootLogger *zap.Logger)
 	Start(ctx context.Context, wg *sync.WaitGroup) <-chan error
 
 	api.ModuleImpl
@@ -120,20 +120,21 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	r.runifyLogger = rootLogger.With(logModule)
 	r.cfg.AddVersionToLog(rootLogger)
 
+	configuration := r.cfg.Get()
 	for _, it := range r.items {
 		m := it.item
-		m.Create(m, it.name, rootLogger)
+		m.Create(m, it.name, configuration, rootLogger)
 	}
 
 	for _, it := range []struct {
 		moduleName string
 		initCh     <-chan error
 	}{
-		{rpc.ModuleName, r.rpc.OnInit(r.cfg)},
-		{x11.ModuleName, r.ds.OnInit(r.cfg)},
-		{de.ModuleName, r.de.OnInit(r.cfg)},
-		{desktop.ModuleName, r.desktop.OnInit(r.cfg, r.ds, r.provider)},
-		{provider.ModuleName, r.provider.OnInit(r.cfg, r.desktop, r.de, r.rpc)},
+		{rpc.ModuleName, r.rpc.OnInit()},
+		{x11.ModuleName, r.ds.OnInit()},
+		{de.ModuleName, r.de.OnInit()},
+		{desktop.ModuleName, r.desktop.OnInit(r.ds, r.provider)},
+		{provider.ModuleName, r.provider.OnInit(r.desktop, r.de, r.rpc)},
 	} {
 		err := <-it.initCh
 		if err != nil {

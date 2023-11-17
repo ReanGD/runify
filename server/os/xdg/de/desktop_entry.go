@@ -3,7 +3,6 @@ package de
 import (
 	"context"
 
-	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/types"
@@ -23,12 +22,11 @@ func New() (*XDGDesktopEntry, string) {
 	}, ModuleName
 }
 
-func (d *XDGDesktopEntry) OnInit(cfg *config.Config) <-chan error {
+func (d *XDGDesktopEntry) OnInit() <-chan error {
 	ch := make(chan error)
 
 	go func() {
-		deCfg := cfg.Get().XDGDesktopEntry
-		d.Init(deCfg.ModuleChLen)
+		d.Init(d.GetConfig().XDGDesktopEntry.ModuleChLen)
 		ch <- d.handler.init(d.GetModuleLogger())
 	}()
 

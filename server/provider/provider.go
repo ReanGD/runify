@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 
-	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/shortcut"
@@ -24,17 +23,12 @@ func New() (*Provider, string) {
 	}, ModuleName
 }
 
-func (p *Provider) OnInit(
-	cfg *config.Config,
-	desktop api.Desktop,
-	de api.XDGDesktopEntry,
-	rpc api.Rpc,
-) <-chan error {
+func (p *Provider) OnInit(desktop api.Desktop, de api.XDGDesktopEntry, rpc api.Rpc) <-chan error {
 	ch := make(chan error)
 
 	go func() {
-		channelLen := cfg.Get().Provider.ChannelLen
-		p.Init(channelLen)
+		cfg := p.GetConfig()
+		p.Init(cfg.Provider.ChannelLen)
 
 		ch <- p.handler.onInit(cfg, desktop, de, rpc, p.GetModuleLogger(), p.NewSubmoduleLogger("RootList"))
 	}()
