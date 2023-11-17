@@ -15,18 +15,18 @@ type dataProvider struct {
 	module.Module
 }
 
-func newDataProvider(providerID api.ProviderID, handler dataProviderHandler) (*dataProvider, string) {
+func newDataProvider(providerID api.ProviderID, handler dataProviderHandler) *dataProvider {
 	return &dataProvider{
 		providerID: providerID,
 		handler:    handler,
-	}, handler.GetName()
+	}
 }
 
 func (p *dataProvider) onInit() <-chan error {
 	ch := make(chan error)
 	go func() {
 		cfg := p.GetConfig()
-		p.InitSubmodule(cfg.Provider.SubModuleChannelLen)
+		p.Init(cfg.Provider.SubModuleChannelLen)
 
 		ch <- p.handler.OnInit(cfg, p.GetModuleLogger(), p.providerID)
 	}()

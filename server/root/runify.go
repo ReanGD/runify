@@ -10,6 +10,7 @@ import (
 
 	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
+	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/logger"
 	"github.com/ReanGD/runify/server/os/desktop"
 	"github.com/ReanGD/runify/server/os/x11"
@@ -24,7 +25,7 @@ import (
 var logModule = zap.String("module", "runify")
 
 type moduleFull interface {
-	Create(impl api.ModuleImpl, name string, cfg *config.Configuration, rootLogger *zap.Logger)
+	Create(impl api.ModuleImpl, name string, isModule bool, cfg *config.Configuration, rootLogger *zap.Logger)
 	Start(ctx context.Context, wg *sync.WaitGroup) <-chan error
 
 	api.ModuleImpl
@@ -123,7 +124,7 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	configuration := r.cfg.Get()
 	for _, it := range r.items {
 		m := it.item
-		m.Create(m, it.name, configuration, rootLogger)
+		m.Create(m, it.name, module.MODULE, configuration, rootLogger)
 	}
 
 	for _, it := range []struct {

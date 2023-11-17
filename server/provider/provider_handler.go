@@ -19,6 +19,7 @@ import (
 )
 
 type providerHandler struct {
+	cfg            *config.Configuration
 	dataProviders  map[api.ProviderID]*dataProvider
 	rpc            api.Rpc
 	desktop        api.Desktop
@@ -30,6 +31,7 @@ type providerHandler struct {
 
 func newProviderHandler() *providerHandler {
 	return &providerHandler{
+		cfg:            nil,
 		dataProviders:  make(map[api.ProviderID]*dataProvider),
 		rpc:            nil,
 		desktop:        nil,
@@ -40,6 +42,12 @@ func newProviderHandler() *providerHandler {
 	}
 }
 
+func (h *providerHandler) addProvider(providerID api.ProviderID, handler dataProviderHandler) {
+	dp := newDataProvider(providerID, handler)
+	h.dataProviders[providerID] = dp
+	dp.Create(dp, handler.GetName(), module.SUB_MODULE, h.cfg, h.moduleLogger)
+}
+
 func (h *providerHandler) onInit(
 	cfg *config.Configuration,
 	desktop api.Desktop,
@@ -48,20 +56,18 @@ func (h *providerHandler) onInit(
 	moduleLogger *zap.Logger,
 	rootListLogger *zap.Logger,
 ) error {
+	h.cfg = cfg
 	h.rpc = rpc
 	h.desktop = desktop
 	h.moduleLogger = moduleLogger
 	h.rootListLogger = rootListLogger
 
-	names := make(map[api.ProviderID]string)
-
-	h.dataProviders[desktopEntryID], names[desktopEntryID] = newDataProvider(desktopEntryID, desktop_entry.New(desktop, de))
-	h.dataProviders[calculatorID], names[calculatorID] = newDataProvider(calculatorID, calculator.New(desktop))
-	h.dataProviders[linksID], names[linksID] = newDataProvider(linksID, links.New(desktop))
+	h.addProvider(desktopEntryID, desktop_entry.New(desktop, de))
+	h.addProvider(calculatorID, calculator.New(desktop))
+	h.addProvider(linksID, links.New(desktop))
 
 	dpChans := make([]<-chan error, 0, len(h.dataProviders))
-	for id, dp := range h.dataProviders {
-		dp.Create(dp, names[id], cfg, moduleLogger)
+	for _, dp := range h.dataProviders {
 		dpChans = append(dpChans, dp.onInit())
 	}
 	for _, dpChan := range dpChans {

@@ -15,6 +15,11 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	MODULE     = true
+	SUB_MODULE = false
+)
+
 type ErrorCtx struct {
 	ch chan error
 }
@@ -90,22 +95,26 @@ type Module struct {
 	Channel
 }
 
-func (m *Module) Create(impl api.ModuleImpl, name string, cfg *config.Configuration, rootLogger *zap.Logger) {
+func (m *Module) Create(
+	impl api.ModuleImpl,
+	name string,
+	isModule bool,
+	cfg *config.Configuration,
+	rootLogger *zap.Logger,
+) {
 	m.ErrorCtx = newErrorCtx()
 	m.impl = impl
 	m.cfg = cfg
 	m.rootLogger = rootLogger
-	m.moduleLogger = nil
+	if isModule {
+		m.moduleLogger = m.rootLogger.With(zap.String("Module", name))
+	} else {
+		m.moduleLogger = m.NewSubmoduleLogger(name)
+	}
 	m.name = name
 }
 
 func (m *Module) Init(channelLen uint32) {
-	m.moduleLogger = m.rootLogger.With(zap.String("Module", m.name))
-	m.Channel.Init(channelLen)
-}
-
-func (m *Module) InitSubmodule(channelLen uint32) {
-	m.moduleLogger = m.NewSubmoduleLogger(m.name)
 	m.Channel.Init(channelLen)
 }
 
