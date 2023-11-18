@@ -14,6 +14,7 @@ const ModuleName = "desktop"
 
 type Desktop struct {
 	handler *handler
+	deps    *dependences
 	mCtx    *moduleCtx
 
 	module.Module
@@ -22,21 +23,23 @@ type Desktop struct {
 func New() (*Desktop, string) {
 	return &Desktop{
 		handler: newHandler(),
+		deps:    nil,
 		mCtx:    nil,
 	}, ModuleName
 }
 
-func (d *Desktop) OnInit(ds api.DisplayServer, provider api.Provider) <-chan error {
-	ch := make(chan error)
+func (d *Desktop) SetDeps(ds api.DisplayServer, provider api.Provider) {
+	d.deps = &dependences{
+		ds:       ds,
+		provider: provider,
+	}
+}
 
-	go func() {
-		cfg := d.GetConfig().Desktop
-		d.Init(cfg.ModuleChLen)
-		d.mCtx = newModuleCtx(d, cfg, ds, provider, d.ErrorCtx, d.GetModuleLogger())
-		ch <- d.handler.init(d.mCtx)
-	}()
+func (d *Desktop) OnInit() (uint32, error) {
+	cfg := d.GetConfig().Desktop
+	d.mCtx = newModuleCtx(d, cfg, d.deps)
 
-	return ch
+	return cfg.ModuleChLen, d.handler.init(d.mCtx)
 }
 
 func (d *Desktop) OnStart(ctx context.Context) []*types.HandledChannel {

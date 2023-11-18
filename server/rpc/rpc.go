@@ -7,7 +7,6 @@ import (
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/types"
-	"go.uber.org/zap"
 )
 
 const ModuleName = "rpc"
@@ -26,17 +25,11 @@ func New() (*Rpc, string) {
 	}, ModuleName
 }
 
-func (m *Rpc) OnInit() <-chan error {
-	ch := make(chan error)
+func (m *Rpc) SetDeps() {
+}
 
-	go func() {
-		cfg := m.GetConfig()
-		m.Init(cfg.Rpc.ChannelLen)
-		uiLogger := m.GetRootLogger().With(zap.String("module", "UI"))
-		ch <- m.handler.onInit(cfg, m, uiLogger, m.GetModuleLogger())
-	}()
-
-	return ch
+func (m *Rpc) OnInit() (uint32, error) {
+	return m.GetConfig().Rpc.ChannelLen, m.handler.onInit(m)
 }
 
 func (m *Rpc) OnStart(ctx context.Context) []*types.HandledChannel {

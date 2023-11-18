@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"sync"
 
-	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/paths"
@@ -45,20 +44,22 @@ func newRpcHandler() *rpcHandler {
 	}
 }
 
-func (h *rpcHandler) onInit(cfg *config.Configuration, rpc *Rpc, uiLogger *zap.Logger, moduleLogger *zap.Logger) error {
-	h.moduleLogger = moduleLogger
-	h.uiBinaryPath = cfg.System.UIBinaryPath
-	h.rpc = rpc
+func (h *rpcHandler) onInit(root *Rpc) error {
+	cfg := root.GetConfig()
+	uiLogger := root.GetRootLogger().With(zap.String("module", "UI"))
+	h.moduleLogger = root.GetModuleLogger()
+	h.uiBinaryPath = root.GetConfig().System.UIBinaryPath
+	h.rpc = root
 
 	var err error
 	h.unixAddr = cfg.System.RpcAddress
 	h.netUnixAddr, err = h.resolveUnixAddr(h.unixAddr)
 	if err != nil {
-		moduleLogger.Error("Failed resolve unit address", zap.String("address", h.unixAddr), zap.Error(err))
+		h.moduleLogger.Error("Failed resolve unit address", zap.String("address", h.unixAddr), zap.Error(err))
 		return errors.New("failed resolve unit address")
 	}
 	h.grpcServer = grpc.NewServer()
-	h.runifyServer = newRunifyServer(rpc, cfg, uiLogger, moduleLogger)
+	h.runifyServer = newRunifyServer(root, cfg, uiLogger, h.moduleLogger)
 
 	return nil
 }

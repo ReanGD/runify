@@ -13,6 +13,7 @@ const ModuleName = "provider"
 
 type Provider struct {
 	handler *providerHandler
+	deps    *dependences
 
 	module.Module
 }
@@ -20,20 +21,21 @@ type Provider struct {
 func New() (*Provider, string) {
 	return &Provider{
 		handler: newProviderHandler(),
+		deps:    nil,
 	}, ModuleName
 }
 
-func (p *Provider) OnInit(desktop api.Desktop, de api.XDGDesktopEntry, rpc api.Rpc) <-chan error {
-	ch := make(chan error)
+func (p *Provider) SetDeps(desktop api.Desktop, de api.XDGDesktopEntry, rpc api.Rpc) {
+	p.deps = &dependences{
+		desktop: desktop,
+		de:      de,
+		rpc:     rpc,
+	}
+}
 
-	go func() {
-		cfg := p.GetConfig()
-		p.Init(cfg.Provider.ChannelLen)
-
-		ch <- p.handler.onInit(cfg, desktop, de, rpc, p.GetModuleLogger(), p.NewSubmoduleLogger("RootList"))
-	}()
-
-	return ch
+func (p *Provider) OnInit() (uint32, error) {
+	chLen := p.GetConfig().Provider.ChannelLen
+	return chLen, p.handler.onInit(p, p.deps)
 }
 
 func (p *Provider) OnStart(ctx context.Context) []*types.HandledChannel {

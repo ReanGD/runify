@@ -15,6 +15,12 @@ const (
 	linksID        api.ProviderID = 3
 )
 
+type dependences struct {
+	desktop api.Desktop
+	de      api.XDGDesktopEntry
+	rpc     api.Rpc
+}
+
 type dataProviderHandler interface {
 	GetName() string
 	OnInit(cfg *config.Configuration, moduleLogger *zap.Logger, providerID api.ProviderID) error

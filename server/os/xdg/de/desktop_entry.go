@@ -22,15 +22,13 @@ func New() (*XDGDesktopEntry, string) {
 	}, ModuleName
 }
 
-func (d *XDGDesktopEntry) OnInit() <-chan error {
-	ch := make(chan error)
+func (d *XDGDesktopEntry) SetDeps() {
+}
 
-	go func() {
-		d.Init(d.GetConfig().XDGDesktopEntry.ModuleChLen)
-		ch <- d.handler.init(d.GetModuleLogger())
-	}()
+func (d *XDGDesktopEntry) OnInit() (uint32, error) {
+	chLen := d.GetConfig().XDGDesktopEntry.ModuleChLen
 
-	return ch
+	return chLen, d.handler.init(d.GetModuleLogger())
 }
 
 func (d *XDGDesktopEntry) OnStart(ctx context.Context) []*types.HandledChannel {

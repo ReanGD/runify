@@ -1,7 +1,6 @@
 package x11
 
 import (
-	"github.com/ReanGD/runify/server/global/module"
 	"github.com/jezek/xgb/xfixes"
 	"github.com/jezek/xgb/xproto"
 	"go.uber.org/zap"
@@ -28,15 +27,17 @@ func newX11Handler() *x11Handler {
 	}
 }
 
-func (h *x11Handler) init(eventsCh chan<- interface{}, errorCtx *module.ErrorCtx, moduleLogger *zap.Logger) error {
-	h.moduleLogger = moduleLogger
+func (h *x11Handler) init(root *X11, eventsCh chan<- interface{}) error {
+	errorCtx := root.ErrorCtx
+	logger := root.GetModuleLogger()
+	h.moduleLogger = logger
 
 	display := ""
-	if !h.conn.init(display, h.atoms, eventsCh, errorCtx, moduleLogger) {
+	if !h.conn.init(display, h.atoms, eventsCh, errorCtx, logger) {
 		return initErr
 	}
 
-	if !h.atoms.init(h.conn, moduleLogger) {
+	if !h.atoms.init(h.conn, logger) {
 		return initErr
 	}
 
@@ -44,15 +45,15 @@ func (h *x11Handler) init(eventsCh chan<- interface{}, errorCtx *module.ErrorCtx
 	rootWindow := h.conn.newWindow(screen.Root)
 	dummyWindow, ok := h.conn.createWindow(screen.Root, screen, zapInitX11)
 	if !ok {
-		moduleLogger.Warn("Failed create X11 dummy window")
+		logger.Warn("Failed create X11 dummy window")
 		return initErr
 	}
 
-	if !h.clipboard.init(h.conn, h.atoms, dummyWindow, moduleLogger) {
+	if !h.clipboard.init(h.conn, h.atoms, dummyWindow, logger) {
 		return initErr
 	}
 
-	if !h.keyboard.init(h.conn, rootWindow, errorCtx, moduleLogger) {
+	if !h.keyboard.init(h.conn, rootWindow, errorCtx, logger) {
 		return initErr
 	}
 

@@ -22,16 +22,14 @@ func newDataProvider(providerID api.ProviderID, handler dataProviderHandler) *da
 	}
 }
 
-func (p *dataProvider) onInit() <-chan error {
-	ch := make(chan error)
-	go func() {
-		cfg := p.GetConfig()
-		p.Init(cfg.Provider.SubModuleChannelLen)
+func (p *dataProvider) SetDeps() {
+}
 
-		ch <- p.handler.OnInit(cfg, p.GetModuleLogger(), p.providerID)
-	}()
+func (p *dataProvider) OnInit() (uint32, error) {
+	cfg := p.GetConfig()
+	chLen := cfg.Provider.ChannelLen
 
-	return ch
+	return chLen, p.handler.OnInit(cfg, p.GetModuleLogger(), p.providerID)
 }
 
 func (p *dataProvider) OnStart(ctx context.Context) []*types.HandledChannel {

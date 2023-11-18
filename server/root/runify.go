@@ -127,15 +127,21 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 		m.Create(m, it.name, module.MODULE, configuration, rootLogger)
 	}
 
+	r.rpc.SetDeps()
+	r.ds.SetDeps()
+	r.de.SetDeps()
+	r.desktop.SetDeps(r.ds, r.provider)
+	r.provider.SetDeps(r.desktop, r.de, r.rpc)
+
 	for _, it := range []struct {
 		moduleName string
 		initCh     <-chan error
 	}{
-		{rpc.ModuleName, r.rpc.OnInit()},
-		{x11.ModuleName, r.ds.OnInit()},
-		{de.ModuleName, r.de.OnInit()},
-		{desktop.ModuleName, r.desktop.OnInit(r.ds, r.provider)},
-		{provider.ModuleName, r.provider.OnInit(r.desktop, r.de, r.rpc)},
+		{rpc.ModuleName, r.rpc.Init()},
+		{x11.ModuleName, r.ds.Init()},
+		{de.ModuleName, r.de.Init()},
+		{desktop.ModuleName, r.desktop.Init()},
+		{provider.ModuleName, r.provider.Init()},
 	} {
 		err := <-it.initCh
 		if err != nil {

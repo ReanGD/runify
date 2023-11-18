@@ -20,9 +20,9 @@ import (
 
 type providerHandler struct {
 	cfg            *config.Configuration
+	deps           *dependences
+	dpChans        []<-chan error
 	dataProviders  map[api.ProviderID]*dataProvider
-	rpc            api.Rpc
-	desktop        api.Desktop
 	wg             *sync.WaitGroup
 	doneErrWaitCh  chan struct{}
 	moduleLogger   *zap.Logger
@@ -32,9 +32,9 @@ type providerHandler struct {
 func newProviderHandler() *providerHandler {
 	return &providerHandler{
 		cfg:            nil,
+		deps:           nil,
+		dpChans:        make([]<-chan error, 0, 3),
 		dataProviders:  make(map[api.ProviderID]*dataProvider),
-		rpc:            nil,
-		desktop:        nil,
 		wg:             &sync.WaitGroup{},
 		doneErrWaitCh:  make(chan struct{}),
 		moduleLogger:   nil,
@@ -46,41 +46,31 @@ func (h *providerHandler) addProvider(providerID api.ProviderID, handler dataPro
 	dp := newDataProvider(providerID, handler)
 	h.dataProviders[providerID] = dp
 	dp.Create(dp, handler.GetName(), module.SUB_MODULE, h.cfg, h.moduleLogger)
+	h.dpChans = append(h.dpChans, dp.Init())
 }
 
-func (h *providerHandler) onInit(
-	cfg *config.Configuration,
-	desktop api.Desktop,
-	de api.XDGDesktopEntry,
-	rpc api.Rpc,
-	moduleLogger *zap.Logger,
-	rootListLogger *zap.Logger,
-) error {
-	h.cfg = cfg
-	h.rpc = rpc
-	h.desktop = desktop
-	h.moduleLogger = moduleLogger
-	h.rootListLogger = rootListLogger
+func (h *providerHandler) onInit(root *Provider, deps *dependences) error {
+	h.cfg = root.GetConfig()
+	h.deps = deps
+	h.moduleLogger = root.GetModuleLogger()
+	h.rootListLogger = root.NewSubmoduleLogger("RootList")
+	desktop := deps.desktop
 
-	h.addProvider(desktopEntryID, desktop_entry.New(desktop, de))
+	h.addProvider(desktopEntryID, desktop_entry.New(desktop, deps.de))
 	h.addProvider(calculatorID, calculator.New(desktop))
 	h.addProvider(linksID, links.New(desktop))
 
-	dpChans := make([]<-chan error, 0, len(h.dataProviders))
-	for _, dp := range h.dataProviders {
-		dpChans = append(dpChans, dp.onInit())
-	}
-	for _, dpChan := range dpChans {
+	for _, dpChan := range h.dpChans {
 		if err := <-dpChan; err != nil {
 			return err
 		}
 	}
-	hotkey, err := shortcut.NewHotkey(cfg.Shortcuts.Root)
+	hotkey, err := shortcut.NewHotkey(h.cfg.Shortcuts.Root)
 	if err != nil {
 		return err
 	}
 	result := api.NewFuncErrorCodeResult(func(result global.Error) {})
-	h.desktop.AddShortcut(shortcut.NewAction("Show UI"), hotkey, result)
+	desktop.AddShortcut(shortcut.NewAction("Show UI"), hotkey, result)
 
 	return nil
 }
@@ -133,7 +123,7 @@ func (h *providerHandler) openRootList() {
 	}
 
 	ctrl := root_list.NewRLRootListCtrl(ctrls, h.rootListLogger)
-	h.rpc.OpenRootList(ctrl)
+	h.deps.rpc.OpenRootList(ctrl)
 }
 
 func (h *providerHandler) activate(cmd *activateCmd) {

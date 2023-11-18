@@ -12,10 +12,14 @@ import (
 	"go.uber.org/zap"
 )
 
+type dependences struct {
+	ds       api.DisplayServer
+	provider api.Provider
+}
+
 type moduleCtx struct {
 	root         *Desktop
-	ds           api.DisplayServer
-	provider     api.Provider
+	deps         *dependences
 	primaryCh    chan *mime.Data
 	clipboardCh  chan *mime.Data
 	hotkeyCh     chan *shortcut.Hotkey
@@ -27,21 +31,17 @@ type moduleCtx struct {
 func newModuleCtx(
 	root *Desktop,
 	cfg *config.DesktopCfg,
-	ds api.DisplayServer,
-	provider api.Provider,
-	ErrorCtx *module.ErrorCtx,
-	moduleLogger *zap.Logger,
+	deps *dependences,
 ) *moduleCtx {
 	return &moduleCtx{
 		root:         root,
-		ds:           ds,
-		provider:     provider,
+		deps:         deps,
 		primaryCh:    make(chan *mime.Data, cfg.PrimarySubscriptionChLen),
 		clipboardCh:  make(chan *mime.Data, cfg.ClipboardSubscriptionChLen),
 		hotkeyCh:     make(chan *shortcut.Hotkey, cfg.HotkeySubscriptionChLen),
-		errorCtx:     ErrorCtx,
+		errorCtx:     root.ErrorCtx,
 		stopCtx:      nil,
-		moduleLogger: moduleLogger,
+		moduleLogger: root.GetModuleLogger(),
 	}
 }
 

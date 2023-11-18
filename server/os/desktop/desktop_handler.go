@@ -35,7 +35,7 @@ func newHandler() *handler {
 
 func (h *handler) init(mCtx *moduleCtx) error {
 	h.mCtx = mCtx
-	h.ds = mCtx.ds
+	h.ds = mCtx.deps.ds
 	h.moduleLogger = mCtx.moduleLogger
 
 	return nil
@@ -73,7 +73,7 @@ func (h *handler) onClipboardMsg(isPrimary bool, data *mime.Data) {
 
 func (h *handler) onHotkeyMsg(hotkey *shortcut.Hotkey) {
 	if shortcutData, ok := h.shortcutByHotkey[hotkey.Id()]; ok {
-		h.mCtx.provider.Activate(shortcutData.action)
+		h.mCtx.deps.provider.Activate(shortcutData.action)
 	}
 }
 

@@ -26,17 +26,13 @@ func New() (*X11, string) {
 	}, ModuleName
 }
 
-func (m *X11) OnInit() <-chan error {
-	ch := make(chan error)
+func (m *X11) SetDeps() {
+}
 
-	go func() {
-		cfg := m.GetConfig().DsX11
-		m.Init(cfg.ModuleChLen)
-		m.x11EventsCh = make(chan interface{}, cfg.X11EventChLen)
-		ch <- m.handler.init(m.x11EventsCh, m.ErrorCtx, m.GetModuleLogger())
-	}()
-
-	return ch
+func (m *X11) OnInit() (uint32, error) {
+	cfg := m.GetConfig().DsX11
+	m.x11EventsCh = make(chan interface{}, cfg.X11EventChLen)
+	return cfg.ModuleChLen, m.handler.init(m, m.x11EventsCh)
 }
 
 func (m *X11) OnStart(ctx context.Context) []*types.HandledChannel {

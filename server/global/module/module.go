@@ -114,8 +114,16 @@ func (m *Module) Create(
 	m.name = name
 }
 
-func (m *Module) Init(channelLen uint32) {
-	m.Channel.Init(channelLen)
+func (m *Module) Init() <-chan error {
+	ch := make(chan error, 1)
+
+	go func() {
+		channelLen, err := m.impl.OnInit()
+		m.Channel.Init(channelLen)
+		ch <- err
+	}()
+
+	return ch
 }
 
 func (m *Module) NewSubmoduleLogger(submoduleName string) *zap.Logger {

@@ -9,6 +9,7 @@ import (
 )
 
 type ModuleImpl interface {
+	OnInit() (uint32, error)
 	OnStart(ctx context.Context) []*types.HandledChannel
 	OnFinish()
 	OnError(err error) (bool, error)
