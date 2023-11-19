@@ -10,7 +10,56 @@ import (
 	"github.com/ReanGD/runify/server/paths"
 )
 
-func buildArgs(agrsStr string, needTerminal bool, terminal string) ([]string, error) {
+type ExecParams struct {
+	urls         []string
+	files        []string
+	needTerminal bool
+	terminal     string
+}
+
+func NewExecParams(needTerminal bool, terminal string) *ExecParams {
+	return &ExecParams{
+		urls:         []string{},
+		files:        []string{},
+		needTerminal: needTerminal,
+		terminal:     terminal,
+	}
+}
+
+func (p *ExecParams) SetUrls(urls ...string) *ExecParams {
+	p.urls = urls
+
+	return p
+}
+
+func (p *ExecParams) SetFiles(files ...string) *ExecParams {
+	p.files = files
+
+	return p
+}
+
+func fillFieldCodes(code rune, urls []string, files []string) []string {
+	switch code {
+	case 'u':
+		if len(urls) > 0 {
+			return []string{urls[0]}
+		}
+	case 'U':
+		return urls
+	case 'f':
+		if len(files) > 0 {
+			return []string{files[0]}
+		}
+	case 'F':
+		if len(files) > 0 {
+			return files
+		}
+	}
+
+	return []string{}
+}
+
+func buildArgs(agrsStr string, ep *ExecParams) ([]string, error) {
 	arg := []rune{}
 	res := []string{}
 	fieldCodeInd := -1
@@ -18,8 +67,8 @@ func buildArgs(agrsStr string, needTerminal bool, terminal string) ([]string, er
 	inSingleQuote := false
 	inDoubleQuote := false
 
-	if needTerminal {
-		res = append(res, terminal, "-e")
+	if ep.needTerminal {
+		res = append(res, ep.terminal, "-e")
 	}
 
 	for ind, c := range strings.Replace(agrsStr, "\\\\", "\\", -1) {
@@ -32,10 +81,9 @@ func buildArgs(agrsStr string, needTerminal bool, terminal string) ([]string, er
 		switch c {
 		case 'u', 'U', 'f', 'F':
 			if fieldCodeInd == ind {
-				// TODO ignore field codes for the moment
-				// strip %-char at the end of the argument
 				if len(arg) > 0 {
 					arg = arg[:len(arg)-1]
+					res = append(res, fillFieldCodes(c, ep.urls, ep.files)...)
 				}
 				continue
 			}
@@ -98,8 +146,8 @@ func buildArgs(agrsStr string, needTerminal bool, terminal string) ([]string, er
 	return res, nil
 }
 
-func execCmd(agrsStr string, needTerminal bool, terminal string) error {
-	args, err := buildArgs(agrsStr, needTerminal, terminal)
+func execCmd(agrsStr string, ep *ExecParams) error {
+	args, err := buildArgs(agrsStr, ep)
 	if err != nil {
 		return err
 	}
