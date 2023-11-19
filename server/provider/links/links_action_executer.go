@@ -2,6 +2,7 @@ package links
 
 import (
 	"errors"
+	"os/exec"
 
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/mime"
@@ -28,7 +29,18 @@ func (e *actionExecuter) init(desktop api.Desktop, moduleLogger *zap.Logger) err
 }
 
 func (e *actionExecuter) openLink(client api.RpcClient, itemData *DataModel) {
-	// TODO: open link
+	cmd := exec.Command("xdg-open", itemData.Link)
+	if err := cmd.Start(); err != nil {
+		e.moduleLogger.Error("Failed open link",
+			zap.String("link", itemData.Link),
+			zap.Error(err))
+		client.HideUI(err)
+		return
+	}
+
+	e.moduleLogger.Debug("Open link success", zap.String("link", itemData.Link))
+	go cmd.Wait()
+
 	client.HideUI(nil)
 }
 
