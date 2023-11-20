@@ -6,6 +6,10 @@
 
 - TODO
 
+### Fixed
+
+- Runify did not get focus on startup if non-zero focus change prevention is enabled.
+
 ## [0.2.0] - 2022-12-26
 
 ### Added
