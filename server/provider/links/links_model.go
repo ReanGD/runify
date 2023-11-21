@@ -2,14 +2,13 @@ package links
 
 import (
 	"errors"
-	"os"
 	"path/filepath"
 	"sync"
 
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/widget"
+	"github.com/ReanGD/runify/server/jdb"
 	"github.com/ReanGD/runify/server/paths"
-	"github.com/goccy/go-json"
 	"go.uber.org/zap"
 )
 
@@ -29,10 +28,10 @@ type item struct {
 }
 
 type model struct {
-	providerID    api.ProviderID
-	providerDBDir string
-	formWidget    *widget.Form
-	moduleLogger  *zap.Logger
+	providerID   api.ProviderID
+	db           *jdb.JDB
+	formWidget   *widget.Form
+	moduleLogger *zap.Logger
 
 	dataMutex sync.RWMutex
 	nextID    api.RootListRowID
@@ -43,24 +42,28 @@ type model struct {
 
 func newModel() *model {
 	return &model{
-		providerID:    0,
-		providerDBDir: "",
-		formWidget:    nil,
-		moduleLogger:  nil,
-		dataMutex:     sync.RWMutex{},
-		nextID:        createRowID + 1,
-		nameIndex:     make(map[string]*item),
-		idIndex:       make(map[api.RootListRowID]*item),
-		rowsCache:     []*api.RootListRow{},
+		providerID:   0,
+		db:           nil,
+		formWidget:   nil,
+		moduleLogger: nil,
+		dataMutex:    sync.RWMutex{},
+		nextID:       createRowID + 1,
+		nameIndex:    make(map[string]*item),
+		idIndex:      make(map[api.RootListRowID]*item),
+		rowsCache:    []*api.RootListRow{},
 	}
 }
 
 func (m *model) init(providerID api.ProviderID, providerName string, moduleLogger *zap.Logger) error {
 	m.providerID = providerID
-	m.providerDBDir = filepath.Join(paths.GetAppConfig(), providerName)
 	m.moduleLogger = moduleLogger
 
 	var err error
+	dbDir := filepath.Join(paths.GetAppConfig(), providerName)
+	if m.db, err = jdb.New(dbDir, providerDBName, moduleLogger); err != nil {
+		return err
+	}
+
 	m.formWidget, err = widget.NewForm(func(bind widget.Bind, fields *DataModel) widget.Widget {
 		return &widget.Column{
 			Children: []widget.Widget{
@@ -86,7 +89,7 @@ func (m *model) init(providerID api.ProviderID, providerName string, moduleLogge
 	}
 
 	storage := []*DataModel{}
-	if err = m.openDB(m.providerDBDir, providerDBName, &storage); err != nil {
+	if err = m.db.Read(&storage); err != nil {
 		return err
 	}
 
@@ -94,49 +97,6 @@ func (m *model) init(providerID api.ProviderID, providerName string, moduleLogge
 		if err = m.addItem(item, false); err != nil {
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *model) openDB(dbDir string, dbName string, dst interface{}) error {
-	if err := os.MkdirAll(dbDir, 0o755); err != nil {
-		m.moduleLogger.Error("Failed create dir for json database", zap.String("path", dbDir), zap.Error(err))
-		return errors.New("Failed open json database")
-	}
-
-	fullPath := filepath.Join(dbDir, dbName+".json")
-	if ok, _ := paths.ExistsFile(fullPath); !ok {
-		return nil
-	}
-
-	dbBinData, err := os.ReadFile(fullPath)
-	if err != nil {
-		m.moduleLogger.Error("Failed open json database file", zap.String("path", fullPath), zap.Error(err))
-		return errors.New("Failed open json database")
-	}
-
-	err = json.Unmarshal(dbBinData, dst)
-	if err != nil {
-		m.moduleLogger.Error("Failed unmarshal json database", zap.String("path", fullPath), zap.Error(err))
-		return errors.New("Failed read json database")
-	}
-
-	return nil
-}
-
-func (m *model) saveDB(dbDir string, dbName string, data interface{}) error {
-	fullPath := filepath.Join(dbDir, dbName+".json")
-
-	dbBinData, err := json.Marshal(data)
-	if err != nil {
-		m.moduleLogger.Error("Failed marshal json database data", zap.String("path", fullPath), zap.Error(err))
-		return errors.New("Failed write json database")
-	}
-
-	if err = os.WriteFile(fullPath, dbBinData, 0o644); err != nil {
-		m.moduleLogger.Error("Failed write json database data", zap.String("path", fullPath), zap.Error(err))
-		return errors.New("Failed write json database")
 	}
 
 	return nil
@@ -162,7 +122,7 @@ func (m *model) updateCache(saveToDB bool) error {
 			storage = append(storage, item.data)
 		}
 
-		if err := m.saveDB(m.providerDBDir, providerDBName, &storage); err != nil {
+		if err := m.db.Write(&storage); err != nil {
 			return err
 		}
 	}
