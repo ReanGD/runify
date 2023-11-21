@@ -34,7 +34,7 @@ func (p *Links) GetName() string {
 func (p *Links) OnInit(cfg *config.Configuration, moduleLogger *zap.Logger, providerID api.ProviderID) error {
 	p.providerID = providerID
 	p.moduleLogger = moduleLogger
-	if err := p.model.init(providerID, moduleLogger); err != nil {
+	if err := p.model.init(providerID, p.GetName(), moduleLogger); err != nil {
 		return err
 	}
 

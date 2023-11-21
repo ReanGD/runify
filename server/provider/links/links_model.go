@@ -2,14 +2,21 @@ package links
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/widget"
+	"github.com/ReanGD/runify/server/paths"
+	"github.com/goccy/go-json"
 	"go.uber.org/zap"
 )
 
-const createRowID = api.RootListRowID(1)
+const (
+	createRowID    = api.RootListRowID(1)
+	providerDBName = "settings"
+)
 
 type DataModel struct {
 	Name string `json:"name"`
@@ -22,9 +29,10 @@ type item struct {
 }
 
 type model struct {
-	providerID   api.ProviderID
-	formWidget   *widget.Form
-	moduleLogger *zap.Logger
+	providerID    api.ProviderID
+	providerDBDir string
+	formWidget    *widget.Form
+	moduleLogger  *zap.Logger
 
 	dataMutex sync.RWMutex
 	nextID    api.RootListRowID
@@ -35,19 +43,21 @@ type model struct {
 
 func newModel() *model {
 	return &model{
-		providerID:   0,
-		formWidget:   nil,
-		moduleLogger: nil,
-		dataMutex:    sync.RWMutex{},
-		nextID:       createRowID + 1,
-		nameIndex:    make(map[string]*item),
-		idIndex:      make(map[api.RootListRowID]*item),
-		rowsCache:    []*api.RootListRow{},
+		providerID:    0,
+		providerDBDir: "",
+		formWidget:    nil,
+		moduleLogger:  nil,
+		dataMutex:     sync.RWMutex{},
+		nextID:        createRowID + 1,
+		nameIndex:     make(map[string]*item),
+		idIndex:       make(map[api.RootListRowID]*item),
+		rowsCache:     []*api.RootListRow{},
 	}
 }
 
-func (m *model) init(providerID api.ProviderID, moduleLogger *zap.Logger) error {
+func (m *model) init(providerID api.ProviderID, providerName string, moduleLogger *zap.Logger) error {
 	m.providerID = providerID
+	m.providerDBDir = filepath.Join(paths.GetAppConfig(), providerName)
 	m.moduleLogger = moduleLogger
 
 	var err error
@@ -75,14 +85,68 @@ func (m *model) init(providerID api.ProviderID, moduleLogger *zap.Logger) error 
 		return err
 	}
 
+	storage := []*DataModel{}
+	if err = m.openDB(m.providerDBDir, providerDBName, &storage); err != nil {
+		return err
+	}
+
+	for _, item := range storage {
+		if err = m.addItem(item, false); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *model) openDB(dbDir string, dbName string, dst interface{}) error {
+	if err := os.MkdirAll(dbDir, 0o755); err != nil {
+		m.moduleLogger.Error("Failed create dir for json database", zap.String("path", dbDir), zap.Error(err))
+		return errors.New("Failed open json database")
+	}
+
+	fullPath := filepath.Join(dbDir, dbName+".json")
+	if ok, _ := paths.ExistsFile(fullPath); !ok {
+		return nil
+	}
+
+	dbBinData, err := os.ReadFile(fullPath)
+	if err != nil {
+		m.moduleLogger.Error("Failed open json database file", zap.String("path", fullPath), zap.Error(err))
+		return errors.New("Failed open json database")
+	}
+
+	err = json.Unmarshal(dbBinData, dst)
+	if err != nil {
+		m.moduleLogger.Error("Failed unmarshal json database", zap.String("path", fullPath), zap.Error(err))
+		return errors.New("Failed read json database")
+	}
+
+	return nil
+}
+
+func (m *model) saveDB(dbDir string, dbName string, data interface{}) error {
+	fullPath := filepath.Join(dbDir, dbName+".json")
+
+	dbBinData, err := json.Marshal(data)
+	if err != nil {
+		m.moduleLogger.Error("Failed marshal json database data", zap.String("path", fullPath), zap.Error(err))
+		return errors.New("Failed write json database")
+	}
+
+	if err = os.WriteFile(fullPath, dbBinData, 0o644); err != nil {
+		m.moduleLogger.Error("Failed write json database data", zap.String("path", fullPath), zap.Error(err))
+		return errors.New("Failed write json database")
+	}
+
 	return nil
 }
 
 func (m *model) start() {
-	m.updateCache()
+	_ = m.updateCache(false)
 }
 
-func (m *model) updateCache() {
+func (m *model) updateCache(saveToDB bool) error {
 	m.rowsCache = make([]*api.RootListRow, 0, len(m.idIndex)+1)
 	m.rowsCache = append(m.rowsCache, api.NewRootListRow(
 		api.RowType_Command, api.MinPriority, m.providerID, createRowID, "", "Create link"))
@@ -91,6 +155,19 @@ func (m *model) updateCache() {
 		m.rowsCache = append(m.rowsCache, api.NewRootListRow(
 			api.RowType_Link, api.MinPriority, m.providerID, item.id, "", item.data.Name))
 	}
+
+	if saveToDB {
+		storage := make([]*DataModel, 0, len(m.idIndex))
+		for _, item := range m.idIndex {
+			storage = append(storage, item.data)
+		}
+
+		if err := m.saveDB(m.providerDBDir, providerDBName, &storage); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (m *model) getRows() []*api.RootListRow {
@@ -132,14 +209,15 @@ func (m *model) checkItem(id api.RootListRowID, name string) bool {
 }
 
 func (m *model) saveItem(id api.RootListRowID, data *DataModel) error {
+	saveToDB := true
 	if id <= createRowID {
-		return m.addItem(data)
+		return m.addItem(data, saveToDB)
 	}
 
-	return m.updateItem(id, data)
+	return m.updateItem(id, data, saveToDB)
 }
 
-func (m *model) addItem(data *DataModel) error {
+func (m *model) addItem(data *DataModel, saveToDB bool) error {
 	m.dataMutex.RLock()
 	defer m.dataMutex.RUnlock()
 
@@ -156,12 +234,10 @@ func (m *model) addItem(data *DataModel) error {
 	m.idIndex[item.id] = item
 	m.nameIndex[data.Name] = item
 
-	m.updateCache()
-
-	return nil
+	return m.updateCache(saveToDB)
 }
 
-func (m *model) updateItem(id api.RootListRowID, data *DataModel) error {
+func (m *model) updateItem(id api.RootListRowID, data *DataModel, saveToDB bool) error {
 	m.dataMutex.RLock()
 	defer m.dataMutex.RUnlock()
 
@@ -178,22 +254,20 @@ func (m *model) updateItem(id api.RootListRowID, data *DataModel) error {
 	item.data = data
 	m.nameIndex[data.Name] = item
 
-	m.updateCache()
-
-	return nil
+	return m.updateCache(saveToDB)
 }
 
-func (m *model) removeItem(id api.RootListRowID) {
+func (m *model) removeItem(id api.RootListRowID, saveToDB bool) error {
 	m.dataMutex.RLock()
 	defer m.dataMutex.RUnlock()
 
 	item, ok := m.idIndex[id]
 	if !ok {
-		return
+		return nil
 	}
 
 	delete(m.idIndex, id)
 	delete(m.nameIndex, item.data.Name)
 
-	m.updateCache()
+	return m.updateCache(saveToDB)
 }

@@ -102,7 +102,7 @@ func (c *LinksContextMenuCtrl) OnRowActivate(menuRowID api.ContextMenuRowID) {
 	case menuCopyNameRowID:
 		c.actionExecuter.copyValue(c.client, c.itemData.Name)
 	case menuRemoveLinkRowID:
-		c.model.removeItem(c.itemRowID)
+		_ = c.model.removeItem(c.itemRowID, true)
 		c.client.CloseForm(c.formID)
 	default:
 		err := errors.New("unknown menu id")
