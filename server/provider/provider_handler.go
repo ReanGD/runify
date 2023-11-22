@@ -45,8 +45,7 @@ func newProviderHandler() *providerHandler {
 func (h *providerHandler) addProvider(providerID api.ProviderID, handler dataProviderHandler) {
 	dp := newDataProvider(providerID, handler)
 	h.dataProviders[providerID] = dp
-	dp.Create(dp, handler.GetName(), module.SUB_MODULE, h.cfg, h.moduleLogger)
-	h.dpChans = append(h.dpChans, dp.Init())
+	h.dpChans = append(h.dpChans, dp.Init(dp, handler.GetName(), module.SUB_MODULE, h.cfg, h.moduleLogger))
 }
 
 func (h *providerHandler) onInit(root *Provider, deps *dependences) error {

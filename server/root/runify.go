@@ -25,8 +25,7 @@ import (
 var logModule = zap.String("module", "runify")
 
 type moduleFull interface {
-	Create(impl api.ModuleImpl, name string, isModule bool, cfg *config.Configuration, rootLogger *zap.Logger)
-	Init() <-chan error
+	Init(impl api.ModuleImpl, name string, isModule bool, cfg *config.Configuration, rootLogger *zap.Logger) <-chan error
 	Start(ctx context.Context, wg *sync.WaitGroup) <-chan error
 
 	GetName() string
@@ -125,12 +124,7 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	rootLogger := r.logger.GetRoot()
 	r.runifyLogger = rootLogger.With(logModule)
 	r.cfg.AddVersionToLog(rootLogger)
-
 	configuration := r.cfg.Get()
-	for _, it := range r.items {
-		m := it.item
-		m.Create(m, it.name, module.MODULE, configuration, rootLogger)
-	}
 
 	r.rpc.SetDeps()
 	r.ds.SetDeps()
@@ -139,7 +133,9 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	r.provider.SetDeps(r.desktop, r.de, r.rpc)
 
 	for _, it := range r.items {
-		it.initErrCh = it.item.Init()
+		m := it.item
+		name := it.name
+		it.initErrCh = m.Init(m, name, module.MODULE, configuration, rootLogger)
 	}
 
 	for _, it := range r.items {

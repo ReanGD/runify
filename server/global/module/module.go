@@ -95,30 +95,28 @@ type Module struct {
 	Channel
 }
 
-func (m *Module) Create(
+func (m *Module) Init(
 	impl api.ModuleImpl,
 	name string,
 	isModule bool,
 	cfg *config.Configuration,
 	rootLogger *zap.Logger,
-) {
-	m.ErrorCtx = newErrorCtx()
-	m.impl = impl
-	m.cfg = cfg
-	m.rootLogger = rootLogger
-	if isModule {
-		m.moduleLogger = m.rootLogger.With(zap.String("Module", name))
-	} else {
-		m.moduleLogger = m.NewSubmoduleLogger(name)
-	}
-	m.name = name
-}
-
-func (m *Module) Init() <-chan error {
+) <-chan error {
 	ch := make(chan error, 1)
 
 	go func() {
-		channelLen, err := m.impl.OnInit()
+		m.ErrorCtx = newErrorCtx()
+		m.impl = impl
+		m.cfg = cfg
+		m.rootLogger = rootLogger
+		if isModule {
+			m.moduleLogger = m.rootLogger.With(zap.String("Module", name))
+		} else {
+			m.moduleLogger = m.NewSubmoduleLogger(name)
+		}
+		m.name = name
+
+		channelLen, err := impl.OnInit()
 		m.Channel.Init(channelLen)
 		ch <- err
 	}()
