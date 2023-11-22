@@ -10,8 +10,6 @@ import (
 	"github.com/ReanGD/runify/server/global/types"
 )
 
-const ModuleName = "desktop"
-
 type Desktop struct {
 	handler *handler
 	deps    *dependences
@@ -25,7 +23,7 @@ func New() (*Desktop, string) {
 		handler: newHandler(),
 		deps:    nil,
 		mCtx:    nil,
-	}, ModuleName
+	}, "desktop"
 }
 
 func (d *Desktop) SetDeps(ds api.DisplayServer, provider api.Provider) {

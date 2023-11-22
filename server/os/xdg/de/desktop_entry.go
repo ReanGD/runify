@@ -8,8 +8,6 @@ import (
 	"github.com/ReanGD/runify/server/global/types"
 )
 
-const ModuleName = "xdg_desktop_entry"
-
 type XDGDesktopEntry struct {
 	handler *handler
 
@@ -19,7 +17,7 @@ type XDGDesktopEntry struct {
 func New() (*XDGDesktopEntry, string) {
 	return &XDGDesktopEntry{
 		handler: newHandler(),
-	}, ModuleName
+	}, "xdg_desktop_entry"
 }
 
 func (d *XDGDesktopEntry) SetDeps() {

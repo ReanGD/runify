@@ -9,8 +9,6 @@ import (
 	"github.com/ReanGD/runify/server/global/types"
 )
 
-const ModuleName = "rpc"
-
 type Rpc struct {
 	wg      *sync.WaitGroup
 	handler *rpcHandler
@@ -22,7 +20,7 @@ func New() (*Rpc, string) {
 	return &Rpc{
 		wg:      &sync.WaitGroup{},
 		handler: newRpcHandler(),
-	}, ModuleName
+	}, "rpc"
 }
 
 func (m *Rpc) SetDeps() {

@@ -9,8 +9,6 @@ import (
 	"github.com/ReanGD/runify/server/global/types"
 )
 
-const ModuleName = "provider"
-
 type Provider struct {
 	handler *providerHandler
 	deps    *dependences
@@ -22,7 +20,7 @@ func New() (*Provider, string) {
 	return &Provider{
 		handler: newProviderHandler(),
 		deps:    nil,
-	}, ModuleName
+	}, "provider"
 }
 
 func (p *Provider) SetDeps(desktop api.Desktop, de api.XDGDesktopEntry, rpc api.Rpc) {

@@ -10,8 +10,6 @@ import (
 	"github.com/ReanGD/runify/server/global/types"
 )
 
-const ModuleName = "x11"
-
 type X11 struct {
 	handler     *x11Handler
 	x11EventsCh chan interface{}
@@ -23,7 +21,7 @@ func New() (*X11, string) {
 	return &X11{
 		handler:     newX11Handler(),
 		x11EventsCh: nil,
-	}, ModuleName
+	}, "x11"
 }
 
 func (m *X11) SetDeps() {

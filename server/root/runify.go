@@ -26,20 +26,25 @@ var logModule = zap.String("module", "runify")
 
 type moduleFull interface {
 	Create(impl api.ModuleImpl, name string, isModule bool, cfg *config.Configuration, rootLogger *zap.Logger)
+	Init() <-chan error
 	Start(ctx context.Context, wg *sync.WaitGroup) <-chan error
+
+	GetName() string
 
 	api.ModuleImpl
 }
 
 type moduleItem struct {
-	item moduleFull
-	name string
+	item      moduleFull
+	name      string
+	initErrCh <-chan error
 }
 
 func newModuleItem(item moduleFull, name string) *moduleItem {
 	return &moduleItem{
-		item: item,
-		name: name,
+		item:      item,
+		name:      name,
+		initErrCh: nil,
 	}
 }
 
@@ -133,22 +138,17 @@ func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	r.desktop.SetDeps(r.ds, r.provider)
 	r.provider.SetDeps(r.desktop, r.de, r.rpc)
 
-	for _, it := range []struct {
-		moduleName string
-		initCh     <-chan error
-	}{
-		{rpc.ModuleName, r.rpc.Init()},
-		{x11.ModuleName, r.ds.Init()},
-		{de.ModuleName, r.de.Init()},
-		{desktop.ModuleName, r.desktop.Init()},
-		{provider.ModuleName, r.provider.Init()},
-	} {
-		err := <-it.initCh
-		if err != nil {
-			r.runifyLogger.Error("OnInit finished with error",
-				zap.String("module", it.moduleName),
+	for _, it := range r.items {
+		it.initErrCh = it.item.Init()
+	}
+
+	for _, it := range r.items {
+		if err = <-it.initErrCh; err != nil {
+			r.runifyLogger.Error("Module initialization finished with error",
+				zap.String("module", it.item.GetName()),
 				zap.Error(err),
 			)
+
 			return false
 		}
 	}
