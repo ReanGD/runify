@@ -20,59 +20,59 @@ func New() (*XDGDesktopEntry, string) {
 	}, "xdg_desktop_entry"
 }
 
-func (d *XDGDesktopEntry) SetDeps() {
+func (m *XDGDesktopEntry) SetDeps() {
 }
 
-func (d *XDGDesktopEntry) OnInit() (uint32, error) {
-	chLen := d.GetConfig().XDGDesktopEntry.ModuleChLen
+func (m *XDGDesktopEntry) OnInit() (uint32, error) {
+	chLen := m.GetConfig().XDGDesktopEntry.ModuleChLen
 
-	return chLen, d.handler.init(d.GetModuleLogger())
+	return chLen, m.handler.init(m.GetModuleLogger())
 }
 
-func (d *XDGDesktopEntry) OnStart(ctx context.Context) []*types.HandledChannel {
-	d.handler.update()
+func (m *XDGDesktopEntry) OnStart(ctx context.Context) []*types.HandledChannel {
+	m.handler.update()
 
 	return []*types.HandledChannel{}
 }
 
-func (d *XDGDesktopEntry) OnFinish() {
-	d.handler.stop()
+func (m *XDGDesktopEntry) OnFinish() {
+	m.handler.stop()
 }
 
-func (d *XDGDesktopEntry) OnRequest(request interface{}) (bool, error) {
+func (m *XDGDesktopEntry) OnRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *updateCmd:
-		d.handler.update()
+		m.handler.update()
 	case *subscribeCmd:
-		d.handler.subscribe(r)
+		m.handler.subscribe(r)
 
 	default:
-		return d.OnRequestUnknownMsg(request)
+		return m.OnRequestUnknownMsg(request)
 	}
 
 	return false, nil
 }
 
-func (d *XDGDesktopEntry) OnRequestDefault(request interface{}, reason string) (bool, error) {
+func (m *XDGDesktopEntry) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *updateCmd:
-		r.onRequestDefault(d.GetModuleLogger(), reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 	case *subscribeCmd:
-		r.onRequestDefault(d.GetModuleLogger(), reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
-		return d.OnRequestDefaultUnknownMsg(request, reason)
+		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil
 }
 
-func (d *XDGDesktopEntry) Update() {
-	d.AddToChannel(&updateCmd{})
+func (m *XDGDesktopEntry) Update() {
+	m.AddToChannel(&updateCmd{})
 }
 
-func (d *XDGDesktopEntry) Subscribe(ch chan<- types.DesktopEntries, result api.BoolResult) {
-	d.AddToChannel(&subscribeCmd{
+func (m *XDGDesktopEntry) Subscribe(ch chan<- types.DesktopEntries, result api.BoolResult) {
+	m.AddToChannel(&subscribeCmd{
 		ch:     ch,
 		result: result,
 	})

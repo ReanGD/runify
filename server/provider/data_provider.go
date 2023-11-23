@@ -22,51 +22,51 @@ func newDataProvider(providerID api.ProviderID, handler dataProviderHandler) *da
 	}
 }
 
-func (p *dataProvider) SetDeps() {
+func (m *dataProvider) SetDeps() {
 }
 
-func (p *dataProvider) OnInit() (uint32, error) {
-	cfg := p.GetConfig()
+func (m *dataProvider) OnInit() (uint32, error) {
+	cfg := m.GetConfig()
 	chLen := cfg.Provider.ChannelLen
 
-	return chLen, p.handler.OnInit(cfg, p.GetModuleLogger(), p.providerID)
+	return chLen, m.handler.OnInit(cfg, m.GetModuleLogger(), m.providerID)
 }
 
-func (p *dataProvider) OnStart(ctx context.Context) []*types.HandledChannel {
+func (m *dataProvider) OnStart(ctx context.Context) []*types.HandledChannel {
 	hChs := []*types.HandledChannel{}
 
-	return append(hChs, p.handler.OnStart(p.ErrorCtx)...)
+	return append(hChs, m.handler.OnStart(m.ErrorCtx)...)
 }
 
-func (p *dataProvider) OnFinish() {
+func (m *dataProvider) OnFinish() {
 }
 
-func (p *dataProvider) OnRequest(request interface{}) (bool, error) {
+func (m *dataProvider) OnRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *makeRootListCtrlCmd:
-		r.result <- p.handler.MakeRootListCtrl()
+		r.result <- m.handler.MakeRootListCtrl()
 
 	default:
-		return p.OnRequestUnknownMsg(request)
+		return m.OnRequestUnknownMsg(request)
 	}
 
 	return false, nil
 }
 
-func (p *dataProvider) OnRequestDefault(request interface{}, reason string) (bool, error) {
+func (m *dataProvider) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *makeRootListCtrlCmd:
-		r.onRequestDefault(p.GetModuleLogger(), reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
-		return p.OnRequestDefaultUnknownMsg(request, reason)
+		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil
 }
 
-func (p *dataProvider) makeRootListCtrl(result chan<- api.RootListCtrl) {
-	p.AddToChannel(&makeRootListCtrlCmd{
+func (m *dataProvider) makeRootListCtrl(result chan<- api.RootListCtrl) {
+	m.AddToChannel(&makeRootListCtrlCmd{
 		result: result,
 	})
 }

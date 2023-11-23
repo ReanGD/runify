@@ -23,55 +23,55 @@ func New() (*Provider, string) {
 	}, "provider"
 }
 
-func (p *Provider) SetDeps(desktop api.Desktop, de api.XDGDesktopEntry, rpc api.Rpc) {
-	p.deps = &dependences{
+func (m *Provider) SetDeps(desktop api.Desktop, de api.XDGDesktopEntry, rpc api.Rpc) {
+	m.deps = &dependences{
 		desktop: desktop,
 		de:      de,
 		rpc:     rpc,
 	}
 }
 
-func (p *Provider) OnInit() (uint32, error) {
-	chLen := p.GetConfig().Provider.ChannelLen
-	return chLen, p.handler.onInit(p, p.deps)
+func (m *Provider) OnInit() (uint32, error) {
+	chLen := m.GetConfig().Provider.ChannelLen
+	return chLen, m.handler.onInit(m, m.deps)
 }
 
-func (p *Provider) OnStart(ctx context.Context) []*types.HandledChannel {
-	p.handler.onStart(ctx, p.ErrorCtx)
+func (m *Provider) OnStart(ctx context.Context) []*types.HandledChannel {
+	m.handler.onStart(ctx, m.ErrorCtx)
 
 	return []*types.HandledChannel{}
 }
 
-func (p *Provider) OnFinish() {
-	p.handler.onFinish()
+func (m *Provider) OnFinish() {
+	m.handler.onFinish()
 }
 
-func (p *Provider) OnRequest(request interface{}) (bool, error) {
+func (m *Provider) OnRequest(request interface{}) (bool, error) {
 	switch r := request.(type) {
 	case *activateCmd:
-		p.handler.activate(r)
+		m.handler.activate(r)
 
 	default:
-		return p.OnRequestUnknownMsg(request)
+		return m.OnRequestUnknownMsg(request)
 	}
 
 	return false, nil
 }
 
-func (p *Provider) OnRequestDefault(request interface{}, reason string) (bool, error) {
+func (m *Provider) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *activateCmd:
-		r.onRequestDefault(p.GetModuleLogger(), reason)
+		r.onRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
-		return p.OnRequestDefaultUnknownMsg(request, reason)
+		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil
 }
 
-func (p *Provider) Activate(action *shortcut.Action) {
-	p.AddToChannel(&activateCmd{
+func (m *Provider) Activate(action *shortcut.Action) {
+	m.AddToChannel(&activateCmd{
 		action: action,
 	})
 }
