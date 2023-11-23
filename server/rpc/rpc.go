@@ -31,7 +31,7 @@ func (m *Rpc) OnInit() (uint32, error) {
 }
 
 func (m *Rpc) OnStart(ctx context.Context) []*types.HandledChannel {
-	m.handler.onStart(ctx, m.wg, m.ErrorCtx)
+	m.handler.onStart(ctx, m.wg, m.GetErrorCtx())
 
 	return []*types.HandledChannel{}
 }

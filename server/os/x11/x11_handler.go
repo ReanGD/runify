@@ -28,7 +28,7 @@ func newX11Handler() *x11Handler {
 }
 
 func (h *x11Handler) init(root *X11, eventsCh chan<- interface{}) error {
-	errorCtx := root.ErrorCtx
+	errorCtx := root.GetErrorCtx()
 	logger := root.GetModuleLogger()
 	h.moduleLogger = logger
 

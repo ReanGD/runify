@@ -39,7 +39,7 @@ func newModuleCtx(
 		primaryCh:    make(chan *mime.Data, cfg.PrimarySubscriptionChLen),
 		clipboardCh:  make(chan *mime.Data, cfg.ClipboardSubscriptionChLen),
 		hotkeyCh:     make(chan *shortcut.Hotkey, cfg.HotkeySubscriptionChLen),
-		errorCtx:     root.ErrorCtx,
+		errorCtx:     root.GetErrorCtx(),
 		stopCtx:      nil,
 		moduleLogger: root.GetModuleLogger(),
 	}

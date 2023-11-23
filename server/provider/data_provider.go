@@ -35,7 +35,7 @@ func (m *dataProvider) OnInit() (uint32, error) {
 func (m *dataProvider) OnStart(ctx context.Context) []*types.HandledChannel {
 	hChs := []*types.HandledChannel{}
 
-	return append(hChs, m.handler.OnStart(m.ErrorCtx)...)
+	return append(hChs, m.handler.OnStart(m.GetErrorCtx())...)
 }
 
 func (m *dataProvider) OnFinish() {

@@ -85,9 +85,9 @@ func (c *Channel) IsOverflow() bool {
 }
 
 type Module struct {
-	ErrorCtx     *ErrorCtx
-	impl         api.ModuleImpl
 	cfg          *config.Configuration
+	errorCtx     *ErrorCtx
+	impl         api.ModuleImpl
 	rootLogger   *zap.Logger
 	moduleLogger *zap.Logger
 	name         string
@@ -105,9 +105,9 @@ func (m *Module) Init(
 	ch := make(chan error, 1)
 
 	go func() {
-		m.ErrorCtx = newErrorCtx()
-		m.impl = impl
 		m.cfg = cfg
+		m.errorCtx = newErrorCtx()
+		m.impl = impl
 		m.rootLogger = rootLogger
 		if isModule {
 			m.moduleLogger = m.rootLogger.With(zap.String("Module", name))
@@ -134,6 +134,10 @@ func (m *Module) GetName() string {
 
 func (m *Module) GetConfig() *config.Configuration {
 	return m.cfg
+}
+
+func (m *Module) GetErrorCtx() *ErrorCtx {
+	return m.errorCtx
 }
 
 func (m *Module) GetRootLogger() *zap.Logger {
@@ -179,12 +183,10 @@ func (m *Module) safeRequestLoop(ctx context.Context, hChannels []*types.Handled
 			if request != nil {
 				reason := m.recoverLog(recoverResult, request)
 				request.OnRequestDefault(m.moduleLogger, reason)
-				resultIsFinish, resultErr = false, nil
-
-				return
 			} else {
 				_ = m.recoverLog(recoverResult, "unknown request")
 			}
+			resultIsFinish, resultErr = false, nil
 		}
 	}()
 
@@ -202,7 +204,7 @@ func (m *Module) safeRequestLoop(ctx context.Context, hChannels []*types.Handled
 	}
 
 	cases[messageChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(messageCh)}
-	cases[errChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(m.ErrorCtx.GetChannel())}
+	cases[errChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(m.errorCtx.GetChannel())}
 	cases[doneChIdx] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(done)}
 
 	for {
@@ -264,12 +266,6 @@ func (m *Module) Start(ctx context.Context, wg *sync.WaitGroup) <-chan error {
 
 func (m *Module) OnError(err error) (bool, error) {
 	return true, err
-}
-
-func (m *Module) onRequestDefault(request api.ModuleMsgImpl, reason string) (bool, error) {
-	request.OnRequestDefault(m.GetModuleLogger(), reason)
-
-	return false, nil
 }
 
 func (m *Module) OnRequestUnknownMsg(request interface{}) (bool, error) {

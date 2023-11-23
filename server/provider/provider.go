@@ -37,7 +37,7 @@ func (m *Provider) OnInit() (uint32, error) {
 }
 
 func (m *Provider) OnStart(ctx context.Context) []*types.HandledChannel {
-	m.handler.onStart(ctx, m.ErrorCtx)
+	m.handler.onStart(ctx, m.GetErrorCtx())
 
 	return []*types.HandledChannel{}
 }
