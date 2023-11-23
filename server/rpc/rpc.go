@@ -62,13 +62,13 @@ func (m *Rpc) OnRequest(request interface{}) (bool, error) {
 func (m *Rpc) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *serverStartedCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 	case *uiClientConnectedCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 	case *uiClientDisconnectedCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 	case *openRootListCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
 		return m.OnRequestDefaultUnknownMsg(request, reason)

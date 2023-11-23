@@ -32,7 +32,7 @@ type makeRootListCtrlCmd struct {
 	result chan<- api.RootListCtrl
 }
 
-func (c *makeRootListCtrlCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *makeRootListCtrlCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	c.result <- nil
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "makeRootListCtrl"),
@@ -44,7 +44,7 @@ type activateCmd struct {
 	action *shortcut.Action
 }
 
-func (c *activateCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *activateCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "activate"),
 		zap.String("Reason", reason),

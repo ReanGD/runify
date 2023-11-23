@@ -74,15 +74,15 @@ func (m *X11) OnRequest(request interface{}) (bool, error) {
 func (m *X11) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *subscribeToClipboardCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 	case *writeToClipboardCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 	case *subscribeToHotkeysCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 	case *bindHotkeyCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 	case *unbindHotkeyCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
 		return m.OnRequestDefaultUnknownMsg(request, reason)

@@ -8,7 +8,7 @@ import (
 
 type updateCmd struct{}
 
-func (c *updateCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *updateCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "update"),
 		zap.String("Reason", reason),
@@ -20,7 +20,7 @@ type subscribeCmd struct {
 	result api.BoolResult
 }
 
-func (c *subscribeCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *subscribeCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "subscribe"),
 		zap.String("Reason", reason),

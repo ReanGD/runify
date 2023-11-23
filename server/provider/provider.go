@@ -61,7 +61,7 @@ func (m *Provider) OnRequest(request interface{}) (bool, error) {
 func (m *Provider) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *activateCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
 		return m.OnRequestDefaultUnknownMsg(request, reason)

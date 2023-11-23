@@ -107,7 +107,7 @@ type subscribeToClipboardCmd struct {
 	result    api.BoolResult
 }
 
-func (c *subscribeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *subscribeToClipboardCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "subscribeToClipboard"),
 		zap.Bool("IsPrimary", c.isPrimary),
@@ -122,7 +122,7 @@ type writeToClipboardCmd struct {
 	result    api.BoolResult
 }
 
-func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *writeToClipboardCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "writeToClipboard"),
 		zap.Bool("IsPrimary", c.isPrimary),
@@ -136,7 +136,7 @@ type subscribeToHotkeysCmd struct {
 	result api.BoolResult
 }
 
-func (c *subscribeToHotkeysCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *subscribeToHotkeysCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "subscribeToHotkeys"),
 		zap.String("Reason", reason),
@@ -149,7 +149,7 @@ type bindHotkeyCmd struct {
 	result api.ErrorCodeResult
 }
 
-func (c *bindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *bindHotkeyCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "bindHotkey"),
 		c.hotkey.ZapField(),
@@ -163,7 +163,7 @@ type unbindHotkeyCmd struct {
 	result api.BoolResult
 }
 
-func (c *unbindHotkeyCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *unbindHotkeyCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "unbindHotkey"),
 		c.hotkey.ZapField(),

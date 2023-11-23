@@ -56,9 +56,9 @@ func (m *XDGDesktopEntry) OnRequest(request interface{}) (bool, error) {
 func (m *XDGDesktopEntry) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *updateCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 	case *subscribeCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
 		return m.OnRequestDefaultUnknownMsg(request, reason)

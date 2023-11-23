@@ -56,7 +56,7 @@ func (m *dataProvider) OnRequest(request interface{}) (bool, error) {
 func (m *dataProvider) OnRequestDefault(request interface{}, reason string) (bool, error) {
 	switch r := request.(type) {
 	case *makeRootListCtrlCmd:
-		r.onRequestDefault(m.GetModuleLogger(), reason)
+		r.OnRequestDefault(m.GetModuleLogger(), reason)
 
 	default:
 		return m.OnRequestDefaultUnknownMsg(request, reason)

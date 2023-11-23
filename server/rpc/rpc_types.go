@@ -10,7 +10,7 @@ import (
 
 type serverStartedCmd struct{}
 
-func (c *serverStartedCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *serverStartedCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "ServerStarted"),
 		zap.String("Reason", reason),
@@ -21,7 +21,7 @@ type uiClientConnectedCmd struct {
 	pClient *protoClient
 }
 
-func (c *uiClientConnectedCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *uiClientConnectedCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "UIClientConnected"),
 		zap.Uint32("ClientID", c.pClient.id),
@@ -33,7 +33,7 @@ type uiClientDisconnectedCmd struct {
 	id uint32
 }
 
-func (c *uiClientDisconnectedCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *uiClientDisconnectedCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "UIClientDisconnected"),
 		zap.Uint32("ClientID", c.id),
@@ -45,7 +45,7 @@ type openRootListCmd struct {
 	ctrl api.RootListCtrl
 }
 
-func (c *openRootListCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *openRootListCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "OpenRootList"),
 		zap.String("Reason", reason),

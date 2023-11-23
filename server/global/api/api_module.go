@@ -6,7 +6,12 @@ import (
 	"github.com/ReanGD/runify/server/global/mime"
 	"github.com/ReanGD/runify/server/global/shortcut"
 	"github.com/ReanGD/runify/server/global/types"
+	"go.uber.org/zap"
 )
+
+type ModuleMsgImpl interface {
+	OnRequestDefault(logger *zap.Logger, reason string)
+}
 
 type ModuleImpl interface {
 	OnInit() (uint32, error)

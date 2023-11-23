@@ -42,21 +42,21 @@ func (e *ErrorCtx) SendError(err error) {
 }
 
 type Channel struct {
-	messageCh chan interface{}
+	messageCh chan api.ModuleMsgImpl
 
 	queueOverflow int32
 }
 
 func (c *Channel) Init(channelLen uint32) {
-	c.messageCh = make(chan interface{}, channelLen)
+	c.messageCh = make(chan api.ModuleMsgImpl, channelLen)
 	c.queueOverflow = 0
 }
 
-func (c *Channel) GetReadChannel() <-chan interface{} {
+func (c *Channel) GetReadChannel() <-chan api.ModuleMsgImpl {
 	return c.messageCh
 }
 
-func (c *Channel) AddToChannel(value interface{}) {
+func (c *Channel) AddToChannel(value api.ModuleMsgImpl) {
 	select {
 	case c.messageCh <- value:
 		atomic.StoreInt32(&c.queueOverflow, 0)

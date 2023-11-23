@@ -55,7 +55,7 @@ type writeToClipboardCmd struct {
 	result    api.BoolResult
 }
 
-func (c *writeToClipboardCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *writeToClipboardCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "writeToClipboard"),
 		zap.Bool("IsPrimary", c.isPrimary),
@@ -70,7 +70,7 @@ type addShortcutCmd struct {
 	result api.ErrorCodeResult
 }
 
-func (c *addShortcutCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *addShortcutCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "addShortcut"),
 		c.action.ZapField(),
@@ -85,7 +85,7 @@ type removeShortcutCmd struct {
 	result api.VoidResult
 }
 
-func (c *removeShortcutCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *removeShortcutCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "removeShortcut"),
 		c.action.ZapField(),
@@ -99,7 +99,7 @@ type removeShortcutWithoutCheckCmd struct {
 	hotkey *shortcut.Hotkey
 }
 
-func (c *removeShortcutWithoutCheckCmd) onRequestDefault(logger *zap.Logger, reason string) {
+func (c *removeShortcutWithoutCheckCmd) OnRequestDefault(logger *zap.Logger, reason string) {
 	logger.Warn("Process message finished with error",
 		zap.String("Request", "removeShortcutWithoutCheck"),
 		c.action.ZapField(),
