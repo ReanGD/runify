@@ -173,12 +173,15 @@ func (m *Module) recoverLog(recoverResult interface{}, request interface{}) stri
 }
 
 func (m *Module) safeRequestLoop(ctx context.Context, hChannels []*types.HandledChannel) (resultIsFinish bool, resultErr error) {
-	var request interface{}
+	var request api.ModuleMsgImpl
 	defer func() {
 		if recoverResult := recover(); recoverResult != nil {
 			if request != nil {
 				reason := m.recoverLog(recoverResult, request)
-				resultIsFinish, resultErr = m.impl.OnRequestDefault(request, reason)
+				request.OnRequestDefault(m.moduleLogger, reason)
+				resultIsFinish, resultErr = false, nil
+
+				return
 			} else {
 				_ = m.recoverLog(recoverResult, "unknown request")
 			}
@@ -222,7 +225,7 @@ func (m *Module) safeRequestLoop(ctx context.Context, hChannels []*types.Handled
 		}
 
 		if chosen == messageChIdx {
-			request = recv.Interface()
+			request = recv.Interface().(api.ModuleMsgImpl)
 			m.MessageWasRead()
 			if resultIsFinish, resultErr = onRequest(request); resultIsFinish {
 				return
@@ -263,18 +266,15 @@ func (m *Module) OnError(err error) (bool, error) {
 	return true, err
 }
 
+func (m *Module) onRequestDefault(request api.ModuleMsgImpl, reason string) (bool, error) {
+	request.OnRequestDefault(m.GetModuleLogger(), reason)
+
+	return false, nil
+}
+
 func (m *Module) OnRequestUnknownMsg(request interface{}) (bool, error) {
 	m.moduleLogger.Warn("Unknown message received",
 		zap.String("Request", fmt.Sprintf("%v", request)),
-		zap.Stringer("RequestType", reflect.TypeOf(request)),
-		logger.LogicalError)
-	return true, errors.New("unknown message received")
-}
-
-func (m *Module) OnRequestDefaultUnknownMsg(request interface{}, reason string) (bool, error) {
-	m.moduleLogger.Warn("Unknown message received",
-		zap.String("Request", fmt.Sprintf("%v", request)),
-		zap.String("Reason", reason),
 		zap.Stringer("RequestType", reflect.TypeOf(request)),
 		logger.LogicalError)
 	return true, errors.New("unknown message received")

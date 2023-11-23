@@ -41,7 +41,7 @@ func (m *Rpc) OnFinish() {
 	m.wg.Wait()
 }
 
-func (m *Rpc) OnRequest(request interface{}) (bool, error) {
+func (m *Rpc) OnRequest(request api.ModuleMsgImpl) (bool, error) {
 	switch r := request.(type) {
 	case *serverStartedCmd:
 		m.handler.serverStarted()
@@ -54,24 +54,6 @@ func (m *Rpc) OnRequest(request interface{}) (bool, error) {
 
 	default:
 		return m.OnRequestUnknownMsg(request)
-	}
-
-	return false, nil
-}
-
-func (m *Rpc) OnRequestDefault(request interface{}, reason string) (bool, error) {
-	switch r := request.(type) {
-	case *serverStartedCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *uiClientConnectedCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *uiClientDisconnectedCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *openRootListCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-
-	default:
-		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil

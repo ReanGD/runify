@@ -41,25 +41,13 @@ func (m *dataProvider) OnStart(ctx context.Context) []*types.HandledChannel {
 func (m *dataProvider) OnFinish() {
 }
 
-func (m *dataProvider) OnRequest(request interface{}) (bool, error) {
+func (m *dataProvider) OnRequest(request api.ModuleMsgImpl) (bool, error) {
 	switch r := request.(type) {
 	case *makeRootListCtrlCmd:
 		r.result <- m.handler.MakeRootListCtrl()
 
 	default:
 		return m.OnRequestUnknownMsg(request)
-	}
-
-	return false, nil
-}
-
-func (m *dataProvider) OnRequestDefault(request interface{}, reason string) (bool, error) {
-	switch r := request.(type) {
-	case *makeRootListCtrlCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-
-	default:
-		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil

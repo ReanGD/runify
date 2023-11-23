@@ -51,7 +51,7 @@ func (m *X11) onX11Events(event interface{}) (bool, error) {
 	return false, nil
 }
 
-func (m *X11) OnRequest(request interface{}) (bool, error) {
+func (m *X11) OnRequest(request api.ModuleMsgImpl) (bool, error) {
 	switch r := request.(type) {
 	case *subscribeToClipboardCmd:
 		m.handler.subscribeToClipboard(r)
@@ -66,26 +66,6 @@ func (m *X11) OnRequest(request interface{}) (bool, error) {
 
 	default:
 		return m.OnRequestUnknownMsg(request)
-	}
-
-	return false, nil
-}
-
-func (m *X11) OnRequestDefault(request interface{}, reason string) (bool, error) {
-	switch r := request.(type) {
-	case *subscribeToClipboardCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *writeToClipboardCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *subscribeToHotkeysCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *bindHotkeyCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *unbindHotkeyCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-
-	default:
-		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil

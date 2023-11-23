@@ -73,7 +73,7 @@ func (m *Desktop) onHotkey(request interface{}) (bool, error) {
 	return false, nil
 }
 
-func (m *Desktop) OnRequest(request interface{}) (bool, error) {
+func (m *Desktop) OnRequest(request api.ModuleMsgImpl) (bool, error) {
 	switch r := request.(type) {
 	case *writeToClipboardCmd:
 		m.handler.writeToClipboard(r)
@@ -86,24 +86,6 @@ func (m *Desktop) OnRequest(request interface{}) (bool, error) {
 
 	default:
 		return m.OnRequestUnknownMsg(request)
-	}
-
-	return false, nil
-}
-
-func (m *Desktop) OnRequestDefault(request interface{}, reason string) (bool, error) {
-	switch r := request.(type) {
-	case *writeToClipboardCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *addShortcutCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *removeShortcutCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *removeShortcutWithoutCheckCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-
-	default:
-		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil

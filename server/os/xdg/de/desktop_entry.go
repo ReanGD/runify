@@ -39,7 +39,7 @@ func (m *XDGDesktopEntry) OnFinish() {
 	m.handler.stop()
 }
 
-func (m *XDGDesktopEntry) OnRequest(request interface{}) (bool, error) {
+func (m *XDGDesktopEntry) OnRequest(request api.ModuleMsgImpl) (bool, error) {
 	switch r := request.(type) {
 	case *updateCmd:
 		m.handler.update()
@@ -48,20 +48,6 @@ func (m *XDGDesktopEntry) OnRequest(request interface{}) (bool, error) {
 
 	default:
 		return m.OnRequestUnknownMsg(request)
-	}
-
-	return false, nil
-}
-
-func (m *XDGDesktopEntry) OnRequestDefault(request interface{}, reason string) (bool, error) {
-	switch r := request.(type) {
-	case *updateCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-	case *subscribeCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-
-	default:
-		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil

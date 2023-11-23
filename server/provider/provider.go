@@ -46,25 +46,13 @@ func (m *Provider) OnFinish() {
 	m.handler.onFinish()
 }
 
-func (m *Provider) OnRequest(request interface{}) (bool, error) {
+func (m *Provider) OnRequest(request api.ModuleMsgImpl) (bool, error) {
 	switch r := request.(type) {
 	case *activateCmd:
 		m.handler.activate(r)
 
 	default:
 		return m.OnRequestUnknownMsg(request)
-	}
-
-	return false, nil
-}
-
-func (m *Provider) OnRequestDefault(request interface{}, reason string) (bool, error) {
-	switch r := request.(type) {
-	case *activateCmd:
-		r.OnRequestDefault(m.GetModuleLogger(), reason)
-
-	default:
-		return m.OnRequestDefaultUnknownMsg(request, reason)
 	}
 
 	return false, nil
