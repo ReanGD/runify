@@ -2,7 +2,7 @@ export RUNIFY_VERSION := "v0.2.0"
 export GOLANGCILINT_VERSION := "v1.48.0"
 export DIR_SCRIPTS := "../ci/make_scripts"
 
-.PHONY: dep_fmt dep gocc test mod_tidy fmt_check fmt build release run help
+.PHONY: dep_fmt dep gocc test mod_tidy fmt_check fmt build release clear_dev_log run help
 
 dep_fmt: ## Get the dependencies for the fmt target
 	@go install mvdan.cc/gofumpt@latest
@@ -31,7 +31,10 @@ build: ## Build the binary file
 release: build ## Make release for server
 	@cp ./runify-server ../release/opt/runify/
 
-run: build ## Build and run the binary file
+clear_dev_log: ## Clear the dev log file
+	@echo > ./runify.log
+
+run: build clear_dev_log ## Build and run the binary file
 	@./runify-server -c ../ci/cfg/dev.json
 
 help: ## Display this help screen

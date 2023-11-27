@@ -118,6 +118,7 @@ func (m *Module) Init(
 
 		channelLen, err := impl.OnInit()
 		m.Channel.Init(channelLen)
+		m.moduleLogger.Info("Init")
 		ch <- err
 	}()
 

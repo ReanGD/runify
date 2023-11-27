@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"sync"
 
@@ -24,6 +25,7 @@ type providerHandler struct {
 	dpChans        []<-chan error
 	dataProviders  map[api.ProviderID]*dataProvider
 	wg             *sync.WaitGroup
+	showUIHotkey   *shortcut.Hotkey
 	doneErrWaitCh  chan struct{}
 	moduleLogger   *zap.Logger
 	rootListLogger *zap.Logger
@@ -36,6 +38,7 @@ func newProviderHandler() *providerHandler {
 		dpChans:        make([]<-chan error, 0, 3),
 		dataProviders:  make(map[api.ProviderID]*dataProvider),
 		wg:             &sync.WaitGroup{},
+		showUIHotkey:   nil,
 		doneErrWaitCh:  make(chan struct{}),
 		moduleLogger:   nil,
 		rootListLogger: nil,
@@ -64,18 +67,24 @@ func (h *providerHandler) onInit(root *Provider, deps *dependences) error {
 			return err
 		}
 	}
-	hotkey, err := shortcut.NewHotkey(h.cfg.Shortcuts.Root)
-	if err != nil {
+
+	var err error
+	if h.showUIHotkey, err = shortcut.NewHotkey(h.cfg.Shortcuts.Root); err != nil {
 		return err
 	}
-	result := api.NewFuncErrorCodeResult(func(result global.Error) {})
-	desktop.AddShortcut(shortcut.NewAction("Show UI"), hotkey, result)
 
 	return nil
 }
 
 func (h *providerHandler) onStart(ctx context.Context, errorCtx *module.ErrorCtx) {
 	cases := make([]reflect.SelectCase, len(h.dataProviders)+1)
+
+	result := api.NewFuncErrorCodeResult(func(result global.Error) {
+		if result != global.Success {
+			errorCtx.SendError(errors.New(result.String()))
+		}
+	})
+	h.deps.desktop.AddShortcut(shortcut.NewAction("Show UI"), h.showUIHotkey, result)
 
 	caseNum := 0
 	for _, dp := range h.dataProviders {
