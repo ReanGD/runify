@@ -330,7 +330,8 @@ class RootListRow extends $pb.GeneratedMessage {
     ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'priority', $pb.PbFieldType.OU3)
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'icon')
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'value')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'displayName', protoName: 'displayName')
+    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'searchNames', protoName: 'searchNames')
     ..hasRequiredFields = false
   ;
 
@@ -341,7 +342,8 @@ class RootListRow extends $pb.GeneratedMessage {
     $core.int? rowID,
     $core.int? priority,
     $core.String? icon,
-    $core.String? value,
+    $core.String? displayName,
+    $core.String? searchNames,
   }) {
     final _result = create();
     if (rowType != null) {
@@ -359,8 +361,11 @@ class RootListRow extends $pb.GeneratedMessage {
     if (icon != null) {
       _result.icon = icon;
     }
-    if (value != null) {
-      _result.value = value;
+    if (displayName != null) {
+      _result.displayName = displayName;
+    }
+    if (searchNames != null) {
+      _result.searchNames = searchNames;
     }
     return _result;
   }
@@ -431,13 +436,22 @@ class RootListRow extends $pb.GeneratedMessage {
   void clearIcon() => clearField(5);
 
   @$pb.TagNumber(6)
-  $core.String get value => $_getSZ(5);
+  $core.String get displayName => $_getSZ(5);
   @$pb.TagNumber(6)
-  set value($core.String v) { $_setString(5, v); }
+  set displayName($core.String v) { $_setString(5, v); }
   @$pb.TagNumber(6)
-  $core.bool hasValue() => $_has(5);
+  $core.bool hasDisplayName() => $_has(5);
   @$pb.TagNumber(6)
-  void clearValue() => clearField(6);
+  void clearDisplayName() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get searchNames => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set searchNames($core.String v) { $_setString(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasSearchNames() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearSearchNames() => clearField(7);
 }
 
 class FormOpen extends $pb.GeneratedMessage {
@@ -949,21 +963,26 @@ class FormClosed extends $pb.GeneratedMessage {
 class ContextMenuRow extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ContextMenuRow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'value')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'displayName', protoName: 'displayName')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'searchNames', protoName: 'searchNames')
     ..hasRequiredFields = false
   ;
 
   ContextMenuRow._() : super();
   factory ContextMenuRow({
     $core.int? rowID,
-    $core.String? value,
+    $core.String? displayName,
+    $core.String? searchNames,
   }) {
     final _result = create();
     if (rowID != null) {
       _result.rowID = rowID;
     }
-    if (value != null) {
-      _result.value = value;
+    if (displayName != null) {
+      _result.displayName = displayName;
+    }
+    if (searchNames != null) {
+      _result.searchNames = searchNames;
     }
     return _result;
   }
@@ -998,13 +1017,22 @@ class ContextMenuRow extends $pb.GeneratedMessage {
   void clearRowID() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get value => $_getSZ(1);
+  $core.String get displayName => $_getSZ(1);
   @$pb.TagNumber(2)
-  set value($core.String v) { $_setString(1, v); }
+  set displayName($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasValue() => $_has(1);
+  $core.bool hasDisplayName() => $_has(1);
   @$pb.TagNumber(2)
-  void clearValue() => clearField(2);
+  void clearDisplayName() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get searchNames => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set searchNames($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasSearchNames() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSearchNames() => clearField(3);
 }
 
 class ContextMenuOpen extends $pb.GeneratedMessage {

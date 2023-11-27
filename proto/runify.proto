@@ -51,7 +51,10 @@ message RootListRow {
 	uint32 rowID = 3;
 	uint32 priority = 4;
 	string icon = 5;
-	string value = 6;
+	// name for UI
+	string displayName = 6;
+	// names for search, with \n as separator
+	string searchNames = 7;
 }
 
 message FormOpen {
@@ -100,7 +103,10 @@ message FormClosed {
 
 message ContextMenuRow {
 	uint32 rowID = 1;
-	string value = 2;
+	// name for UI
+	string displayName = 2;
+	// names for search, with \n as separator
+	string searchNames = 3;
 }
 
 message ContextMenuOpen {

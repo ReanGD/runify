@@ -116,12 +116,13 @@ const RootListRow$json = const {
     const {'1': 'rowID', '3': 3, '4': 1, '5': 13, '10': 'rowID'},
     const {'1': 'priority', '3': 4, '4': 1, '5': 13, '10': 'priority'},
     const {'1': 'icon', '3': 5, '4': 1, '5': 9, '10': 'icon'},
-    const {'1': 'value', '3': 6, '4': 1, '5': 9, '10': 'value'},
+    const {'1': 'displayName', '3': 6, '4': 1, '5': 9, '10': 'displayName'},
+    const {'1': 'searchNames', '3': 7, '4': 1, '5': 9, '10': 'searchNames'},
   ],
 };
 
 /// Descriptor for `RootListRow`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List rootListRowDescriptor = $convert.base64Decode('CgtSb290TGlzdFJvdxIxCgdyb3dUeXBlGAEgASgOMhcucnVuaWZ5LlJvb3RMaXN0Um93VHlwZVIHcm93VHlwZRIeCgpwcm92aWRlcklEGAIgASgNUgpwcm92aWRlcklEEhQKBXJvd0lEGAMgASgNUgVyb3dJRBIaCghwcmlvcml0eRgEIAEoDVIIcHJpb3JpdHkSEgoEaWNvbhgFIAEoCVIEaWNvbhIUCgV2YWx1ZRgGIAEoCVIFdmFsdWU=');
+final $typed_data.Uint8List rootListRowDescriptor = $convert.base64Decode('CgtSb290TGlzdFJvdxIxCgdyb3dUeXBlGAEgASgOMhcucnVuaWZ5LlJvb3RMaXN0Um93VHlwZVIHcm93VHlwZRIeCgpwcm92aWRlcklEGAIgASgNUgpwcm92aWRlcklEEhQKBXJvd0lEGAMgASgNUgVyb3dJRBIaCghwcmlvcml0eRgEIAEoDVIIcHJpb3JpdHkSEgoEaWNvbhgFIAEoCVIEaWNvbhIgCgtkaXNwbGF5TmFtZRgGIAEoCVILZGlzcGxheU5hbWUSIAoLc2VhcmNoTmFtZXMYByABKAlSC3NlYXJjaE5hbWVz');
 @$core.Deprecated('Use formOpenDescriptor instead')
 const FormOpen$json = const {
   '1': 'FormOpen',
@@ -229,12 +230,13 @@ const ContextMenuRow$json = const {
   '1': 'ContextMenuRow',
   '2': const [
     const {'1': 'rowID', '3': 1, '4': 1, '5': 13, '10': 'rowID'},
-    const {'1': 'value', '3': 2, '4': 1, '5': 9, '10': 'value'},
+    const {'1': 'displayName', '3': 2, '4': 1, '5': 9, '10': 'displayName'},
+    const {'1': 'searchNames', '3': 3, '4': 1, '5': 9, '10': 'searchNames'},
   ],
 };
 
 /// Descriptor for `ContextMenuRow`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List contextMenuRowDescriptor = $convert.base64Decode('Cg5Db250ZXh0TWVudVJvdxIUCgVyb3dJRBgBIAEoDVIFcm93SUQSFAoFdmFsdWUYAiABKAlSBXZhbHVl');
+final $typed_data.Uint8List contextMenuRowDescriptor = $convert.base64Decode('Cg5Db250ZXh0TWVudVJvdxIUCgVyb3dJRBgBIAEoDVIFcm93SUQSIAoLZGlzcGxheU5hbWUYAiABKAlSC2Rpc3BsYXlOYW1lEiAKC3NlYXJjaE5hbWVzGAMgASgJUgtzZWFyY2hOYW1lcw==');
 @$core.Deprecated('Use contextMenuOpenDescriptor instead')
 const ContextMenuOpen$json = const {
   '1': 'ContextMenuOpen',
