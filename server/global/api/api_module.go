@@ -39,7 +39,7 @@ type DisplayServer interface {
 
 type XDGDesktopEntry interface {
 	Update()
-	Subscribe(ch chan<- types.DesktopEntries, result BoolResult)
+	Subscribe(ch chan<- types.DesktopFiles, result BoolResult)
 }
 
 type Desktop interface {

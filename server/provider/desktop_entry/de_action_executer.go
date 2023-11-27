@@ -35,7 +35,7 @@ func (e *deActionExecuter) init(cfg *config.Configuration, desktop api.Desktop, 
 	return nil
 }
 
-func (e *deActionExecuter) getEntry(id api.RootListRowID, logMsg string) (*types.DesktopEntry, error) {
+func (e *deActionExecuter) getEntry(id api.RootListRowID, logMsg string) (types.DesktopFile, error) {
 	entry, ok := e.model.getEntry(id)
 	if !ok {
 		err := errors.New("row data not found")
@@ -71,7 +71,7 @@ func (e *deActionExecuter) open(client api.RpcClient, id api.RootListRowID) {
 	client.HideUI(err)
 }
 
-func (e *deActionExecuter) copy(id api.RootListRowID, entry *types.DesktopEntry, data *mime.Data, logMsg string) bool {
+func (e *deActionExecuter) copy(id api.RootListRowID, entry types.DesktopFile, data *mime.Data, logMsg string) bool {
 	copyResult := api.NewChanBoolResult()
 	e.desktop.WriteToClipboard(false, data, copyResult)
 	res := <-copyResult.GetChannel()

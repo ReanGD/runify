@@ -13,7 +13,7 @@ type deModel struct {
 	providerID   api.ProviderID
 	nextID       api.RootListRowID
 	nameIndex    map[string]api.RootListRowID
-	entriesIndex map[api.RootListRowID]*types.DesktopEntry
+	entriesIndex map[api.RootListRowID]types.DesktopFile
 	dataMutex    sync.RWMutex
 	dataCache    []*api.RootListRow
 	moduleLogger *zap.Logger
@@ -24,7 +24,7 @@ func newDEModel() *deModel {
 		providerID:   0,
 		nextID:       1,
 		nameIndex:    make(map[string]api.RootListRowID),
-		entriesIndex: make(map[api.RootListRowID]*types.DesktopEntry),
+		entriesIndex: make(map[api.RootListRowID]types.DesktopFile),
 		dataMutex:    sync.RWMutex{},
 		dataCache:    []*api.RootListRow{},
 		moduleLogger: nil,
@@ -39,11 +39,11 @@ func (m *deModel) init(providerID api.ProviderID, moduleLogger *zap.Logger) erro
 }
 
 func (m *deModel) onDesktopEntries(request interface{}) (bool, error) {
-	entries, ok := request.(types.DesktopEntries)
+	entries, ok := request.(types.DesktopFiles)
 	if !ok {
-		return true, fmt.Errorf("invalid request type, expected types.DesktopEntries, but got %T", request)
+		return true, fmt.Errorf("invalid request type, expected types.DesktopFiles, but got %T", request)
 	}
-	entriesIndex := make(map[api.RootListRowID]*types.DesktopEntry)
+	entriesIndex := make(map[api.RootListRowID]types.DesktopFile)
 	dataCache := make([]*api.RootListRow, 0, len(m.dataCache))
 
 	for _, entry := range entries {
@@ -75,7 +75,7 @@ func (m *deModel) getRows() []*api.RootListRow {
 	return m.dataCache
 }
 
-func (m *deModel) getEntry(id api.RootListRowID) (*types.DesktopEntry, bool) {
+func (m *deModel) getEntry(id api.RootListRowID) (types.DesktopFile, bool) {
 	m.dataMutex.RLock()
 	defer m.dataMutex.RUnlock()
 	res, ok := m.entriesIndex[id]

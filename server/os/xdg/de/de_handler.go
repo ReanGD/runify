@@ -3,6 +3,7 @@ package de
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/rkoesters/xdg/desktop"
 
@@ -13,8 +14,8 @@ import (
 
 type handler struct {
 	iconCache     *iconCache
-	entries       types.DesktopEntries
-	subscriptions []chan<- types.DesktopEntries
+	dfileCache    []*desktopFile
+	subscriptions []chan<- types.DesktopFiles
 
 	moduleLogger *zap.Logger
 }
@@ -22,8 +23,8 @@ type handler struct {
 func newHandler() *handler {
 	return &handler{
 		iconCache:     nil,
-		entries:       types.DesktopEntries{},
-		subscriptions: []chan<- types.DesktopEntries{},
+		dfileCache:    []*desktopFile{},
+		subscriptions: []chan<- types.DesktopFiles{},
 		moduleLogger:  nil,
 	}
 }
@@ -40,54 +41,54 @@ func (h *handler) init(moduleLogger *zap.Logger) error {
 	return nil
 }
 
-func (h *handler) sendToSubscribers() {
-	for _, ch := range h.subscriptions {
-		select {
-		case ch <- h.entries.Clone():
-		default:
-			h.moduleLogger.Warn("Failed send desktop entry data array to subscription channel, channel is full")
-		}
+func (h *handler) dfileCacheSend(ch chan<- types.DesktopFiles) {
+	copy := make(types.DesktopFiles, len(h.dfileCache))
+	for ind, val := range h.dfileCache {
+		copy[ind] = val
+	}
+
+	select {
+	case ch <- copy:
+	default:
+		h.moduleLogger.Warn("Failed send desktop entry file data array to subscription channel, channel is full")
 	}
 }
 
 func (h *handler) update() {
-	entries := make(types.DesktopEntries, 0, len(h.entries))
-	h.walkXDGDesktopEntries(func(entry *types.DesktopEntry) {
-		entries = append(entries, entry)
+	dfileCache := make([]*desktopFile, 0, len(h.dfileCache))
+	h.walkXDGDesktopFiles(func(dfile *desktopFile) {
+		dfileCache = append(dfileCache, dfile)
 	})
 
-	h.entries = entries
-	h.sendToSubscribers()
+	h.dfileCache = dfileCache
+	for _, ch := range h.subscriptions {
+		h.dfileCacheSend(ch)
+	}
 }
 
 func (h *handler) subscribe(cmd *subscribeCmd) {
 	h.subscriptions = append(h.subscriptions, cmd.ch)
-
-	select {
-	case cmd.ch <- h.entries.Clone():
-	default:
-		h.moduleLogger.Warn("Failed send desktop entry data array to subscription channel, channel is full")
-	}
-
+	h.dfileCacheSend(cmd.ch)
 	cmd.result.SetResult(true)
 }
 
 func (h *handler) stop() {
 }
 
-func (h *handler) walkXDGDesktopEntries(fn func(entry *types.DesktopEntry)) {
+func (h *handler) walkXDGDesktopFiles(fn func(dfile *desktopFile)) {
 	exists := make(map[string]struct{})
 	for _, dirname := range paths.GetXDGAppDirs() {
+		idStart := len(dirname) + 1
+		idEnd := len(".desktop")
 		paths.Walk(dirname, h.moduleLogger, func(filePath string, mode paths.PathMode) {
 			if mode != paths.ModeRegFile || filepath.Ext(filePath) != ".desktop" {
 				return
 			}
 
-			_, filename := filepath.Split(filePath)
-			if _, ok := exists[filename]; ok {
+			id := strings.ReplaceAll(filePath[idStart:len(filePath)-idEnd], "/", "_")
+			if _, ok := exists[id]; ok {
 				return
 			}
-			exists[filename] = struct{}{}
 
 			f, err := os.Open(filePath)
 			if err != nil {
@@ -106,12 +107,12 @@ func (h *handler) walkXDGDesktopEntries(fn func(entry *types.DesktopEntry)) {
 				return
 			}
 
-			fn(types.NewDesktopEntry(
+			exists[id] = struct{}{}
+			fn(newDesktopFile(
+				id,
 				filePath,
 				h.iconCache.getNonSvgIconPath(props.Icon, 48),
-				props.Name,
-				props.Exec,
-				props.Terminal,
+				props,
 			))
 		})
 	}

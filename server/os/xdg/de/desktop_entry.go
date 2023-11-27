@@ -57,7 +57,7 @@ func (m *XDGDesktopEntry) Update() {
 	m.AddToChannel(&updateCmd{})
 }
 
-func (m *XDGDesktopEntry) Subscribe(ch chan<- types.DesktopEntries, result api.BoolResult) {
+func (m *XDGDesktopEntry) Subscribe(ch chan<- types.DesktopFiles, result api.BoolResult) {
 	m.AddToChannel(&subscribeCmd{
 		ch:     ch,
 		result: result,
