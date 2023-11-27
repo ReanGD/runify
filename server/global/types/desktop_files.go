@@ -5,6 +5,7 @@ type DesktopFile interface {
 	FilePath() string
 	IconPath() string
 	Name() string
+	SearchNames() string
 	Exec() string
 	InTerminal() bool
 }

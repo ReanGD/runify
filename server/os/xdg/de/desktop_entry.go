@@ -26,7 +26,7 @@ func (m *XDGDesktopEntry) SetDeps() {
 func (m *XDGDesktopEntry) OnInit() (uint32, error) {
 	chLen := m.GetConfig().XDGDesktopEntry.ModuleChLen
 
-	return chLen, m.handler.init(m.GetModuleLogger())
+	return chLen, m.handler.init(m.GetConfig(), m.GetModuleLogger())
 }
 
 func (m *XDGDesktopEntry) OnStart(ctx context.Context) []*types.HandledChannel {

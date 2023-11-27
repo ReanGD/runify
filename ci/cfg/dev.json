@@ -18,6 +18,8 @@
   "system": {
     "RpcAddress": "/tmp/runify.socket",
     "Terminal": "sh",
+    "MainLocale": "en_US.UTF-8",
+    "DopLocale": "ru_RU.UTF-8",
     "UIBinaryPath": "../ui/build/linux/x64/debug/bundle/runify-ui"
   }
 }

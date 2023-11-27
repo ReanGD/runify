@@ -9,6 +9,8 @@ import (
 type SystemCfg struct {
 	UIBinaryPath string
 	RpcAddress   string
+	MainLocale   string
+	DopLocale    string
 	Terminal     string
 }
 
@@ -16,6 +18,8 @@ func (c *SystemCfg) setDefault(vp *viper.Viper) {
 	vp.SetDefault("System", map[string]interface{}{
 		"UIBinaryPath": "/opt/runify/runify-ui",
 		"RpcAddress":   "/tmp/runify.socket",
+		"MainLocale":   "en_US.UTF-8",
+		"DopLocale":    "ru_RU.UTF-8",
 		"Terminal":     "sh",
 	})
 }

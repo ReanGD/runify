@@ -1,12 +1,12 @@
 package de
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/rkoesters/xdg/desktop"
+	"github.com/rkoesters/xdg/keyfile"
 
+	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/types"
 	"github.com/ReanGD/runify/server/paths"
 	"go.uber.org/zap"
@@ -16,6 +16,8 @@ type handler struct {
 	iconCache     *iconCache
 	dfileCache    []*desktopFile
 	subscriptions []chan<- types.DesktopFiles
+	mainLocale    keyfile.Locale
+	dopLocale     keyfile.Locale
 
 	moduleLogger *zap.Logger
 }
@@ -25,17 +27,37 @@ func newHandler() *handler {
 		iconCache:     nil,
 		dfileCache:    []*desktopFile{},
 		subscriptions: []chan<- types.DesktopFiles{},
+		mainLocale:    keyfile.Locale{},
+		dopLocale:     keyfile.Locale{},
 		moduleLogger:  nil,
 	}
 }
 
-func (h *handler) init(moduleLogger *zap.Logger) error {
+func (h *handler) init(cfg *config.Configuration, moduleLogger *zap.Logger) error {
 	h.moduleLogger = moduleLogger
 
 	var err error
 	h.iconCache, err = newIconCache(moduleLogger)
 	if err != nil {
 		return err
+	}
+
+	h.mainLocale, err = keyfile.ParseLocale(cfg.System.MainLocale)
+	if err != nil {
+		h.moduleLogger.Warn("Error parse main locale",
+			zap.String("action", "use default locale"),
+			zap.String("locale", cfg.System.MainLocale),
+			zap.Error(err))
+		h.mainLocale = keyfile.DefaultLocale()
+	}
+
+	h.dopLocale, err = keyfile.ParseLocale(cfg.System.DopLocale)
+	if err != nil {
+		h.moduleLogger.Warn("Error parse dop locale",
+			zap.String("action", "use default locale"),
+			zap.String("locale", cfg.System.DopLocale),
+			zap.Error(err))
+		h.dopLocale = keyfile.DefaultLocale()
 	}
 
 	return nil
@@ -90,30 +112,14 @@ func (h *handler) walkXDGDesktopFiles(fn func(dfile *desktopFile)) {
 				return
 			}
 
-			f, err := os.Open(filePath)
-			if err != nil {
-				h.moduleLogger.Info("Error open desktop entry file", zap.String("path", filePath), zap.Error(err))
+			dFile := newDesktopFile(id, filePath, h.mainLocale, h.dopLocale, h.moduleLogger)
+			if dFile == nil {
 				return
 			}
-
-			props, err := desktop.New(f)
-			f.Close()
-			if err != nil {
-				h.moduleLogger.Info("Error parse desktop entry file", zap.String("path", filePath), zap.Error(err))
-				return
-			}
-
-			if props.NoDisplay || props.Hidden {
-				return
-			}
+			dFile.iconPath = h.iconCache.getNonSvgIconPath(dFile.icon, 48)
 
 			exists[id] = struct{}{}
-			fn(newDesktopFile(
-				id,
-				filePath,
-				h.iconCache.getNonSvgIconPath(props.Icon, 48),
-				props,
-			))
+			fn(dFile)
 		})
 	}
 }
