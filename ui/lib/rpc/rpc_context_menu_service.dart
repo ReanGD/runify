@@ -16,7 +16,9 @@ class CMService implements Service {
       List<pb.ContextMenuRow> rows) {
     _filter = ContextMenuRowFilter();
     _filter.add(CastList(
-        rows, (pb.ContextMenuRow row) => ContextMenuRow(row.rowID, row.value)));
+        rows,
+        (pb.ContextMenuRow row) =>
+            ContextMenuRow(row.rowID, row.displayName, row.searchNames)));
     _filter.apply();
   }
 

@@ -77,7 +77,7 @@ func (c *CalcRootListCtrl) OnFilterChange(text string) {
 		return
 	}
 
-	row := api.NewRootListRow(api.RowType_Calculator, api.MaxPriority, c.providerID, rootRowID, "", text+"\n"+userResult)
+	row := api.NewRootListRow(api.RowType_Calculator, api.MaxPriority, c.providerID, rootRowID, "", text+"\n"+userResult, "")
 	if c.visible {
 		c.client.RootListChangeRows(c.formID, row)
 	} else {

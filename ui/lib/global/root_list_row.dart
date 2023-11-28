@@ -28,10 +28,18 @@ class RootListRow implements Matcher<RootListRowID> {
   final RootListRowID id;
   final RootListRowType rowType;
   final int priority;
-  final String value;
+  final String displayName;
+  final String searchNames;
   final String icon;
 
-  RootListRow(this.id, this.rowType, this.priority, this.value, this.icon);
+  RootListRow(
+    this.id,
+    this.rowType,
+    this.priority,
+    this.displayName,
+    this.searchNames,
+    this.icon,
+  );
 
   @override
   RootListRowID get key => id;
@@ -57,7 +65,7 @@ class RootListRow implements Matcher<RootListRowID> {
       return true;
     }
 
-    return rexp.hasMatch(value);
+    return rexp.hasMatch(searchNames);
   }
 }
 
@@ -66,7 +74,7 @@ int rootListRowComparator(RootListRow a, RootListRow b) {
     return b.priority.compareTo(a.priority);
   }
 
-  return a.value.compareTo(b.value);
+  return a.displayName.compareTo(b.displayName);
 }
 
 typedef RootListRowFilter = DataFilter<RootListRowID, RootListRow>;

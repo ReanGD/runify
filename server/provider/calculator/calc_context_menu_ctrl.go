@@ -30,7 +30,9 @@ func newCalcContextMenuCtrl(value string, actionExecuter *calcActionExecuter, mo
 func (c *CalcContextMenuCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*api.ContextMenuRow {
 	c.formID = formID
 	c.client = client
-	return []*api.ContextMenuRow{api.NewContextMenuRow(menuRowID, "Copy")}
+	return []*api.ContextMenuRow{
+		api.NewContextMenuRow(menuRowID, "Copy", "Copy\nКопировать"),
+	}
 }
 
 func (c *CalcContextMenuCtrl) OnRowActivate(rowID api.ContextMenuRowID) {

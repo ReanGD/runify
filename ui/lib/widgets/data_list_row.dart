@@ -34,7 +34,7 @@ class RootListRowWidget extends StatelessWidget {
     final icon = _getIcon(data.icon, iconSize);
     final name = Flexible(
       child: Text(
-        "  ${data.value}",
+        "  ${data.displayName}",
         style: theme.textTheme.majorText,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -72,7 +72,7 @@ class RootListRowWidget extends StatelessWidget {
     final theme = Theme.of(context);
     final nameStyle = theme.textTheme.majorText;
 
-    final items = data.value.split("\n");
+    final items = data.displayName.split("\n");
 
     final left = Flexible(
       fit: FlexFit.tight,
@@ -130,7 +130,7 @@ class ContextMenuRowWidget extends StatelessWidget {
     final icon = _getIcon(null, iconSize);
     final name = Flexible(
       child: Text(
-        "  ${data.value}",
+        "  ${data.displayName}",
         style: theme.textTheme.majorText,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

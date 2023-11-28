@@ -58,7 +58,13 @@ func (m *deModel) onDesktopEntries(request interface{}) (bool, error) {
 		entriesIndex[id] = entry
 
 		dataCache = append(dataCache, api.NewRootListRow(
-			api.RowType_Application, api.MinPriority, m.providerID, id, entry.IconPath(), name))
+			api.RowType_Application,
+			api.MinPriority,
+			m.providerID,
+			id,
+			entry.IconPath(),
+			name,
+			entry.SearchNames()))
 	}
 
 	m.dataMutex.Lock()

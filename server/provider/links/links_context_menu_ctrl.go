@@ -56,16 +56,16 @@ func (c *LinksContextMenuCtrl) OnOpen(formID api.FormID, client api.RpcClient) [
 
 	if c.itemRowID <= createRowID {
 		return []*api.ContextMenuRow{
-			api.NewContextMenuRow(menuOpenCmdRowID, "Open command"),
+			api.NewContextMenuRow(menuOpenCmdRowID, "Open command", "Open command\nОткрыть команду"),
 		}
 	}
 
 	return []*api.ContextMenuRow{
-		api.NewContextMenuRow(menuOpenLinkRowID, "Open"),
-		api.NewContextMenuRow(menuEditLinkRowID, "Edit"),
-		api.NewContextMenuRow(menuCopyLinkRowID, "Copy link"),
-		api.NewContextMenuRow(menuCopyNameRowID, "Copy name"),
-		api.NewContextMenuRow(menuRemoveLinkRowID, "Remove"),
+		api.NewContextMenuRow(menuOpenLinkRowID, "Open", "Open\nОткрыть"),
+		api.NewContextMenuRow(menuEditLinkRowID, "Edit", "Edit\nРедактировать"),
+		api.NewContextMenuRow(menuCopyLinkRowID, "Copy link", "Copy link\nКопировать ссылку"),
+		api.NewContextMenuRow(menuCopyNameRowID, "Copy name", "Copy name\nКопировать имя"),
+		api.NewContextMenuRow(menuRemoveLinkRowID, "Remove", "Remove\nУдалить"),
 	}
 }
 

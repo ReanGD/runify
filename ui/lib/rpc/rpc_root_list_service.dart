@@ -29,7 +29,8 @@ RootListRow castRootListRow(pb.RootListRow row) {
     RootListRowID(row.providerID, row.rowID),
     rowType,
     row.priority,
-    row.value,
+    row.displayName,
+    row.searchNames,
     row.icon,
   );
 }

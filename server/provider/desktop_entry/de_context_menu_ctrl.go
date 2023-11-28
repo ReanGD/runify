@@ -37,9 +37,9 @@ func (c *DEContextMenuCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*a
 	c.client = client
 
 	return []*api.ContextMenuRow{
-		api.NewContextMenuRow(api.ContextMenuRowID(actionOpen), "Open"),
-		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyName), "Copy name"),
-		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyPath), "Copy path"),
+		api.NewContextMenuRow(api.ContextMenuRowID(actionOpen), "Open", "Open\nОткрыть"),
+		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyName), "Copy name", "Copy name\nКопировать имя"),
+		api.NewContextMenuRow(api.ContextMenuRowID(actionCopyPath), "Copy path", "Copy path\nКопировать путь"),
 	}
 }
 

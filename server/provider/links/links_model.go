@@ -109,11 +109,23 @@ func (m *model) start() {
 func (m *model) updateCache(saveToDB bool) error {
 	m.rowsCache = make([]*api.RootListRow, 0, len(m.idIndex)+1)
 	m.rowsCache = append(m.rowsCache, api.NewRootListRow(
-		api.RowType_Command, api.MinPriority, m.providerID, createRowID, "", "Create link"))
+		api.RowType_Command,
+		api.MinPriority,
+		m.providerID,
+		createRowID,
+		"",
+		"Create link",
+		"Create link"))
 
 	for _, item := range m.idIndex {
 		m.rowsCache = append(m.rowsCache, api.NewRootListRow(
-			api.RowType_Link, api.MinPriority, m.providerID, item.id, "", item.data.Name))
+			api.RowType_Link,
+			api.MinPriority,
+			m.providerID,
+			item.id,
+			"",
+			item.data.Name,
+			item.data.Name))
 	}
 
 	if saveToDB {

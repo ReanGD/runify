@@ -128,53 +128,65 @@ func (r *RootListRowGlobalID) ToProtobuf() *pb.RootListRowGlobalID {
 }
 
 type RootListRow struct {
-	rowType    RowType
-	Priority   uint16
-	ProviderID ProviderID
-	ID         RootListRowID
-	Icon       string
-	Value      string
+	rowType     RowType
+	Priority    uint16
+	ProviderID  ProviderID
+	ID          RootListRowID
+	Icon        string
+	DisplayName string
+	SearchNames string
 }
 
 func NewRootListRow(
-	rowType RowType, priority uint16, providerID ProviderID, id RootListRowID, icon string, value string,
+	rowType RowType,
+	priority uint16,
+	providerID ProviderID,
+	id RootListRowID,
+	icon string,
+	displayName string,
+	searchNames string,
 ) *RootListRow {
 	return &RootListRow{
-		rowType:    rowType,
-		Priority:   priority,
-		ProviderID: providerID,
-		ID:         id,
-		Icon:       icon,
-		Value:      value,
+		rowType:     rowType,
+		Priority:    priority,
+		ProviderID:  providerID,
+		ID:          id,
+		Icon:        icon,
+		DisplayName: displayName,
+		SearchNames: searchNames,
 	}
 }
 
 func (r *RootListRow) ToProtobuf() *pb.RootListRow {
 	return &pb.RootListRow{
-		RowType:    r.rowType.ToProtobuf(),
-		ProviderID: uint32(r.ProviderID),
-		RowID:      uint32(r.ID),
-		Priority:   uint32(r.Priority),
-		Icon:       r.Icon,
-		Value:      r.Value,
+		RowType:     r.rowType.ToProtobuf(),
+		ProviderID:  uint32(r.ProviderID),
+		RowID:       uint32(r.ID),
+		Priority:    uint32(r.Priority),
+		Icon:        r.Icon,
+		DisplayName: r.DisplayName,
+		SearchNames: r.SearchNames,
 	}
 }
 
 type ContextMenuRow struct {
-	ID    ContextMenuRowID
-	Value string
+	ID          ContextMenuRowID
+	DisplayName string
+	SearchNames string
 }
 
-func NewContextMenuRow(id ContextMenuRowID, value string) *ContextMenuRow {
+func NewContextMenuRow(id ContextMenuRowID, displayName, searchNames string) *ContextMenuRow {
 	return &ContextMenuRow{
-		ID:    id,
-		Value: value,
+		ID:          id,
+		DisplayName: displayName,
+		SearchNames: searchNames,
 	}
 }
 
 func (r *ContextMenuRow) ToProtobuf() *pb.ContextMenuRow {
 	return &pb.ContextMenuRow{
-		RowID: uint32(r.ID),
-		Value: r.Value,
+		RowID:       uint32(r.ID),
+		DisplayName: r.DisplayName,
+		SearchNames: r.SearchNames,
 	}
 }

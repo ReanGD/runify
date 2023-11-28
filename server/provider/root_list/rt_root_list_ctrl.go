@@ -44,7 +44,7 @@ func (c *RLRootListCtrl) OnOpen(formID api.FormID, client api.RpcClient) []*api.
 	wg.Wait()
 	sort.SliceStable(allData, func(i, j int) bool {
 		if allData[i].Priority == allData[j].Priority {
-			return allData[i].Value < allData[j].Value
+			return allData[i].DisplayName < allData[j].DisplayName
 		}
 		return allData[i].Priority > allData[j].Priority
 	})
