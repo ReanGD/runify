@@ -4,11 +4,12 @@
 
 ### Added
 
-- TODO
+- Support for searching in multiple locales
+- For "Desktop entries" plugin - support for desktop files search keyword
 
 ### Fixed
 
-- Runify did not get focus on startup if non-zero focus change prevention is enabled.
+- Runify did not get focus on startup if non-zero focus change prevention is enabled
 
 ## [0.2.0] - 2022-12-26
 
