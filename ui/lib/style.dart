@@ -66,6 +66,7 @@ extension RunifyDialogTheme on DialogTheme {
 
 enum TextStyleType {
   bodyRegular_100,
+  bodyRegular_80,
   bodyRegular_50,
   bodyLight_100,
   bodyLight_50,
@@ -102,6 +103,8 @@ extension RunifyTextTheme on TextTheme {
     return <TextStyleType, TextStyle?>{
       TextStyleType.bodyRegular_100:
           _makeTextStyle(theme, bodyFS, bodyRegularFW, 1.0),
+      TextStyleType.bodyRegular_80:
+          _makeTextStyle(theme, bodyFS, bodyRegularFW, 0.8),
       TextStyleType.bodyRegular_50:
           _makeTextStyle(theme, bodyFS, bodyRegularFW, 0.5),
       TextStyleType.bodyLight_100:
@@ -130,6 +133,8 @@ extension RunifyTextTheme on TextTheme {
       _getTextStyle(this, TextStyleType.bodyRegular_100);
   TextStyle? get bodyRegular_100 =>
       _getTextStyle(this, TextStyleType.bodyRegular_100);
+  TextStyle? get bodyRegular_80 =>
+      _getTextStyle(this, TextStyleType.bodyRegular_80);
   TextStyle? get bodyRegularInactive =>
       _getTextStyle(this, TextStyleType.bodyRegular_50);
   TextStyle? get bodyRegular_50 =>
