@@ -22,11 +22,11 @@ class SearchField extends StatelessWidget {
 
     final child = TextField(
       autofocus: true,
-      style: theme.textTheme.majorText,
+      style: theme.textTheme.bodyRegular,
       textAlignVertical: TextAlignVertical.center,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: theme.textTheme.minorText,
+        hintStyle: theme.textTheme.bodyLightInactive,
         filled: false,
         isDense: true,
         errorBorder: border,

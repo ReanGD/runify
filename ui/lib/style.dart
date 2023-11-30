@@ -64,21 +64,97 @@ extension RunifyDialogTheme on DialogTheme {
   double get horizontalOffset => 10.0;
 }
 
-extension RunifyTextTheme on TextTheme {
-  TextStyle? get majorText => bodyMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        fontSize: 18,
-        letterSpacing: -0.2,
-        wordSpacing: 0,
-      );
+enum TextStyleType {
+  bodyRegular_100,
+  bodyRegular_50,
+  bodyLight_100,
+  bodyLight_50,
+  labelRegular_100,
+  labelRegular_80,
+  labelRegular_60,
+  labelRegular_50,
+}
 
-  TextStyle? get minorText => bodyMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        fontSize: 18,
-        letterSpacing: -0.2,
-        wordSpacing: 0,
-        color: bodyMedium?.color?.withAlpha(130),
-      );
+extension RunifyTextTheme on TextTheme {
+  static Map<TextStyleType, TextStyle?>? _textStyles;
+
+  static TextStyle? _makeTextStyle(
+      TextTheme theme, double fontSize, FontWeight fontWeight, double opacity) {
+    return theme.bodyMedium?.copyWith(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      fontStyle: FontStyle.normal,
+      letterSpacing: -0.1,
+      wordSpacing: 0,
+      color: theme.bodyMedium?.color?.withOpacity(opacity),
+    );
+  }
+
+  static Map<TextStyleType, TextStyle?> _makeTextStyles(TextTheme theme) {
+    // fonst size
+    const bodyFS = 18.0;
+    const labelFS = 16.0;
+    // font weight
+    const bodyRegularFW = FontWeight.w600;
+    const bodyLightFW = FontWeight.w500;
+    const labelRegularFW = FontWeight.w600;
+
+    return <TextStyleType, TextStyle?>{
+      TextStyleType.bodyRegular_100:
+          _makeTextStyle(theme, bodyFS, bodyRegularFW, 1.0),
+      TextStyleType.bodyRegular_50:
+          _makeTextStyle(theme, bodyFS, bodyRegularFW, 0.5),
+      TextStyleType.bodyLight_100:
+          _makeTextStyle(theme, bodyFS, bodyLightFW, 1.0),
+      TextStyleType.bodyLight_50:
+          _makeTextStyle(theme, bodyFS, bodyLightFW, 0.5),
+      TextStyleType.labelRegular_100:
+          _makeTextStyle(theme, labelFS, labelRegularFW, 1.0),
+      TextStyleType.labelRegular_80:
+          _makeTextStyle(theme, labelFS, labelRegularFW, 0.8),
+      TextStyleType.labelRegular_60:
+          _makeTextStyle(theme, labelFS, labelRegularFW, 0.6),
+      TextStyleType.labelRegular_50:
+          _makeTextStyle(theme, labelFS, labelRegularFW, 0.5),
+    };
+  }
+
+  static TextStyle? _getTextStyle(TextTheme theme, TextStyleType type) {
+    _textStyles ??= _makeTextStyles(theme);
+    return _textStyles?[type];
+  }
+
+  TextStyle? get bodyRegular =>
+      _getTextStyle(this, TextStyleType.bodyRegular_100);
+  TextStyle? get bodyRegularActive =>
+      _getTextStyle(this, TextStyleType.bodyRegular_100);
+  TextStyle? get bodyRegular_100 =>
+      _getTextStyle(this, TextStyleType.bodyRegular_100);
+  TextStyle? get bodyRegularInactive =>
+      _getTextStyle(this, TextStyleType.bodyRegular_50);
+  TextStyle? get bodyRegular_50 =>
+      _getTextStyle(this, TextStyleType.bodyRegular_50);
+
+  TextStyle? get bodyLight => _getTextStyle(this, TextStyleType.bodyLight_100);
+  TextStyle? get bodyLightActive =>
+      _getTextStyle(this, TextStyleType.bodyLight_100);
+  TextStyle? get bodyLight_100 =>
+      _getTextStyle(this, TextStyleType.bodyLight_100);
+  TextStyle? get bodyLightInactive =>
+      _getTextStyle(this, TextStyleType.bodyLight_50);
+  TextStyle? get bodyLight_50 =>
+      _getTextStyle(this, TextStyleType.bodyLight_50);
+
+  TextStyle? get labelRegular =>
+      _getTextStyle(this, TextStyleType.labelRegular_100);
+  TextStyle? get labelRegular_100 =>
+      _getTextStyle(this, TextStyleType.labelRegular_100);
+  TextStyle? get labelRegular_80 =>
+      _getTextStyle(this, TextStyleType.labelRegular_80);
+  TextStyle? get labelRegular_60 =>
+      _getTextStyle(this, TextStyleType.labelRegular_60);
+  TextStyle? get labelRegular_50 =>
+      _getTextStyle(this, TextStyleType.labelRegular_50);
 }
 
 extension RunifyCardTheme on CardTheme {

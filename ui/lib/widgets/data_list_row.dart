@@ -29,13 +29,13 @@ class RootListRowWidget extends StatelessWidget {
   Widget buildDefault(BuildContext context) {
     final theme = Theme.of(context);
     final iconSize = TextSizeCalculator.instance
-        .getCachedHeight(context, "majorText", theme.textTheme.majorText);
+        .getCachedHeight(context, "majorText", theme.textTheme.bodyRegular);
 
     final icon = _getIcon(data.icon, iconSize);
     final name = Flexible(
       child: Text(
         "  ${data.displayName}",
-        style: theme.textTheme.majorText,
+        style: theme.textTheme.bodyRegular,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -53,7 +53,7 @@ class RootListRowWidget extends StatelessWidget {
 
     final right = Text(
       data.typeName,
-      style: theme.textTheme.minorText,
+      style: theme.textTheme.bodyLightInactive,
     );
 
     return Padding(
@@ -70,7 +70,7 @@ class RootListRowWidget extends StatelessWidget {
 
   Widget buildCalc(BuildContext context) {
     final theme = Theme.of(context);
-    final nameStyle = theme.textTheme.majorText;
+    final nameStyle = theme.textTheme.bodyRegular;
 
     final items = data.displayName.split("\n");
 
@@ -125,13 +125,13 @@ class ContextMenuRowWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final iconSize = TextSizeCalculator.instance
-        .getCachedHeight(context, "majorText", theme.textTheme.majorText);
+        .getCachedHeight(context, "majorText", theme.textTheme.bodyRegular);
 
     final icon = _getIcon(null, iconSize);
     final name = Flexible(
       child: Text(
         "  ${data.displayName}",
-        style: theme.textTheme.majorText,
+        style: theme.textTheme.bodyRegular,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
