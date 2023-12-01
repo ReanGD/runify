@@ -51,7 +51,6 @@ class CMService implements Service {
 
   void setFilter(String value) {
     _filter.setFilter(value);
-    _filter.apply();
   }
 
   void execute(int id) {

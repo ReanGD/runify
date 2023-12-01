@@ -88,7 +88,6 @@ class RLService implements Service {
   void setFilter(String value) {
     _pClient.filterChanged(value);
     _filter.setFilter(value);
-    _filter.apply();
   }
 
   void execute(RootListRowID id) {
