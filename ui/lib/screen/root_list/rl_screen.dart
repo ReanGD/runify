@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:runify/global/shortcuts.dart';
 import 'package:runify/screen/root_list/rl_view.dart';
 import 'package:runify/screen/root_list/rl_controller.dart';
 
@@ -10,9 +12,11 @@ class RLScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shortcuts = context.watch<ShortcutStorage>();
+
     return Scaffold(
       body: Shortcuts(
-        shortcuts: controller.listController.shortcuts,
+        shortcuts: shortcuts.listShortcuts,
         child: Actions(
           actions: controller.listController.actions,
           child: FocusScope(

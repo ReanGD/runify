@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:runify/style.dart';
+import 'package:runify/global/shortcuts.dart';
 import 'package:runify/screen/context_menu/cm_view.dart';
 import 'package:runify/screen/context_menu/cm_controller.dart';
 
@@ -14,6 +16,7 @@ class CMScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final dialogTheme = theme.dialogTheme;
     final dividerTheme = theme.dividerTheme;
+    final shortcuts = context.watch<ShortcutStorage>();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -29,7 +32,7 @@ class CMScreen extends StatelessWidget {
             side: BorderSide(color: dividerTheme.color ?? theme.dividerColor),
           ),
           child: Shortcuts(
-            shortcuts: controller.listController.shortcuts,
+            shortcuts: shortcuts.listShortcuts,
             child: Actions(
               actions: controller.listController.actions,
               child: FocusScope(

@@ -8,7 +8,8 @@ class ActionHelper extends StatelessWidget {
   final SingleActivator shortcut;
   final bool? isMinor;
 
-  const ActionHelper(this.name, this.shortcut, {this.isMinor, super.key});
+  // ignore: prefer_const_constructors_in_immutables
+  ActionHelper(this.name, this.shortcut, {this.isMinor, super.key});
 
   Widget buildKey(ThemeData theme, String key, TextStyle? textStyle) {
     const double radius = 6.0;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:runify/global/shortcuts.dart';
 import 'package:runify/widgets/data_list_view.dart';
 import 'package:runify/global/context_menu_row.dart';
 import 'package:runify/rpc/rpc_context_menu_service.dart';
@@ -26,10 +27,8 @@ class CMController {
     );
   }
 
-  get filter => _service.filter;
-
-  void onListItemEvent(DataItemEvent event, ContextMenuRow row) {
-    if (event == DataItemEvent.onChoice) {
+  void onListItemEvent(DataListEvent event, ContextMenuRow row) {
+    if (event == DataListEvent.onChoice) {
       _service.execute(row.id);
       return;
     }

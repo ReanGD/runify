@@ -2,36 +2,22 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:runify/style.dart';
 import 'package:runify/global/shortcuts.dart';
 
-enum DataItemEvent {
-  onTap,
-  onMenu,
-  onChoice,
-  onFocus,
-}
+typedef OnDataItemEvent = void Function(DataListEvent event, int id);
+typedef _OnDataItemIndexEvent = void Function(DataListEvent event, int index);
 
-typedef OnDataItemEvent = void Function(DataItemEvent event, int id);
-typedef _OnDataItemIndexEvent = void Function(DataItemEvent event, int index);
-
-class OnEventIntent extends Intent {
-  final DataItemEvent event;
-
-  const OnEventIntent(this.event);
-}
-
-class OnEventAction extends Action<OnEventIntent> {
+class OnEventAction extends Action<OnDataListEventIntent> {
   final DataListController controller;
 
   OnEventAction(this.controller);
 
   @override
-  Object? invoke(covariant OnEventIntent intent) {
+  Object? invoke(covariant OnDataListEventIntent intent) {
     controller.onItemEvent(intent.event);
     return null;
   }
@@ -44,31 +30,42 @@ class OnMenuAction extends Action<MenuActivateIntent> {
 
   @override
   void invoke(MenuActivateIntent intent) {
-    controller.onItemEvent(DataItemEvent.onMenu);
+    controller.onItemEvent(DataListEvent.onMenu);
   }
 }
 
-class MoveFocusIntent extends Intent {
-  final int offset;
-
-  const MoveFocusIntent(this.offset);
-}
-
-class MoveFocusAction extends Action<MoveFocusIntent> {
+class MoveFocusAction extends Action<DataListMoveIntent> {
   final DataListController controller;
 
   MoveFocusAction(this.controller);
 
   @override
-  Object? invoke(covariant MoveFocusIntent intent) {
-    controller.moveFocus(intent.offset);
+  Object? invoke(covariant DataListMoveIntent intent) {
+    const int pageOffset = 10;
+
+    int offset;
+    switch (intent.direction) {
+      case DataListMoveDir.up:
+        offset = -1;
+        break;
+      case DataListMoveDir.down:
+        offset = 1;
+        break;
+      case DataListMoveDir.pageUp:
+        offset = -pageOffset;
+        break;
+      case DataListMoveDir.pageDown:
+        offset = pageOffset;
+        break;
+    }
+
+    controller.moveFocus(offset);
     return null;
   }
 }
 
 abstract class DataListController {
   _DataListScroll? _dataScroll;
-  static const int _pageOffset = 10;
 
   void _attach(_DataListScroll dataScroll) {
     _dataScroll = dataScroll;
@@ -76,30 +73,15 @@ abstract class DataListController {
 
   List<int> getVisibleItems(BuildContext context);
 
-  Map<ShortcutActivator, Intent> get shortcuts {
-    return <ShortcutActivator, Intent>{
-      const SingleActivator(LogicalKeyboardKey.enter):
-          const OnEventIntent(DataItemEvent.onChoice),
-      const SingleActivator(LogicalKeyboardKey.arrowUp):
-          const MoveFocusIntent(-1),
-      const SingleActivator(LogicalKeyboardKey.arrowDown):
-          const MoveFocusIntent(1),
-      const SingleActivator(LogicalKeyboardKey.pageUp):
-          const MoveFocusIntent(-_pageOffset),
-      const SingleActivator(LogicalKeyboardKey.pageDown):
-          const MoveFocusIntent(_pageOffset),
-    };
-  }
-
   Map<Type, Action<Intent>> get actions {
     return <Type, Action<Intent>>{
-      OnEventIntent: OnEventAction(this),
-      MoveFocusIntent: MoveFocusAction(this),
+      OnDataListEventIntent: OnEventAction(this),
+      DataListMoveIntent: MoveFocusAction(this),
       MenuActivateIntent: OnMenuAction(this),
     };
   }
 
-  Future onItemEvent(DataItemEvent event) async {
+  Future onItemEvent(DataListEvent event) async {
     return _dataScroll?.onItemIndexEvent(event);
   }
 
@@ -114,10 +96,9 @@ class _DataListScroll extends ScrollController {
   _OnDataItemIndexEvent? _onItemIndexEvent;
   final Map<int, _DataListItemState> _items = <int, _DataListItemState>{};
 
-  _DataListScroll()
-      : super(keepScrollOffset: true);
+  _DataListScroll() : super(keepScrollOffset: true);
 
-  Future onItemIndexEvent(DataItemEvent event, {int? index}) async {
+  Future onItemIndexEvent(DataListEvent event, {int? index}) async {
     return _onItemIndexEvent?.call(event, index ?? _focusedIndex);
   }
 
@@ -130,7 +111,7 @@ class _DataListScroll extends ScrollController {
     _onItemIndexEvent = callbackOnItemIndexEvent;
     _focusedIndex =
         indexCount > 0 ? _focusedIndex.clamp(0, _indexCount - 1) : -1;
-    onItemIndexEvent(DataItemEvent.onFocus, index: _focusedIndex);
+    onItemIndexEvent(DataListEvent.onFocus, index: _focusedIndex);
   }
 
   void register(int index, _DataListItemState item) {
@@ -211,7 +192,7 @@ class _DataListScroll extends ScrollController {
         _focusedIndex = index;
         _items[prevIndex]?.update();
         _items[nextIndex]?.update();
-        onItemIndexEvent(DataItemEvent.onFocus);
+        onItemIndexEvent(DataListEvent.onFocus);
       }
 
       while (attempts != 0 && hasClients && offset != scrollOffset) {
@@ -375,7 +356,7 @@ class _DataListItemState extends State<_DataListItem>
       child: GestureDetector(
         onTap: () {
           widget.dataScroll
-              .onItemIndexEvent(DataItemEvent.onTap, index: widget.index);
+              .onItemIndexEvent(DataListEvent.onTap, index: widget.index);
         },
         behavior: HitTestBehavior.opaque,
         excludeFromSemantics: true,
@@ -411,7 +392,7 @@ class DataListView extends StatelessWidget {
       this.onDataItemEvent,
       required this.itemBuilder});
 
-  void _onItemIndexEvent(DataItemEvent event, int index) {
+  void _onItemIndexEvent(DataListEvent event, int index) {
     if (index >= 0 && index < _visibleItems.length) {
       final id = _visibleItems[index];
       onDataItemEvent?.call(event, id);

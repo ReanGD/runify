@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:runify/text.dart';
 import 'package:runify/style.dart';
 import 'package:runify/widgets/hdivider.dart';
+import 'package:runify/global/shortcuts.dart';
+import 'package:runify/global/root_list_row.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_row.dart';
 import 'package:runify/widgets/data_list_view.dart';
@@ -15,10 +18,10 @@ class RLView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filter = controller.filter;
     final theme = Theme.of(context);
     final cardTheme = theme.cardTheme;
     final dialogTheme = theme.dialogTheme;
+    final filter = context.read<RootListRowFilter>();
 
     final dividerPadding = EdgeInsets.only(
         top: dialogTheme.verticalOffset, bottom: dialogTheme.verticalOffset);
@@ -45,7 +48,7 @@ class RLView extends StatelessWidget {
           child: DataListView(
             controller: controller.listController,
             padding: windowPadding,
-            onDataItemEvent: (DataItemEvent event, int id) {
+            onDataItemEvent: (DataListEvent event, int id) {
               controller.onListItemEvent(event, filter[id]);
             },
             itemBuilder: (context, int id) => RootListRowWidget(filter[id]),

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:runify/text.dart';
 import 'package:runify/style.dart';
+import 'package:runify/global/shortcuts.dart';
 import 'package:runify/widgets/hdivider.dart';
 import 'package:runify/widgets/search_field.dart';
 import 'package:runify/widgets/data_list_row.dart';
 import 'package:runify/widgets/data_list_view.dart';
+import 'package:runify/global/context_menu_row.dart';
 import 'package:runify/screen/context_menu/cm_controller.dart';
 
 class CMView extends StatelessWidget {
@@ -15,10 +18,10 @@ class CMView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filter = controller.filter;
     final theme = Theme.of(context);
     final cardTheme = theme.cardTheme;
     final dialogTheme = theme.dialogTheme;
+    final filter = context.read<ContextMenuRowFilter>();
 
     final searchFieldPadding = EdgeInsets.only(
       bottom: cardTheme.commandPadding.bottom,
@@ -36,7 +39,7 @@ class CMView extends StatelessWidget {
             padding: windowPadding,
             child: DataListView(
               controller: controller.listController,
-              onDataItemEvent: (DataItemEvent event, int id) {
+              onDataItemEvent: (DataListEvent event, int id) {
                 controller.onListItemEvent(event, filter[id]);
               },
               itemBuilder: (context, int id) =>

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:runify/global/shortcuts.dart';
 import 'package:runify/global/root_list_row.dart';
 import 'package:runify/widgets/data_list_view.dart';
 import 'package:runify/rpc/rpc_root_list_service.dart';
@@ -26,14 +27,12 @@ class RLController {
     );
   }
 
-  get filter => _service.filter;
-
-  void onListItemEvent(DataItemEvent event, RootListRow row) {
-    if (event == DataItemEvent.onMenu) {
+  void onListItemEvent(DataListEvent event, RootListRow row) {
+    if (event == DataListEvent.onMenu) {
       _service.menuActivate(row.id);
       return;
     }
-    if (event == DataItemEvent.onChoice) {
+    if (event == DataListEvent.onChoice) {
       _service.execute(row.id);
       return;
     }
