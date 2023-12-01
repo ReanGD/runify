@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:runify/system/logger.dart';
 import 'package:runify/system/settings.dart';
+import 'package:runify/global/shortcuts.dart';
 import 'package:runify/plugin/runify_native.dart';
 import 'package:runify/rpc/rpc_form_service.dart';
 import 'package:runify/screen/form/fm_controller.dart';
@@ -46,13 +48,14 @@ class RouteItem {
 class RunifyNavigator {
   final Logger _logger;
   final Settings _settings;
+  final ShortcutStorage _shortcuts;
   final RunifyNative _runifyPlugin;
   final NavigatorState _navigator;
   final _routes = <RouteItem>[];
   var _isFirstShow = true;
 
-  RunifyNavigator(
-      this._settings, this._runifyPlugin, this._navigator, this._logger) {
+  RunifyNavigator(this._settings, this._shortcuts, this._runifyPlugin,
+      this._navigator, this._logger) {
     _runifyPlugin.addListener(_Listener(this));
   }
 
@@ -118,11 +121,18 @@ class RunifyNavigator {
     }
   }
 
+  Widget shortcutsWrapper(Widget child) {
+    return ChangeNotifierProvider.value(
+      value: _shortcuts,
+      child: child,
+    );
+  }
+
   Future<void> openForm(FMService service) async {
     final ctrl = FMController(service);
 
     final route = MaterialPageRoute(
-      builder: (context) => ctrl.build(),
+      builder: (context) => shortcutsWrapper(ctrl.build()),
     );
 
     _push(service.formID, service.formClosed, route);
@@ -133,7 +143,7 @@ class RunifyNavigator {
     await showWindow();
 
     final route = MaterialPageRoute(
-      builder: (context) => ctrl.build(),
+      builder: (context) => shortcutsWrapper(ctrl.build()),
     );
 
     _push(service.formID, service.formClosed, route);
@@ -145,7 +155,8 @@ class RunifyNavigator {
     final route = RawDialogRoute(
       barrierColor: null,
       barrierLabel: "Label",
-      pageBuilder: (context, animation, secondaryAnimation) => ctrl.build(),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          shortcutsWrapper(ctrl.build()),
     );
 
     _push(service.formID, service.formClosed, route);

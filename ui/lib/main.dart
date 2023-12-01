@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:runify/style.dart';
 import 'package:runify/system/settings.dart';
+import 'package:runify/global/shortcuts.dart';
 import 'package:runify/rpc/rpc_grpc_client.dart';
 import 'package:runify/plugin/runify_native.dart';
 import 'package:runify/navigator/nav_builder.dart';
@@ -12,7 +13,8 @@ void main() async {
   final runifyPlugin = RunifyNative();
   final pluginFuture = runifyPlugin.initPlugin();
   final grpcClient = GrpcClient(settings);
-  final builder = NavBuilder(settings, grpcClient, runifyPlugin);
+  final shortcuts = ShortcutStorage();
+  final builder = NavBuilder(settings, shortcuts, grpcClient, runifyPlugin);
   await pluginFuture;
 
   // ignore: invalid_use_of_protected_member

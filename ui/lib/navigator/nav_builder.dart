@@ -26,10 +26,13 @@ class OnBackAction extends Action<OnBackIntent> {
 class NavBuilder extends StatelessWidget {
   final Settings _settings;
   final GrpcClient _grpcClient;
+  final ShortcutStorage _shortcuts;
   final RunifyNative _runifyPlugin;
   final _onBackAction = OnBackAction();
 
-  NavBuilder(this._settings, this._grpcClient, this._runifyPlugin, {super.key});
+  NavBuilder(
+      this._settings, this._shortcuts, this._grpcClient, this._runifyPlugin,
+      {super.key});
 
   Map<Type, Action<Intent>> get actions {
     return <Type, Action<Intent>>{
@@ -41,15 +44,15 @@ class NavBuilder extends StatelessWidget {
   Map<ShortcutActivator, Intent> get shortcuts {
     return <ShortcutActivator, Intent>{
       ...WidgetsApp.defaultShortcuts,
-      ...appShortcuts(),
+      ..._shortcuts.appShortcuts,
       const SingleActivator(LogicalKeyboardKey.escape): const OnBackIntent(),
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    final navigator = RunifyNavigator(
-        _settings, _runifyPlugin, Navigator.of(context), _grpcClient.logger);
+    final navigator = RunifyNavigator(_settings, _shortcuts, _runifyPlugin,
+        Navigator.of(context), _grpcClient.logger);
     _onBackAction.callback = () => navigator.back();
     _grpcClient.start(navigator);
     final theme = Theme.of(context);
