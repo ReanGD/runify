@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:runify/global/shortcuts.dart';
+import 'package:provider/provider.dart';
 
+import 'package:runify/global/shortcuts.dart';
 import 'package:runify/screen/form/fm_view.dart';
+import 'package:runify/widgets/action_helper.dart';
+import 'package:runify/widgets/bottom_helper_bar.dart';
 import 'package:runify/screen/form/fm_controller.dart';
 
 class MenuActivateAction extends Action<MenuActivateIntent> {
@@ -40,7 +43,15 @@ class FMScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shortcuts = context.watch<ShortcutStorage>();
+    final scSubmit = shortcuts.getShortcut(const SubmitIntent())!;
+
     return Scaffold(
+      bottomNavigationBar: BottomHelperBar(
+        [
+          ActionHelper("Save", scSubmit),
+        ],
+      ),
       body: Actions(
         actions: actions,
         child: FocusScope(
