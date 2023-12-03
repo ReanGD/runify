@@ -42,18 +42,16 @@ func (c *LinksFormCtrl) OnOpen(formID api.FormID, client api.RpcClient) *widget.
 }
 
 func (c *LinksFormCtrl) OnFieldCheckRequest(requestID uint32, fieldName string, jsonBody string) {
-	result := true
-
 	data := &DataModel{}
 	err := json.Unmarshal([]byte(jsonBody), data)
 	if err != nil {
 		c.moduleLogger.Warn("Failed unmarshal json for check", zap.Error(err))
-		result = false
+		c.client.FieldCheckResponse(c.formID, requestID, false, "internal error, failed parse request")
+	} else if !c.model.checkItem(c.rowID, data.Name) {
+		c.client.FieldCheckResponse(c.formID, requestID, false, "name already exists")
 	} else {
-		result = c.model.checkItem(c.rowID, data.Name)
+		c.client.FieldCheckResponse(c.formID, requestID, true, "")
 	}
-
-	c.client.FieldCheckResponse(c.formID, requestID, result, "name already exists")
 }
 
 func (c *LinksFormCtrl) OnSubmit(jsonBody string) {

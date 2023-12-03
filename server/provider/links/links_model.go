@@ -3,6 +3,7 @@ package links
 import (
 	"errors"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/ReanGD/runify/server/global/api"
@@ -18,8 +19,43 @@ const (
 )
 
 type DataModel struct {
-	Name string `json:"name"`
-	Link string `json:"link"`
+	Name    string `json:"name"`
+	Aliases string `json:"aliases"`
+	Link    string `json:"link"`
+}
+
+func (d *DataModel) normalize() {
+	d.Name = strings.TrimSpace(d.Name)
+	d.Link = strings.TrimSpace(d.Link)
+
+	aliases := map[string]struct{}{
+		d.Name: {},
+	}
+	for _, alias := range strings.Split(d.Aliases, ";") {
+		alias = strings.TrimSpace(alias)
+		if alias != "" {
+			aliases[strings.TrimSpace(alias)] = struct{}{}
+		}
+	}
+	delete(aliases, d.Name)
+
+	var aliasesStr string
+	for alias := range aliases {
+		if aliasesStr != "" {
+			aliasesStr += ";"
+		}
+		aliasesStr += alias
+	}
+	d.Aliases = aliasesStr
+}
+
+func (d *DataModel) getAliases() string {
+	aliases := d.Name
+	for _, alias := range strings.Split(d.Aliases, ";") {
+		aliases += "\n" + alias
+	}
+
+	return aliases
 }
 
 type item struct {
@@ -74,6 +110,15 @@ func (m *model) init(providerID api.ProviderID, providerName string, moduleLogge
 					Bind: bind(&fields.Name).Required().MaxLength(25).ServerSide(),
 				},
 				&widget.Text{
+					Data: "Aliases",
+				},
+				&widget.TextField{
+					Bind: bind(&fields.Aliases).MaxLength(150).ServerSide(),
+				},
+				&widget.Text{
+					Data: "If multiple aliases are required, separate them with a ';' character",
+				},
+				&widget.Text{
 					Data: "Link",
 				},
 				&widget.TextField{
@@ -94,6 +139,7 @@ func (m *model) init(providerID api.ProviderID, providerName string, moduleLogge
 	}
 
 	for _, item := range storage {
+		item.normalize()
 		if err = m.addItem(item, false); err != nil {
 			return err
 		}
@@ -125,7 +171,8 @@ func (m *model) updateCache(saveToDB bool) error {
 			item.id,
 			"",
 			item.data.Name,
-			item.data.Name))
+			item.data.getAliases(),
+		))
 	}
 
 	if saveToDB {
@@ -182,6 +229,7 @@ func (m *model) checkItem(id api.RootListRowID, name string) bool {
 
 func (m *model) saveItem(id api.RootListRowID, data *DataModel) error {
 	saveToDB := true
+	data.normalize()
 	if id <= createRowID {
 		return m.addItem(data, saveToDB)
 	}
