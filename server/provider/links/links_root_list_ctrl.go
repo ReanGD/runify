@@ -40,7 +40,7 @@ func (c *LinksRootListCtrl) OnFilterChange(text string) {
 
 func (c *LinksRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.RootListRowID) {
 	if rowID == createRowID {
-		formCtrl, err := newLinksFormCtrl(rowID, c.model, c.moduleLogger)
+		formCtrl, err := newLinksFormCtrl(rowID, c.model, c.formID, c.moduleLogger)
 		if err != nil {
 			c.client.UserMessage(err.Error())
 		} else {
@@ -58,7 +58,7 @@ func (c *LinksRootListCtrl) OnRowActivate(providerID api.ProviderID, rowID api.R
 }
 
 func (c *LinksRootListCtrl) OnMenuActivate(providerID api.ProviderID, rowID api.RootListRowID) {
-	menuCtrl, err := newLinksContextMenuCtrl(rowID, c.model, c.actionExecuter, c.moduleLogger)
+	menuCtrl, err := newLinksContextMenuCtrl(rowID, c.model, c.actionExecuter, c.providerID, c.formID, c.moduleLogger)
 	if err != nil {
 		c.client.UserMessage(err.Error())
 		c.moduleLogger.Warn("Failed open menu",

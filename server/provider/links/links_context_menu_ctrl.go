@@ -23,11 +23,18 @@ type LinksContextMenuCtrl struct {
 	itemData       *DataModel
 	model          *model
 	actionExecuter *actionExecuter
+	providerID     api.ProviderID
+	rootListformID api.FormID
 	moduleLogger   *zap.Logger
 }
 
 func newLinksContextMenuCtrl(
-	itemRowID api.RootListRowID, model *model, actionExecuter *actionExecuter, moduleLogger *zap.Logger,
+	itemRowID api.RootListRowID,
+	model *model,
+	actionExecuter *actionExecuter,
+	providerID api.ProviderID,
+	rootListformID api.FormID,
+	moduleLogger *zap.Logger,
 ) (*LinksContextMenuCtrl, error) {
 	var itemData *DataModel
 	if itemRowID > createRowID {
@@ -46,6 +53,8 @@ func newLinksContextMenuCtrl(
 		itemData:       itemData,
 		model:          model,
 		actionExecuter: actionExecuter,
+		providerID:     providerID,
+		rootListformID: rootListformID,
 		moduleLogger:   moduleLogger,
 	}, nil
 }
@@ -72,7 +81,7 @@ func (c *LinksContextMenuCtrl) OnOpen(formID api.FormID, client api.RpcClient) [
 func (c *LinksContextMenuCtrl) OnRowActivate(menuRowID api.ContextMenuRowID) {
 	if c.itemRowID <= createRowID {
 		if menuRowID == menuOpenCmdRowID {
-			formCtrl, err := newLinksFormCtrl(c.itemRowID, c.model, c.moduleLogger)
+			formCtrl, err := newLinksFormCtrl(c.itemRowID, c.model, c.rootListformID, c.moduleLogger)
 			if err != nil {
 				c.client.UserMessage(err.Error())
 			} else {
@@ -90,7 +99,7 @@ func (c *LinksContextMenuCtrl) OnRowActivate(menuRowID api.ContextMenuRowID) {
 	case menuOpenLinkRowID:
 		c.actionExecuter.openLink(c.client, c.itemData)
 	case menuEditLinkRowID:
-		formCtrl, err := newLinksFormCtrl(c.itemRowID, c.model, c.moduleLogger)
+		formCtrl, err := newLinksFormCtrl(c.itemRowID, c.model, c.rootListformID, c.moduleLogger)
 		c.client.CloseForm(c.formID)
 		if err != nil {
 			c.client.UserMessage(err.Error())
@@ -102,7 +111,11 @@ func (c *LinksContextMenuCtrl) OnRowActivate(menuRowID api.ContextMenuRowID) {
 	case menuCopyNameRowID:
 		c.actionExecuter.copyValue(c.client, c.itemData.Name)
 	case menuRemoveLinkRowID:
-		_ = c.model.removeItem(c.itemRowID, true)
+		if err := c.model.removeItem(c.itemRowID, true); err != nil {
+			c.client.UserMessage("Failed remove link")
+		} else {
+			c.client.RootListRemoveRows(c.rootListformID, api.NewRootListRowGlobalID(c.providerID, c.itemRowID))
+		}
 		c.client.CloseForm(c.formID)
 	default:
 		err := errors.New("unknown menu id")

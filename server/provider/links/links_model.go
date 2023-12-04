@@ -139,8 +139,7 @@ func (m *model) init(providerID api.ProviderID, providerName string, moduleLogge
 	}
 
 	for _, item := range storage {
-		item.normalize()
-		if err = m.addItem(item, false); err != nil {
+		if _, err = m.addItem(item, false); err != nil {
 			return err
 		}
 	}
@@ -149,10 +148,19 @@ func (m *model) init(providerID api.ProviderID, providerName string, moduleLogge
 }
 
 func (m *model) start() {
-	_ = m.updateCache(false)
+	_ = m.updateCache(createRowID)
 }
 
-func (m *model) updateCache(saveToDB bool) error {
+func (m *model) saveToDB() error {
+	storage := make([]*DataModel, 0, len(m.idIndex))
+	for _, item := range m.idIndex {
+		storage = append(storage, item.data)
+	}
+
+	return m.db.Write(&storage)
+}
+
+func (m *model) updateCache(id api.RootListRowID) *api.RootListRow {
 	m.rowsCache = make([]*api.RootListRow, 0, len(m.idIndex)+1)
 	m.rowsCache = append(m.rowsCache, api.NewRootListRow(
 		api.RowType_Command,
@@ -163,8 +171,9 @@ func (m *model) updateCache(saveToDB bool) error {
 		"Create link",
 		"Create link"))
 
+	var res *api.RootListRow
 	for _, item := range m.idIndex {
-		m.rowsCache = append(m.rowsCache, api.NewRootListRow(
+		row := api.NewRootListRow(
 			api.RowType_Link,
 			api.MinPriority,
 			m.providerID,
@@ -172,21 +181,15 @@ func (m *model) updateCache(saveToDB bool) error {
 			"",
 			item.data.Name,
 			item.data.getAliases(),
-		))
-	}
+		)
+		m.rowsCache = append(m.rowsCache, row)
 
-	if saveToDB {
-		storage := make([]*DataModel, 0, len(m.idIndex))
-		for _, item := range m.idIndex {
-			storage = append(storage, item.data)
-		}
-
-		if err := m.db.Write(&storage); err != nil {
-			return err
+		if item.id == id {
+			res = row
 		}
 	}
 
-	return nil
+	return res
 }
 
 func (m *model) getRows() []*api.RootListRow {
@@ -220,30 +223,21 @@ func (m *model) checkItem(id api.RootListRowID, name string) bool {
 	m.dataMutex.RLock()
 	defer m.dataMutex.RUnlock()
 
-	if nameItem, ok := m.nameIndex[name]; ok && nameItem.id != id {
+	if nameItem, ok := m.nameIndex[strings.TrimSpace(name)]; ok && nameItem.id != id {
 		return false
 	}
 
 	return true
 }
 
-func (m *model) saveItem(id api.RootListRowID, data *DataModel) error {
-	saveToDB := true
-	data.normalize()
-	if id <= createRowID {
-		return m.addItem(data, saveToDB)
-	}
-
-	return m.updateItem(id, data, saveToDB)
-}
-
-func (m *model) addItem(data *DataModel, saveToDB bool) error {
+func (m *model) addItem(data *DataModel, saveToDB bool) (*api.RootListRow, error) {
 	m.dataMutex.RLock()
 	defer m.dataMutex.RUnlock()
 
+	data.normalize()
 	_, ok := m.nameIndex[data.Name]
 	if ok {
-		return errors.New("item with this name already exists")
+		return nil, errors.New("item with this name already exists")
 	}
 
 	item := &item{
@@ -254,27 +248,38 @@ func (m *model) addItem(data *DataModel, saveToDB bool) error {
 	m.idIndex[item.id] = item
 	m.nameIndex[data.Name] = item
 
-	return m.updateCache(saveToDB)
+	row := m.updateCache(item.id)
+	if saveToDB {
+		return row, m.saveToDB()
+	}
+
+	return row, nil
 }
 
-func (m *model) updateItem(id api.RootListRowID, data *DataModel, saveToDB bool) error {
+func (m *model) updateItem(id api.RootListRowID, data *DataModel, saveToDB bool) (*api.RootListRow, error) {
 	m.dataMutex.RLock()
 	defer m.dataMutex.RUnlock()
 
+	data.normalize()
 	item, ok := m.idIndex[id]
 	if !ok {
-		return errors.New("item not found")
+		return nil, errors.New("item not found")
 	}
 
 	if nameItem, ok := m.nameIndex[data.Name]; ok && nameItem.id != id {
-		return errors.New("item with this name already exists")
+		return nil, errors.New("item with this name already exists")
 	}
 
 	delete(m.nameIndex, data.Name)
 	item.data = data
 	m.nameIndex[data.Name] = item
 
-	return m.updateCache(saveToDB)
+	row := m.updateCache(id)
+	if saveToDB {
+		return row, m.saveToDB()
+	}
+
+	return row, nil
 }
 
 func (m *model) removeItem(id api.RootListRowID, saveToDB bool) error {
@@ -289,5 +294,10 @@ func (m *model) removeItem(id api.RootListRowID, saveToDB bool) error {
 	delete(m.idIndex, id)
 	delete(m.nameIndex, item.data.Name)
 
-	return m.updateCache(saveToDB)
+	_ = m.updateCache(createRowID)
+	if saveToDB {
+		return m.saveToDB()
+	}
+
+	return nil
 }

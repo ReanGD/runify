@@ -9,15 +9,16 @@ import (
 )
 
 type LinksFormCtrl struct {
-	formID       api.FormID
-	rowID        api.RootListRowID
-	client       api.RpcClient
-	model        *model
-	dataForm     *widget.DataForm
-	moduleLogger *zap.Logger
+	formID         api.FormID
+	rowID          api.RootListRowID
+	client         api.RpcClient
+	model          *model
+	dataForm       *widget.DataForm
+	rootListformID api.FormID
+	moduleLogger   *zap.Logger
 }
 
-func newLinksFormCtrl(rowID api.RootListRowID, model *model, moduleLogger *zap.Logger) (*LinksFormCtrl, error) {
+func newLinksFormCtrl(rowID api.RootListRowID, model *model, rootListformID api.FormID, moduleLogger *zap.Logger) (*LinksFormCtrl, error) {
 	dataForm, err := model.createDataForm(rowID)
 	if err != nil {
 		moduleLogger.Error("Failed create markup for form", zap.Error(err))
@@ -25,12 +26,13 @@ func newLinksFormCtrl(rowID api.RootListRowID, model *model, moduleLogger *zap.L
 	}
 
 	return &LinksFormCtrl{
-		formID:       0,
-		rowID:        rowID,
-		client:       nil,
-		model:        model,
-		dataForm:     dataForm,
-		moduleLogger: moduleLogger,
+		formID:         0,
+		rowID:          rowID,
+		client:         nil,
+		model:          model,
+		dataForm:       dataForm,
+		rootListformID: rootListformID,
+		moduleLogger:   moduleLogger,
 	}, nil
 }
 
@@ -62,7 +64,20 @@ func (c *LinksFormCtrl) OnSubmit(jsonBody string) {
 		c.moduleLogger.Warn("Failed unmarshal json for save link", zap.Error(err))
 	}
 
-	err = c.model.saveItem(c.rowID, data)
+	id := c.rowID
+	var row *api.RootListRow
+	if id <= createRowID {
+		row, err = c.model.addItem(data, true)
+		if err == nil && row != nil {
+			c.client.RootListAddRows(c.rootListformID, row)
+		}
+	} else {
+		row, err = c.model.updateItem(id, data, true)
+		if err == nil && row != nil {
+			c.client.RootListChangeRows(c.rootListformID, row)
+		}
+	}
+
 	if err != nil {
 		c.client.UserMessage("Failed save link")
 		c.moduleLogger.Warn("Failed save link", zap.Error(err))
