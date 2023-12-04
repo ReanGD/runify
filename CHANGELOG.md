@@ -4,6 +4,7 @@
 
 ### Added
 
+- "Link plugin" - opening URLs
 - Support for searching in multiple locales
 - For "Desktop entries" plugin - support for desktop files search keyword
 
