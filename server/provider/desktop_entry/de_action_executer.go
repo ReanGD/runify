@@ -58,9 +58,7 @@ func (e *deActionExecuter) open(client api.RpcClient, id api.RootListRowID) {
 		return
 	}
 
-	ep := NewExecParams(entry.InTerminal(), e.terminal)
-	err = execCmd(entry.Exec(), ep)
-	if err != nil {
+	if err = entry.Launch(e.terminal); err != nil {
 		e.moduleLogger.Warn(logMsg,
 			id.ZapField(),
 			zap.String("EntryPath", entry.FilePath()),

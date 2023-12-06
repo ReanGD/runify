@@ -2,8 +2,13 @@ package de
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"os/exec"
+	"strings"
+	"syscall"
 
+	"github.com/ReanGD/runify/server/paths"
 	"github.com/rkoesters/xdg/keyfile"
 	"go.uber.org/zap"
 )
@@ -293,10 +298,154 @@ func (f *desktopFile) SearchNames() string {
 	return f.searchNames
 }
 
-func (f *desktopFile) Exec() string {
-	return f.exec
+func (f *desktopFile) fillParamCode(code rune, urls []string, files []string) []string {
+	switch code {
+	case 'u':
+		if len(urls) > 0 {
+			return []string{urls[0]}
+		}
+	case 'U':
+		return urls
+	case 'f':
+		if len(files) > 0 {
+			return []string{files[0]}
+		}
+	case 'F':
+		return files
+	}
+
+	return []string{}
 }
 
-func (f *desktopFile) InTerminal() bool {
-	return f.terminal
+func (f *desktopFile) buildLaunchArgs(terminalPath string, urls []string, files []string) ([]string, error) {
+	arg := []rune{}
+	res := []string{}
+	fieldCodeInd := -1
+	inEscape := false
+	inSingleQuote := false
+	inDoubleQuote := false
+
+	if f.terminal {
+		if len(terminalPath) == 0 {
+			return nil, fmt.Errorf("Terminal value is true, but terminal path is empty")
+		}
+		res = append(res, terminalPath, "-e")
+	}
+
+	for ind, c := range strings.Replace(f.exec, "\\\\", "\\", -1) {
+		if inEscape {
+			inEscape = false
+			arg = append(arg, c)
+			continue
+		}
+
+		switch c {
+		case 'u', 'U', 'f', 'F':
+			if fieldCodeInd == ind {
+				if len(arg) > 0 {
+					arg = arg[:len(arg)-1]
+					res = append(res, f.fillParamCode(c, urls, files)...)
+				}
+				continue
+			}
+		case '"':
+			if inDoubleQuote {
+				inDoubleQuote = false
+				res = append(res, string(arg))
+				arg = arg[:0]
+				continue
+			}
+			if !inSingleQuote {
+				inDoubleQuote = true
+				continue
+			}
+
+		case '\'':
+			if inSingleQuote {
+				inSingleQuote = false
+				res = append(res, string(arg))
+				arg = arg[:0]
+				continue
+			}
+			if !inDoubleQuote {
+				inSingleQuote = true
+				continue
+			}
+
+		case '\\':
+			if inDoubleQuote {
+				inEscape = true
+				continue
+			}
+
+		case '%':
+			if !(inDoubleQuote || inSingleQuote) {
+				fieldCodeInd = ind + 1
+			}
+
+		case ' ':
+			if !(inDoubleQuote || inSingleQuote) {
+				if len(arg) != 0 {
+					res = append(res, string(arg))
+					arg = arg[:0]
+				}
+				continue
+			}
+		}
+
+		arg = append(arg, c)
+	}
+
+	if len(arg) != 0 {
+		if !(inEscape || inDoubleQuote || inSingleQuote) {
+			res = append(res, string(arg))
+		} else {
+			return nil, fmt.Errorf("Exec value contains an unbalanced number of quote characters: %s", f.exec)
+		}
+	}
+
+	return res, nil
+}
+
+func (f *desktopFile) LaunchFull(terminalPath string, urls []string, files []string) error {
+	args, err := f.buildLaunchArgs(terminalPath, urls, files)
+	if err != nil {
+		return err
+	}
+	if len(args) == 0 {
+		return errors.New("empty exec string")
+	}
+
+	name := args[0]
+	var cmd *exec.Cmd
+	if len(args) == 1 {
+		cmd = exec.Command(name)
+	} else {
+		cmd = exec.Command(name, args[1:]...)
+	}
+
+	// If the parent process does not exit correctly, then all child processes will also be killed
+	// This code cancel this behavior
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pgid: 0}
+	cmd.Dir = paths.GetUserHome()
+
+	if err = cmd.Start(); err != nil {
+		return err
+	}
+
+	go cmd.Wait()
+
+	return nil
+}
+
+func (f *desktopFile) Launch(terminalPath string) error {
+	return f.LaunchFull(terminalPath, []string{}, []string{})
+}
+
+func (f *desktopFile) LaunchWithURLs(terminalPath string, urls ...string) error {
+	return f.LaunchFull(terminalPath, urls, []string{})
+}
+
+func (f *desktopFile) LaunchWithFiles(terminalPath string, files ...string) error {
+	return f.LaunchFull(terminalPath, []string{}, files)
 }

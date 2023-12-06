@@ -6,8 +6,11 @@ type DesktopFile interface {
 	IconPath() string
 	Name() string
 	SearchNames() string
-	Exec() string
-	InTerminal() bool
+
+	LaunchFull(terminalPath string, urls []string, files []string) error
+	Launch(terminalPath string) error
+	LaunchWithURLs(terminalPath string, urls ...string) error
+	LaunchWithFiles(terminalPath string, files ...string) error
 }
 
 type DesktopFiles []DesktopFile
