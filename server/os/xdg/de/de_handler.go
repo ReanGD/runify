@@ -19,17 +19,22 @@ type handler struct {
 	mainLocale    keyfile.Locale
 	dopLocale     keyfile.Locale
 
+	xdgAppDirs      []string
+	xdgMimeAppFiles []string
+
 	moduleLogger *zap.Logger
 }
 
 func newHandler() *handler {
 	return &handler{
-		iconCache:     nil,
-		dfileCache:    []*desktopFile{},
-		subscriptions: []chan<- types.DesktopFiles{},
-		mainLocale:    keyfile.Locale{},
-		dopLocale:     keyfile.Locale{},
-		moduleLogger:  nil,
+		iconCache:       nil,
+		dfileCache:      []*desktopFile{},
+		subscriptions:   []chan<- types.DesktopFiles{},
+		mainLocale:      keyfile.Locale{},
+		dopLocale:       keyfile.Locale{},
+		xdgAppDirs:      getXDGAppDirs(),
+		xdgMimeAppFiles: getXDGMimeAppFiles(),
+		moduleLogger:    nil,
 	}
 }
 
@@ -99,7 +104,7 @@ func (h *handler) stop() {
 
 func (h *handler) walkXDGDesktopFiles(fn func(dfile *desktopFile)) {
 	exists := make(map[string]struct{})
-	for _, dirname := range paths.GetXDGAppDirs() {
+	for _, dirname := range h.xdgAppDirs {
 		idStart := len(dirname) + 1
 		idEnd := len(".desktop")
 		paths.Walk(dirname, h.moduleLogger, func(filePath string, mode paths.PathMode) {

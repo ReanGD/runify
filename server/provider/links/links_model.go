@@ -95,7 +95,7 @@ func (m *model) init(providerID api.ProviderID, providerName string, moduleLogge
 	m.moduleLogger = moduleLogger
 
 	var err error
-	dbDir := filepath.Join(paths.GetAppConfig(), providerName)
+	dbDir := filepath.Join(paths.GetAppConfigDir(), providerName)
 	if m.db, err = jdb.New(dbDir, providerDBName, moduleLogger); err != nil {
 		return err
 	}

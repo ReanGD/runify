@@ -105,7 +105,7 @@ func (r *Runify) create(buildCfg *config.BuildCfg) error {
 
 func (r *Runify) init(cfgFile string, cfgSave bool) bool {
 	if len(cfgFile) == 0 {
-		cfgFile = filepath.Join(paths.GetAppConfig(), "runify.cfg")
+		cfgFile = filepath.Join(paths.GetAppConfigDir(), "runify.cfg")
 	}
 	r.cfg.OnInit(cfgFile)
 	if cfgSave {
