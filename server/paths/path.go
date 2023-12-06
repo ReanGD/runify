@@ -13,32 +13,50 @@ func GetUserHome() string {
 	return cache.userHome
 }
 
-func GetUserConfig() string {
-	return cache.userConfig
+func GetDataHome() string {
+	return cache.dataHome
 }
 
-func GetUserCache() string {
-	return cache.userCache
+func GetConfigHome() string {
+	return cache.configHome
 }
 
-func GetAppConfig() string {
-	return cache.appConfig
+func GetCacheHome() string {
+	return cache.cacheHome
 }
 
-func GetAppCache() string {
-	return cache.appCache
+func GetDataDirs() []string {
+	return cache.dataDirs
 }
 
-func GetAppIconCache() string {
-	return cache.appIconCache
+func GetConfigDirs() []string {
+	return cache.configDirs
 }
 
-func GetXDGDataDirs() []string {
-	return cache.xdgDataDirs
+// if exists(dataHome) + dataDirs
+func GetAllDataDirs() []string {
+	return cache.allDataDirs
 }
 
-func GetXDGAppDirs() []string {
-	return cache.xdgAppDirs
+// if exists(configHome) + configDirs
+func GetAllConfigDirs() []string {
+	return cache.allConfigDirs
+}
+
+func GetAppDataDir() string {
+	return cache.appDataDir
+}
+
+func GetAppConfigDir() string {
+	return cache.appConfigDir
+}
+
+func GetAppCacheDir() string {
+	return cache.appCacheDir
+}
+
+func GetAppIconCacheDir() string {
+	return cache.appIconCacheDir
 }
 
 func ExpandUser(path string) string {

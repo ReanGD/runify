@@ -48,7 +48,7 @@ func newIconKeyFromPath(fullpath string) (iconKey, error) {
 }
 
 func (k iconKey) toFullPath() string {
-	return filepath.Join(paths.GetAppIconCache(), fmt.Sprintf("%d_%s.png", k.size, k.name))
+	return filepath.Join(paths.GetAppIconCacheDir(), fmt.Sprintf("%d_%s.png", k.size, k.name))
 }
 
 type iconCache struct {
@@ -66,7 +66,7 @@ func newIconCache(logger *zap.Logger) (*iconCache, error) {
 	}
 
 	iconPathCache := make(map[iconKey]string)
-	paths.Walk(paths.GetAppIconCache(), logger, func(fullpath string, mode paths.PathMode) {
+	paths.Walk(paths.GetAppIconCacheDir(), logger, func(fullpath string, mode paths.PathMode) {
 		if mode == paths.ModeRegFile {
 			if key, err := newIconKeyFromPath(fullpath); err != nil {
 				logger.Info("Failed scan icons", zap.Error(err))

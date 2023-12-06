@@ -13,58 +13,22 @@ const (
 )
 
 type cachePaths struct {
-	sysTmp       string
-	userHome     string
-	userConfig   string
-	userData     string
-	userCache    string
-	appConfig    string
-	appData      string
-	appCache     string
-	appIconCache string
-	xdgDataDirs  []string
-	xdgAppDirs   []string
+	sysTmp          string
+	userHome        string
+	dataHome        string
+	configHome      string
+	cacheHome       string
+	dataDirs        []string
+	configDirs      []string
+	allDataDirs     []string
+	allConfigDirs   []string
+	appDataDir      string
+	appConfigDir    string
+	appCacheDir     string
+	appIconCacheDir string
 }
 
 var cache = cachePaths{}
-
-func getXDGDataDirs() []string {
-	var xdgDataDirs []string
-
-	xdgDataHome := getenvDef("XDG_DATA_HOME", "~/.local/share")
-	if ok, _ := ExistsDir(xdgDataHome); ok {
-		xdgDataDirs = append(xdgDataDirs, xdgDataHome)
-	}
-
-	if str, ok := getenv("XDG_DATA_DIRS"); ok {
-		for _, dirPath := range strings.Split(str, ":") {
-			if ok, _ := ExistsDir(dirPath); ok {
-				xdgDataDirs = append(xdgDataDirs, dirPath)
-			}
-		}
-	} else {
-		if ok, _ := ExistsDir("/usr/local/share"); ok {
-			xdgDataDirs = append(xdgDataDirs, "/usr/local/share")
-		}
-		if ok, _ := ExistsDir("/usr/share"); ok {
-			xdgDataDirs = append(xdgDataDirs, "/usr/share")
-		}
-	}
-
-	return xdgDataDirs
-}
-
-func getXDGAppDirs(xdgDataDirs []string) []string {
-	var xdgAppDirs []string
-	for _, xdgDataDir := range xdgDataDirs {
-		xdgAppDir := filepath.Join(xdgDataDir, "applications")
-		if ok, _ := ExistsDir(xdgAppDir); ok {
-			xdgAppDirs = append(xdgAppDirs, xdgAppDir)
-		}
-	}
-
-	return xdgAppDirs
-}
 
 func createDir(dirPath string) (existed bool, err error) {
 	if existed, err = ExistsDir(dirPath); err != nil {
@@ -87,43 +51,66 @@ func New() error {
 		return errors.New("Application name is empty")
 	}
 
-	if cache.sysTmp, ok = getenv("TMPDIR"); !ok {
+	if cache.sysTmp, ok = GetEnv("TMPDIR"); !ok {
 		cache.sysTmp = "/tmp"
 	}
 
-	if cache.userHome, ok = getenv("HOME"); !ok {
+	if cache.userHome, ok = GetEnv("HOME"); !ok {
 		return errors.New("Env $HOME is not defined")
 	}
 
-	cache.userConfig = ExpandUser(getenvDef("XDG_CONFIG_HOME", filepath.Join(cache.userHome, ".config")))
-	cache.userData = ExpandUser(getenvDef("XDG_DATA_HOME", filepath.Join(cache.userHome, ".local", "share")))
-	cache.userCache = ExpandUser(getenvDef("XDG_CACHE_HOME", filepath.Join(cache.userHome, ".cache")))
+	cache.dataHome = ExpandUser(GetEnvDef("XDG_DATA_HOME", "~/.local/share"))
+	cache.configHome = ExpandUser(GetEnvDef("XDG_CONFIG_HOME", "~/.config"))
+	cache.cacheHome = ExpandUser(GetEnvDef("XDG_CACHE_HOME", "~/.cache"))
 
-	cache.appConfig = filepath.Join(cache.userConfig, appName)
-	if _, err := createDir(cache.appConfig); err != nil {
-		return err
-	}
-	setenv("RUNIFY_CONFIG_DIR", cache.appConfig)
-
-	cache.appData = filepath.Join(cache.userData, appName)
-	if _, err := createDir(cache.appData); err != nil {
-		return err
-	}
-	setenv("RUNIFY_DATA_DIR", cache.appData)
-
-	cache.appCache = filepath.Join(cache.userCache, appName)
-	if _, err := createDir(cache.appCache); err != nil {
-		return err
-	}
-	setenv("RUNIFY_CACHE_DIR", cache.appCache)
-
-	cache.appIconCache = filepath.Join(cache.appCache, "icon")
-	if _, err := createDir(cache.appIconCache); err != nil {
-		return err
+	envDataDirs := GetEnvDef("XDG_DATA_DIRS", "/usr/local/share:/usr/share")
+	for _, dirPath := range strings.Split(envDataDirs, ":") {
+		dirPath = ExpandUser(dirPath)
+		if ok, _ := ExistsDir(dirPath); ok {
+			cache.dataDirs = append(cache.dataDirs, dirPath)
+		}
 	}
 
-	cache.xdgDataDirs = getXDGDataDirs()
-	cache.xdgAppDirs = getXDGAppDirs(cache.xdgDataDirs)
+	envConfigDirs := GetEnvDef("XDG_CONFIG_DIRS", "/etc/xdg")
+	for _, dirPath := range strings.Split(envConfigDirs, ":") {
+		dirPath = ExpandUser(dirPath)
+		if ok, _ := ExistsDir(dirPath); ok {
+			cache.configDirs = append(cache.configDirs, dirPath)
+		}
+	}
+
+	if ok, _ := ExistsDir(cache.dataHome); ok {
+		cache.allDataDirs = append(cache.allDataDirs, cache.dataHome)
+	}
+	cache.allDataDirs = append(cache.allDataDirs, cache.dataDirs...)
+
+	if ok, _ := ExistsDir(cache.configHome); ok {
+		cache.allConfigDirs = append(cache.allConfigDirs, cache.configHome)
+	}
+	cache.allConfigDirs = append(cache.allConfigDirs, cache.configDirs...)
+
+	cache.appDataDir = filepath.Join(cache.dataHome, appName)
+	if _, err := createDir(cache.appDataDir); err != nil {
+		return err
+	}
+	setenv("RUNIFY_DATA_DIR", cache.appDataDir)
+
+	cache.appConfigDir = filepath.Join(cache.configHome, appName)
+	if _, err := createDir(cache.appConfigDir); err != nil {
+		return err
+	}
+	setenv("RUNIFY_CONFIG_DIR", cache.appConfigDir)
+
+	cache.appCacheDir = filepath.Join(cache.cacheHome, appName)
+	if _, err := createDir(cache.appCacheDir); err != nil {
+		return err
+	}
+	setenv("RUNIFY_CACHE_DIR", cache.appCacheDir)
+
+	cache.appIconCacheDir = filepath.Join(cache.appCacheDir, "icon")
+	if _, err := createDir(cache.appIconCacheDir); err != nil {
+		return err
+	}
 
 	return nil
 }

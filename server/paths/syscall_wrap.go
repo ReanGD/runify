@@ -2,7 +2,7 @@ package paths
 
 import "syscall"
 
-func getenv(key string) (string, bool) {
+func GetEnv(key string) (string, bool) {
 	return syscall.Getenv(key)
 }
 
@@ -10,7 +10,7 @@ func setenv(key string, value string) error {
 	return syscall.Setenv(key, value)
 }
 
-func getenvDef(key string, defValue string) string {
+func GetEnvDef(key string, defValue string) string {
 	if res, ok := syscall.Getenv(key); ok {
 		return res
 	}
