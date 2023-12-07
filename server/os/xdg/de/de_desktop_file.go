@@ -135,14 +135,15 @@ type desktopFile struct {
 
 func newDesktopFile(
 	id string,
-	filePath string,
+	filepath string,
 	mainLocale keyfile.Locale,
 	dopLocale keyfile.Locale,
+	mimeStorage *mimeStorage,
 	logger *zap.Logger,
 ) *desktopFile {
-	fh, err := os.Open(filePath)
+	fh, err := os.Open(filepath)
 	if err != nil {
-		logger.Info("Error open desktop entry file", zap.String("path", filePath), zap.Error(err))
+		logger.Info("Error open desktop entry file", zap.String("path", filepath), zap.Error(err))
 		return nil
 	}
 
@@ -150,20 +151,20 @@ func newDesktopFile(
 
 	kf, err := keyfile.New(fh)
 	if err != nil {
-		logger.Info("Error parse desktop entry file struct", zap.String("path", filePath), zap.Error(err))
+		logger.Info("Error parse desktop entry file struct", zap.String("path", filepath), zap.Error(err))
 		return nil
 	}
 
 	res := &desktopFile{
 		id:       id,
-		filePath: filePath,
+		filePath: filepath,
 		iconPath: "",
 	}
 
-	ok, key, err := res.readFields(kf, mainLocale, dopLocale)
+	ok, key, err := res.readFields(kf, mainLocale, dopLocale, mimeStorage)
 	if err != nil {
 		logger.Info("Error parse desktop entry file fields",
-			zap.String("path", filePath), zap.String("field", key), zap.Error(err))
+			zap.String("path", filepath), zap.String("field", key), zap.Error(err))
 		return nil
 	}
 	if !ok {
@@ -177,6 +178,7 @@ func (f *desktopFile) readFields(
 	kf *keyfile.KeyFile,
 	mainLocale keyfile.Locale,
 	dopLocale keyfile.Locale,
+	mimeStorage *mimeStorage,
 ) (bool, string, error) {
 	// see full list in github.com/rkoesters/xdg/desktop/entry.go
 	if kf.KeyExists(groupDesktopEntry, keyNoDisplay) {
@@ -233,6 +235,14 @@ func (f *desktopFile) readFields(
 		if err != nil {
 			return false, keyTerminal, err
 		}
+	}
+
+	if kf.KeyExists(groupDesktopEntry, keyMimeType) {
+		mimeType, err := kf.StringList(groupDesktopEntry, keyMimeType)
+		if err != nil {
+			return false, keyMimeType, err
+		}
+		mimeStorage.addDesktopFile(mimeType, f)
 	}
 
 	if kf.KeyExists(groupDesktopEntry, keyKeywords) {

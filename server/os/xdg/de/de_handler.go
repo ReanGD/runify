@@ -13,6 +13,7 @@ import (
 )
 
 type handler struct {
+	mimeStorage   *mimeStorage
 	iconCache     *iconCache
 	dfileCache    []*desktopFile
 	subscriptions []chan<- types.DesktopFiles
@@ -27,6 +28,7 @@ type handler struct {
 
 func newHandler() *handler {
 	return &handler{
+		mimeStorage:     newMimeStorage(),
 		iconCache:       nil,
 		dfileCache:      []*desktopFile{},
 		subscriptions:   []chan<- types.DesktopFiles{},
@@ -82,12 +84,7 @@ func (h *handler) dfileCacheSend(ch chan<- types.DesktopFiles) {
 }
 
 func (h *handler) update() {
-	dfileCache := make([]*desktopFile, 0, len(h.dfileCache))
-	h.walkXDGDesktopFiles(func(dfile *desktopFile) {
-		dfileCache = append(dfileCache, dfile)
-	})
-
-	h.dfileCache = dfileCache
+	h.readXDGFiles()
 	for _, ch := range h.subscriptions {
 		h.dfileCacheSend(ch)
 	}
@@ -102,8 +99,10 @@ func (h *handler) subscribe(cmd *subscribeCmd) {
 func (h *handler) stop() {
 }
 
-func (h *handler) walkXDGDesktopFiles(fn func(dfile *desktopFile)) {
+func (h *handler) readXDGFiles() {
 	exists := make(map[string]struct{})
+	mimeStorage := newMimeStorage()
+	dfileCache := make([]*desktopFile, 0, len(h.dfileCache))
 	for _, dirname := range h.xdgAppDirs {
 		idStart := len(dirname) + 1
 		idEnd := len(".desktop")
@@ -117,14 +116,17 @@ func (h *handler) walkXDGDesktopFiles(fn func(dfile *desktopFile)) {
 				return
 			}
 
-			dFile := newDesktopFile(id, filePath, h.mainLocale, h.dopLocale, h.moduleLogger)
+			dFile := newDesktopFile(id, filePath, h.mainLocale, h.dopLocale, mimeStorage, h.moduleLogger)
 			if dFile == nil {
 				return
 			}
 			dFile.iconPath = h.iconCache.getNonSvgIconPath(dFile.icon, 48)
 
 			exists[id] = struct{}{}
-			fn(dFile)
+			dfileCache = append(dfileCache, dFile)
 		})
 	}
+
+	h.dfileCache = dfileCache
+	h.mimeStorage = mimeStorage
 }
