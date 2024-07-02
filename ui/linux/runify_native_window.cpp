@@ -1,7 +1,12 @@
 #include "runify_native_window.h"
 
-#if defined(GDK_WINDOWING_X11)
-#include <gdk/gdkx.h>
+#include <gtk/gtk.h>
+
+#ifdef GDK_WINDOWING_X11
+# include <gdk/gdkx.h>
+#endif
+#ifdef GDK_WINDOWING_WAYLAND
+# include <gdk/gdkwayland.h>
 #endif
 
 
@@ -57,6 +62,19 @@ RNWindow::RNWindow(GtkWindow* gtk_window, FlMethodChannel* channel)
   RNWindow::instance = this;
 
   GdkDisplay* display = gdk_display_get_default();
+
+#ifdef GDK_WINDOWING_X11
+  if (GDK_IS_X11_DISPLAY(display)) {
+    m_is_x11 = true;
+  }
+#endif
+
+#ifdef GDK_WINDOWING_WAYLAND
+  if (GDK_IS_WAYLAND_DISPLAY(display)) {
+    m_is_wayland = true;
+  }
+#endif
+
   GdkMonitor* monitor = gdk_display_get_monitor_at_window(display, m_gdk_window);
   GdkRectangle frame;
   gdk_monitor_get_geometry(monitor, &frame);
@@ -71,7 +89,11 @@ RNWindow::~RNWindow() {
   RNWindow::instance = nullptr;
 }
 
-void RNWindow::InitPlugin() {
+bool RNWindow::InitPlugin() {
+  if (m_is_wayland == m_is_x11) {
+    return false;
+  }
+
   Hide();
 
   auto callback = G_CALLBACK(gSignalCallback);
@@ -79,6 +101,8 @@ void RNWindow::InitPlugin() {
   m_focus_in_handler = g_signal_connect(m_gtk_window, "focus-in-event", callback, nullptr);
   m_focus_out_handler = g_signal_connect(m_gtk_window, "focus-out-event", callback, nullptr);
   m_configure_handler = g_signal_connect(m_gtk_window, "configure-event", callback, nullptr);
+
+  return true;
 }
 
 void RNWindow::ClosePlugin() {
@@ -107,11 +131,7 @@ bool RNWindow::IsVisible() const {
 
 void RNWindow::Show() const {
   gtk_widget_show(GTK_WIDGET(m_gtk_window));
-#if defined(GDK_WINDOWING_X11)
-  gtk_window_present_with_time(m_gtk_window, gdk_x11_get_server_time(m_gdk_window));
-#else
-  gtk_window_present(m_gtk_window);
-#endif
+  Focus();
 }
 
 void RNWindow::Hide() const {
@@ -123,10 +143,16 @@ bool RNWindow::IsFocused() const {
 }
 
 void RNWindow::Focus() const {
-#if defined(GDK_WINDOWING_X11)
-  gtk_window_present_with_time(m_gtk_window, gdk_x11_get_server_time(m_gdk_window));
-#else
-  gtk_window_present(m_gtk_window);
+#ifdef GDK_WINDOWING_X11
+  if (m_is_x11) {
+    gtk_window_present_with_time(m_gtk_window, gdk_x11_get_server_time(m_gdk_window));
+  }
+#endif
+
+#ifdef GDK_WINDOWING_WAYLAND
+  if (m_is_wayland) {
+    gtk_window_present(m_gtk_window);
+  }
 #endif
 }
 
@@ -196,8 +222,7 @@ void RNWindow::HandleMethodCall(FlMethodCall* method_call) {
   FlValue* args = fl_method_call_get_args(method_call);
 
   if (strcmp(method, "initPlugin") == 0) {
-    InitPlugin();
-    response = flBool(true);
+    response = flBool(InitPlugin());
   } else if (strcmp(method, "closePlugin") == 0) {
     ClosePlugin();
     response = flBool(true);

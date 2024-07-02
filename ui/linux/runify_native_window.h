@@ -10,7 +10,7 @@ public:
     ~RNWindow();
 
 public:
-    void InitPlugin();
+    bool InitPlugin();
     void ClosePlugin();
     bool IsVisible() const;
     void Show() const;
@@ -33,6 +33,9 @@ public:
 
 private:
     static RNWindow* instance;
+
+    bool m_is_x11 = false;
+    bool m_is_wayland = false;
 
     gulong m_delete_handler = 0;
     gulong m_focus_in_handler = 0;
