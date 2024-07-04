@@ -33,8 +33,8 @@ message FilterData {
 }
 
 message RootListRowGlobalID {
-	uint32 providerID = 1;
-	uint32 rowID = 2;
+	string providerID = 1;
+	string rowID = 2;
 }
 
 enum RootListRowType {
@@ -47,9 +47,13 @@ enum RootListRowType {
 
 message RootListRow {
 	RootListRowType rowType = 1;
-	uint32 providerID = 2;
-	uint32 rowID = 3;
+	// unique ID for provider
+	string providerID = 2;
+	// unique ID for row in provider
+	string rowID = 3;
+	// priority for sorting
 	uint32 priority = 4;
+	// icon path
 	string icon = 5;
 	// name for UI
 	string displayName = 6;
@@ -95,14 +99,14 @@ message RootListRemoveRows {
 }
 
 message ContextMenuRowID {
-	uint32 rowID = 1;
+	string rowID = 1;
 }
 
 message FormClosed {
 }
 
 message ContextMenuRow {
-	uint32 rowID = 1;
+	string rowID = 1;
 	// name for UI
 	string displayName = 2;
 	// names for search, with \n as separator

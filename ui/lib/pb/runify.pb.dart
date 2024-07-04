@@ -264,15 +264,15 @@ class FilterData extends $pb.GeneratedMessage {
 
 class RootListRowGlobalID extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RootListRowGlobalID', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'providerID', $pb.PbFieldType.OU3, protoName: 'providerID')
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'providerID', protoName: 'providerID')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', protoName: 'rowID')
     ..hasRequiredFields = false
   ;
 
   RootListRowGlobalID._() : super();
   factory RootListRowGlobalID({
-    $core.int? providerID,
-    $core.int? rowID,
+    $core.String? providerID,
+    $core.String? rowID,
   }) {
     final _result = create();
     if (providerID != null) {
@@ -305,18 +305,18 @@ class RootListRowGlobalID extends $pb.GeneratedMessage {
   static RootListRowGlobalID? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get providerID => $_getIZ(0);
+  $core.String get providerID => $_getSZ(0);
   @$pb.TagNumber(1)
-  set providerID($core.int v) { $_setUnsignedInt32(0, v); }
+  set providerID($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
   $core.bool hasProviderID() => $_has(0);
   @$pb.TagNumber(1)
   void clearProviderID() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.int get rowID => $_getIZ(1);
+  $core.String get rowID => $_getSZ(1);
   @$pb.TagNumber(2)
-  set rowID($core.int v) { $_setUnsignedInt32(1, v); }
+  set rowID($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
   $core.bool hasRowID() => $_has(1);
   @$pb.TagNumber(2)
@@ -326,8 +326,8 @@ class RootListRowGlobalID extends $pb.GeneratedMessage {
 class RootListRow extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RootListRow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
     ..e<RootListRowType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowType', $pb.PbFieldType.OE, protoName: 'rowType', defaultOrMaker: RootListRowType.CALCULATOR, valueOf: RootListRowType.valueOf, enumValues: RootListRowType.values)
-    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'providerID', $pb.PbFieldType.OU3, protoName: 'providerID')
-    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'providerID', protoName: 'providerID')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', protoName: 'rowID')
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'priority', $pb.PbFieldType.OU3)
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'icon')
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'displayName', protoName: 'displayName')
@@ -338,8 +338,8 @@ class RootListRow extends $pb.GeneratedMessage {
   RootListRow._() : super();
   factory RootListRow({
     RootListRowType? rowType,
-    $core.int? providerID,
-    $core.int? rowID,
+    $core.String? providerID,
+    $core.String? rowID,
     $core.int? priority,
     $core.String? icon,
     $core.String? displayName,
@@ -400,18 +400,18 @@ class RootListRow extends $pb.GeneratedMessage {
   void clearRowType() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.int get providerID => $_getIZ(1);
+  $core.String get providerID => $_getSZ(1);
   @$pb.TagNumber(2)
-  set providerID($core.int v) { $_setUnsignedInt32(1, v); }
+  set providerID($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
   $core.bool hasProviderID() => $_has(1);
   @$pb.TagNumber(2)
   void clearProviderID() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.int get rowID => $_getIZ(2);
+  $core.String get rowID => $_getSZ(2);
   @$pb.TagNumber(3)
-  set rowID($core.int v) { $_setUnsignedInt32(2, v); }
+  set rowID($core.String v) { $_setString(2, v); }
   @$pb.TagNumber(3)
   $core.bool hasRowID() => $_has(2);
   @$pb.TagNumber(3)
@@ -886,13 +886,13 @@ class RootListRemoveRows extends $pb.GeneratedMessage {
 
 class ContextMenuRowID extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ContextMenuRowID', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', protoName: 'rowID')
     ..hasRequiredFields = false
   ;
 
   ContextMenuRowID._() : super();
   factory ContextMenuRowID({
-    $core.int? rowID,
+    $core.String? rowID,
   }) {
     final _result = create();
     if (rowID != null) {
@@ -922,9 +922,9 @@ class ContextMenuRowID extends $pb.GeneratedMessage {
   static ContextMenuRowID? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get rowID => $_getIZ(0);
+  $core.String get rowID => $_getSZ(0);
   @$pb.TagNumber(1)
-  set rowID($core.int v) { $_setUnsignedInt32(0, v); }
+  set rowID($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
   $core.bool hasRowID() => $_has(0);
   @$pb.TagNumber(1)
@@ -962,7 +962,7 @@ class FormClosed extends $pb.GeneratedMessage {
 
 class ContextMenuRow extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ContextMenuRow', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'runify'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', $pb.PbFieldType.OU3, protoName: 'rowID')
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rowID', protoName: 'rowID')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'displayName', protoName: 'displayName')
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'searchNames', protoName: 'searchNames')
     ..hasRequiredFields = false
@@ -970,7 +970,7 @@ class ContextMenuRow extends $pb.GeneratedMessage {
 
   ContextMenuRow._() : super();
   factory ContextMenuRow({
-    $core.int? rowID,
+    $core.String? rowID,
     $core.String? displayName,
     $core.String? searchNames,
   }) {
@@ -1008,9 +1008,9 @@ class ContextMenuRow extends $pb.GeneratedMessage {
   static ContextMenuRow? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get rowID => $_getIZ(0);
+  $core.String get rowID => $_getSZ(0);
   @$pb.TagNumber(1)
-  set rowID($core.int v) { $_setUnsignedInt32(0, v); }
+  set rowID($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
   $core.bool hasRowID() => $_has(0);
   @$pb.TagNumber(1)
