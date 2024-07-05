@@ -1,8 +1,8 @@
 import 'package:runify/global/data_filter.dart';
 
 class RootListRowID {
-  final int providerID;
-  final int rowID;
+  final String providerID;
+  final String rowID;
 
   RootListRowID(this.providerID, this.rowID);
 

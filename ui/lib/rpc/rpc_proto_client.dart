@@ -31,7 +31,7 @@ class ProtoClient {
     _outCh.add(msg);
   }
 
-  void rootListRowActivated(int providerID, int rowID) {
+  void rootListRowActivated(String providerID, String rowID) {
     final msg = UIMessage(
       formID: _formID,
       rootListRowActivated:
@@ -41,7 +41,7 @@ class ProtoClient {
     _outCh.add(msg);
   }
 
-  void rootListMenuActivated(int providerID, int rowID) {
+  void rootListMenuActivated(String providerID, String rowID) {
     final msg = UIMessage(
       formID: _formID,
       rootListMenuActivated:
@@ -51,7 +51,7 @@ class ProtoClient {
     _outCh.add(msg);
   }
 
-  void contextMenuRowActivated(int rowID) {
+  void contextMenuRowActivated(String rowID) {
     final msg = UIMessage(
       formID: _formID,
       contextMenuRowActivated: ContextMenuRowID(rowID: rowID),

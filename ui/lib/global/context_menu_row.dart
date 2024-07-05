@@ -1,14 +1,14 @@
 import 'package:runify/global/data_filter.dart';
 
-class ContextMenuRow implements Matcher<int> {
-  final int id;
+class ContextMenuRow implements Matcher<String> {
+  final String id;
   final String displayName;
   final String searchNames;
 
   ContextMenuRow(this.id, this.displayName, this.searchNames);
 
   @override
-  int get key => id;
+  String get key => id;
 
   @override
   bool match(RegExp rexp) {
@@ -20,4 +20,4 @@ int contextMenuRowComparator(ContextMenuRow a, ContextMenuRow b) {
   return a.displayName.compareTo(b.displayName);
 }
 
-typedef ContextMenuRowFilter = DataFilter<int, ContextMenuRow>;
+typedef ContextMenuRowFilter = DataFilter<String, ContextMenuRow>;

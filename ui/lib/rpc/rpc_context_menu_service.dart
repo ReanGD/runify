@@ -53,7 +53,7 @@ class CMService implements Service {
     _filter.setFilter(value);
   }
 
-  void execute(int id) {
+  void execute(String id) {
     _pClient.contextMenuRowActivated(id);
   }
 
