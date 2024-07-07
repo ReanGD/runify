@@ -3,26 +3,22 @@ package portal
 import (
 	"context"
 
-	"github.com/godbus/dbus/v5"
-
 	"github.com/ReanGD/runify/server/global/api"
 	"github.com/ReanGD/runify/server/global/module"
 	"github.com/ReanGD/runify/server/global/types"
 )
 
 type Portal struct {
-	provider  api.Provider
-	handler   *handler
-	signalsCh chan *dbus.Signal
+	provider api.Provider
+	handler  *handler
 
 	module.Module
 }
 
 func New() (*Portal, string) {
 	return &Portal{
-		provider:  nil,
-		handler:   newHandler(),
-		signalsCh: nil,
+		provider: nil,
+		handler:  newHandler(),
 	}, "xdg_desktop_portal"
 }
 
@@ -32,26 +28,15 @@ func (m *Portal) SetDeps(provider api.Provider) {
 
 func (m *Portal) OnInit() (uint32, error) {
 	cfg := m.GetConfig().XDGDesktopPortal
-	m.signalsCh = make(chan *dbus.Signal, cfg.SignalsChLen)
-	return cfg.ModuleChLen, m.handler.init(m)
+	return cfg.ModuleChLen, m.handler.init(m, cfg)
 }
 
 func (m *Portal) OnStart(ctx context.Context) []*types.HandledChannel {
-	m.handler.start(m.signalsCh)
-
-	return []*types.HandledChannel{
-		types.NewHandledChannel(m.signalsCh, m.onSignal),
-	}
+	return m.handler.start()
 }
 
 func (m *Portal) OnFinish() {
 	m.handler.stop()
-}
-
-func (m *Portal) onSignal(event interface{}) (bool, error) {
-	m.handler.onSignal(event)
-
-	return false, nil
 }
 
 func (m *Portal) OnRequest(request api.ModuleMsgImpl) (bool, error) {

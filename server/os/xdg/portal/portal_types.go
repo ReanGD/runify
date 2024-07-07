@@ -6,33 +6,15 @@ import (
 	"github.com/godbus/dbus/v5"
 )
 
-var initErr = errors.New("failed to init xdg_desktop_portal module")
-
-const (
-	portalName = `org.freedesktop.portal.Desktop`
-	portalPath = dbus.ObjectPath(`/org/freedesktop/portal/desktop`)
-
-	portalRequestName           = `org.freedesktop.portal.Request`
-	portalRequestMemberResponse = `Response`
-	portalRequestSignalResponse = portalRequestName + `.` + portalRequestMemberResponse
-
-	portalSessionName        = `org.freedesktop.portal.Session`
-	portalSessionMethodClose = portalSessionName + `.Close`
-
-	globalShortcutsName = `org.freedesktop.portal.GlobalShortcuts`
-
-	globalShortcutsSignalActivated   = globalShortcutsName + `.Activated`
-	globalShortcutsSignalDeactivated = globalShortcutsName + `.Deactivated`
-
-	globalShortcutsMethodCreateSession = globalShortcutsName + `.CreateSession`
-	globalShortcutsMethodListShortcuts = globalShortcutsName + `.ListShortcuts`
-	globalShortcutsMethodBindShortcuts = globalShortcutsName + `.BindShortcuts`
-
-	shortcutPrefix = `com.runify.`
-	shortcutOpen   = shortcutPrefix + `open`
+var (
+	initErr  = errors.New("failed to init xdg_desktop_portal module")
+	startErr = errors.New("failed to start xdg_desktop_portal module")
 )
 
-type dbusCallback func(*dbus.Signal)
+type (
+	dbusResponseCallback func([]interface{}) error
+	dbusSignalCallback   func([]interface{})
+)
 
 type globalShortcutDefinition struct {
 	ID   string

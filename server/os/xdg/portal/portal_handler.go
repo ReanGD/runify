@@ -1,61 +1,53 @@
 package portal
 
 import (
+	"github.com/ReanGD/runify/server/config"
 	"github.com/ReanGD/runify/server/global/module"
-	"github.com/godbus/dbus/v5"
+	"github.com/ReanGD/runify/server/global/types"
 	"go.uber.org/zap"
 )
 
-// var zapInitX11 = zap.String("Method", "x11.X11::init")
-
 type handler struct {
-	conn         *dbus.Conn
-	dHandler     *dbusHandler
-	errorCtx     *module.ErrorCtx
-	moduleLogger *zap.Logger
+	dbusClient      *dbusClient
+	globalShortcuts *globalShortcuts
+	errorCtx        *module.ErrorCtx
+	moduleLogger    *zap.Logger
 }
 
 func newHandler() *handler {
 	return &handler{
-		conn:         nil,
-		dHandler:     nil,
-		errorCtx:     nil,
-		moduleLogger: nil,
+		dbusClient:      nil,
+		globalShortcuts: nil,
+		errorCtx:        nil,
+		moduleLogger:    nil,
 	}
 }
 
-func (h *handler) init(root *Portal) error {
+func (h *handler) init(root *Portal, cfg *config.XDGDesktopPortalCfg) error {
 	h.errorCtx = root.GetErrorCtx()
 	logger := root.GetModuleLogger()
 	h.moduleLogger = logger
 
 	var err error
-	if h.conn, err = dbus.SessionBus(); err != nil {
-		h.moduleLogger.Error("Failed to connect to session dbus", zap.Error(err))
-		return initErr
+	if h.dbusClient, err = newDBusClient(h.errorCtx, cfg, h.moduleLogger); err != nil {
+		return err
 	}
 
-	opts := []dbus.MatchOption{
-		dbus.WithMatchInterface(portalRequestName),
-		dbus.WithMatchMember(portalRequestMemberResponse),
+	if h.globalShortcuts, err = newGlobalShortcuts(
+		h.dbusClient, root.provider, h.errorCtx, h.moduleLogger); err != nil {
+		return err
 	}
-	if err := h.conn.AddMatchSignal(opts...); err != nil {
-		h.moduleLogger.Error("Failed to add match dbus signal", zap.Error(err))
-		return initErr
-	}
-
-	h.dHandler = newDbusHandler(h.conn, root.provider, h.errorCtx, h.moduleLogger)
 
 	return nil
 }
 
-func (h *handler) start(signalsCh chan *dbus.Signal) {
-	h.conn.Signal(signalsCh)
+func (h *handler) start() []*types.HandledChannel {
+	ch := h.dbusClient.start()
+	chs := []*types.HandledChannel{ch}
 
-	if err := h.dHandler.globalShortcutsCreateSession(); err != nil {
-		h.moduleLogger.Error("Failed to create global shortcuts session", zap.Error(err))
+	if err := h.globalShortcuts.createSession(); err != nil {
 		h.errorCtx.SendError(err)
-		return
+		return chs
 	}
 
 	// shortcuts := []globalShortcutDefinition{
@@ -67,16 +59,8 @@ func (h *handler) start(signalsCh chan *dbus.Signal) {
 	// 	h.errorCtx.SendError(err)
 	// 	return
 	// }
-}
 
-func (h *handler) onSignal(event interface{}) {
-	signal, ok := event.(*dbus.Signal)
-	if !ok {
-		h.moduleLogger.Warn("Failed to cast dbus signal")
-		return
-	}
-
-	h.dHandler.onSignal(signal)
+	return chs
 }
 
 // func (h *handler) subscribeToClipboard(cmd *subscribeToClipboardCmd) {
@@ -100,11 +84,13 @@ func (h *handler) onSignal(event interface{}) {
 // }
 
 func (h *handler) stop() {
-	if h.conn != nil {
-		h.dHandler.close()
-		if err := h.conn.Close(); err != nil {
-			h.moduleLogger.Warn("Failed to close dbus connection", zap.Error(err))
-		}
-		h.conn = nil
+	if h.globalShortcuts != nil {
+		h.globalShortcuts.close()
+		h.globalShortcuts = nil
+	}
+
+	if h.dbusClient != nil {
+		h.dbusClient.close()
+		h.dbusClient = nil
 	}
 }
