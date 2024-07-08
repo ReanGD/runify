@@ -39,6 +39,7 @@ type globalShortcuts struct {
 	sessionObj        dbus.BusObject
 	sessionObjectPath dbus.ObjectPath
 	shortcutsState    map[string]struct{}
+	bindQueue         []globalShortcutDefinition
 
 	errorCtx     *module.ErrorCtx
 	moduleLogger *zap.Logger
@@ -56,6 +57,7 @@ func newGlobalShortcuts(
 		sessionObj:        nil,
 		sessionObjectPath: "",
 		shortcutsState:    make(map[string]struct{}),
+		bindQueue:         []globalShortcutDefinition{},
 		errorCtx:          errorCtx,
 		moduleLogger:      moduleLogger.With(zap.String("api", "GlobalShortcuts")),
 	}
@@ -137,13 +139,9 @@ func (gs *globalShortcuts) onCreateSessionResponse(body []interface{}) error {
 	}
 	gs.sessionObj = gs.client.newObject(gs.sessionObjectPath)
 
-	shortcuts := []globalShortcutDefinition{
-		newGlobalShortcutDefinition(shortcutOpen, "Open runify (preferred: MOD4+r)"),
-	}
-
-	if err := gs.bind(shortcuts); err != nil {
-		gs.moduleLogger.Error("Failed to bind global shortcuts", zap.Error(err))
-		return err
+	if len(gs.bindQueue) > 0 {
+		_ = gs.bind(gs.bindQueue)
+		gs.bindQueue = []globalShortcutDefinition{}
 	}
 
 	return nil
@@ -201,6 +199,11 @@ func (gs *globalShortcuts) onBindResponse(body []interface{}) error {
 }
 
 func (gs *globalShortcuts) bind(shortcuts []globalShortcutDefinition) error {
+	if gs.sessionObj == nil {
+		gs.bindQueue = append(gs.bindQueue, shortcuts...)
+		return nil
+	}
+
 	handleToken := gs.client.newToken()
 	parentWindow := ""
 

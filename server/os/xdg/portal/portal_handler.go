@@ -50,15 +50,14 @@ func (h *handler) start() []*types.HandledChannel {
 		return chs
 	}
 
-	// shortcuts := []globalShortcutDefinition{
-	// 	newGlobalShortcutDefinition(shortcutOpen, "Open runify (preferred: MOD4+r)"),
-	// }
+	shortcuts := []globalShortcutDefinition{
+		newGlobalShortcutDefinition(shortcutOpen, "Open runify (preferred: MOD4+r)"),
+	}
 
-	// if err := h.dHandler.globalShortcutsBind(shortcuts); err != nil {
-	// 	h.moduleLogger.Error("Failed to bind global shortcuts", zap.Error(err))
-	// 	h.errorCtx.SendError(err)
-	// 	return
-	// }
+	if err := h.globalShortcuts.bind(shortcuts); err != nil {
+		h.errorCtx.SendError(err)
+		return chs
+	}
 
 	return chs
 }
